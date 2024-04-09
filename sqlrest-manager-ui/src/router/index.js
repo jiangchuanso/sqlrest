@@ -92,12 +92,12 @@ const constantRouter = new Router({
               icon: "el-icon-refrigerator",
               component: () => import('@/views/interface/list'),
             },
-            {
-              path: '/interface/swagger',
-              name: '接口文档',
-              icon: "el-icon-pie-chart",
-              component: () => import('@/views/interface/swagger')
-            }
+            // {
+            //   path: '/interface/swagger',
+            //   name: '接口文档',
+            //   icon: "el-icon-pie-chart",
+            //   component: () => import('@/views/interface/swagger')
+            // }
           ]
         },
         {

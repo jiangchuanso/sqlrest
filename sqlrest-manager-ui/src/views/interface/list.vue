@@ -17,7 +17,7 @@
             <el-select v-model="moduleId"
                        size="mini"
                        :clearable="true"
-                        style="width:20%"
+                       style="width:20%"
                        placeholder="请选择模块">
               <el-option v-for="(item,index) in moduleLists"
                          :key="index"
@@ -27,7 +27,7 @@
             <el-select v-model="publish"
                        size="mini"
                        :clearable="true"
-                        style="width:10%"
+                       style="width:10%"
                        placeholder="是否发布">
               <el-option :key=true
                          label="是"
@@ -39,7 +39,7 @@
             <el-select v-model="open"
                        size="mini"
                        :clearable="true"
-                        style="width:10%"
+                       style="width:10%"
                        placeholder="是否公开">
               <el-option :key=true
                          label="是"
@@ -53,8 +53,7 @@
                       v-model="keyword"
                       :clearable=true
                       style="width:20%"
-                      @change="searchByKeyword"
-                      >
+                      @change="searchByKeyword">
             </el-input>
             <el-button type="primary"
                        size="mini"
@@ -62,6 +61,10 @@
                        @click="handleSearch">搜索</el-button>
           </div>
         </div>
+        <el-button type="warning"
+                   size="mini"
+                   icon="el-icon-document-add"
+                   @click="openSwagger">文档</el-button>
         <el-button type="primary"
                    size="mini"
                    icon="el-icon-document-add"
@@ -280,6 +283,25 @@ export default {
     },
     handleCreate: function () {
       this.$router.push('/interface/create')
+    },
+    openSwagger: function () {
+      this.$http({
+        method: "GET",
+        url: "/sqlrest/manager/api/v1/node/gateway"
+      }).then(
+        res => {
+          if (0 === res.data.code) {
+            if (res.data.data && typeof res.data.data === 'string') {
+              var url = res.data.data + '/apidoc/index.html';
+              window.open(url, '_blank');
+            }
+          } else {
+            if (res.data.message) {
+              alert("操作失败:" + res.data.message);
+            }
+          }
+        }
+      );
     },
     handleDetail: function (index, row) {
       this.$router.push({ path: '/interface/detail', query: { id: row.id } })

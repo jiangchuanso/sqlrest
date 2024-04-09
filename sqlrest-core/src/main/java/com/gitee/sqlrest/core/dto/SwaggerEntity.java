@@ -328,6 +328,13 @@ public class SwaggerEntity {
       this.responses.put(status, response);
     }
 
+    public void addResponse(String status, String description, Map schema) {
+      Map<String, Object> response = new HashMap<>();
+      response.put("description", description);
+      response.put("schema", schema);
+      this.responses.put(status, response);
+    }
+
     public List<String> getTags() {
       return tags;
     }

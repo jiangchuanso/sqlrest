@@ -2,12 +2,16 @@ package com.gitee.sqlrest.core.servlet;
 
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.core.dto.SwaggerEntity;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.ApiModuleDao;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
 import com.google.common.collect.Lists;
+import com.hazelcast.com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -76,7 +81,7 @@ public class ApiSwaggerService {
       pathInfo.addProduce(assignment.getContentType());
       pathInfo.setSummary(assignment.getName());
       pathInfo.setDescription(StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
-      pathInfo.addProduce("application/json");
+      pathInfo.addProduce(MediaType.APPLICATION_JSON_VALUE);
 
       // 入参
       List<ItemParam> params = assignment.getParams();
@@ -87,13 +92,22 @@ public class ApiSwaggerService {
           String type = param.getType().getJsType();
           String description = param.getRemark();
           Map<String, Object> mapParams = SwaggerEntity
-              .createParameter(required, name, VAR_NAME_QUERY, type, description, null);
+              .createParameter(required, name, VAR_NAME_QUERY, type, description, param.getType().getExample());
           pathInfo.addParameter(mapParams);
         }
       }
 
       // 响应
-      //pathInfo.addResponse("200", BODY_EMPTY);
+      String unique = assignment.getId().toString();
+      pathInfo.addResponse("200", "OK", ImmutableMap.of("$ref", "#/definitions/" + unique));
+      pathInfo.addResponse("401", ResultEntity.failed(ResponseErrorCode.ERROR_TOKEN_EXPIRED));
+      pathInfo.addResponse("403", ResultEntity.failed(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN));
+      pathInfo.addResponse("404", ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS));
+      swaggerEntity.addDefinitions(unique,
+          ImmutableMap.of("type", "object",
+              "properties", Collections.emptyMap(),
+              "title", unique + "|" + assignment.getName())
+      );
 
       swaggerEntity.addPath(path, method, pathInfo);
     }
@@ -103,7 +117,7 @@ public class ApiSwaggerService {
     String method = "POST";
     SwaggerEntity.Path pathInfo = new SwaggerEntity.Path("0");
     pathInfo.addTag(TOKEN_MODEL);
-    pathInfo.addProduce("application/json");
+    pathInfo.addProduce(MediaType.APPLICATION_JSON_VALUE);
     pathInfo.setSummary(TOKEN_MODEL);
     pathInfo.setDescription(TOKEN_MODEL);
     Map<String, Object> mapParamsUser = SwaggerEntity

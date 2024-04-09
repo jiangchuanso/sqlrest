@@ -1,6 +1,6 @@
 # SQLREST
 
-> 将数据库的SQL生成RESTful的http接口的工具
+> 将数据库的SQL生成RESTful风格的http接口的工具
 
 ## 一、工具介绍
 

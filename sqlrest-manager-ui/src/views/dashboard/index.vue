@@ -267,7 +267,7 @@ export default {
         },
         yAxis: {
           type: 'category',
-          data: ['/api/first', '/api/ssss', '/api/ddd', '/api/dddds', '/api/aaaa', '/api/ssssdddd']
+          data: []
         },
         series: [
           {
@@ -300,7 +300,7 @@ export default {
         },
         yAxis: {
           type: 'category',
-          data: ['/api/first', '/api/ssss', '/api/ddd', '/api/dddds', '/api/aaaa', '/api/ssssdddd']
+          data: []
         },
         series: [
           {
@@ -333,7 +333,7 @@ export default {
         },
         yAxis: {
           type: 'category',
-          data: ['/api/first', '/api/ssss', '/api/ddd', '/api/dddds', '/api/aaaa', '/api/ssssdddd']
+          data: []
         },
         series: [
           {
