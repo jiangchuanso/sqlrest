@@ -24,6 +24,9 @@ public class AccessToken implements Serializable {
   @ApiModelProperty("token字符串")
   private String accessToken;
 
+  @ApiModelProperty("创建时的时间戳")
+  private Long createTimestamp;
+
   @ApiModelProperty("有效时间(单位秒)")
   private Long expireSeconds;
 }

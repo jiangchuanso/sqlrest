@@ -106,7 +106,7 @@ sh ./docker-maven-build.sh
 
 ```
 # mysql的host地址
-MYSQLDB_HOST=192.168.31.57
+MYSQLDB_HOST=127.0.0.1
 
 # mysql的端口号
 MYSQLDB_PORT=3306
@@ -139,7 +139,7 @@ GATEWAY_PORT=8091
 
 
 # mysql的host地址
-MYSQLDB_HOST=192.168.31.57
+MYSQLDB_HOST=127.0.0.1
 
 # mysql的端口号
 MYSQLDB_PORT=3306
@@ -158,7 +158,7 @@ MYSQLDB_PASSWORD=123456
 
 - 步骤4：启动服务
 
-> windows下，需按照如下顺序双击如下脚本启动对应的服务
+> windows下，需按照如下顺序双击脚本启动对应的服务
 
 启动manager服务：bin/manager_startup.cmd
 
@@ -166,7 +166,7 @@ MYSQLDB_PASSWORD=123456
 
 启动gateway服务：bin/gateway_startup.cmd
 
-> linux下，需按照如下顺序双击如下脚本启动对应的服务
+> linux下，需按照如下顺序双击脚本启动对应的服务
 
 启动manager服务：sh bin/sqlrestctl.sh start manager
 
@@ -179,6 +179,8 @@ MYSQLDB_PASSWORD=123456
 ### 1、部分系统截图
 
 ![001.png](docs/images/001.PNG)
+
+![000.png](docs/images/000.PNG)
 
 ![002.png](docs/images/002.PNG)
 

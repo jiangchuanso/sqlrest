@@ -137,7 +137,7 @@ public enum ProductTypeEnum {
           .defaultPort(5236)
           .testSql("SELECT 'Hello' from DUAL")
           .urlPrefix("jdbc:dm://")
-          .tplUrls(new String[]{"jdbc:dm://{host}[:{port}]/[{database}][\\?{params}]"})
+          .tplUrls(new String[]{"jdbc:dm://{host}:{port}[/{database}][\\\\?{params}]"})
           .urlSample("jdbc:dm://172.17.2.10:5236")
           .sqlSchemaList("SHOW SCHEMAS")
           .adapter(database -> Pair.of(null, database))

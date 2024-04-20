@@ -39,6 +39,7 @@ public class ClientTokenService {
               .realName(appClient.getName())
               .appKey(appClient.getAppKey())
               .accessToken(appClient.getAccessToken())
+              .createTimestamp(appClient.getCreateTime().getTime() / 1000)
               .expireSeconds(appClient.getExpireDuration().getValue())
               .build();
 
@@ -52,7 +53,7 @@ public class ClientTokenService {
           }
 
           Map tokenClientMap = hazelcastCacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
-          tokenClientMap.put(appClient.getAccessToken(), Pair.of(clientToken, now));
+          tokenClientMap.put(appClient.getAccessToken(), clientToken);
         }
       }
       log.info("Finish load client app token from persistence.");
@@ -72,6 +73,7 @@ public class ClientTokenService {
         .realName(appClient.getName())
         .appKey(clientId)
         .accessToken(token)
+        .createTimestamp(System.currentTimeMillis()/1000)
         .expireSeconds(Constants.CLIENT_TOKEN_DURATION_SECONDS)
         .build();
     if (DurationTimeEnum.TIME_VALUE.equals(appClient.getExpireDuration())) {
@@ -113,7 +115,7 @@ public class ClientTokenService {
         tokenClientMap.remove(tokenStr);
       }
       return clientToken.getAppKey();
-    } else if ((System.currentTimeMillis() / 1000) > expireTime) {
+    } else if ((System.currentTimeMillis() / 1000) - clientToken.getCreateTimestamp() > expireTime) {
       log.error("token [{}] expired, clientId: {}", tokenStr, clientToken.getAppKey());
       return null;
     }

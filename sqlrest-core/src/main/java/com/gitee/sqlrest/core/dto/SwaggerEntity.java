@@ -588,7 +588,7 @@ public class SwaggerEntity {
 
     private String in = "header";
 
-    private String description ="用户登录后获取的Token（头部需加上bearer ）";
+    private String description ="用户登录后获取的Token（头部需加上Bearer ）";
 
     public String getType() {
       return type;

@@ -4,8 +4,6 @@
 
 基于Vue.js 2.0编写的sqlrest管理web端。
 
-## 二、构建
-
 ## 二、环境
 
  **node** : >= v14.15.4
@@ -36,7 +34,7 @@ npm -v
 
 可参考[博文教程](https://zhuanlan.zhihu.com/p/572795586)
 
-## 二、构建
+## 三、构建
 
 ``` bash
 # install dependencies
@@ -52,6 +50,6 @@ npm run build
 npm run build --report
 ```
 
-## 三、部署
+## 四、部署
 
 执行`npm run build`命令后，sqlrest-ui\dist目录生成的所有文件拷贝（或替换）sqlrest-manager\src\main\resources目录下。然后直接使用mvn对整个sqlrest项目打包即可。
