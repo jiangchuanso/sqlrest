@@ -20,12 +20,6 @@
 
     <dependency>
       <groupId>com.gitee.sqlrest</groupId>
-      <artifactId>sqlrest-script</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.gitee.sqlrest</groupId>
       <artifactId>sqlrest-persistence</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -34,6 +28,11 @@
       <groupId>com.gitee.sqlrest</groupId>
       <artifactId>sqlrest-cache</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
     </dependency>
 
     <dependency>

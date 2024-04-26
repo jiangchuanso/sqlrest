@@ -6,13 +6,13 @@
 
 ### 1、功能介绍
 
-一句话, sqlrest工具提供快速构建RESTful的API接口工具，包括SQl方式和脚本方式。功能包括：
+一句话, sqlrest工具提供快速构建RESTful的API接口工具，包括SQl方式和Groovy脚本方式。功能包括：
 
 - SQL方式构建RESTful接口
 > 提供类似mybatis的动态SQL语法方式构建接口。
 
 - 脚本方式构建RESTful接口
-> 基于magic-script脚本的语法方式构建复杂场景下的接口。
+> 基于groovy脚本的语法方式构建复杂场景下的接口。
 
 - 支持接口的token安全认证功能
 > 执行器支持生成token及token认证。
@@ -46,7 +46,6 @@
 └── sqlrest
     ├── sqlrest-common           // sqlrest通用定义模块
     ├── sqlrest-template         // sqlrest的SQL内容模板模块
-    ├── sqlrest-script           // sqlrest的接口脚本解析模块
     ├── sqlrest-cache            // sqlrest执行器缓存模块
     ├── sqlrest-persistence      // sqlrest的数据库持久化模块
     ├── sqlrest-core             // sqlrest-core的接口实现模块
@@ -59,7 +58,7 @@
 
 ## 二、编译打包
 
-本工具纯Java语言开发，代码中的依赖全部来自于开源项目。
+本工具纯Java语言开发，依赖全部来自于开源项目。
 
 ### 1、编译打包
 
@@ -68,7 +67,9 @@
   **JDK**:>=1.8 （建议用JDK 1.8）
 
   **maven**:>=3.6
-> Maven 仓库默认在国外， 国内使用难免很慢，可以更换为阿里云的仓库。 参考教程： [配置阿里云的仓库教程](https://www.runoob.com/maven/maven-repositories.html)
+> Maven 仓库默认在国外， 国内使用难免很慢，可以更换为阿里云的仓库。
+>  
+> 参考教程： [配置阿里云的仓库教程](https://www.runoob.com/maven/maven-repositories.html)
 
 - 编译命令:
 
@@ -166,15 +167,19 @@ MYSQLDB_PASSWORD=123456
 
 ### 1、部分系统截图
 
-![001.png](docs/images/001.PNG)
-
 ![000.png](docs/images/000.PNG)
+
+![001.png](docs/images/001.PNG)
 
 ![002.png](docs/images/002.PNG)
 
 ![003.png](docs/images/003.PNG)
 
 ![004.png](docs/images/004.PNG)
+
+![005.png](docs/images/005.PNG)
+
+![006.png](docs/images/006.PNG)
 
 ## 四、问题反馈
 

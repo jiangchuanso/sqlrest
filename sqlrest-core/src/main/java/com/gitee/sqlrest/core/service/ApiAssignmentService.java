@@ -14,9 +14,12 @@ import com.gitee.sqlrest.core.dto.ApiAssignmentDetailResponse;
 import com.gitee.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import com.gitee.sqlrest.core.dto.ApiDebugExecuteRequest;
 import com.gitee.sqlrest.core.dto.AssignmentSearchRequest;
+import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.dto.SqlParamParseResponse;
 import com.gitee.sqlrest.core.exec.ApiExecuteService;
+import com.gitee.sqlrest.core.exec.annotation.Comment;
 import com.gitee.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
+import com.gitee.sqlrest.core.exec.engine.impl.ScriptExecutorService;
 import com.gitee.sqlrest.core.util.ApiPathUtils;
 import com.gitee.sqlrest.core.util.DataSourceUtils;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
@@ -29,14 +32,17 @@ import com.gitee.sqlrest.template.Configuration;
 import com.gitee.sqlrest.template.SqlTemplate;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +55,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ApiAssignmentService {
 
+  private final static Map<String, List<ScriptEditorCompletion>> memCache = new ConcurrentHashMap<>();
+
   @Resource
   public ApiAssignmentDao apiAssignmentDao;
   @Resource
@@ -57,6 +65,40 @@ public class ApiAssignmentService {
   private DriverLoadService driverLoadService;
   @Resource
   private ApiExecuteService apiExecuteService;
+
+  public List<ScriptEditorCompletion> completions() {
+    return memCache.computeIfAbsent("COMPLETION", this::computeCompletions);
+  }
+
+  private List<ScriptEditorCompletion> computeCompletions(String key) {
+    List<ScriptEditorCompletion> results = new ArrayList<>();
+    results.addAll(ScriptExecutorService.syntax);
+
+    for (Class clazz : ScriptExecutorService.modules) {
+      String varName = ScriptExecutorService.getModuleVarName(clazz);
+      for (Method method : clazz.getMethods()) {
+        if (method.isAnnotationPresent(Comment.class)) {
+          String methodName = method.getName();
+          String params = Stream.of(method.getParameters())
+              .map(item -> {
+                String type = item.getType().getSimpleName();
+                String name = item.isAnnotationPresent(Comment.class)
+                    ? item.getAnnotation(Comment.class).value()
+                    : item.getName();
+                return type + " " + name;
+              })
+              .collect(Collectors.joining(","));
+          results.add(ScriptEditorCompletion.builder()
+              .meta(method.getReturnType().getName())
+              .caption(String.format("%s.%s(%s)", varName, methodName, params))
+              .value(String.format("%s.%s( )", varName, methodName))
+              .build());
+        }
+      }
+    }
+
+    return results;
+  }
 
   public List<SqlParamParseResponse> parseSqlParams(String text) {
     Configuration cfg = new Configuration();

@@ -36,16 +36,12 @@
                          min-width="18%"></el-table-column>
         <el-table-column label="数据库类型"
                          show-overflow-tooltip
-                         min-width="10%">
+                         min-width="15%">
           <template slot-scope="scope">
             <databaseIcon :type="scope.row.type"></databaseIcon>
             <span>{{ scope.row.type }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="version"
-                         label="驱动版本"
-                         show-overflow-tooltip
-                         min-width="12%"></el-table-column>
         <el-table-column prop="url"
                          label="JDBC连接串"
                          show-overflow-tooltip

@@ -2,36 +2,106 @@ package com.gitee.sqlrest.core.exec.engine.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
+import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
+import com.gitee.sqlrest.core.exec.annotation.Module;
 import com.gitee.sqlrest.core.exec.engine.AbstractExecutorEngine;
-import com.gitee.sqlrest.core.exec.module.DataBaseModule;
-import com.gitee.sqlrest.core.exec.module.EnvironmentModule;
+import com.gitee.sqlrest.core.exec.module.DbVarModule;
+import com.gitee.sqlrest.core.exec.module.EnvVarModule;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
-import com.gitee.sqlrest.script.MagicScript;
-import com.gitee.sqlrest.script.MagicScriptContext;
-import com.gitee.sqlrest.script.MagicScriptEngineFactory;
 import com.zaxxer.hikari.HikariDataSource;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
+import org.codehaus.groovy.control.CompilationFailedException;
 
 public class ScriptExecutorService extends AbstractExecutorEngine {
+
+  public static List<ScriptEditorCompletion> syntax = new ArrayList<>();
+  public static List<Class> modules = Arrays.asList(EnvVarModule.class, DbVarModule.class);
+
+  static {
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("foreach")
+            .caption("foreach")
+            .value("for(item in collection){\n\t\n}")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("for")
+            .caption("fori")
+            .value("for(i=0;i< ;i++){\n\t\n}")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("for")
+            .caption("for")
+            .value("for( ){\n\t\n}")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("if")
+            .caption("if")
+            .value("if( ){\n\n}")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("if")
+            .caption("ifelse")
+            .value("if( ){\n\t\n}else{\n\t\n}")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("import")
+            .caption("import")
+            .value("import ")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("continue")
+            .caption("continue")
+            .value("continue;")
+            .build());
+    syntax.add(
+        ScriptEditorCompletion.builder()
+            .meta("break")
+            .caption("break")
+            .value("break;")
+            .build());
+  }
 
   public ScriptExecutorService(HikariDataSource dataSource, ProductTypeEnum productType) {
     super(dataSource, productType);
   }
 
+  public static String getModuleVarName(Class clazz) {
+    if (clazz.isAnnotationPresent(Module.class)) {
+      Module annotation = (Module) clazz.getAnnotation(Module.class);
+      return annotation.value();
+    }
+    return "unknown";
+  }
+
   public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params) {
-    ScriptEngineFactory scriptEngineFactory = new MagicScriptEngineFactory();
-    ScriptEngine scriptEngine = scriptEngineFactory.getScriptEngine();
+    EnvVarModule envModule = SpringUtil.getBean(EnvVarModule.class);
+    DbVarModule dbModule = new DbVarModule(dataSource, productType, params);
+
     List<Object> results = new ArrayList<>();
     for (ApiContextEntity entity : scripts) {
-      MagicScript script = MagicScript.create(entity.getSqlText(), scriptEngine);
-      MagicScriptContext context = new MagicScriptContext(params);
-      context.set("db", new DataBaseModule(dataSource, productType));
-      context.set("env", SpringUtil.getBean(EnvironmentModule.class));
-      results.add(script.execute(context));
+      Binding binding = new Binding();
+      params.forEach((k, v) -> binding.setProperty(k, v));
+      binding.setProperty(getModuleVarName(dbModule.getClass()), dbModule);
+      binding.setProperty(getModuleVarName(entity.getClass()), envModule);
+
+      GroovyShell groovyShell = new GroovyShell(binding);
+      try {
+        results.add(groovyShell.evaluate(entity.getSqlText()));
+      } catch (CompilationFailedException e) {
+        throw new RuntimeException(e);
+      }
     }
     return results;
   }

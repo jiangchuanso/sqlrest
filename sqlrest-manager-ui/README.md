@@ -32,7 +32,7 @@ npm -v
 
 ### 2. Windows下安装Nodejs
 
-可参考[博文教程](https://zhuanlan.zhihu.com/p/572795586)
+可参考[博文教程](https://blog.csdn.net/inrgihc/article/details/138013024)
 
 ## 三、构建
 

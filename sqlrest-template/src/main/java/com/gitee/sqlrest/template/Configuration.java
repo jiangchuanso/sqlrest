@@ -30,6 +30,10 @@ public class Configuration {
   }
 
   public SqlTemplate getTemplate(final String content) {
+    if (null == content || content.isEmpty()) {
+      throw new IllegalArgumentException("SQL Content is Empty!");
+    }
+
     if (cacheTemplate) {
       FutureTask<SqlTemplate> f = templateCache.get(content);
       if (f == null) {

@@ -157,11 +157,12 @@
                     <el-form-item label="执行"
                                   label-width="65px">
                       <el-radio-group size="small"
+                                      @change="agreeEngineChange"
                                       v-model="createParam.engine">
                         <el-radio-button label="SQL"
                                          :disabled="$route.query.id>0 && createParam.engine==='SCRIPT'">SQL语句</el-radio-button>
                         <el-radio-button label="SCRIPT"
-                                         :disabled="$route.query.id>0 && createParam.engine==='SQL'">脚本内容</el-radio-button>
+                                         :disabled="$route.query.id>0 && createParam.engine==='SQL'">Groovy脚本</el-radio-button>
                       </el-radio-group>
                     </el-form-item>
                   </el-col>
@@ -191,7 +192,7 @@
                           每个SQL窗口中至多写一条SQL语句，支持Mybatis的动态SQL语法
                         </div>
                       </el-tooltip>
-                      <multi-sql-editer ref="editers"
+                      <multi-sql-editer ref="sqlEditors"
                                         :tableHints="tableHints"
                                         :tabSqls="createParam.sqls"
                                         :canAddSql="!isOnlyShowDetail"></multi-sql-editer>
@@ -205,7 +206,7 @@
                       <el-tooltip placement="top">
                         <i class="el-icon-question"></i>
                         <div slot="content">
-                          可以编写符合magic-script语法格式的脚本内容
+                          可以编写符合groovy语法格式的脚本内容
                         </div>
                       </el-tooltip>
                       <script-editer ref="scriptEditer"
@@ -527,6 +528,7 @@ export default {
       tableHints: {
         'mysql': ['user']
       },
+      keywordHints: [],
       inputParams: [],
       debugParams: [],
       debugResponse: "",
@@ -632,8 +634,6 @@ export default {
               this.createParam.script = detail.sqlList[0].sqlText
             }
           }
-
-          //console.log(this.createParam)
         } else {
           if (res.data.message) {
             alert("查询失败," + res.data.message);
@@ -715,6 +715,15 @@ export default {
           }
         }
       );
+    },
+    loadKeywordHints: function () {
+      this.$http.get(
+        "/sqlrest/manager/api/v1/assignment/completions"
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.keywordHints = res.data.data;
+        }
+      });
     },
     loadTreeData: function () {
       if (this.createParam.dataSourceId && this.createParam.dataSourceId > 0 && this.showTree) {
@@ -799,7 +808,19 @@ export default {
             } else {
               this.tableHints[schema] = nameList;
             }
-            this.$refs.editers.setTableHints(this.tableHints)
+            if (this.$refs.sqlEditors) {
+              this.$refs.sqlEditors.setTableHints(this.tableHints)
+            }
+            // if (this.$refs.scriptEditer) {
+            //   let keywords = []
+            //   for (let key in this.tableHints) {
+            //     let value = this.tableHints[key]
+            //     for (let item of value) {
+            //       keywords.push({ meta: "数据表", caption: key + "." + item, value: key + "." + item, score: 1 });
+            //     }
+            //   }
+            //   this.$refs.scriptEditer.setTableHints(keywords)
+            // }
 
             return resolve(tableList);
           } else {
@@ -838,7 +859,10 @@ export default {
         return (
           <div class="custom-tree-node">
             <i class="iconfont icon-shujuku1"></i>
-            <span>{data.label}</span>
+            <el-tooltip class="item" effect="light" placement="left">
+              <div slot="content">{node.label}</div>
+              <span>{data.label}</span>
+            </el-tooltip>
           </div>
         );
       } else if (node.level === 2) {
@@ -893,7 +917,7 @@ export default {
       }
     },
     handleParseInputParams: function () {
-      var currTabSql = this.$refs.editers.queryCurrentTabSql()
+      var currTabSql = this.$refs.sqlEditors.queryCurrentTabSql()
       if (/^\s*$/.test(currTabSql)) {
         alert("SQL内容不能为空")
       }
@@ -929,6 +953,11 @@ export default {
           }
         }
       );
+    },
+    agreeEngineChange: function () {
+      if (this.createParam.engine === 'SCRIPT') {
+        this.$refs.scriptEditer.setTableHints(this.keywordHints);
+      }
     },
     handleAddInputParams: function () {
       this.inputParams.push(
@@ -995,7 +1024,7 @@ export default {
           var isSql = true;
           if (this.createParam.engine === 'SQL') {
             isSql = true
-            sqls = this.$refs.editers.queryContent()
+            sqls = this.$refs.sqlEditors.queryContent()
           } else {
             isSql = false
             sqls = this.$refs.scriptEditer.queryContent()
@@ -1085,13 +1114,14 @@ export default {
       );
     },
     handleDebug: function () {
+      this.debugResponse = ""
       this.$refs.form.validate(valid => {
         if (valid) {
           var sqls = []
           var isSql = true;
           if (this.createParam.engine === 'SQL') {
             isSql = true
-            sqls = this.$refs.editers.queryContent()
+            sqls = this.$refs.sqlEditors.queryContent()
           } else {
             isSql = false
             sqls = this.$refs.scriptEditer.queryContent()
@@ -1140,7 +1170,7 @@ export default {
     handleExecuteDebug: function () {
       var sqls = []
       if (this.createParam.engine === 'SQL') {
-        sqls = this.$refs.editers.queryContent()
+        sqls = this.$refs.sqlEditors.queryContent()
       } else {
         sqls = this.$refs.scriptEditer.queryContent()
       }
@@ -1176,6 +1206,7 @@ export default {
     this.loadGroups();
     this.loadModules();
     this.loadGateway();
+    this.loadKeywordHints();
     this.loadTreeData();
   },
 }

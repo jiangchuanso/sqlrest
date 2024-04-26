@@ -6,14 +6,16 @@
           <div slot="header"
                align="center"
                class="clearfix">
-            <span><b>数据库产品类型列表</b></span>
+            <span><b>数据库类型列表</b></span>
           </div>
           <div class="navsBox">
             <ul>
               <li v-for="(item,index) in connectionTypes"
                   :key="index"
                   @click="handleChooseClick(item.type,index)"
-                  :class="{active:index==isActive}">[{{item.id}}]{{item.type}}</li>
+                  :class="{active:index==isActive}">
+                  <databaseIcon :type="item.type"></databaseIcon>
+                  [{{item.id}}]{{item.type}}</li>
             </ul>
           </div>
         </el-card>
@@ -71,7 +73,7 @@
 </template>
 
 <script>
-
+import databaseIcon from "@/components/databaseIcon/databaseIcon";
 export default {
   data () {
     return {
@@ -81,6 +83,9 @@ export default {
       versionDrivers: [],
       isActive: -1,
     };
+  },
+  components: {
+    databaseIcon
   },
   methods: {
     loadConnectionTypes: function () {

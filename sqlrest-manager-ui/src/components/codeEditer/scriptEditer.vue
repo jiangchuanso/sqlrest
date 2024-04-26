@@ -1,60 +1,46 @@
 <template>
-  <div>
-    <codemirror class="custom-code-script"
-                :options="cmOptions"
-                @ready="onCmReady"
-                @focus="onCmFocus"
-                @inputRead="onCmCodeChange">
-    </codemirror>
+  <div class="custom-code-script">
+    <div class="quick-script-tag">
+      <div class="mybatis-named-tag"
+           @click="addSqlTag('foreach')">foreach</div>
+      <div class="mybatis-named-tag"
+           @click="addSqlTag('if')">if</div>
+      <div class="mybatis-named-tag"
+           @click="addSqlTag('where')">where</div>
+      <div class="mybatis-named-tag"
+           @click="addSqlTag('trim')">trim</div>
+    </div>
+    <editor v-model="value"
+            ref="aceEditor"
+            @init="editorInit"
+            lang="groovy"
+            theme="vibrant_ink"
+            height="200"
+            :options="options"></editor>
   </div>
 </template>
 
 <script>
-import { codemirror } from 'vue-codemirror'
+// https://blog.csdn.net/sunsineq/article/details/116980241
 
-import 'codemirror/theme/solarized.css'
-import 'codemirror/theme/idea.css'
-import 'codemirror/theme/darcula.css'
-import 'codemirror/theme/base16-light.css'
-import "codemirror/addon/hint/show-hint.css";
-
-require('codemirror/mode/groovy/groovy.js');
-require("codemirror/mode/clike/clike.js");
-require("codemirror/addon/edit/closebrackets.js");
-require("codemirror/lib/codemirror");
-require("codemirror/addon/hint/show-hint");
-
+import Editor from 'vue2-ace-editor'
 export default {
-  name: "scriptEditer",
+  name: 'scriptEditor',
   components: {
-    codemirror
+    Editor
   },
   data () {
     return {
-      cmInstance: null, // 当前codemirror实例
-      cmOptions: {
-        code: "",
-        styleActiveLine: true,
-        lineNumbers: true,
-        mode: 'text/x-groovy',
-        theme: 'darcula',
-        lint: true,                     // 代码出错提醒
-        indentUnit: 4,
-        lineWrapping: true, // 是否应滚动或换行以显示长行
-        fontSize: 10,
-        autofocus: true,
-        autoCloseBrackets: true,
-        matchBrackets: true, //括号匹配
-        lineWrapping: true, //代码折叠
-        foldGutter: true,
-        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-        extraKeys: { "Tab": "autocomplete" },  //自动补全
-        hintOptions: { // 自定义提示选项
-          completeSingle: false, // 当匹配只有一项的时候是否自动补全
-          tables: {
-            "db": ["selectAll", "selectCount", "selectOne", "page", "insert", "update", "batchUpdate", "delete"]
-          }
-        }
+      editor: null,
+      value: "",
+      options: {
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        showPrintMargin: false,
+        showLineNumbers: true,
+        tabSize: 6,
+        fontSize: 14,
       },
     }
   },
@@ -63,44 +49,69 @@ export default {
       type: String,
       default: ''
     },
-    tableHints: {
-      type: Object,
+    keywordHints: {
+      type: Array,
+      default: () => [
+      ]
     }
   },
   methods: {
-    onCmReady (cm) {
-      this.cmInstance = cm
-      this.cmInstance.setSize('100%', '200px')
-      this.cmInstance.setValue(this.content)
+    editorInit: function (editor) {
+      this.editor = editor;
+      require('brace/ext/language_tools') //language extension prerequsite...
+      require('brace/mode/groovy')    //language
+      require('brace/theme/chrome')   // theme
+      require('brace/theme/vibrant_ink') // theme
+      require('brace/snippets/groovy') //snippet
+      this.setCompletionHints(this.keywordHints)
     },
-    onCmFocus (cm) {
-    },
-    onCmCodeChange (cm, changeObj) {
-      if (/^[a-zA-Z.]/.test(changeObj.text[0])) {
-        //如果输入的是字母才提示，空格不提示
-        cm.showHint()
+    setCompletionHints: function (data) {
+      let langTools = ace.acequire('ace/ext/language_tools')
+      const completer = {
+        getCompletions: function (editors, session, pos, prefix, callback) {
+          if (prefix.length === 0) {
+            return callback(null, [])
+          } else {
+            return callback(null, data)
+          }
+        }
       }
+      langTools.addCompleter(completer)
+    },
+    addSqlTag: function (tag) {
+      let val = ''
+      if (tag == 'foreach') {
+        val = "\n<foreach open=\"(\" close=\")\" collection=\"\" separator=\",\" item=\"item\" index=\"index\">#{item}</foreach>"
+      } else if (tag == 'if') {
+        val = "\n<if test=\"\" ></if>"
+      } else if (tag == 'choose') {
+        val = "\n<choose><when test=\"\"></when></choose>"
+      } else if (tag == 'where') {
+        val = "\n<where></where>"
+      } else if (tag == 'trim') {
+        val = "\n<trim prefix=\"\" suffix=\"\" suffixesToOverride=\"\" prefixesToOverride=\"\"></trim>"
+      }
+      this.editor.insert(val)
+    },
+    setTableHints: function (data) {
+      this.keywordHints = []
+      for (let i = 0; i < data.length; i++) {
+        this.keywordHints.push(data[i]);
+      }
+      this.setCompletionHints(this.keywordHints)
     },
     queryContent: function () {
-      var sqls = []
-      sqls.push(this.cmInstance.getValue())
-      return sqls
-    }
-  },
-  watch: {
-    content (newVal, OldVal) {
-      this.cmOptions.hintOptions.value = newVal
-    },
-    tableHints (newVal, OldVal) {
-      this.cmOptions.hintOptions.tables = newVal
+      return [this.editor.getValue()]
     }
   },
   mounted () {
-    //console.log("content:"+this.content)
+    this.value = this.content
   },
-  created () {
-    this.cmOptions.hintOptions.tables = this.tableHints
-  }
+  watch: {
+    keywordHints (newVal, OldVal) {
+      this.keywordHints = newVal
+    }
+  },
 }
 </script>
 
@@ -108,5 +119,19 @@ export default {
 .custom-code-script {
   font-size: 13px;
   line-height: 150%;
+}
+.quick-script-tag {
+  display: flex;
+  float: right;
+}
+
+.quick-script-tag .mybatis-named-tag {
+  background-color: #170f7cb9;
+  color: #fff;
+  border-radius: 3px;
+  margin: 2px;
+  line-height: 22px;
+  padding: 0 5px;
+  cursor: pointer;
 }
 </style>

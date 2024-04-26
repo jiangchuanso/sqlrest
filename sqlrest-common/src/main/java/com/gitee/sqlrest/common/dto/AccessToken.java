@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -24,6 +25,7 @@ public class AccessToken implements Serializable {
   @ApiModelProperty("token字符串")
   private String accessToken;
 
+  @JsonIgnore
   @ApiModelProperty("创建时的时间戳")
   private Long createTimestamp;
 

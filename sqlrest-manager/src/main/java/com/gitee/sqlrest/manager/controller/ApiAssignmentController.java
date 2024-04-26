@@ -32,6 +32,12 @@ public class ApiAssignmentController {
   @Resource
   private ApiAssignmentService apiAssignmentService;
 
+  @ApiOperation(value = "获取自动提示列表")
+  @GetMapping(value = "/completions", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity completions() {
+    return ResultEntity.success(apiAssignmentService.completions());
+  }
+
   @ApiOperation(value = "获取SQL中的入参列表")
   @PostMapping(value = "/parse", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity parse(@RequestParam("sql") String sql) {

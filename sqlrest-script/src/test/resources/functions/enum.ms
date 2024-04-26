@@ -1,2 +1,0 @@
-import MethodCallTests;
-return MethodCallTests.ClassType.NORMAL_CLASS

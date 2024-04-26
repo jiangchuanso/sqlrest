@@ -26,7 +26,7 @@
                 </p>
                 <li>脚本方式构建RESTful接口</li>
                 <p>
-                  基于magic-script脚本的语法方式构建复杂场景下的接口。
+                  基于groovy脚本的语法方式构建复杂场景下的接口。
                 </p>
                 <li>支持接口的token安全认证功能</li>
                 <p>
@@ -109,8 +109,6 @@
             └── sqlrest
                 ├── sqlrest-common                     // sqlrest通用定义模块
                 ├── sqlrest-template                   // sqlrest的SQL内容模板模块
-                ├── sqlrest-script                     // sqlrest的接口脚本解析模块
-                ├── sqlrest-cache                      // sqlrest执行器缓存模块
                 ├── sqlrest-persistence                // sqlrest的数据库持久化模块
                 ├── sqlrest-core                       // sqlrest-core的接口实现模块
                 ├── sqlrest-gateway                    // Gateway网关节点
