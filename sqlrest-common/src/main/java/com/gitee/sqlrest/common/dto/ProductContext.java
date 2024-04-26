@@ -25,6 +25,7 @@ public class ProductContext {
   private String urlSample;
   private String sqlSchemaList;
   private List<String> retSchemaList;
+  private boolean hasCatalogAndSchema;
   private Function<String, Pair<String, String>> adapter;
   private String pageSql;
 }

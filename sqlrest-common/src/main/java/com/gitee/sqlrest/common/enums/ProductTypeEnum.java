@@ -63,7 +63,7 @@ public enum ProductTypeEnum {
           .tplUrls(new String[]{"jdbc:oracle:thin:@{host}:{port}:{database}",
               "jdbc:oracle:thin:@//{host}[:{port}]/{database}"})
           .urlSample("jdbc:oracle:thin:@172.17.2.10:1521:ORCL")
-          .sqlSchemaList("SELECT name FROM v$database")
+          .sqlSchemaList("SELECT USERNAME FROM SYS.ALL_USERS")
           .adapter(database -> Pair.of(null, database))
           .pageSql("SELECT * FROM ( SELECT TMP.*, ROWNUM ROW_ID FROM ( %s ) ALIAS WHERE ROWNUM <= ? ) WHERE ROW_ID > ?")
           .build()),
@@ -81,7 +81,8 @@ public enum ProductTypeEnum {
           .urlPrefix("jdbc:sqlserver://")
           .tplUrls(new String[]{"jdbc:sqlserver://{host}[:{port}][;DatabaseName={database}][;{params}]"})
           .urlSample("jdbc:sqlserver://172.17.2.10:1433;DatabaseName=test")
-          .sqlSchemaList("SELECT name FROM sys.databases WHERE state = 0 AND database_id > 4")
+          .sqlSchemaList("select schema_name from INFORMATION_SCHEMA.SCHEMATA")
+          .hasCatalogAndSchema(true)
           .adapter(database -> Pair.of(null, database))
           .pageSql("SELECT * FROM (%s) ALIAS OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
           .build()),
@@ -139,7 +140,7 @@ public enum ProductTypeEnum {
           .urlPrefix("jdbc:dm://")
           .tplUrls(new String[]{"jdbc:dm://{host}:{port}[/{database}][\\\\?{params}]"})
           .urlSample("jdbc:dm://172.17.2.10:5236")
-          .sqlSchemaList("SHOW SCHEMAS")
+          .sqlSchemaList("SELECT DISTINCT object_name FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'SCH'")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
           .build()),
@@ -251,7 +252,7 @@ public enum ProductTypeEnum {
           .driver("org.sqlite.JDBC")
           .defaultPort(0)
           .testSql("SELECT 1")
-          .urlPrefix("jdbc:sqlite://")
+          .urlPrefix("jdbc:sqlite:")
           .tplUrls(new String[]{"jdbc:sqlite:{file}", "jdbc:sqlite::resource:{file}"})
           .urlSample("jdbc:sqlite:/tmp/test.db")
           .sqlSchemaList(null)

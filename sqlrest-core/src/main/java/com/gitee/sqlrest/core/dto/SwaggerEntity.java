@@ -292,6 +292,8 @@ public class SwaggerEntity {
 
     private final String operationId;
 
+    private Map<String,Object> requestBody= new HashMap<>();
+
     private List<String> produces = new ArrayList<>();
 
     private List<String> consumes = new ArrayList<>();
@@ -302,6 +304,13 @@ public class SwaggerEntity {
 
     public Path(String operationId) {
       this.operationId = operationId;
+    }
+
+    public void setRequestBody(String description, String acceptType, Map<String, Object> schema) {
+      Map<String, Object> content = new HashMap<>();
+      content.put(acceptType, schema);
+      requestBody.put("description", description);
+      requestBody.put("content", content);
     }
 
     public void addProduce(String produce) {

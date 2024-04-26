@@ -24,6 +24,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+/**
+ * https://juejin.cn/post/6996227860058865700
+ */
 @Service
 public class ApiSwaggerService {
 

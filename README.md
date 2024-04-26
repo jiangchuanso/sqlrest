@@ -44,17 +44,17 @@
 
 ```
 └── sqlrest
-    ├── sqlrest-common                     // sqlrest通用定义模块
-    ├── sqlrest-template                   // sqlrest的SQL内容模板模块
-    ├── sqlrest-script                     // sqlrest的接口脚本解析模块
-    ├── sqlrest-cache                      // sqlrest执行器缓存模块
-    ├── sqlrest-persistence                // sqlrest的数据库持久化模块
-    ├── sqlrest-core                       // sqlrest-core的接口实现模块
-    ├── sqlrest-gateway                    // Gateway网关节点
-    ├── sqlrest-executor                   // Executor接口执行节点
-    ├── sqlrest-manager                    // Manager管理节点
-    ├── sqlrest-manager-ui                 // 基于Vue2的Manager前段WEB交互页面
-    ├── sqlrest-dist                       // 基于maven-assembly-plugin插件的项目打包模块
+    ├── sqlrest-common           // sqlrest通用定义模块
+    ├── sqlrest-template         // sqlrest的SQL内容模板模块
+    ├── sqlrest-script           // sqlrest的接口脚本解析模块
+    ├── sqlrest-cache            // sqlrest执行器缓存模块
+    ├── sqlrest-persistence      // sqlrest的数据库持久化模块
+    ├── sqlrest-core             // sqlrest-core的接口实现模块
+    ├── sqlrest-gateway          // Gateway网关节点
+    ├── sqlrest-executor         // Executor接口执行节点
+    ├── sqlrest-manager          // Manager管理节点
+    ├── sqlrest-manager-ui       // 基于Vue2的Manager前段WEB交互页面
+    ├── sqlrest-dist             // 基于maven-assembly-plugin插件的项目打包模块
 ```
 
 ## 二、编译打包
@@ -104,27 +104,15 @@ sh ./docker-maven-build.sh
 
 - 步骤1：准备好一个MySQL5.7+的数据库，假设连接地址如下：
 
-```
-# mysql的host地址
-MYSQLDB_HOST=127.0.0.1
-
-# mysql的端口号
-MYSQLDB_PORT=3306
-
-# mysql的库名
-MYSQLDB_NAME=sqlrest
-
-# mysql的账号
-MYSQLDB_USERNAME=root
-
-# mysql的密码
-MYSQLDB_PASSWORD=123456
-```
+| mysql的host地址 | mysql的端口号 | mysql的账号 | mysql的密码 |
+| :------| :------ | :------ | :------ |
+| 127.0.0.1 | 3306 | root | 123456 |
 
 - 步骤2：修改sqlrest-relase-x.x.x/conf/config.ini配置文件
 
 ```
-# manager节点的host地址，如果gateway与executor节点与manager不在同一台机器时需要配置manger节点的IP地址
+# manager节点的host地址，如果gateway与executor节点
+# 与manager不在同一台机器时需要配置manger节点的IP地址
 MANAGER_HOST=localhost
 
 
@@ -166,7 +154,7 @@ MYSQLDB_PASSWORD=123456
 
 启动gateway服务：bin/gateway_startup.cmd
 
-> linux下，需按照如下顺序双击脚本启动对应的服务
+> linux下，需按照如下顺序执行脚本启动对应的服务
 
 启动manager服务：sh bin/sqlrestctl.sh start manager
 

@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -151,6 +150,9 @@ public class DataSourceService {
             dataSourceEntity.getVersion());
     String driverPath = driverPathFile.getAbsolutePath();
     String sqlList = dataSourceEntity.getType().getContext().getSqlSchemaList();
+    if (null == sqlList) {
+      return dataSourceEntity.getType().getContext().getRetSchemaList();
+    }
     List<String> result = new ArrayList<>();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);
     if (StringUtils.isNotBlank(sqlList)) {
@@ -178,7 +180,9 @@ public class DataSourceService {
     List<String> result = new ArrayList<>();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);
     try (Connection connection = ds.getConnection()) {
-      String catalogName = productType.getContext().getAdapter().apply(schema).getLeft();
+      String catalogName = productType.getContext().isHasCatalogAndSchema()
+          ? connection.getCatalog()
+          : productType.getContext().getAdapter().apply(schema).getLeft();
       String schemaName = productType.getContext().getAdapter().apply(schema).getRight();
       try (ResultSet rs = connection.getMetaData()
           .getTables(catalogName, schemaName, "%", new String[]{"TABLE"})) {
@@ -205,7 +209,9 @@ public class DataSourceService {
     List<String> result = new ArrayList<>();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);
     try (Connection connection = ds.getConnection()) {
-      String catalogName = productType.getContext().getAdapter().apply(schema).getLeft();
+      String catalogName = productType.getContext().isHasCatalogAndSchema()
+          ? connection.getCatalog()
+          : productType.getContext().getAdapter().apply(schema).getLeft();
       String schemaName = productType.getContext().getAdapter().apply(schema).getRight();
       try (ResultSet rs = connection.getMetaData()
           .getTables(catalogName, schemaName, "%", new String[]{"VIEW"})) {
@@ -229,7 +235,9 @@ public class DataSourceService {
     List<MetadataColumnResponse> result = new ArrayList<>();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);
     try (Connection connection = ds.getConnection()) {
-      String catalogName = productType.getContext().getAdapter().apply(schema).getLeft();
+      String catalogName = productType.getContext().isHasCatalogAndSchema()
+          ? connection.getCatalog()
+          : productType.getContext().getAdapter().apply(schema).getLeft();
       String schemaName = productType.getContext().getAdapter().apply(schema).getRight();
       try (ResultSet rs = connection.getMetaData()
           .getColumns(catalogName, schemaName, table, null)) {
