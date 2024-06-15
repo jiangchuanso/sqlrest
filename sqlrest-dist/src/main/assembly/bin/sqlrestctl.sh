@@ -65,7 +65,7 @@ elif [ "$module" == "executor" ]; then
   APP_MAIN_CLASS='com.gitee.sqlrest.executor.ExecutorApplication'
 elif [ "$module" == "gateway" ]; then
   CLASSPATH="$APP_CONF_PATH/gateway:$APP_LIB_COMMON_PATH/*:$APP_HOME/lib/webflux/*:$APP_HOME/lib/gateway/*"
-  APP_MAIN_CLASS='ccom.gitee.sqlrest.gateway.GatewayApplication'
+  APP_MAIN_CLASS='com.gitee.sqlrest.gateway.GatewayApplication'
 else
   echo "Error: No module named '$module' was found."
   exit 1

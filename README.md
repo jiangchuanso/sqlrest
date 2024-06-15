@@ -163,6 +163,12 @@ MYSQLDB_PASSWORD=123456
 
 启动gateway服务：sh bin/sqlrestctl.sh start gateway
 
+### 3、系统访问
+
+启动完成后,通过http://<MANAGER_HOST>:<MANAGER_PORT> 地址即可访问。
+
+登陆账号：```admin```  登陆密码：```123456```
+
 ## 三、使用教程
 
 ### 1、部分系统截图
