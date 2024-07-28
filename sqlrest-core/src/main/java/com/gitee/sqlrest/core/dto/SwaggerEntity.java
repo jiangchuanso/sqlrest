@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.core.dto;
 
+import io.swagger.annotations.ApiModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +14,7 @@ import java.util.TreeSet;
 /**
  * Swagger接口信息
  */
+@ApiModel("Swagger的数据接口")
 public class SwaggerEntity {
 
   private String swagger = "2.0";

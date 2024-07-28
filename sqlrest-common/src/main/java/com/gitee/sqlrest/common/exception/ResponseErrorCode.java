@@ -23,6 +23,8 @@ public enum ResponseErrorCode {
   ERROR_ACCESS_FORBIDDEN(403, "access forbidden"),
   ERROR_TOKEN_EXPIRED(401, "token is expired"),
   ERROR_PATH_NOT_EXISTS(404, "path not exists"),
+
+  ERROR_TOO_MANY_REQUESTS(429, "too many requests"),
   ;
 
   private int code;

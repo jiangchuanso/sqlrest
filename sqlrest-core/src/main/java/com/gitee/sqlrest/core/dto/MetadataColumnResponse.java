@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@ApiModel("列信息")
 @NoArgsConstructor
 @AllArgsConstructor
+@ApiModel("列信息")
 public class MetadataColumnResponse {
 
   @ApiModelProperty("列名")

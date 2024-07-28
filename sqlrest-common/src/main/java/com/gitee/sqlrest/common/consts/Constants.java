@@ -15,4 +15,10 @@ public abstract class Constants {
   public static final String CACHE_KEY_TOKEN_CLIENT = "token_client";
 
   public static final Long CLIENT_TOKEN_DURATION_SECONDS = 7200L;
+
+  public static final int SC_TOO_MANY_REQUESTS = 429;
+
+  public static final String getResourceName(String method, String path) {
+    return String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method);
+  }
 }

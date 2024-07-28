@@ -103,9 +103,9 @@ public class ApiAssignmentService {
   public List<SqlParamParseResponse> parseSqlParams(String text) {
     Configuration cfg = new Configuration();
     SqlTemplate template = cfg.getTemplate(text);
-    List<SqlParamParseResponse> responses = new ArrayList<>();
-    template.getParameterNames().forEach((k, v) -> responses.add(new SqlParamParseResponse(k, v)));
-    return responses;
+    return template.getParameterNames().entrySet().stream()
+        .map(e -> new SqlParamParseResponse(e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
   }
 
   public Object debugExecute(ApiDebugExecuteRequest request) {
@@ -178,6 +178,9 @@ public class ApiAssignmentService {
     assignmentEntity.setEngine(request.getEngine());
     assignmentEntity.setStatus(false);
     assignmentEntity.setContextList(contextList);
+    assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
+    assignmentEntity.setFlowGrade(request.getFlowGrade());
+    assignmentEntity.setFlowCount(request.getFlowCount());
 
     apiAssignmentDao.insert(assignmentEntity);
     return assignmentEntity.getId();
@@ -215,6 +218,9 @@ public class ApiAssignmentService {
     assignmentEntity.setStatus(false);
     assignmentEntity.setEngine(request.getEngine());
     assignmentEntity.setContextList(contextList);
+    assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
+    assignmentEntity.setFlowGrade(request.getFlowGrade());
+    assignmentEntity.setFlowCount(request.getFlowCount());
 
     apiAssignmentDao.update(assignmentEntity);
   }

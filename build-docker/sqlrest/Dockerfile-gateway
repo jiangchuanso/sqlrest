@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM registry.cn-hangzhou.aliyuncs.com/inrgihc/openjdk:8-jre-alpine
 
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -11,7 +11,7 @@ USER        root
 
 WORKDIR /sqlrest-release
 
-RUN chmod u+x /sqlrest-release/bin/startup.sh
+RUN chmod u+x /sqlrest-release/bin/sqlrestctl.sh
 
-CMD  ["/sqlrest-release/bin/startup.sh","gateway"]
+CMD  ["/sqlrest-release/bin/sqlrestctl.sh","gateway"]
 

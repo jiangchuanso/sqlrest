@@ -19,7 +19,7 @@ services:
       start_period: 30s
   manager:
     container_name: sqlrest_manager
-    image: inrgihc/sqlrest-manager:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:1.0.0
     network_mode: host
     environment:
       MYSQLDB_HOST: localhost
@@ -40,7 +40,7 @@ services:
         condition: service_healthy
   executor:
     container_name: sqlrest_executor
-    image: inrgihc/sqlrest-executor:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:1.0.0
     network_mode: host
     environment:
       MYSQLDB_HOST: localhost
@@ -61,7 +61,7 @@ services:
         condition: service_healthy
   gateway:
     container_name: sqlrest_gateway
-    image: inrgihc/sqlrest-gateway:1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:1.0.0
     network_mode: host
     environment:
       MYSQLDB_HOST: localhost

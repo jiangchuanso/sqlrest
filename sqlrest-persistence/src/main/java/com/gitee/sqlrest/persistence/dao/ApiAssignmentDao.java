@@ -80,7 +80,8 @@ public class ApiAssignmentDao {
     return apiConfigEntity;
   }
 
-  public List<ApiAssignmentEntity> listAll(Long groupId, Long moduleId, Boolean publish, Boolean open, String searchText) {
+  public List<ApiAssignmentEntity> listAll(Long groupId, Long moduleId, Boolean publish, Boolean open,
+      String searchText) {
     return apiAssignmentMapper.selectList(
         Wrappers.<ApiAssignmentEntity>lambdaQuery()
             .eq(Objects.nonNull(groupId), ApiAssignmentEntity::getGroupId, groupId)
@@ -94,6 +95,16 @@ public class ApiAssignmentDao {
 
   public List<ApiAssignmentEntity> listAll() {
     return apiAssignmentMapper.selectList(null);
+  }
+
+  public List<ApiAssignmentEntity> listFlowControlAll() {
+    return apiAssignmentMapper.selectList(
+        Wrappers.<ApiAssignmentEntity>lambdaQuery()
+            .eq(ApiAssignmentEntity::getStatus, true)
+            .eq(ApiAssignmentEntity::getFlowStatus, true)
+            .isNotNull(ApiAssignmentEntity::getFlowGrade)
+            .isNotNull(ApiAssignmentEntity::getFlowCount)
+    );
   }
 
   public boolean existsDataSourceById(Long dataSourceId) {

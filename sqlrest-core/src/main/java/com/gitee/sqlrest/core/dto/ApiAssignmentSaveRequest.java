@@ -52,4 +52,13 @@ public class ApiAssignmentSaveRequest {
 
   @ApiModelProperty("接口入参")
   private List<ItemParam> params;
+
+  @ApiModelProperty("是否开启流量控制")
+  private Boolean flowStatus;
+
+  @ApiModelProperty("阈值类型")
+  private Integer flowGrade;
+
+  @ApiModelProperty("单机阈值")
+  private Integer flowCount;
 }

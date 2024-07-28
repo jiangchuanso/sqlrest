@@ -11,8 +11,10 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
+@EnableScheduling
 @Configuration
 public class ExecutorServletConfig {
 
@@ -32,7 +34,7 @@ public class ExecutorServletConfig {
     registrationBean.setFilter(authenticationFilter);
     registrationBean.addUrlPatterns(URL_PATH_PATTERN);
     registrationBean.setOrder(2);
-    log.info("Register authFilter for {} UrlPatterns, and order is {}", URL_PATH_PATTERN);
+    log.info("Register authFilter for {} UrlPatterns, and order is {}", URL_PATH_PATTERN, 2);
     return registrationBean;
   }
 

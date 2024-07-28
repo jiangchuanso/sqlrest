@@ -31,7 +31,7 @@ cd $PROJECT_ROOT_DIR && sh docker-maven-clean.sh && cd -
 
 # login and push docker image
 docker login -u inrgihc
-docker push inrgihc/sqlrest-manager:${SQLREST_VERSION}
-docker push inrgihc/sqlrest-executor:${SQLREST_VERSION}
-docker push inrgihc/sqlrest-gateway:${SQLREST_VERSION}
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:${SQLREST_VERSION}
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:${SQLREST_VERSION}
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:${SQLREST_VERSION}
 

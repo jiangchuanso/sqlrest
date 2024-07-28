@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.gitee.sqlrest.common.dto.ItemParam;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
+import com.gitee.sqlrest.common.enums.OnOffEnum;
 import com.gitee.sqlrest.persistence.handler.ListParamHandler;
 import java.sql.Timestamp;
 import java.util.List;
@@ -62,6 +63,15 @@ public class ApiAssignmentEntity {
 
   @TableField(value = "engine", typeHandler = EnumTypeHandler.class)
   private ExecuteEngineEnum engine;
+
+  @TableField(value = "flow_status")
+  private Boolean flowStatus;
+
+  @TableField("flow_grade")
+  private Integer flowGrade;
+
+  @TableField("flow_count")
+  private Integer flowCount;
 
   @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;

@@ -52,7 +52,7 @@ CREATE TABLE `SQLREST_API_ASSIGNMENT`
 (
     `id`             bigint(20)   unsigned not null auto_increment            comment '主键',
     `group_id`       bigint(20)   unsigned not null                           comment '分组ID',
-    `module_id`       bigint(20)   unsigned not null                          comment '模块ID',
+    `module_id`      bigint(20)   unsigned not null                           comment '模块ID',
     `datasource_id`  bigint(20)   unsigned not null                           comment '数据源ID',
     `name`           varchar(255)          not null default ''                comment '接口名称',
     `description`    varchar(1024)                  default null              comment '接口描述',
@@ -62,6 +62,9 @@ CREATE TABLE `SQLREST_API_ASSIGNMENT`
     `status`         tinyint(1)            not null default 0                 comment '是否发布',
     `open`           tinyint(1)            not null default 0                 comment '是否公开',
     `engine`         varchar(16)           not null default 'SQL'             comment '执行引擎',
+    `flow_status`    tinyint(1)            not null default 0                 comment '是否开启流量控制',
+    `flow_grade`     bigint(20)   unsigned          default null              comment '流控类型',
+    `flow_count`     bigint(20)   unsigned          default null              comment '流控阈值',
     `content_type`   varchar(50)           not null default ''                comment 'ContentType',
     `create_time`    timestamp             not null default current_timestamp comment '创建时间',
     `update_time`    timestamp             not null default current_timestamp on update current_timestamp comment '修改时间',

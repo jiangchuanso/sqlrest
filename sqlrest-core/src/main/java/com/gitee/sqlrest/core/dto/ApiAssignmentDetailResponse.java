@@ -1,7 +1,7 @@
 package com.gitee.sqlrest.core.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.gitee.sqlrest.common.dto.ItemParam;
-import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -34,4 +34,13 @@ public class ApiAssignmentDetailResponse extends ApiAssignmentBaseResponse {
 
   @ApiModelProperty("SQL列表")
   private List<ApiContextEntity> sqlList;
+
+  @ApiModelProperty("是否开启流量控制")
+  private Boolean flowStatus;
+
+  @ApiModelProperty("阈值类型")
+  private Integer flowGrade;
+
+  @TableField("阈值大小")
+  private Integer flowCount;
 }

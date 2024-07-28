@@ -15,29 +15,34 @@ public class HttpApiServlet extends HttpServlet {
   public HttpApiServlet(ApiServletService apiServletService) {
     this.apiServletService = apiServletService;
   }
-  
+
+  private void doHandle(HttpMethodEnum method, HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    apiServletService.process(method, request, response);
+  }
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    apiServletService.process(HttpMethodEnum.GET, req, resp);
+    doHandle(HttpMethodEnum.GET, req, resp);
   }
 
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    apiServletService.process(HttpMethodEnum.HEAD, req, resp);
+    doHandle(HttpMethodEnum.HEAD, req, resp);
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    apiServletService.process(HttpMethodEnum.POST, req, resp);
+    doHandle(HttpMethodEnum.POST, req, resp);
   }
 
   @Override
   protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    apiServletService.process(HttpMethodEnum.PUT, req, resp);
+    doHandle(HttpMethodEnum.PUT, req, resp);
   }
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    apiServletService.process(HttpMethodEnum.DELETE, req, resp);
+    doHandle(HttpMethodEnum.DELETE, req, resp);
   }
 }

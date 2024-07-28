@@ -35,6 +35,8 @@ public class AuthenticationFilter implements Filter {
   @Resource
   private ApiAssignmentDao apiAssignmentDao;
   @Resource
+  private FlowControlManger flowControlManger;
+  @Resource
   private ClientTokenService clientTokenService;
   @Resource
   private AccessRecordMapper accessRecordMapper;
@@ -62,6 +64,18 @@ public class AuthenticationFilter implements Filter {
       return;
     }
 
+    if (apiConfigEntity.getFlowStatus()) {
+      String resourceName = Constants.getResourceName(method.name(), path);
+      if (flowControlManger.checkFlowControl(resourceName, response)) {
+        doAuthenticationFilter(chain, request, response, apiConfigEntity);
+      }
+    } else {
+      doAuthenticationFilter(chain, request, response, apiConfigEntity);
+    }
+  }
+
+  private void doAuthenticationFilter(FilterChain chain, HttpServletRequest request, HttpServletResponse response,
+      ApiAssignmentEntity apiConfigEntity) throws IOException {
     AccessRecordEntity accessRecordEntity = AccessRecordEntity.builder()
         .path(request.getRequestURI())
         .status(HttpStatus.OK.value())
@@ -70,6 +84,9 @@ public class AuthenticationFilter implements Filter {
         .userAgent(ServletUtils.getUserAgent())
         .apiId(apiConfigEntity.getId())
         .build();
+
+    String path = apiConfigEntity.getPath();
+    HttpMethodEnum method = apiConfigEntity.getMethod();
 
     try {
       if (!apiConfigEntity.getOpen()) {
