@@ -33,8 +33,12 @@ public class SqlExecutorService extends AbstractExecutorEngine {
         for (ApiContextEntity sql : scripts) {
           SqlTemplate template = cfg.getTemplate(sql.getSqlText());
           SqlMeta sqlMeta = template.process(params);
-          int page = NumberUtil.parseInt(params.getOrDefault(Constants.PARAM_PAGE_NUMBER, 1).toString());
-          int size = NumberUtil.parseInt(params.getOrDefault(Constants.PARAM_PAGE_SIZE, 10).toString());
+          int page = (null == params.get(Constants.PARAM_PAGE_NUMBER))
+              ? 1
+              : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_NUMBER).toString());
+          int size = (null == params.get(Constants.PARAM_PAGE_SIZE))
+              ? 10
+              : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_SIZE).toString());
           dataList.add(SqlJdbcUtils.execute(connection, sqlMeta, page, size));
         }
         connection.commit();

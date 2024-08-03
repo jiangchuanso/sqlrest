@@ -107,7 +107,7 @@ export default {
   methods: {
     onCmReady (cm) {
       this.cmMapper.set(this.currentTabName, cm)
-      cm.setSize('100%', '200px')
+      cm.setSize('100%', '300px')
     },
     onCmFocus (cm) {
     },
@@ -131,10 +131,6 @@ export default {
       this.currentTabName = newTabName;
     },
     removeTab: function (targetName) {
-      if (this.editableTabs.length === 1) {
-        alert("最后一个SQL窗口禁止关闭")
-        return
-      }
       let tabs = this.editableTabs;
       let activeName = this.currentTabName;
       if (activeName === targetName) {

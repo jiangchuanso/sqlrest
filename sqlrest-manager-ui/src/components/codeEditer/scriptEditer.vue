@@ -15,7 +15,7 @@
             @init="editorInit"
             lang="groovy"
             theme="vibrant_ink"
-            height="200"
+            height="300"
             :options="options"></editor>
   </div>
 </template>

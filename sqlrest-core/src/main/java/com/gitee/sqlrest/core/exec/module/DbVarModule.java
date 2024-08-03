@@ -90,8 +90,12 @@ public class DbVarModule {
     SqlMeta sqlMeta = template.process(params);
     String pageSql = productType.getPageSql(sqlMeta.getSql());
     List<Object> parameters = sqlMeta.getParameter();
-    int page = NumberUtil.parseInt(params.getOrDefault(Constants.PARAM_PAGE_NUMBER, 1).toString());
-    int size = NumberUtil.parseInt(params.getOrDefault(Constants.PARAM_PAGE_SIZE, 10).toString());
+    int page = (null == params.get(Constants.PARAM_PAGE_NUMBER))
+        ? 1
+        : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_NUMBER).toString());
+    int size = (null == params.get(Constants.PARAM_PAGE_SIZE))
+        ? 10
+        : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_SIZE).toString());
     parameters.add(((page - 1) * size) < 0 ? 0 : (page - 1) * size);
     parameters.add(size);
     return jdbcTemplate.queryForList(pageSql, parameters.toArray());

@@ -37,6 +37,7 @@
           </el-select>
           <el-tree ref="tree"
                    empty-text="请选择数据源后查看"
+                   style="min-height: 500px; max-height: 800px; overflow: auto;"
                    :indent=6
                    :data="treeData"
                    :props="props"
@@ -57,105 +58,8 @@
                    ref="form">
             <el-tabs type="border-card"
                      v-model="tabActiveName">
-              <el-tab-pane label="基础配置"
+              <el-tab-pane label="基础配置>>"
                            name="basic">
-                <el-row>
-                  <el-col :span="12">
-                    <el-form-item label="名称"
-                                  label-width="65px"
-                                  :required=true
-                                  prop="name">
-                      <el-input v-model="createParam.name"
-                                auto-complete="off"
-                                style="width:75%"
-                                :disabled=isOnlyShowDetail></el-input>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="12">
-                    <el-form-item label="数据源"
-                                  label-width="65px"
-                                  :required=true
-                                  prop="dataSourceId">
-                      <el-select placeholder="请选择数据源"
-                                 style="width:60%"
-                                 v-model="createParam.dataSourceId"
-                                 @change="loadTreeData"
-                                 :disabled=isOnlyShowDetail>
-                        <el-option v-for="(item,index) in connectionList"
-                                   :key="index"
-                                   :label="`[${item.id}]${item.name}`"
-                                   :value="item.id"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="12">
-                    <el-form-item label="授权"
-                                  label-width="65px"
-                                  style="width:80%"
-                                  :required=true
-                                  prop="group">
-                      <el-select v-model="createParam.group"
-                                 placeholder="请选择"
-                                 :disabled=isOnlyShowDetail>
-                        <el-option v-for="(item,index) in groupList"
-                                   :key="index"
-                                   :label="`[${item.id}]${item.name}`"
-                                   :value="item.id"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="12">
-                    <el-form-item label="方法"
-                                  label-width="65px"
-                                  style="width:50%"
-                                  :required=true
-                                  prop="method">
-                      <el-select v-model="createParam.method"
-                                 :disabled=isOnlyShowDetail>
-                        <el-option label="GET"
-                                   value="GET"></el-option>
-                        <el-option label="PUT"
-                                   value="PUT"></el-option>
-                        <el-option label="POST"
-                                   value="POST"></el-option>
-                        <el-option label="DELETE"
-                                   value="DELETE"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="12">
-                    <el-form-item label="路径"
-                                  label-width="65px"
-                                  style="width:80%"
-                                  :required=true
-                                  prop="path">
-                      <el-input v-model="createParam.path"
-                                :disabled=isOnlyShowDetail>
-                        <template slot="prepend">{{gatewayApiPrefix}}</template>
-                      </el-input>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="12">
-                    <el-form-item label="模块"
-                                  label-width="65px"
-                                  :required=true
-                                  style="width:80%"
-                                  prop="module">
-                      <el-select v-model="createParam.module"
-                                 placeholder="请选择"
-                                 :disabled=isOnlyShowDetail>
-                        <el-option v-for="(item,index) in moduleList"
-                                   :key="index"
-                                   :label="`[${item.id}]${item.name}`"
-                                   :value="item.id"></el-option>
-                      </el-select>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="执行"
@@ -168,21 +72,6 @@
                         <el-radio-button label="SCRIPT"
                                          :disabled="$route.query.id>0 && createParam.engine==='SQL'">Groovy脚本</el-radio-button>
                       </el-radio-group>
-                    </el-form-item>
-                  </el-col>
-                  <el-col :span="12">
-                    <el-form-item label="类型"
-                                  style="width:80%"
-                                  label-width="65px"
-                                  :required=true
-                                  prop="contentType">
-                      <el-select v-model="createParam.contentType"
-                                 :disabled=isOnlyShowDetail>
-                        <el-option v-for="(item,index) in contentTypes"
-                                   :key="index"
-                                   :label="item"
-                                   :value="item"></el-option>
-                      </el-select>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -255,7 +144,7 @@
                           size="mini"
                           border>
                   <template slot="empty">
-                    <span>请输入sql后解析出这里的入参</span>
+                    <span>请输入sql后点击"入参解析"按钮后解析出这里的入参</span>
                   </template>
                   <el-table-column label="参数名"
                                    min-width="25%">
@@ -334,8 +223,103 @@
                   </el-table-column>
                 </el-table>
               </el-tab-pane>
-              <el-tab-pane label="详细配置"
+              <el-tab-pane label="必要配置>>"
                            name="detail">
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="路径"
+                                  label-width="65px"
+                                  style="width:80%"
+                                  :required=true
+                                  prop="path">
+                      <el-input v-model="createParam.path"
+                                :disabled=isOnlyShowDetail>
+                        <template slot="prepend">{{gatewayApiPrefix}}</template>
+                      </el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="方法"
+                                  label-width="65px"
+                                  style="width:50%"
+                                  :required=true
+                                  prop="method">
+                      <el-select v-model="createParam.method"
+                                 :disabled=isOnlyShowDetail>
+                        <el-option label="GET"
+                                   value="GET"></el-option>
+                        <el-option label="PUT"
+                                   value="PUT"></el-option>
+                        <el-option label="POST"
+                                   value="POST"></el-option>
+                        <el-option label="DELETE"
+                                   value="DELETE"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="名称"
+                                  label-width="65px"
+                                  :required=true
+                                  prop="name">
+                      <el-input v-model="createParam.name"
+                                auto-complete="off"
+                                style="width:75%"
+                                :disabled=isOnlyShowDetail></el-input>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="类型"
+                                  style="width:80%"
+                                  label-width="65px"
+                                  :required=true
+                                  prop="contentType">
+                      <el-select v-model="createParam.contentType"
+                                 :disabled=isOnlyShowDetail>
+                        <el-option v-for="(item,index) in contentTypes"
+                                   :key="index"
+                                   :label="item"
+                                   :value="item"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="模块"
+                                  label-width="65px"
+                                  :required=true
+                                  style="width:80%"
+                                  prop="module">
+                      <el-select v-model="createParam.module"
+                                 placeholder="请选择"
+                                 :disabled=isOnlyShowDetail>
+                        <el-option v-for="(item,index) in moduleList"
+                                   :key="index"
+                                   :label="`[${item.id}]${item.name}`"
+                                   :value="item.id"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <el-form-item label="授权"
+                                  label-width="65px"
+                                  style="width:80%"
+                                  :required=true
+                                  prop="group">
+                      <el-select v-model="createParam.group"
+                                 placeholder="请选择"
+                                 :disabled=isOnlyShowDetail>
+                        <el-option v-for="(item,index) in groupList"
+                                   :key="index"
+                                   :label="`[${item.id}]${item.name}`"
+                                   :value="item.id"></el-option>
+                      </el-select>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
                 <el-row>
                   <el-col :span="24">
                     <el-form-item label="描述"
@@ -545,7 +529,7 @@ export default {
       moduleList: [],
       connectionList: [],
       contentTypes: ['application/x-www-form-urlencoded'],
-      showTree: false,
+      showTree: true,
       createParam: {
         id: null,
         name: null,
@@ -655,6 +639,8 @@ export default {
         "/sqlrest/manager/api/v1/assignment/detail/" + this.$route.query.id
       ).then(res => {
         if (0 === res.data.code) {
+          this.showTree = false;
+          console.log("showTree:" + this.showTree)
           let detail = res.data.data;
           this.createParam = {
             id: detail.id,
@@ -971,6 +957,7 @@ export default {
       var currTabSql = this.$refs.sqlEditors.queryCurrentTabSql()
       if (/^\s*$/.test(currTabSql)) {
         alert("SQL内容不能为空")
+        return
       }
       this.$http({
         method: "POST",
@@ -1172,41 +1159,35 @@ export default {
     },
     handleDebug: function () {
       this.debugResponse = ""
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          var sqls = []
-          var isSql = true;
-          if (this.createParam.engine === 'SQL') {
-            isSql = true
-            sqls = this.$refs.sqlEditors.queryContent()
-          } else {
-            isSql = false
-            sqls = this.$refs.scriptEditer.queryContent()
-          }
+      var sqls = []
+      var isSql = true;
+      if (this.createParam.engine === 'SQL') {
+        isSql = true
+        sqls = this.$refs.sqlEditors.queryContent()
+      } else {
+        isSql = false
+        sqls = this.$refs.scriptEditer.queryContent()
+      }
 
-          if (this.checkSqlsOrScriptEmpty(sqls)) {
-            alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容')
-          } else {
-            this.debugParams = []
-            this.inputParams.forEach(item => {
-              this.debugParams.push(
-                {
-                  name: item.name,
-                  type: item.type,
-                  isArray: item.isArray,
-                  required: item.required,
-                  defaultValue: item.defaultValue,
-                  remark: item.remark,
-                  value: null,
-                },
-              )
-            })
-            this.showDebugDrawer = true
-          }
-        } else {
-          alert("请检查输入");
-        }
-      });
+      if (this.checkSqlsOrScriptEmpty(sqls)) {
+        alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容')
+      } else {
+        this.debugParams = []
+        this.inputParams.forEach(item => {
+          this.debugParams.push(
+            {
+              name: item.name,
+              type: item.type,
+              isArray: item.isArray,
+              required: item.required,
+              defaultValue: item.defaultValue,
+              remark: item.remark,
+              value: null,
+            },
+          )
+        })
+        this.showDebugDrawer = true
+      }
     },
     handleAddDebugParams: function () {
       this.debugParams.push(
