@@ -8,6 +8,7 @@ import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.core.exec.ApiExecuteService;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
+import com.google.common.base.Charsets;
 import java.io.IOException;
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
@@ -29,6 +30,7 @@ public class ApiServletService {
   public void process(HttpMethodEnum method, HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding(Charsets.UTF_8.name());
     String path = request.getRequestURI().substring(Constants.API_PATH_PREFIX.length() + 2);
     ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path);
     if (null == apiConfigEntity || !apiConfigEntity.getStatus()) {
