@@ -39,7 +39,6 @@ public class SentinelFlowControlManager implements FlowControlManger {
   public void loadFlowRules() {
     try {
       doLoadFlowRules();
-      log.info("Success load flow rules");
     } catch (Exception e) {
       log.error("load flow rules failed:{}", e.getMessage(), e);
     }
@@ -64,7 +63,10 @@ public class SentinelFlowControlManager implements FlowControlManger {
       rule.setId(assignmentEntity.getId());
       rules.add(rule);
     }
-    FlowRuleManager.loadRules(rules);
+    if (rules.size() > 0) {
+      FlowRuleManager.loadRules(rules);
+      log.info("Success refresh flow rules count: {}", rules.size());
+    }
   }
 
   @Override

@@ -46,8 +46,8 @@ public class ApiAssignmentController {
 
   @ApiOperation(value = "调试API配置")
   @PostMapping(value = "/debug", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity debug(@RequestBody ApiDebugExecuteRequest request) {
-    return ResultEntity.success(apiAssignmentService.debugExecute(request));
+  public void debug(@RequestBody ApiDebugExecuteRequest request, HttpServletResponse response) {
+    apiAssignmentService.debugExecute(request, response);
   }
 
   @ApiOperation(value = "添加API配置")

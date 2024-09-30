@@ -1,6 +1,7 @@
 package com.gitee.sqlrest.core.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ParamValue;
 import com.gitee.sqlrest.common.dto.ResultEntity;
@@ -22,6 +23,7 @@ import com.gitee.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import com.gitee.sqlrest.core.exec.engine.impl.ScriptExecutorService;
 import com.gitee.sqlrest.core.util.ApiPathUtils;
 import com.gitee.sqlrest.core.util.DataSourceUtils;
+import com.gitee.sqlrest.core.util.JacksonUtils;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.DataSourceDao;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
@@ -30,6 +32,7 @@ import com.gitee.sqlrest.persistence.entity.DataSourceEntity;
 import com.gitee.sqlrest.persistence.util.PageUtils;
 import com.gitee.sqlrest.template.Configuration;
 import com.gitee.sqlrest.template.SqlTemplate;
+import com.google.common.base.Charsets;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.lang.reflect.Method;
@@ -48,6 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -108,7 +112,7 @@ public class ApiAssignmentService {
         .collect(Collectors.toList());
   }
 
-  public Object debugExecute(ApiDebugExecuteRequest request) {
+  public void debugExecute(ApiDebugExecuteRequest request, HttpServletResponse response) {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(request.getDataSourceId());
     if (null == dataSourceEntity) {
       String message = "datasource[id=" + request.getDataSourceId() + " not exist!";
@@ -139,16 +143,33 @@ public class ApiAssignmentService {
         }
       }
     }
+
     File driverPath = driverLoadService.getVersionDriverFile(dataSourceEntity.getType(), dataSourceEntity.getVersion());
-    HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
-    Object result = ApiExecutorEngineFactory
-        .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
-        .execute(scripts, params);
-    if (result instanceof Collection) {
-      Collection r = (Collection) result;
-      return ResultEntity.success(scripts.size() == 1 ? r.stream().findFirst().get() : r);
+    
+    ResultEntity entity;
+    try {
+      HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
+      Object result = ApiExecutorEngineFactory
+          .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
+          .execute(scripts, params);
+      if (result instanceof Collection) {
+        Collection r = (Collection) result;
+        result = scripts.size() == 1 ? r.stream().findFirst().get() : r;
+      }
+      entity = ResultEntity.success(result);
+    } catch (Exception e) {
+      entity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(e));
     }
-    return ResultEntity.success(result);
+
+    String json = JacksonUtils.toJsonStr(entity, request.getFormatMap(), request.getNamingStrategy());
+
+    try {
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.setCharacterEncoding(Charsets.UTF_8.name());
+      response.getWriter().append(json);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public Long createAssignment(ApiAssignmentSaveRequest request) {
