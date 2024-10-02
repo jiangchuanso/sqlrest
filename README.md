@@ -1,5 +1,7 @@
 # SQLREST
 
+![SQLREST](https://gitee.com/inrgihc/sqlrest/raw/master/sqlrest-manager-ui/src/assets/LOGO.png#pic_center)
+
 > 将数据库的SQL生成RESTful风格的http接口的工具
 
 ## 一、工具介绍
@@ -33,15 +35,18 @@
 - Greenplum(需使用PostgreSQL类型)
 - IBM的DB2
 - Sybase数据库
-- 国产达梦数据库DMDB
+- 国产达梦数据库DM
 - 国产人大金仓数据库Kingbase8
 - 国产翰高数据库HighGo
 - 国产神通数据库Oscar
 - 国产南大通用数据库GBase8a
 - Apache Hive
 - SQLite3
-- OpenGuass
+- OpenGauss
 - ClickHouse
+- Apache Doris
+- StarRocks
+- OceanBase
 
 ### 3、模块结构功能
 

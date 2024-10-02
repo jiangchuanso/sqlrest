@@ -5,6 +5,8 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ParamValue;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.OnOffEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.common.exception.CommonException;
@@ -15,6 +17,8 @@ import com.gitee.sqlrest.core.dto.ApiAssignmentDetailResponse;
 import com.gitee.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import com.gitee.sqlrest.core.dto.ApiDebugExecuteRequest;
 import com.gitee.sqlrest.core.dto.AssignmentSearchRequest;
+import com.gitee.sqlrest.core.dto.DataTypeFormatMapValue;
+import com.gitee.sqlrest.core.dto.NameValueRemarkResponse;
 import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.dto.SqlParamParseResponse;
 import com.gitee.sqlrest.core.exec.ApiExecuteService;
@@ -35,8 +39,10 @@ import com.gitee.sqlrest.template.SqlTemplate;
 import com.google.common.base.Charsets;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +56,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -144,29 +151,34 @@ public class ApiAssignmentService {
       }
     }
 
+    if (null == request.getNamingStrategy()) {
+      request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
+    }
+
     File driverPath = driverLoadService.getVersionDriverFile(dataSourceEntity.getType(), dataSourceEntity.getVersion());
-    
+
     ResultEntity entity;
     try {
       HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
       Object result = ApiExecutorEngineFactory
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
-          .execute(scripts, params);
+          .execute(scripts, params, request.getNamingStrategy());
       if (result instanceof Collection) {
         Collection r = (Collection) result;
         result = scripts.size() == 1 ? r.stream().findFirst().get() : r;
       }
       entity = ResultEntity.success(result);
+      response.setStatus(HttpServletResponse.SC_OK);
     } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       entity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(e));
     }
-
-    String json = JacksonUtils.toJsonStr(entity, request.getFormatMap(), request.getNamingStrategy());
 
     try {
       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
       response.setCharacterEncoding(Charsets.UTF_8.name());
-      response.getWriter().append(json);
+      response.getWriter().append(JacksonUtils.toJsonStr(entity, request.getFormatMap().stream()
+          .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a))));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -183,6 +195,10 @@ public class ApiAssignmentService {
     if (CollectionUtils.isEmpty(request.getContextList())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "contextList");
     }
+    if (null == request.getNamingStrategy()) {
+      request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
+    }
+
     List<ApiContextEntity> contextList = getContextListEntity(request.getContextList());
 
     ApiAssignmentEntity assignmentEntity = new ApiAssignmentEntity();
@@ -199,6 +215,9 @@ public class ApiAssignmentService {
     assignmentEntity.setEngine(request.getEngine());
     assignmentEntity.setStatus(false);
     assignmentEntity.setContextList(contextList);
+    assignmentEntity.setResponseFormat(request.getFormatMap().stream()
+        .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a)));
+    assignmentEntity.setNamingStrategy(request.getNamingStrategy());
     assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
     assignmentEntity.setFlowGrade(request.getFlowGrade());
     assignmentEntity.setFlowCount(request.getFlowCount());
@@ -222,6 +241,10 @@ public class ApiAssignmentService {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "sqlTextList");
     }
 
+    if (null == request.getNamingStrategy()) {
+      request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
+    }
+
     List<ApiContextEntity> contextList = getContextListEntity(request.getContextList());
 
     ApiAssignmentEntity assignmentEntity = new ApiAssignmentEntity();
@@ -239,6 +262,9 @@ public class ApiAssignmentService {
     assignmentEntity.setStatus(false);
     assignmentEntity.setEngine(request.getEngine());
     assignmentEntity.setContextList(contextList);
+    assignmentEntity.setResponseFormat(request.getFormatMap().stream()
+        .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a)));
+    assignmentEntity.setNamingStrategy(request.getNamingStrategy());
     assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
     assignmentEntity.setFlowGrade(request.getFlowGrade());
     assignmentEntity.setFlowCount(request.getFlowCount());
@@ -255,15 +281,43 @@ public class ApiAssignmentService {
     ApiAssignmentDetailResponse response = new ApiAssignmentDetailResponse();
     BeanUtil.copyProperties(assignmentEntity, response);
     response.setSqlList(assignmentEntity.getContextList());
+    List<DataTypeFormatMapValue> formatMap = new ArrayList<>();
+
+    for (Map.Entry<DataTypeFormatEnum, String> entry : assignmentEntity.getResponseFormat().entrySet()) {
+      formatMap.add(
+          DataTypeFormatMapValue.builder()
+              .key(entry.getKey())
+              .value(entry.getValue())
+              .remark(entry.getKey().getClassName())
+              .build());
+    }
+    response.setFormatMap(formatMap);
     return response;
   }
 
-  public ResultEntity testAssignment(Long id, HttpServletRequest request, HttpServletResponse response) {
+  public void testAssignment(Long id, HttpServletRequest request, HttpServletResponse response) {
     ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(id, true);
     if (null == assignmentEntity) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
     }
-    return apiExecuteService.execute(assignmentEntity, request, response);
+
+    String json;
+    ResultEntity result = apiExecuteService.execute(assignmentEntity, request);
+    if (0 != result.getCode()) {
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      json = JacksonUtils.toJsonStr(ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR));
+    } else {
+      response.setStatus(HttpServletResponse.SC_OK);
+      json = JacksonUtils.toJsonStr(result, assignmentEntity.getResponseFormat());
+    }
+
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding(Charsets.UTF_8.name());
+    try {
+      response.getWriter().append(json);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void deleteAssignment(Long id) {

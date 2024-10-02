@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.common.dto;
 
+import com.gitee.sqlrest.common.enums.ParamLocationEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,6 +16,9 @@ public class ItemParam {
 
   @ApiModelProperty("参数名")
   private String name;
+
+  @ApiModelProperty("参数位置")
+  private ParamLocationEnum location;
 
   @ApiModelProperty("参数类型")
   private ParamTypeEnum type;

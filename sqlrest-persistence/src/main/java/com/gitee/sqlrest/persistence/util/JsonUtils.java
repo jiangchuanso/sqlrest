@@ -1,6 +1,7 @@
 package com.gitee.sqlrest.persistence.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
@@ -33,6 +34,19 @@ public class JsonUtils {
         return jacksonMapper.readValue(jsonString, clazz);
       } catch (JsonProcessingException e) {
         String className = clazz.getSimpleName();
+        log.error(" parse json [{}] to class [{}] error：{}", jsonString, className, e);
+        throw new RuntimeException("parse json string to object error:" + e.getMessage());
+      }
+    }
+    return null;
+  }
+
+  public static <T> T toBeanType(String jsonString, TypeReference<T> clazz) {
+    if (null != jsonString) {
+      try {
+        return jacksonMapper.readValue(jsonString, clazz);
+      } catch (JsonProcessingException e) {
+        String className = clazz.getType().getTypeName();
         log.error(" parse json [{}] to class [{}] error：{}", jsonString, className, e);
         throw new RuntimeException("parse json string to object error:" + e.getMessage());
       }

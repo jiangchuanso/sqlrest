@@ -123,7 +123,8 @@ public enum ProductTypeEnum {
               "jdbc:db2://172.17.2.10:50000/testdb:driverType=4;fullyMaterializeLobData=true;fullyMaterializeInputStreams=true;progressiveStreaming=2;progresssiveLocators=2;")
           .sqlSchemaList("SELECT SCHEMANAME FROM SYSCAT.SCHEMATA ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("SELECT * FROM (SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( %s ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN ? AND ?")
+          .pageSql(
+              "SELECT * FROM (SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( %s ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN ? AND ?")
           .build()),
 
   /**
@@ -297,7 +298,68 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ?, ? ")
-          .build());
+          .build()),
+
+  /**
+   * Doris数据库类型
+   */
+  DORIS(
+      ProductContext.builder()
+          .id(16)
+          .quote("`")
+          .name("doris")
+          .driver("com.mysql.jdbc.Driver")
+          .defaultPort(3306)
+          .testSql("/* ping */ SELECT 1")
+          .urlPrefix("jdbc:mysql://")
+          .tplUrls(new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"})
+          .urlSample(
+              "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
+          .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
+          .adapter(database -> Pair.of(database, null))
+          .pageSql("select * from (%s) alias limit ?, ? ")
+          .build()),
+
+  /**
+   * StarRocks数据库类型
+   */
+  STARROCKS(
+      ProductContext.builder()
+          .id(17)
+          .quote("`")
+          .name("starrocks")
+          .driver("com.mysql.jdbc.Driver")
+          .defaultPort(3306)
+          .testSql("/* ping */ SELECT 1")
+          .urlPrefix("jdbc:mysql://")
+          .tplUrls(new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"})
+          .urlSample(
+              "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
+          .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
+          .adapter(database -> Pair.of(database, null))
+          .pageSql("select * from (%s) alias limit ?, ? ")
+          .build()),
+
+  /**
+   * OceanBase数据库类型
+   */
+  OCEANBASE(
+      ProductContext.builder()
+          .id(18)
+          .quote("`")
+          .name("oceanbase")
+          .driver("com.oceanbase.jdbc.Driver")
+          .defaultPort(2881)
+          .testSql("/* ping */ SELECT 1")
+          .urlPrefix("jdbc:oceanbase://")
+          .tplUrls(new String[]{"jdbc:oceanbase://{host}[:{port}]/[{database}][\\?{params}]"})
+          .urlSample(
+              "jdbc:oceanbase://127.0.0.1:2881/test?pool=false&useUnicode=true&characterEncoding=utf-8&useSSL=false")
+          .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
+          .adapter(database -> Pair.of(database, null))
+          .pageSql("select * from (%s) alias limit ?, ? ")
+          .build()),
+  ;
 
   private ProductContext context;
 
@@ -323,6 +385,10 @@ public enum ProductTypeEnum {
 
   public String[] getUrl() {
     return this.context.getTplUrls();
+  }
+
+  public String getTestSql() {
+    return this.context.getTestSql();
   }
 
   public String getSample() {

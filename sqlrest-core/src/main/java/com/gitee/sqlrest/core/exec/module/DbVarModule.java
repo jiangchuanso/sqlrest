@@ -2,9 +2,11 @@ package com.gitee.sqlrest.core.exec.module;
 
 import cn.hutool.core.util.NumberUtil;
 import com.gitee.sqlrest.common.consts.Constants;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.exec.annotation.Comment;
 import com.gitee.sqlrest.core.exec.annotation.Module;
+import com.gitee.sqlrest.core.util.ConvertUtils;
 import com.gitee.sqlrest.template.Configuration;
 import com.gitee.sqlrest.template.SqlMeta;
 import com.gitee.sqlrest.template.SqlTemplate;
@@ -15,7 +17,9 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -37,11 +41,26 @@ public class DbVarModule {
   private JdbcTemplate jdbcTemplate;
   private ProductTypeEnum productType;
   private Map<String, Object> params;
+  private Function<String, String> converter;
 
-  public DbVarModule(DataSource dataSource, ProductTypeEnum productType, Map<String, Object> params) {
+  public DbVarModule(DataSource dataSource, ProductTypeEnum productType, Map<String, Object> params,
+      NamingStrategyEnum strategy) {
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.productType = productType;
     this.params = params;
+
+    if (null == strategy) {
+      strategy = NamingStrategyEnum.NONE;
+    }
+    this.converter = strategy.getFunction();
+  }
+
+  private Map<String, Object> build(Map<String, Object> row) {
+    return ConvertUtils.to(row, converter);
+  }
+
+  private List<Map<String, Object>> build(List<Map<String, Object>> rows) {
+    return rows.stream().map(this::build).collect(Collectors.toList());
   }
 
   @Comment("查询所有的数据列表")
@@ -49,7 +68,7 @@ public class DbVarModule {
     log.info("Enter selectAll() function, SQL:{},params:{}", sqlOrXml, params);
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
-    return jdbcTemplate.queryForList(sqlMeta.getSql(), sqlMeta.getParameter().toArray());
+    return build(jdbcTemplate.queryForList(sqlMeta.getSql(), sqlMeta.getParameter().toArray()));
   }
 
   @Comment("count所有数据的总数")
@@ -67,7 +86,7 @@ public class DbVarModule {
     log.info("Enter selectOne() function, SQL:{},params:{}", sqlOrXml, params);
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
-    return jdbcTemplate
+    return build(jdbcTemplate
         .query(sqlMeta.getSql(), new ResultSetExtractor<Map<String, Object>>() {
               private ColumnMapRowMapper mapper = new ColumnMapRowMapper();
 
@@ -79,7 +98,7 @@ public class DbVarModule {
                 return null;
               }
             },
-            sqlMeta.getParameter().toArray());
+            sqlMeta.getParameter().toArray()));
   }
 
   @Comment("分页查询数据列表")
@@ -98,7 +117,7 @@ public class DbVarModule {
         : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_SIZE).toString());
     parameters.add(((page - 1) * size) < 0 ? 0 : (page - 1) * size);
     parameters.add(size);
-    return jdbcTemplate.queryForList(pageSql, parameters.toArray());
+    return build(jdbcTemplate.queryForList(pageSql, parameters.toArray()));
   }
 
   @Comment("执行insert操作，返回插入主键")
@@ -115,7 +134,7 @@ public class DbVarModule {
           return ps;
         },
         keyHolder);
-    return keyHolder.getKeys();
+    return build(keyHolder.getKeys());
   }
 
   @Comment("执行update操作，返回受影响行数")

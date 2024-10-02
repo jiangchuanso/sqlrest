@@ -3,7 +3,6 @@ package com.gitee.sqlrest.core.servlet;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
-import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.core.exec.ApiExecuteService;
 import com.gitee.sqlrest.core.util.JacksonUtils;
@@ -11,7 +10,6 @@ import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.google.common.base.Charsets;
 import java.io.IOException;
-import java.util.Collections;
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,21 +32,19 @@ public class ApiServletService {
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(Charsets.UTF_8.name());
     String path = request.getRequestURI().substring(Constants.API_PATH_PREFIX.length() + 2);
-    String json = null;
+    ResultEntity result = ResultEntity.success();
     ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path);
     if (null == apiConfigEntity || !apiConfigEntity.getStatus()) {
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
       String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
-      ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS, message);
-      json = JacksonUtils.toJsonStr(result, Collections.emptyMap(), null);
+      result = ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS, message);
     } else {
-      ResultEntity result = apiExecuteService.execute(apiConfigEntity, request, response);
-      if (0 != result.getCode()) {
-        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      }
-      json = JacksonUtils.toJsonStr(result, Collections.emptyMap(), NamingStrategyEnum.UPPER_CAMEL_CASE);
+      result = apiExecuteService.execute(apiConfigEntity, request);
     }
-
+    if (0 != result.getCode()) {
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+    String json = JacksonUtils.toJsonStr(result, apiConfigEntity.getResponseFormat());
     response.getWriter().append(json);
   }
 

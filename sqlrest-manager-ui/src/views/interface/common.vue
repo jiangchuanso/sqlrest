@@ -151,14 +151,14 @@
                     <template slot-scope="scope">
                       <el-input v-model="scope.row.name"
                                 type="string"
-                                :disabled=isOnlyShowDetail> </el-input>
+                                :disabled="isOnlyShowDetail"> </el-input>
                     </template>
                   </el-table-column>
                   <el-table-column label="参数类型"
                                    min-width="25%">
                     <template slot-scope="scope">
                       <el-select v-model="scope.row.type"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option label='整型'
                                    value='LONG'></el-option>
                         <el-option label='浮点型'
@@ -176,7 +176,7 @@
                                    min-width="25%">
                     <template slot-scope="scope">
                       <el-select v-model="scope.row.isArray"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option label='是'
                                    :value=true></el-option>
                         <el-option label='否'
@@ -188,7 +188,7 @@
                                    min-width="25%">
                     <template slot-scope="scope">
                       <el-select v-model="scope.row.required"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option label='是'
                                    :value=true></el-option>
                         <el-option label='否'
@@ -201,7 +201,7 @@
                     <template slot-scope="scope">
                       <el-input v-model="scope.row.defaultValue"
                                 type="string"
-                                :disabled=isOnlyShowDetail></el-input>
+                                :disabled="isOnlyShowDetail"></el-input>
                     </template>
                   </el-table-column>
                   <el-table-column label="描述"
@@ -209,7 +209,7 @@
                     <template slot-scope="scope">
                       <el-input v-model="scope.row.remark"
                                 type="string"
-                                :disabled=isOnlyShowDetail></el-input>
+                                :disabled="isOnlyShowDetail"></el-input>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作"
@@ -223,7 +223,7 @@
                   </el-table-column>
                 </el-table>
               </el-tab-pane>
-              <el-tab-pane label="必要配置>>"
+              <el-tab-pane label="接口配置>>"
                            name="detail">
                 <el-row>
                   <el-col :span="12">
@@ -233,7 +233,7 @@
                                   :required=true
                                   prop="path">
                       <el-input v-model="createParam.path"
-                                :disabled=isOnlyShowDetail>
+                                :disabled="isOnlyShowDetail">
                         <template slot="prepend">{{gatewayApiPrefix}}</template>
                       </el-input>
                     </el-form-item>
@@ -245,7 +245,7 @@
                                   :required=true
                                   prop="method">
                       <el-select v-model="createParam.method"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option label="GET"
                                    value="GET"></el-option>
                         <el-option label="PUT"
@@ -267,7 +267,7 @@
                       <el-input v-model="createParam.name"
                                 auto-complete="off"
                                 style="width:75%"
-                                :disabled=isOnlyShowDetail></el-input>
+                                :disabled="isOnlyShowDetail"></el-input>
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
@@ -277,7 +277,7 @@
                                   :required=true
                                   prop="contentType">
                       <el-select v-model="createParam.contentType"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option v-for="(item,index) in contentTypes"
                                    :key="index"
                                    :label="item"
@@ -295,7 +295,7 @@
                                   prop="module">
                       <el-select v-model="createParam.module"
                                  placeholder="请选择"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option v-for="(item,index) in moduleList"
                                    :key="index"
                                    :label="`[${item.id}]${item.name}`"
@@ -311,7 +311,7 @@
                                   prop="group">
                       <el-select v-model="createParam.group"
                                  placeholder="请选择"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                         <el-option v-for="(item,index) in groupList"
                                    :key="index"
                                    :label="`[${item.id}]${item.name}`"
@@ -333,6 +333,46 @@
                   </el-col>
                 </el-row>
               </el-tab-pane>
+              <el-tab-pane label="出参格式>>"
+                           name="outputParams">
+                <el-row>
+                  <el-col :span="12">
+                    <div>
+                      <el-form-item label="命名策略"
+                                    label-width="80px"
+                                    prop="description"
+                                    style="width:100%">
+                        <el-select v-model="createParam.namingStrategy"
+                                   placeholder="请选择"
+                                   :disabled="isOnlyShowDetail">
+                          <el-option v-for="(item,index) in responseNamingStrategy"
+                                     :key="index"
+                                     :label="`[${item.key}]${item.value}`"
+                                     :value="`${item.key}`"></el-option>
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="12">
+                    <el-form-item label="数据格式"
+                                  label-width="80px"
+                                  prop="formatMap"
+                                  style="width:100%">
+                      <div v-for="item in createParam.formatMap"
+                           :key="item.key"
+                           v-bind="item">
+                        {{item.remark}}:
+                        <el-input type="text"
+                                  :key="item.key"
+                                  v-model="item.value"
+                                  :value="item.value"> </el-input>
+                      </div>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
               <el-tab-pane label="流量控制"
                            name="flowControl">
                 <el-row>
@@ -344,14 +384,14 @@
                                  :inactive-value="false"
                                  active-text="开启"
                                  inactive-text="关闭"
-                                 :disabled=isOnlyShowDetail>
+                                 :disabled="isOnlyShowDetail">
                       </el-switch>
                     </el-form-item>
                     <div v-show="createParam.flowStatus">
                       <el-form-item label="阈值类型">
                         <el-radio-group size="small"
                                         v-model="createParam.flowGrade"
-                                        :disabled=isOnlyShowDetail
+                                        :disabled="isOnlyShowDetail"
                                         border>
                           <el-radio :label="1">QPS</el-radio>
                           <el-radio :label="0">并发线程数</el-radio>
@@ -361,7 +401,7 @@
                         <el-input-number v-model="createParam.flowCount"
                                          size="small"
                                          :step="1"
-                                         :disabled=isOnlyShowDetail
+                                         :disabled="isOnlyShowDetail"
                                          step-strictly></el-input-number>
                       </el-form-item>
                     </div>
@@ -444,7 +484,7 @@
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-select v-model="scope.row.isArray"
-                             disabled="true">
+                             :disabled="true">
                     <el-option label='是'
                                :value=true></el-option>
                     <el-option label='否'
@@ -456,7 +496,7 @@
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-select v-model="scope.row.required"
-                             disabled="true">
+                             :disabled="true">
                     <el-option label='是'
                                :value=true></el-option>
                     <el-option label='否'
@@ -468,7 +508,7 @@
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.remark"
-                            disabled="true"
+                            :disabled="true"
                             type="string"></el-input>
                 </template>
               </el-table-column>
@@ -544,6 +584,8 @@ export default {
         sqls: [],
         script: '',
         open: false,
+        namingStrategy: 'CAMEL_CASE',
+        formatMap: null,
         flowStatus: false,
         flowGrade: 1,
         flowCount: 5
@@ -564,6 +606,8 @@ export default {
       inputParams: [],
       debugParams: [],
       debugResponse: "",
+      responseNamingStrategy: [],
+      responseTypeFormat: [],
       rules: {
         name: [
           {
@@ -656,6 +700,8 @@ export default {
             engine: detail.engine,
             sqls: [],
             script: "",
+            namingStrategy: detail.namingStrategy,
+            formatMap: detail.formatMap,
             flowStatus: detail.flowStatus,
             flowGrade: detail.flowGrade,
             flowCount: detail.flowCount
@@ -759,6 +805,28 @@ export default {
       ).then(res => {
         if (0 === res.data.code) {
           this.keywordHints = res.data.data;
+        }
+      });
+    },
+    loadResponseNamingStrategy: function () {
+      this.$http.get(
+        "/sqlrest/manager/api/v1/assignment/response-naming-strategy"
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.responseNamingStrategy = res.data.data;
+          console.log(this.responseNamingStrategy)
+        }
+      });
+    },
+    loadResponseTypeFormat: function () {
+      this.$http.get(
+        "/sqlrest/manager/api/v1/assignment/response-type-format"
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.responseTypeFormat = res.data.data;
+          if (!this.createParam.formatMap) {
+            this.createParam.formatMap = res.data.data;
+          }
         }
       });
     },
@@ -976,6 +1044,7 @@ export default {
               this.inputParams.push(
                 {
                   name: item.name,
+                  location: 'FORM_DATA',
                   type: "STRING",
                   isArray: item.isArray,
                   required: true,
@@ -1001,6 +1070,7 @@ export default {
       this.inputParams.push(
         {
           name: "",
+          location: 'FORM_DATA',
           type: "STRING",
           isArray: false,
           required: true,
@@ -1017,6 +1087,7 @@ export default {
           {
             name: "apiPageNum",
             type: "LONG",
+            location: 'FORM_DATA',
             isArray: false,
             required: true,
             defaultValue: "1",
@@ -1030,6 +1101,7 @@ export default {
           {
             name: "apiPageSize",
             type: "LONG",
+            location: 'FORM_DATA',
             isArray: false,
             required: true,
             defaultValue: "10",
@@ -1099,6 +1171,8 @@ export default {
           contentType: this.createParam.contentType,
           path: this.createParam.path,
           open: this.createParam.open,
+          namingStrategy: this.createParam.namingStrategy,
+          formatMap: this.createParam.formatMap,
           flowStatus: this.createParam.flowStatus,
           flowGrade: this.createParam.flowGrade,
           flowCount: this.createParam.flowCount,
@@ -1137,6 +1211,8 @@ export default {
           contentType: this.createParam.contentType,
           path: this.createParam.path,
           open: this.createParam.open,
+          namingStrategy: this.createParam.namingStrategy,
+          formatMap: this.createParam.formatMap,
           flowStatus: this.createParam.flowStatus,
           flowGrade: this.createParam.flowGrade,
           flowCount: this.createParam.flowCount,
@@ -1222,6 +1298,8 @@ export default {
         data: JSON.stringify({
           dataSourceId: this.createParam.dataSourceId,
           engine: this.createParam.engine,
+          namingStrategy: this.createParam.namingStrategy,
+          formatMap: this.createParam.formatMap,
           contextList: sqls,
           paramValues: this.debugParams
         })
@@ -1246,6 +1324,8 @@ export default {
     this.loadGateway();
     this.loadKeywordHints();
     this.loadTreeData();
+    this.loadResponseNamingStrategy();
+    this.loadResponseTypeFormat();
   },
 }
 </script>

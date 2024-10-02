@@ -1,6 +1,7 @@
 package com.gitee.sqlrest.core.util;
 
 import cn.hutool.core.util.ClassLoaderUtil;
+import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.common.model.JarFileClassLoader;
 import com.gitee.sqlrest.common.model.SimpleDataSource;
 import com.gitee.sqlrest.persistence.entity.DataSourceEntity;
@@ -60,18 +61,14 @@ public final class DataSourceUtils {
     HikariDataSource ds = new HikariDataSource();
     ds.setPoolName("The_JDBC_Connection");
     ds.setJdbcUrl(properties.getUrl());
-    if (properties.getDriver().contains("oracle")) {
-      ds.setConnectionTestQuery("SELECT 'Hello' from DUAL");
+    if (ProductTypeEnum.ORACLE == properties.getType()) {
+      ds.setConnectionTestQuery(properties.getType().getTestSql());
       // https://blog.csdn.net/qq_20960159/article/details/78593936
       System.getProperties().setProperty("oracle.jdbc.J2EE13Compliant", "true");
       // Oracle在通过jdbc连接的时候需要添加一个参数来设置是否获取注释
       parameters.put("remarksReporting", "true");
-    } else if (properties.getDriver().contains("db2")) {
-      ds.setConnectionTestQuery("SELECT 1 FROM SYSIBM.SYSDUMMY1");
-    } else if (properties.getDriver().contains("mongodb")) {
-      ds.setConnectionTestQuery("use admin;");
-    } else if (!ds.getJdbcUrl().contains("jdbc:jest://")) {
-      ds.setConnectionTestQuery("SELECT 1");
+    } else if (StringUtils.isNotBlank(properties.getType().getTestSql())) {
+      ds.setConnectionTestQuery(properties.getType().getTestSql());
     }
     ds.setMaximumPoolSize(MAX_THREAD_COUNT);
     ds.setMinimumIdle(MAX_THREAD_COUNT);

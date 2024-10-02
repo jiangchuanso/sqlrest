@@ -6,12 +6,15 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
-import com.gitee.sqlrest.common.enums.OnOffEnum;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
+import com.gitee.sqlrest.persistence.handler.FormatMapHandler;
 import com.gitee.sqlrest.persistence.handler.ListParamHandler;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -63,6 +66,12 @@ public class ApiAssignmentEntity {
 
   @TableField(value = "engine", typeHandler = EnumTypeHandler.class)
   private ExecuteEngineEnum engine;
+
+  @TableField(value = "response_format", typeHandler = FormatMapHandler.class)
+  private Map<DataTypeFormatEnum, String> responseFormat;
+
+  @TableField(value = "naming_strategy", typeHandler = EnumTypeHandler.class)
+  private NamingStrategyEnum namingStrategy;
 
   @TableField(value = "flow_status")
   private Boolean flowStatus;

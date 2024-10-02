@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.core.util;
 
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.template.SqlMeta;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class SqlJdbcUtils {
 
-  public static Object execute(Connection connection, SqlMeta sqlMeta, int page, int size) throws SQLException {
+  public static Object execute(Connection connection, SqlMeta sqlMeta, NamingStrategyEnum strategy, int page, int size)
+      throws SQLException {
     List<Object> paramValues = sqlMeta.getParameter();
     PreparedStatement statement = connection.prepareStatement(sqlMeta.getSql());
     statement.setQueryTimeout(300);
@@ -25,6 +28,7 @@ public class SqlJdbcUtils {
       statement.setObject(i, paramValues.get(i - 1));
     }
     log.info("ExecuteSQL:{}\n{}", sqlMeta.getSql(), paramValues);
+    Function<String, String> converter = (null == strategy) ? Function.identity() : strategy.getFunction();
     if (statement.execute()) {
       int skipNumber = size * (page - 1);
       try (ResultSet rs = statement.getResultSet()) {
@@ -45,7 +49,7 @@ public class SqlJdbcUtils {
             }
           }
           if (skipNumber <= 0) {
-            list.add(row);
+            list.add(ConvertUtils.to(row, converter));
             if (list.size() >= size) {
               break;
             }

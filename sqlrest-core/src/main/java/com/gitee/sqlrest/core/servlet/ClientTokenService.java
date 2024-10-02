@@ -1,6 +1,6 @@
 package com.gitee.sqlrest.core.servlet;
 
-import com.gitee.sqlrest.cache.HazelcastCacheFactory;
+import com.gitee.sqlrest.cache.CacheFactory;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.AccessToken;
 import com.gitee.sqlrest.common.enums.DurationTimeEnum;
@@ -14,7 +14,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class ClientTokenService {
   @Resource
   private AppClientDao appClientDao;
   @Resource
-  private HazelcastCacheFactory hazelcastCacheFactory;
+  private CacheFactory cacheFactory;
 
   @EventListener(ApplicationReadyEvent.class)
   public void init() {
@@ -52,7 +51,7 @@ public class ClientTokenService {
             }
           }
 
-          Map tokenClientMap = hazelcastCacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
+          Map tokenClientMap = cacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
           tokenClientMap.put(appClient.getAccessToken(), clientToken);
         }
       }
@@ -73,7 +72,7 @@ public class ClientTokenService {
         .realName(appClient.getName())
         .appKey(clientId)
         .accessToken(token)
-        .createTimestamp(System.currentTimeMillis()/1000)
+        .createTimestamp(System.currentTimeMillis() / 1000)
         .expireSeconds(Constants.CLIENT_TOKEN_DURATION_SECONDS)
         .build();
     if (DurationTimeEnum.TIME_VALUE.equals(appClient.getExpireDuration())) {
@@ -93,7 +92,7 @@ public class ClientTokenService {
       appClientDao.updateTokenByAppKey(clientId, token);
     }
 
-    Map tokenClientMap = hazelcastCacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
+    Map tokenClientMap = cacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
     tokenClientMap.put(token, clientToken);
 
     return clientToken;
@@ -103,7 +102,7 @@ public class ClientTokenService {
     if (StringUtils.isBlank(tokenStr)) {
       return null;
     }
-    Map<String, AccessToken> tokenClientMap = hazelcastCacheFactory
+    Map<String, AccessToken> tokenClientMap = cacheFactory
         .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
     AccessToken clientToken = tokenClientMap.get(tokenStr);
     if (null == clientToken) {

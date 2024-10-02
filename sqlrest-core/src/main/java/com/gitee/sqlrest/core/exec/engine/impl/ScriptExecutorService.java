@@ -1,6 +1,7 @@
 package com.gitee.sqlrest.core.exec.engine.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.exec.annotation.Module;
@@ -86,9 +87,9 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
   }
 
   @Override
-  public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params) {
+  public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     EnvVarModule envModule = SpringUtil.getBean(EnvVarModule.class);
-    DbVarModule dbModule = new DbVarModule(dataSource, productType, params);
+    DbVarModule dbModule = new DbVarModule(dataSource, productType, params, strategy);
 
     List<Object> results = new ArrayList<>();
     for (ApiContextEntity entity : scripts) {

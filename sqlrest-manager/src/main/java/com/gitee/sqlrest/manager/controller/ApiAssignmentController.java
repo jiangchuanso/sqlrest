@@ -3,13 +3,19 @@ package com.gitee.sqlrest.manager.controller;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.core.dto.ApiAssignmentBaseResponse;
 import com.gitee.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import com.gitee.sqlrest.core.dto.ApiDebugExecuteRequest;
 import com.gitee.sqlrest.core.dto.AssignmentSearchRequest;
+import com.gitee.sqlrest.core.dto.NameValueBaseResponse;
+import com.gitee.sqlrest.core.dto.NameValueRemarkResponse;
 import com.gitee.sqlrest.core.service.ApiAssignmentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +42,37 @@ public class ApiAssignmentController {
   @GetMapping(value = "/completions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity completions() {
     return ResultEntity.success(apiAssignmentService.completions());
+  }
+
+  @ApiOperation(value = "响应属性命名策略")
+  @GetMapping(value = "/response-naming-strategy", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity responseNamingStrategy() {
+    return ResultEntity.success(
+        Arrays.stream(NamingStrategyEnum.values())
+            .map(
+                e ->
+                    NameValueBaseResponse.builder()
+                        .key(e)
+                        .value(e.getDescription())
+                        .build()
+            ).collect(Collectors.toList())
+    );
+  }
+
+  @ApiOperation(value = "响应数据类型格式")
+  @GetMapping(value = "/response-type-format", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity responseTypeFormat() {
+    return ResultEntity.success(
+        Arrays.stream(DataTypeFormatEnum.values())
+            .map(
+                e ->
+                    NameValueRemarkResponse.builder()
+                        .key(e)
+                        .value(e.getDefault())
+                        .remark(e.getClassName())
+                        .build()
+            ).collect(Collectors.toList())
+    );
   }
 
   @ApiOperation(value = "获取SQL中的入参列表")
@@ -72,8 +109,8 @@ public class ApiAssignmentController {
 
   @ApiOperation(value = "测试API执行")
   @PostMapping(value = "/test/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity test(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) {
-    return apiAssignmentService.testAssignment(id, request, response);
+  public void test(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) {
+    apiAssignmentService.testAssignment(id, request, response);
   }
 
   @ApiOperation(value = "删除API配置")

@@ -39,4 +39,11 @@ public enum DataTypeFormatEnum {
   public int getNumberScale() {
     return numberScale;
   }
+
+  public String getDefault() {
+    if (numberScale > 0) {
+      return String.valueOf(numberScale);
+    }
+    return defaultPattern;
+  }
 }

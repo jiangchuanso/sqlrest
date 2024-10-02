@@ -2,6 +2,7 @@ package com.gitee.sqlrest.core.dto;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -34,6 +35,12 @@ public class ApiAssignmentDetailResponse extends ApiAssignmentBaseResponse {
 
   @ApiModelProperty("SQL列表")
   private List<ApiContextEntity> sqlList;
+
+  @ApiModelProperty("接口出参数据类型转换格式")
+  private List<DataTypeFormatMapValue> formatMap;
+
+  @ApiModelProperty("接口出参属性命名策略")
+  private NamingStrategyEnum namingStrategy;
 
   @ApiModelProperty("是否开启流量控制")
   private Boolean flowStatus;

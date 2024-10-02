@@ -2,6 +2,7 @@ package com.gitee.sqlrest.core.exec.engine.impl;
 
 import cn.hutool.core.util.NumberUtil;
 import com.gitee.sqlrest.common.consts.Constants;
+import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.exec.engine.AbstractExecutorEngine;
 import com.gitee.sqlrest.core.util.SqlJdbcUtils;
@@ -25,7 +26,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
   }
 
   @Override
-  public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params) {
+  public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     List<Object> dataList = new ArrayList<>();
     Configuration cfg = new Configuration();
     try (Connection connection = this.dataSource.getConnection()) {
@@ -40,7 +41,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           int size = (null == params.get(Constants.PARAM_PAGE_SIZE))
               ? 10
               : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_SIZE).toString());
-          dataList.add(SqlJdbcUtils.execute(connection, sqlMeta, page, size));
+          dataList.add(SqlJdbcUtils.execute(connection, sqlMeta, strategy, page, size));
         }
         connection.commit();
         return dataList;

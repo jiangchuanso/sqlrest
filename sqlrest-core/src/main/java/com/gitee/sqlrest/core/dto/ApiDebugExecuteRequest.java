@@ -1,13 +1,11 @@
 package com.gitee.sqlrest.core.dto;
 
 import com.gitee.sqlrest.common.dto.ParamValue;
-import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
-import java.util.Map;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +21,7 @@ public class ApiDebugExecuteRequest {
   private ExecuteEngineEnum engine;
 
   @ApiModelProperty("数据类型转换格式")
-  private Map<DataTypeFormatEnum, String> formatMap;
+  private List<DataTypeFormatMapValue> formatMap;
 
   @ApiModelProperty("属性命名策略")
   private NamingStrategyEnum namingStrategy;
