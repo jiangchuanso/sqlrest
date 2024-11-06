@@ -8,6 +8,7 @@ import com.gitee.sqlrest.core.serdes.datetime.LocalDateValueSerializer;
 import com.gitee.sqlrest.core.serdes.datetime.TimeValueSerializer;
 import com.gitee.sqlrest.core.serdes.datetime.TimestampValueSerializer;
 import com.gitee.sqlrest.core.serdes.number.NumberValueSerializer;
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -29,6 +30,6 @@ public final class DateTimeSerDesFactory {
   }
 
   public static Map<DataTypeFormatEnum, Function<String, StdSerializer>> getAllSerDesMap() {
-    return new HashMap<>(DATE_TIME_SER_MAP);
+    return ImmutableMap.copyOf(DATE_TIME_SER_MAP);
   }
 }

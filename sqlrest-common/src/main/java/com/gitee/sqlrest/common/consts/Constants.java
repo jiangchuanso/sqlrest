@@ -18,6 +18,10 @@ public abstract class Constants {
 
   public static final int SC_TOO_MANY_REQUESTS = 429;
 
+  public static final String API_DOC_PATH_PREFIX = "/apidoc";
+
+  public static final String SYS_PARAM_KEY_API_DOC_OPEN = "apiDocOpen";
+
   public static final String getResourceName(String method, String path) {
     return String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method);
   }

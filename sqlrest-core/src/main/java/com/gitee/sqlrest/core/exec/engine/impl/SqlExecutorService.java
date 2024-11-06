@@ -41,7 +41,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           int size = (null == params.get(Constants.PARAM_PAGE_SIZE))
               ? 10
               : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_SIZE).toString());
-          dataList.add(SqlJdbcUtils.execute(connection, sqlMeta, strategy, page, size));
+          dataList.add(SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size));
         }
         connection.commit();
         return dataList;

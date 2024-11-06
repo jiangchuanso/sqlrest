@@ -27,7 +27,7 @@ public enum ProductTypeEnum {
               "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
   /**
    * MariaDB数据库类型
@@ -46,7 +46,7 @@ public enum ProductTypeEnum {
               "jdbc:mariadb://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
   /**
    * Oracle数据库类型
@@ -238,7 +238,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:hive2://172.17.2.12:10000/default")
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
 
   /**
@@ -297,7 +297,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:clickhouse://172.17.2.10:8123/default")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
 
   /**
@@ -317,7 +317,7 @@ public enum ProductTypeEnum {
               "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
 
   /**
@@ -337,7 +337,7 @@ public enum ProductTypeEnum {
               "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
 
   /**
@@ -357,7 +357,7 @@ public enum ProductTypeEnum {
               "jdbc:oceanbase://127.0.0.1:2881/test?pool=false&useUnicode=true&characterEncoding=utf-8&useSSL=false")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ?, ? ")
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .build()),
   ;
 

@@ -134,3 +134,12 @@ CREATE TABLE `SQLREST_ACCESS_RECORD`
     `create_time`     timestamp          not null default current_timestamp comment '创建时间',
     PRIMARY KEY (`id`)
 ) engine=InnoDB default charset=utf8 comment='客户端应用接口访问日志表';
+
+CREATE TABLE `SQLREST_SYSTEM_PARAM` (
+  `id`               bigint(20)        NOT NULL AUTO_INCREMENT  COMMENT '主键id',
+  `param_key`        varchar(128)      NOT NULL                 COMMENT '参数KEY',
+  `param_type`       varchar(64)       NOT NULL                 COMMENT '值类型',
+  `param_value`      varchar(255)      NOT NULL                 COMMENT '参数值',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `param_key` (`param_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='系统参数表';

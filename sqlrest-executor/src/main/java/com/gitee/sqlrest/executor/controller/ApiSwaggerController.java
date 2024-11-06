@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.executor.controller;
 
+import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.core.dto.SwaggerEntity;
 import com.gitee.sqlrest.core.servlet.ApiSwaggerService;
 import io.swagger.annotations.Api;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Api(tags = {"Swagger接口文档"})
 @RestController
-@RequestMapping(value = "/apidoc")
+@RequestMapping(value = Constants.API_DOC_PATH_PREFIX)
 public class ApiSwaggerController {
 
   @Resource

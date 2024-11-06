@@ -4,3 +4,6 @@ ADD COLUMN `naming_strategy`  varchar(16) NOT NULL DEFAULT 'NONE' comment 'ÂëΩÂê
 
 UPDATE SQLREST_API_ASSIGNMENT set response_format = '{"LOCAL_DATE":"yyyy-MM-dd","DATE":"yyyy-MM-dd","TIMESTAMP":"yyyy-MM-dd HH:mm","LOCAL_DATE_TIME":"yyyy-MM-dd HH:mm","TIME":"HH:mm:ss","BIG_DECIMAL":"6"}' where response_format is null;
 
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('apiDocOpen', 'BOOLEAN', 'true');
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('nameOfPageNum', 'STRING', 'apiPageNum');
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('nameOfPageSize', 'STRING', 'apiPageSize');
