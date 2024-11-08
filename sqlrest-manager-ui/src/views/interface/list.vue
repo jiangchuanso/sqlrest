@@ -7,7 +7,7 @@
             <el-select v-model="groupId"
                        size="mini"
                        :clearable="true"
-                       style="width:20%"
+                       style="width:15%"
                        placeholder="请选择分组">
               <el-option v-for="(item,index) in groupLists"
                          :key="index"
@@ -17,7 +17,7 @@
             <el-select v-model="moduleId"
                        size="mini"
                        :clearable="true"
-                       style="width:20%"
+                       style="width:15%"
                        placeholder="请选择模块">
               <el-option v-for="(item,index) in moduleLists"
                          :key="index"
@@ -52,17 +52,27 @@
                       size="mini"
                       v-model="keyword"
                       :clearable=true
-                      style="width:20%"
+                      style="width:15%"
                       @change="searchByKeyword">
             </el-input>
             <el-button type="primary"
                        size="mini"
                        icon="el-icon-search"
                        @click="handleSearch">搜索</el-button>
+            <el-switch v-model="apiDocStatus"
+                       active-color="#13ce66"
+                       inactive-color="#ff4949"
+                       :active-value=true
+                       :inactive-value=false
+                       active-text="文档开"
+                       inactive-text="文档关"
+                       @change="hanldeSwitchApiDoc()">
+            </el-switch>
           </div>
         </div>
         <el-button type="warning"
                    size="mini"
+                   :disabled="apiDocStatus==false"
                    icon="el-icon-document-add"
                    @click="openSwagger">文档</el-button>
         <el-button type="primary"
@@ -177,6 +187,7 @@ export default {
       moduleId: null,
       publish: null,
       open: null,
+      apiDocStatus: true,
       groupLists: [],
       moduleLists: [],
       tableData: [],
@@ -243,9 +254,35 @@ export default {
         }
       );
     },
+    loadApiDocOpenStatus () {
+      this.$http.get(
+        "/sqlrest/manager/api/v1/param/value/query?key=apiDocOpen"
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.apiDocStatus = res.data.data;
+        } else {
+          if (res.data.message) {
+            alert("操作失败:" + res.data.message);
+          }
+        }
+      });
+    },
     searchByKeyword: function () {
       this.currentPage = 1;
       this.loadData();
+    },
+    hanldeSwitchApiDoc: function () {
+      this.$http.post(
+        "/sqlrest/manager/api/v1/param/value/update?key=apiDocOpen&value=" + this.apiDocStatus
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.loadApiDocOpenStatus();
+        } else {
+          if (res.data.message) {
+            alert("操作失败:" + res.data.message);
+          }
+        }
+      });
     },
     boolFormatPublish (row) {
       if (row.status === true) {
@@ -383,6 +420,7 @@ export default {
   created () {
     this.loadGroupList();
     this.loadModuleList();
+    this.loadApiDocOpenStatus();
     this.loadData();
   },
 };

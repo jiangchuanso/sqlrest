@@ -183,7 +183,8 @@
               <el-option v-for="(item,index) in databaseType"
                          :key="index"
                          :label="item.type"
-                         :value="item.type"></el-option>
+                         :value="item.type">
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="驱动版本"
@@ -204,12 +205,10 @@
                         :required=true
                         prop="url"
                         style="width:85%">
-            <el-tooltip placement="top">
-              <i class="el-icon-question">样例:</i>
-              <div slot="content">
-                {{createform.sample}}
-              </div>
-            </el-tooltip>
+            <el-alert title="样例："
+                      type="warning"
+                      :description="createform.sample">
+            </el-alert>
             <el-input type="textarea"
                       :rows="6"
                       :spellcheck="false"

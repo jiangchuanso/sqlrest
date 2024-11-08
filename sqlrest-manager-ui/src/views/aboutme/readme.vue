@@ -49,23 +49,22 @@
                    name="second">
         <div class="content_tag">
           <el-tag type="success">JDBC</el-tag>
-          <el-tag type="danger">dbswitch</el-tag>
+          <el-tag type="danger">sqlrest</el-tag>
         </div>
         <div class="content_card">
           <el-card class="box-card">
             <div class="text item">
               <p>
-                sqlrest配置SQL生成接口的常规关系数据库，包括：
+                sqlrest配置支持的常规关系数据库有20+，包括：
               </p>
               <ul>
                 <li>甲骨文的Oracle
-                </li>
-                <li>微软的Microsoft SQLServer
                 </li>
                 <li>MySQL
                 </li>
                 <li>MariaDB
                 </li>
+                <li>微软的Microsoft SQLServer
                 <li>PostgreSQL
                 </li>
                 <li>Greenplum(需使用PostgreSQL类型)
@@ -86,11 +85,17 @@
                 </li>
                 <li>Apache Hive
                 </li>
+                <li>Apache Doris
+                </li>
                 <li>SQLite3
                 </li>
                 <li>OpenGuass
                 </li>
                 <li>ClickHouse
+                </li>
+                <li>StarRocks
+                </li>
+                <li>OceanBase
                 </li>
               </ul>
             </div>
@@ -101,8 +106,9 @@
                    name="third">
         <div class="content_tag">
           <el-tag type="success">SpringBoot</el-tag>
-          <el-tag type="danger">Mybatis</el-tag>
-          <el-tag type="success">Vue/ElementUI</el-tag>
+          <el-tag type="danger">SpringCloud</el-tag>
+          <el-tag type="success">Mybatis</el-tag>
+          <el-tag type="danger">Vue/ElementUI</el-tag>
         </div>
         <div class="content_card">
           <el-card class="box-card">
