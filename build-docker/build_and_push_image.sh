@@ -29,8 +29,21 @@ rm -f sqlrest-release.tar.gz && rm -rf sqlrest-release/lib/* && rm -rf sqlrest-r
 # clean project
 cd $PROJECT_ROOT_DIR && sh docker-maven-clean.sh && cd -
 
+# tag image
+docker tag inrgihc/sqlrest-manager:${SQLREST_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:${SQLREST_VERSION}
+docker tag inrgihc/sqlrest-executor:${SQLREST_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:${SQLREST_VERSION}
+docker tag inrgihc/sqlrest-gateway:${SQLREST_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:${SQLREST_VERSION}
+
 # login and push docker image
 docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:${SQLREST_VERSION}
 docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:${SQLREST_VERSION}
 docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:${SQLREST_VERSION}
 
+docker tag registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:${SQLREST_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:latest
+docker tag registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:${SQLREST_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:latest
+docker tag registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:${SQLREST_VERSION} registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:latest
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:latest
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:latest
+docker push registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:latest
+
+echo 'success'

@@ -127,7 +127,13 @@ sh ./docker-maven-build.sh
 
 (1) 当编译打包完成后，会在sqlrest/target/目录下生成sqlrest-relase-x.x.x.tar.gz的打包文件，将文件拷贝到已安装JRE的部署机器上解压即可。
 
-(2) 基于docker-compose提供linux联网环境下的**一键安装**，安装命令见 [发行版链接地址](https://gitee.com/inrgihc/sqlrest/releases)
+(2) 基于docker-compose提供linux联网环境下的一键安装，x86的CentOS系统下安装命令如下：
+
+```
+curl -k -sSL https://gitee.com/inrgihc/dbswitch/attach_files/1978630/download -o /tmp/sr.sh && bash /tmp/sr.sh && rm -f /tmp/sr.sh
+```
+
+文档详见: [build-docker/install/README.md](build-docker/install)
 
 (3) 物理机方式部署
 

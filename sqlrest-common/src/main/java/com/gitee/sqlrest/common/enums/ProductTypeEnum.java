@@ -65,7 +65,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:oracle:thin:@172.17.2.10:1521:ORCL")
           .sqlSchemaList("SELECT USERNAME FROM SYS.ALL_USERS")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("SELECT * FROM ( SELECT TMP.*, ROWNUM ROW_ID FROM ( %s ) ALIAS WHERE ROWNUM <= ? ) WHERE ROW_ID > ?")
+          .pageSql("SELECT * FROM ( SELECT ALIAS.*, ROWNUM ROW_ID FROM ( %s ) ALIAS WHERE ROWNUM <= ? ) WHERE ROW_ID > ?")
           .build()),
   /**
    * Microsoft SQL Server数据库类型(>=2005)
@@ -124,7 +124,7 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT SCHEMANAME FROM SYSCAT.SCHEMATA ")
           .adapter(database -> Pair.of(null, database))
           .pageSql(
-              "SELECT * FROM (SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( %s ) AS TMP_PAGE) TMP_PAGE WHERE ROW_ID BETWEEN ? AND ?")
+              "SELECT * FROM (SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( %s ) AS TMP_PAGE) ALIAS WHERE ROW_ID BETWEEN ? AND ?")
           .build()),
 
   /**
