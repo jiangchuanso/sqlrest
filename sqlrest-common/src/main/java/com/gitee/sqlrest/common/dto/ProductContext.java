@@ -28,4 +28,5 @@ public class ProductContext {
   private boolean hasCatalogAndSchema;
   private Function<String, Pair<String, String>> adapter;
   private String pageSql;
+  private ThreeConsumer<Integer, Integer, List<Object>> pageConsumer;
 }

@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class SqlJdbcUtils {
 
+  private static final int QUERY_TIMEOUT = 300;
+
   public static boolean isQuerySQL(String sql) {
     String upperSql = sql.toUpperCase().trim();
     return upperSql.startsWith("SELECT") || upperSql.startsWith("WITH");
@@ -29,23 +31,15 @@ public class SqlJdbcUtils {
   }
 
   public static Object execute(ProductTypeEnum productType, Connection connection, SqlMeta sqlMeta,
-      NamingStrategyEnum strategy, int page, int size)
-      throws SQLException {
+      NamingStrategyEnum strategy, int page, int size) throws SQLException {
     List<Object> paramValues = sqlMeta.getParameter();
     boolean isQuerySql = isQuerySQL(sqlMeta.getSql());
     String sql = isQuerySql ? productType.getPageSql(sqlMeta.getSql()) : sqlMeta.getSql();
     PreparedStatement statement = connection.prepareStatement(sql);
-    statement.setQueryTimeout(300);
-    statement.setFetchSize(isMySqlConnection(connection) ? Integer.MIN_VALUE : 100);
+    statement.setQueryTimeout(QUERY_TIMEOUT);
+    statement.setFetchSize(isMySqlConnection(connection) ? Integer.MIN_VALUE : size);
     if (isQuerySql) {
-      if (page <= 0) {
-        page = 1;
-      }
-      if (size <= 0) {
-        size = 10;
-      }
-      paramValues.add(size);
-      paramValues.add((page - 1) * size);
+      productType.getPageConsumer().accept(page, size, paramValues);
     }
     for (int i = 1; i <= paramValues.size(); i++) {
       statement.setObject(i, paramValues.get(i - 1));

@@ -1,6 +1,7 @@
 package com.gitee.sqlrest.common.enums;
 
 import com.gitee.sqlrest.common.dto.ProductContext;
+import com.gitee.sqlrest.common.dto.ThreeConsumer;
 import java.util.Arrays;
 import java.util.Collections;
 import lombok.Getter;
@@ -28,7 +29,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
   /**
    * MariaDB数据库类型
    */
@@ -47,7 +53,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
   /**
    * Oracle数据库类型
    */
@@ -65,10 +76,16 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:oracle:thin:@172.17.2.10:1521:ORCL")
           .sqlSchemaList("SELECT USERNAME FROM SYS.ALL_USERS")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("SELECT * FROM ( SELECT ALIAS.*, ROWNUM ROW_ID FROM ( %s ) ALIAS WHERE ROWNUM <= ? ) WHERE ROW_ID > ?")
-          .build()),
+          .pageSql(
+              "SELECT * FROM ( SELECT ALIAS.*, ROWNUM ROW_ID FROM ( %s ) ALIAS WHERE ROWNUM <= ? ) WHERE ROW_ID > ?")
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(page * size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
   /**
-   * Microsoft SQL Server数据库类型(>=2005)
+   * Microsoft SQL Server数据库类型(>=2012)
    */
   SQLSERVER(
       ProductContext.builder()
@@ -85,7 +102,12 @@ public enum ProductTypeEnum {
           .hasCatalogAndSchema(true)
           .adapter(database -> Pair.of(null, database))
           .pageSql("SELECT * FROM (%s) ALIAS OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add((page - 1) * size);
+                parameters.add(size);
+              }
+          ).build()),
 
   /**
    * PostgreSQL数据库类型
@@ -104,7 +126,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * DB2数据库类型
@@ -125,7 +152,12 @@ public enum ProductTypeEnum {
           .adapter(database -> Pair.of(null, database))
           .pageSql(
               "SELECT * FROM (SELECT TMP_PAGE.*,ROWNUMBER() OVER() AS ROW_ID FROM ( %s ) AS TMP_PAGE) ALIAS WHERE ROW_ID BETWEEN ? AND ?")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add((page - 1) * size);
+                parameters.add(page * size);
+              }
+          ).build()),
 
   /**
    * [国产] 达梦(DM)数据库类型
@@ -144,7 +176,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT DISTINCT object_name FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'SCH'")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * [国产] 金仓(Kingbase)数据库类型
@@ -163,7 +200,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * [国产] 神通(Oscar)数据库类型
@@ -182,7 +224,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * [国产] 南大通用(GBase8A)数据库类型
@@ -201,7 +248,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * Sybase 数据库类型
@@ -220,7 +272,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("SELECT * FROM (%s) ALIAS OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add((page - 1) * size);
+                parameters.add(size);
+              }
+          ).build()),
 
   /**
    * Hive 数据库类型
@@ -239,7 +296,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * Sqlite v3数据库类型
@@ -260,7 +322,12 @@ public enum ProductTypeEnum {
           .retSchemaList(Collections.singletonList("sqlite_master"))
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * OpenGauss数据库类型
@@ -279,7 +346,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? offset ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * ClickHouse数据库类型
@@ -298,7 +370,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * Doris数据库类型
@@ -318,7 +395,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
    * StarRocks数据库类型
@@ -338,10 +420,15 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
 
   /**
-   * OceanBase数据库类型
+   * OceanBase数据库类型(MySQL方言)
    */
   OCEANBASE(
       ProductContext.builder()
@@ -358,7 +445,12 @@ public enum ProductTypeEnum {
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
-          .build()),
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
   ;
 
   private ProductContext context;
@@ -397,6 +489,10 @@ public enum ProductTypeEnum {
 
   public String getSql() {
     return this.context.getTestSql();
+  }
+
+  public ThreeConsumer getPageConsumer() {
+    return this.context.getPageConsumer();
   }
 
   public boolean hasDatabaseName() {

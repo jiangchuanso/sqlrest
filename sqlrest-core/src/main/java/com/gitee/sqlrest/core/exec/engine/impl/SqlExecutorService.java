@@ -1,10 +1,9 @@
 package com.gitee.sqlrest.core.exec.engine.impl;
 
-import cn.hutool.core.util.NumberUtil;
-import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.exec.engine.AbstractExecutorEngine;
+import com.gitee.sqlrest.core.util.PageSizeUtils;
 import com.gitee.sqlrest.core.util.SqlJdbcUtils;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
 import com.gitee.sqlrest.template.Configuration;
@@ -35,12 +34,8 @@ public class SqlExecutorService extends AbstractExecutorEngine {
         for (ApiContextEntity sql : scripts) {
           SqlTemplate template = cfg.getTemplate(sql.getSqlText());
           SqlMeta sqlMeta = template.process(params);
-          int page = (null == params.get(Constants.PARAM_PAGE_NUMBER))
-              ? 1
-              : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_NUMBER).toString());
-          int size = (null == params.get(Constants.PARAM_PAGE_SIZE))
-              ? 10
-              : NumberUtil.parseInt(params.get(Constants.PARAM_PAGE_SIZE).toString());
+          int page = PageSizeUtils.getPageFromParams(params);
+          int size = PageSizeUtils.getSizeFromParams(params);
           dataList.add(SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size));
         }
         connection.commit();
