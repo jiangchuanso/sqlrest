@@ -106,12 +106,12 @@ public class DbVarModule {
   public List<Map<String, Object>> page(@Comment("sqlOrXml") String sqlOrXml)
       throws SQLException {
     log.info("Enter page() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
-    SqlMeta sqlMeta = template.process(params);
-    String pageSql = productType.getPageSql(sqlMeta.getSql());
-    List<Object> parameters = sqlMeta.getParameter();
     int page = PageSizeUtils.getPageFromParams(params);
     int size = PageSizeUtils.getSizeFromParams(params);
+    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    SqlMeta sqlMeta = template.process(params);
+    String pageSql = productType.getPageSql(sqlMeta.getSql(), page, size);
+    List<Object> parameters = sqlMeta.getParameter();
     this.productType.getPageConsumer().accept(page, size, parameters);
     return build(jdbcTemplate.queryForList(pageSql, parameters.toArray()));
   }

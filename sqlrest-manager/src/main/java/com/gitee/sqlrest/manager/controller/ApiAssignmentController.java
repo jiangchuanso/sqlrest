@@ -14,6 +14,7 @@ import com.gitee.sqlrest.core.dto.NameValueRemarkResponse;
 import com.gitee.sqlrest.core.service.ApiAssignmentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -83,7 +84,7 @@ public class ApiAssignmentController {
 
   @ApiOperation(value = "调试API配置")
   @PostMapping(value = "/debug", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void debug(@RequestBody ApiDebugExecuteRequest request, HttpServletResponse response) {
+  public void debug(@RequestBody ApiDebugExecuteRequest request, HttpServletResponse response) throws IOException {
     apiAssignmentService.debugExecute(request, response);
   }
 

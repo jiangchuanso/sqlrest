@@ -19,15 +19,38 @@
     </dependencySet>
   </dependencySets>
 
-  <fileSets>
 
-    <!-- 打包assembly中的bin目录到 打包目录/sbin 下 -->
-    <fileSet>
-      <directory>src/main/assembly/bin</directory>
+  <!-- 打包assembly中的bin目录到 打包目录/bin 下 -->
+  <files>
+
+    <file>
+      <source>src/main/assembly/bin/sqlrestctl.sh</source>
       <outputDirectory>bin</outputDirectory>
-      <!-- lineEnding>unix</lineEnding -->
+      <lineEnding>unix</lineEnding>
       <fileMode>0755</fileMode>
-    </fileSet>
+    </file>
+    <file>
+      <source>src/main/assembly/bin/manager_startup.cmd</source>
+      <outputDirectory>bin</outputDirectory>
+      <lineEnding>dos</lineEnding>
+      <fileMode>0755</fileMode>
+    </file>
+    <file>
+      <source>src/main/assembly/bin/gateway_startup.cmd</source>
+      <outputDirectory>bin</outputDirectory>
+      <lineEnding>dos</lineEnding>
+      <fileMode>0755</fileMode>
+    </file>
+    <file>
+      <source>src/main/assembly/bin/executor_startup.cmd</source>
+      <outputDirectory>bin</outputDirectory>
+      <lineEnding>dos</lineEnding>
+      <fileMode>0755</fileMode>
+    </file>
+
+  </files>
+
+  <fileSets>
 
     <!-- 创建logs目录文件夹 -->
     <fileSet>

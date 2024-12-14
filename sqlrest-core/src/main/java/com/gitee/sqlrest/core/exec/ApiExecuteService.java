@@ -20,7 +20,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,10 +57,6 @@ public class ApiExecuteService {
       Object result = ApiExecutorEngineFactory
           .getExecutor(config.getEngine(), dataSource, dsEntity.getType())
           .execute(config.getContextList(), paramValues, config.getNamingStrategy());
-      if (result instanceof Collection) {
-        Collection r = (Collection) result;
-        return ResultEntity.success(config.getContextList().size() == 1 ? r.stream().findFirst().get() : r);
-      }
       return ResultEntity.success(result);
     } catch (Throwable t) {
       return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(t));

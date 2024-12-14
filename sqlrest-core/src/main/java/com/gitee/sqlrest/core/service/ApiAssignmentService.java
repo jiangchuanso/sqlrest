@@ -119,7 +119,7 @@ public class ApiAssignmentService {
         .collect(Collectors.toList());
   }
 
-  public void debugExecute(ApiDebugExecuteRequest request, HttpServletResponse response) {
+  public void debugExecute(ApiDebugExecuteRequest request, HttpServletResponse response) throws IOException {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(request.getDataSourceId());
     if (null == dataSourceEntity) {
       String message = "datasource[id=" + request.getDataSourceId() + " not exist!";
@@ -163,25 +163,16 @@ public class ApiAssignmentService {
       Object result = ApiExecutorEngineFactory
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
           .execute(scripts, params, request.getNamingStrategy());
-      if (result instanceof Collection) {
-        Collection r = (Collection) result;
-        result = scripts.size() == 1 ? r.stream().findFirst().get() : r;
-      }
       entity = ResultEntity.success(result);
-      response.setStatus(HttpServletResponse.SC_OK);
     } catch (Exception e) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       entity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(e));
     }
 
-    try {
-      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-      response.setCharacterEncoding(Charsets.UTF_8.name());
-      response.getWriter().append(JacksonUtils.toJsonStr(entity, request.getFormatMap().stream()
-          .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a))));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    response.setStatus(HttpServletResponse.SC_OK);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding(Charsets.UTF_8.name());
+    response.getWriter().append(JacksonUtils.toJsonStr(entity, request.getFormatMap().stream()
+        .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a))));
   }
 
   public Long createAssignment(ApiAssignmentSaveRequest request) {

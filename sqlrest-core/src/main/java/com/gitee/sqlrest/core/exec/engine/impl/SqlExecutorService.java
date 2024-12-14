@@ -39,7 +39,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           dataList.add(SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size));
         }
         connection.commit();
-        return dataList;
+        return scripts.size() > 1 ? dataList : dataList.stream().findFirst().orElse(null);
       } catch (Exception e) {
         try {
           connection.rollback();

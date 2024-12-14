@@ -34,7 +34,7 @@ public class SqlJdbcUtils {
       NamingStrategyEnum strategy, int page, int size) throws SQLException {
     List<Object> paramValues = sqlMeta.getParameter();
     boolean isQuerySql = isQuerySQL(sqlMeta.getSql());
-    String sql = isQuerySql ? productType.getPageSql(sqlMeta.getSql()) : sqlMeta.getSql();
+    String sql = isQuerySql ? productType.getPageSql(sqlMeta.getSql(), page, size) : sqlMeta.getSql();
     PreparedStatement statement = connection.prepareStatement(sql);
     statement.setQueryTimeout(QUERY_TIMEOUT);
     statement.setFetchSize(isMySqlConnection(connection) ? Integer.MIN_VALUE : size);

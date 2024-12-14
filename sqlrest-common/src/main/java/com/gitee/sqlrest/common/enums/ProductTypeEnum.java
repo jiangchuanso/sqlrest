@@ -85,7 +85,7 @@ public enum ProductTypeEnum {
               }
           ).build()),
   /**
-   * Microsoft SQL Server数据库类型(>=2012)
+   * Microsoft SQL Server数据库类型(>=2005)
    */
   SQLSERVER(
       ProductContext.builder()
@@ -101,11 +101,11 @@ public enum ProductTypeEnum {
           .sqlSchemaList("select schema_name from INFORMATION_SCHEMA.SCHEMATA")
           .hasCatalogAndSchema(true)
           .adapter(database -> Pair.of(null, database))
-          .pageSql("SELECT * FROM (%s) ALIAS OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
+          .pageSql(
+              "SELECT TOP <LIMIT> * FROM ( SELECT ROW_NUMBER() OVER(ORDER BY (SELECT 0)) AS ALIAS_ROW_NUM,PAGE_ALAS1.* FROM (%s) PAGE_ALAS1 ) PAGE_ALAS2 WHERE ALIAS_ROW_NUM > ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add((page - 1) * size);
-                parameters.add(size);
               }
           ).build()),
 
@@ -516,8 +516,9 @@ public enum ProductTypeEnum {
     return String.format("%s%s%s.%s%s%s", quote, schema, quote, quote, table, quote);
   }
 
-  public String getPageSql(String sql) {
-    return String.format(context.getPageSql(), sql);
+  public String getPageSql(String sql, int page, int size) {
+    String pageSql = String.format(context.getPageSql(), sql);
+    return pageSql.replace("<LIMIT>", String.valueOf(size));
   }
 
   /**
