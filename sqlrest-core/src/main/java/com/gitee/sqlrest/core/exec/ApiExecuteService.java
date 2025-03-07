@@ -19,6 +19,7 @@ import com.google.common.base.Charsets;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,11 +27,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,11 @@ public class ApiExecuteService {
         log.warn("Error for handle api[id={}],information:{}", config.getId(), message);
         return ResultEntity.failed(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, message);
       }
-      Map<String, Object> paramValues = obtainParameterValues(request, config.getParams());
+      List<ItemParam> invalidArgs = new ArrayList<>();
+      Map<String, Object> paramValues = obtainParameterValues(request, config.getParams(), invalidArgs);
+      if (invalidArgs.size() > 0) {
+        return ResultEntity.failed(ResponseErrorCode.ERROR_INVALID_ARGUMENT, convertInvalidArgs(invalidArgs));
+      }
       File driverPath = driverLoadService.getVersionDriverFile(dsEntity.getType(), dsEntity.getVersion());
       HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dsEntity, driverPath.getAbsolutePath());
       Object result = ApiExecutorEngineFactory
@@ -63,37 +68,79 @@ public class ApiExecuteService {
     }
   }
 
-  private Map<String, Object> obtainParameterValues(HttpServletRequest request, List<ItemParam> params) {
+  private String convertInvalidArgs(List<ItemParam> invalidArgs) {
+    return "无效参数," + invalidArgs.stream().map(
+        p -> p.getIsArray() ? "数组" : "" + "参数'" + p.getName() + "'位于" + p.getLocation().getIn()
+    ).collect(Collectors.joining(";"));
+  }
+
+  private Map<String, Object> obtainParameterValues(HttpServletRequest request, List<ItemParam> params,
+      List<ItemParam> invalidArgs) {
+    if (CollectionUtils.isEmpty(params)) {
+      return Collections.emptyMap();
+    }
+
     Map<String, Object> map = new HashMap<>();
-    if (null != params && params.size() > 0) {
-      Map<String, Object> bodyMap = getRequestBodyMap(request);
-      for (ItemParam param : params) {
-        String name = param.getName();
-        ParamTypeEnum type = param.getType();
-        ParamLocationEnum location = param.getLocation();
-        String defaultValue = param.getDefaultValue();
-        if (location == ParamLocationEnum.REQUEST_HEADER) {
-          map.put(name, request.getHeader(name));
-        } else if (location == ParamLocationEnum.REQUEST_BODY) {
-          map.put(name, bodyMap.get(name));
+    Map<String, Object> bodyMap = getRequestBodyMap(request);
+    for (ItemParam param : params) {
+      String name = param.getName();
+      ParamTypeEnum type = param.getType();
+      ParamLocationEnum location = param.getLocation();
+      Boolean isArray = param.getIsArray();
+      Boolean required = param.getRequired();
+      String defaultValue = param.getDefaultValue();
+      if (location == ParamLocationEnum.REQUEST_HEADER) {
+        List<Object> hv = Collections.list(request.getHeaders(name))
+            .stream().map(v -> type.getConverter().apply(v))
+            .collect(Collectors.toList());
+        if (isArray) {
+          if (CollectionUtils.isEmpty(hv)) {
+            invalidArgs.add(param);
+          } else {
+            map.put(name, hv);
+          }
         } else {
-          boolean isArray = Optional.ofNullable(param.getIsArray()).orElse(false);
-          Boolean required = Optional.ofNullable(param.getRequired()).orElse(false);
-          if (isArray) {
-            String[] values = request.getParameterValues(name);
-            if (null != values && values.length > 0) {
-              List list = Arrays.asList(values).stream()
-                  .map(v -> type.getConverter().apply(v))
-                  .collect(Collectors.toList());
-              map.put(name, list);
+          if (CollectionUtils.isEmpty(hv)) {
+            if (required) {
+              invalidArgs.add(param);
             } else {
-              map.put(name, null);
+              map.put(name, type.getConverter().apply(defaultValue));
             }
           } else {
-            String value = request.getParameter(name);
-            if (!required && null == value) {
-              value = defaultValue;
+            map.put(name, hv.get(0));
+          }
+        }
+      } else if (location == ParamLocationEnum.REQUEST_BODY) {
+        Object paramValue = bodyMap.get(name);
+        if (null == paramValue) {
+          if (required) {
+            invalidArgs.add(param);
+          } else {
+            map.put(name, type.getConverter().apply(defaultValue));
+          }
+        } else {
+          map.put(name, paramValue);
+        }
+      } else {
+        if (isArray) {
+          String[] values = request.getParameterValues(name);
+          if (null != values && values.length > 0) {
+            List list = Arrays.asList(values).stream()
+                .map(v -> type.getConverter().apply(v))
+                .collect(Collectors.toList());
+            map.put(name, list);
+          } else {
+            invalidArgs.add(param);
+          }
+        } else {
+          String value = request.getParameter(name);
+          if (null == value) {
+            if (required) {
+              invalidArgs.add(param);
+            } else {
+              map.put(name, type.getConverter().apply(defaultValue));
             }
+          } else {
             map.put(name, type.getConverter().apply(value));
           }
         }
@@ -103,6 +150,10 @@ public class ApiExecuteService {
   }
 
   public Map<String, Object> getRequestBodyMap(HttpServletRequest request) {
+    if (null == request.getContentType() || !request.getContentType().contains("application/json")) {
+      return Collections.emptyMap();
+    }
+
     ObjectMapper mapper = new ObjectMapper();
     try {
       String jsonString = IoUtil.read(request.getInputStream(), Charsets.UTF_8);

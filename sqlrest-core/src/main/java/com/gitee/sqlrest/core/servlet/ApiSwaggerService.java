@@ -2,136 +2,306 @@ package com.gitee.sqlrest.core.servlet;
 
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.ItemParam;
-import com.gitee.sqlrest.common.dto.ResultEntity;
-import com.gitee.sqlrest.common.exception.ResponseErrorCode;
-import com.gitee.sqlrest.core.dto.SwaggerEntity;
+import com.gitee.sqlrest.common.enums.HttpMethodEnum;
+import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.ApiModuleDao;
+import com.gitee.sqlrest.persistence.dao.SystemParamDao;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
-import com.google.common.collect.Lists;
-import com.hazelcast.com.google.common.collect.ImmutableMap;
+import com.gitee.sqlrest.persistence.entity.SystemParamEntity;
+import com.google.common.collect.ImmutableMap;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.NumberSchema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityScheme.Type;
+import io.swagger.v3.oas.models.tags.Tag;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.MediaType;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 /**
- * https://juejin.cn/post/6996227860058865700
+ * 文档格式说明：https://openapi.apifox.cn/
+ * <p>
+ * SwaggerEditor: https://editor.swagger.io/
+ * </p>
  */
+@Slf4j
 @Service
 public class ApiSwaggerService {
 
   private static final String INFO_TITLE = "SQLREST在线接口文档";
   private static final String INFO_VERSION = "1.0";
+  private static final String INFO_DESCRIPTION = "基于SQLREST配置生成的Swagger在线接口文档";
   private static final String TOKEN_MODEL = "TOKEN认证授权";
-  private static final String BASE_PATH = "/";
-  private static final String VAR_NAME_QUERY = "query";
-  private static final String BODY_EMPTY = "{}";
+  private static final String APPLICATION_JSON = "application/json";
+  private static final String AUTHORIZATION = "Authorization";
 
   @Resource
   private ApiAssignmentDao apiAssignmentDao;
   @Resource
   private ApiModuleDao apiModuleDao;
+  @Resource
+  private SystemParamDao systemParamDao;
 
   private String getApiUrlPrefix() {
     return String.format("/%s/", Constants.API_PATH_PREFIX);
   }
 
-  public SwaggerEntity getSwaggerJson(HttpServletRequest request) {
-    SwaggerEntity.Info info = new SwaggerEntity.Info(INFO_TITLE, INFO_VERSION, INFO_TITLE, null, null);
-    Map<String, Object> securityDefinitionMap = new HashMap<>();
-    Map<String, Object> securityMap = new HashMap<>();
+  private Triple<String, String, String> getOpenApiInfo() {
+    SystemParamEntity title = systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_TITLE);
+    SystemParamEntity version = systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_VERSION);
+    SystemParamEntity description = systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_DESCRIPTION);
+    return Triple.of(
+        Optional.ofNullable(title).map(SystemParamEntity::getParamValue).orElse(INFO_TITLE),
+        Optional.ofNullable(version).map(SystemParamEntity::getParamValue).orElse(INFO_VERSION),
+        Optional.ofNullable(description).map(SystemParamEntity::getParamValue).orElse(INFO_DESCRIPTION)
+    );
+  }
 
-    // Bearer Token
-    securityDefinitionMap.put(SwaggerEntity.BearerAuth.KEY_NAME, new SwaggerEntity.BearerAuth());
-    securityMap.put(SwaggerEntity.BearerAuth.KEY_NAME, new String[]{});
+  public OpenAPI getSwaggerJson(HttpServletRequest request) {
+    Triple<String, String, String> entity = getOpenApiInfo();
+    Info info = new Info().title(entity.getLeft())
+        .version(entity.getMiddle())
+        .description(entity.getRight());
 
-    SwaggerEntity swaggerEntity = new SwaggerEntity();
-    swaggerEntity.setInfo(info);
-    swaggerEntity.setSchemes(Lists.newArrayList("http"));
-    swaggerEntity.setBasePath(BASE_PATH);
-    swaggerEntity.addSecurityDefinitions(securityDefinitionMap);
-    swaggerEntity.addSecurity(securityMap);
+    OpenAPI openAPI = new OpenAPI();
+    openAPI.info(info);
 
+    // 模块
     List<ApiModuleEntity> moduleEntities = apiModuleDao.listAll();
+    for (ApiModuleEntity module : moduleEntities) {
+      openAPI.addTagsItem(new Tag().name(module.getName()));
+    }
+
+    //token获取接口
+    openAPI.path("/token/generate", getTokenGeneratePathItem());
+
+    // 自定义的接口
     Map<Long, ApiModuleEntity> moduleIdMap = moduleEntities.stream()
         .collect(Collectors.toMap(ApiModuleEntity::getId,
             Function.identity(), (a, b) -> a));
-
-    moduleEntities.forEach(module -> swaggerEntity.addTag(module.getName(), module.getName()));
-    swaggerEntity.addTag(TOKEN_MODEL, TOKEN_MODEL);
-
     String urlPrefix = getApiUrlPrefix();
-
     for (ApiAssignmentEntity assignment : apiAssignmentDao.listAll()) {
       if (!assignment.getStatus()) {
         // 过滤掉未发布的
         continue;
       }
       String path = urlPrefix + assignment.getPath();
-      String method = assignment.getMethod().name();
-      SwaggerEntity.Path pathInfo = new SwaggerEntity.Path(String.valueOf(assignment.getId()));
-      pathInfo.addTag(moduleIdMap.get(assignment.getModuleId()).getName());
-      pathInfo.addProduce(assignment.getContentType());
-      pathInfo.setSummary(assignment.getName());
-      pathInfo.setDescription(StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
-      pathInfo.addProduce(MediaType.APPLICATION_JSON_VALUE);
+      HttpMethodEnum method = assignment.getMethod();
+
+      PathItem pathItem = new PathItem();
+      pathItem.setSummary(assignment.getName());
+      pathItem.setDescription(StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
+
+      Operation operation = new Operation();
+      operation.setOperationId(String.valueOf(assignment.getId()));
+      operation.addTagsItem(moduleIdMap.get(assignment.getModuleId()).getName());
 
       // 入参
       List<ItemParam> params = assignment.getParams();
       if (!CollectionUtils.isEmpty(params)) {
-        for (ItemParam param : params) {
-          boolean required = param.getRequired();
-          String name = param.getName();
-          String type = param.getType().getJsType();
-          String description = param.getRemark();
-          Map<String, Object> mapParams = SwaggerEntity
-              .createParameter(required, name, VAR_NAME_QUERY, type, description, param.getType().getExample());
-          pathInfo.addParameter(mapParams);
+        List<ItemParam> paramList = params.stream()
+            .filter(i -> i.getLocation().isParameter())
+            .collect(Collectors.toList());
+        for (ItemParam param : paramList) {
+          ParamTypeEnum type = param.getType();
+
+          Parameter parameter =
+              param.getLocation().isHeader()
+                  ? new HeaderParameter()
+                  : new QueryParameter();
+          parameter.setName(param.getName());
+
+          Schema schema = new Schema().type(type.getJsType());
+          if (param.getIsArray()) {
+            ArraySchema arraySchema = new ArraySchema().items(schema);
+            parameter.setSchema(arraySchema);
+          } else {
+            parameter.setSchema(schema);
+          }
+          parameter.setDescription(param.getRemark());
+          parameter.setRequired(param.getRequired());
+          parameter.setDeprecated(false);
+          parameter.allowEmptyValue(true);
+          parameter.setExample(param.getType().getExample());
+
+          operation.addParametersItem(parameter);
+        }
+
+        List<ItemParam> requestBodyList = params.stream()
+            .filter(i -> i.getLocation().isRequestBody())
+            .collect(Collectors.toList());
+        if (requestBodyList.size() > 0) {
+          RequestBody requestBody = new RequestBody();
+          requestBody.setRequired(true);
+          requestBody.setDescription(assignment.getName());
+
+          Schema objectSchema = new ObjectSchema().name("type");
+          for (ItemParam param : requestBodyList) {
+            ParamTypeEnum type = param.getType();
+
+            Schema schema = new Schema().type(type.getJsType());
+            if (param.getIsArray()) {
+              ArraySchema arraySchema = new ArraySchema().items(schema);
+              objectSchema.addProperties(param.getName(), arraySchema);
+            } else {
+              objectSchema.addProperties(param.getName(), schema);
+            }
+          }
+
+          Content content = new Content();
+          content.addMediaType(
+              assignment.getContentType(),
+              new MediaType().schema(objectSchema)
+          );
+          requestBody.setContent(content);
+          operation.setRequestBody(requestBody);
         }
       }
 
-      // 响应
-      String unique = assignment.getId().toString();
-      pathInfo.addResponse("200", "OK", ImmutableMap.of("$ref", "#/definitions/" + unique));
-      pathInfo.addResponse("401", ResultEntity.failed(ResponseErrorCode.ERROR_TOKEN_EXPIRED));
-      pathInfo.addResponse("403", ResultEntity.failed(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN));
-      pathInfo.addResponse("404", ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS));
-      swaggerEntity.addDefinitions(unique,
-          ImmutableMap.of("type", "object",
-              "properties", Collections.emptyMap(),
-              "title", unique + "|" + assignment.getName())
-      );
+      if (HttpMethodEnum.GET == method) {
+        pathItem.setGet(operation);
+      } else if (HttpMethodEnum.HEAD == method) {
+        pathItem.setHead(operation);
+      } else if (HttpMethodEnum.PUT == method) {
+        pathItem.setPut(operation);
+      } else if (HttpMethodEnum.POST == method) {
+        pathItem.setPost(operation);
+      } else if (HttpMethodEnum.DELETE == method) {
+        pathItem.setDelete(operation);
+      } else {
+        continue;
+      }
 
-      swaggerEntity.addPath(path, method, pathInfo);
+      // 响应
+      operation.setResponses(getApiResponses());
+      operation.security(Collections.singletonList(new SecurityRequirement().addList(AUTHORIZATION)));
+
+      openAPI.path(path, pathItem);
     }
 
-    //token获取接口
-    String path = "/token/generate";
-    String method = "POST";
-    SwaggerEntity.Path pathInfo = new SwaggerEntity.Path("0");
-    pathInfo.addTag(TOKEN_MODEL);
-    pathInfo.addProduce(MediaType.APPLICATION_JSON_VALUE);
-    pathInfo.setSummary(TOKEN_MODEL);
-    pathInfo.setDescription(TOKEN_MODEL);
-    Map<String, Object> mapParamsUser = SwaggerEntity
-        .createParameter(true, "clientId", VAR_NAME_QUERY, "string", "账号", null);
-    pathInfo.addParameter(mapParamsUser);
-    Map<String, Object> mapParamsPwd = SwaggerEntity
-        .createParameter(true, "secret", VAR_NAME_QUERY, "string", "密码", null);
-    pathInfo.addParameter(mapParamsPwd);
-    pathInfo.addResponse("200", BODY_EMPTY);
-    swaggerEntity.addPath(path, method, pathInfo);
+    Map<String, SecurityScheme> securitySchemes = ImmutableMap.of(
+        AUTHORIZATION,
+        new SecurityScheme()
+            .type(Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT")
+    );
+    openAPI.setComponents(new Components().securitySchemes(securitySchemes));
 
-    return swaggerEntity;
+    return openAPI;
+  }
+
+  private PathItem getTokenGeneratePathItem() {
+    PathItem pathItem = new PathItem();
+    pathItem.setSummary(TOKEN_MODEL);
+    pathItem.setDescription(TOKEN_MODEL);
+
+    RequestBody requestBody = new RequestBody();
+    requestBody.setRequired(true);
+    requestBody.setDescription(TOKEN_MODEL);
+    Content content = new Content();
+    content.addMediaType(APPLICATION_JSON,
+        new MediaType().schema(
+            new ObjectSchema().name("type")
+                .addProperties("clientId", new StringSchema())
+                .addProperties("secret", new StringSchema())
+        )
+    );
+    requestBody.setContent(content);
+
+    Operation operation = new Operation();
+    operation.setOperationId("0");
+    operation.addTagsItem(TOKEN_MODEL);
+    operation.setRequestBody(requestBody);
+
+    ApiResponses apiResponses = new ApiResponses();
+    apiResponses.addApiResponse("200",
+        new ApiResponse().description("OK")
+            .content(
+                new Content().addMediaType(
+                    "application/json",
+                    new MediaType().schema(
+                        new Schema().name("type")
+                            .type("object")
+                            .addProperties("accessToken", new StringSchema())
+                            .addProperties("expireSeconds", new NumberSchema())
+                    )
+                )
+            )
+    );
+    apiResponses.addApiResponse("201",
+        new ApiResponse().description("Created")
+    );
+    apiResponses.addApiResponse("401",
+        new ApiResponse().description("Unauthorized")
+    );
+    apiResponses.addApiResponse("403",
+        new ApiResponse().description("Forbidden")
+    );
+    apiResponses.addApiResponse("404",
+        new ApiResponse().description("Not Found")
+    );
+    operation.setResponses(apiResponses);
+
+    pathItem.setPost(operation);
+
+    return pathItem;
+  }
+
+  private ApiResponses getApiResponses() {
+    ApiResponses apiResponses = new ApiResponses();
+    apiResponses.addApiResponse("200",
+        new ApiResponse().description("OK").content(
+            new Content().addMediaType(
+                "*/*",
+                new MediaType().schema(
+                    new Schema().name("type")
+                        .type("object")
+                )
+            )
+        )
+    );
+    apiResponses.addApiResponse("201",
+        new ApiResponse().description("Created")
+    );
+    apiResponses.addApiResponse("401",
+        new ApiResponse().description("Unauthorized")
+    );
+    apiResponses.addApiResponse("403",
+        new ApiResponse().description("Forbidden")
+    );
+    apiResponses.addApiResponse("404",
+        new ApiResponse().description("Not Found")
+    );
+    return apiResponses;
   }
 }

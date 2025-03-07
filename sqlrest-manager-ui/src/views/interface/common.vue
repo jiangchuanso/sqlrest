@@ -154,6 +154,20 @@
                                 :disabled="isOnlyShowDetail"> </el-input>
                     </template>
                   </el-table-column>
+                  <el-table-column label="参数位置"
+                                   min-width="25%">
+                    <template slot-scope="scope">
+                      <el-select v-model="scope.row.location"
+                                 :disabled="isOnlyShowDetail">
+                        <el-option label='header'
+                                   value='REQUEST_HEADER'></el-option>
+                        <el-option label='body'
+                                   value='REQUEST_BODY'></el-option>
+                        <el-option label='query'
+                                   value='REQUEST_FORM'></el-option>
+                      </el-select>
+                    </template>
+                  </el-table-column>
                   <el-table-column label="参数类型"
                                    min-width="25%">
                     <template slot-scope="scope">
@@ -568,7 +582,7 @@ export default {
       groupList: [],
       moduleList: [],
       connectionList: [],
-      contentTypes: ['application/x-www-form-urlencoded'],
+      contentTypes: ['application/x-www-form-urlencoded', 'application/json'],
       showTree: true,
       createParam: {
         id: null,
@@ -579,7 +593,7 @@ export default {
         module: null,
         method: null,
         path: null,
-        contentType: 'application/x-www-form-urlencoded',
+        contentType: null,
         engine: 'SQL',
         sqls: [],
         script: '',
@@ -1044,7 +1058,7 @@ export default {
               this.inputParams.push(
                 {
                   name: item.name,
-                  location: 'FORM_DATA',
+                  location: 'REQUEST_FORM',
                   type: "STRING",
                   isArray: item.isArray,
                   required: true,
@@ -1070,7 +1084,7 @@ export default {
       this.inputParams.push(
         {
           name: "",
-          location: 'FORM_DATA',
+          location: 'REQUEST_FORM',
           type: "STRING",
           isArray: false,
           required: true,
@@ -1087,7 +1101,7 @@ export default {
           {
             name: "apiPageNum",
             type: "LONG",
-            location: 'FORM_DATA',
+            location: 'REQUEST_FORM',
             isArray: false,
             required: true,
             defaultValue: "1",
@@ -1101,7 +1115,7 @@ export default {
           {
             name: "apiPageSize",
             type: "LONG",
-            location: 'FORM_DATA',
+            location: 'REQUEST_FORM',
             isArray: false,
             required: true,
             defaultValue: "10",

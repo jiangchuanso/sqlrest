@@ -22,6 +22,12 @@ public abstract class Constants {
 
   public static final String SYS_PARAM_KEY_API_DOC_OPEN = "apiDocOpen";
 
+  public static final String SYS_PARAM_KEY_SWAGGER_INFO_TITLE = "apiDocInfoTitle";
+
+  public static final String SYS_PARAM_KEY_SWAGGER_INFO_VERSION = "apiDocInfoVersion";
+
+  public static final String SYS_PARAM_KEY_SWAGGER_INFO_DESCRIPTION = "apiDocInfoDescription";
+
   public static final String getResourceName(String method, String path) {
     return String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method);
   }

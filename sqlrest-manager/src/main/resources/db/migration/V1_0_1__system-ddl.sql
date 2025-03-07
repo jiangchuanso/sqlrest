@@ -62,6 +62,8 @@ CREATE TABLE `SQLREST_API_ASSIGNMENT`
     `status`         tinyint(1)            not null default 0                 comment '是否发布',
     `open`           tinyint(1)            not null default 0                 comment '是否公开',
     `engine`         varchar(16)           not null default 'SQL'             comment '执行引擎',
+    `response_format`  tinytext                     default null              comment '响应格式配置',
+    `naming_strategy`  varchar(16)         not null default 'NONE'            comment '响应命名策略',
     `flow_status`    tinyint(1)            not null default 0                 comment '是否开启流量控制',
     `flow_grade`     bigint(20)   unsigned          default null              comment '流控类型',
     `flow_count`     bigint(20)   unsigned          default null              comment '流控阈值',

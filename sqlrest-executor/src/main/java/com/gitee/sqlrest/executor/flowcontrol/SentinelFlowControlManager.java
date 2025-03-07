@@ -65,7 +65,9 @@ public class SentinelFlowControlManager implements FlowControlManger {
     }
     if (rules.size() > 0) {
       FlowRuleManager.loadRules(rules);
-      log.info("Success refresh flow rules count: {}", rules.size());
+      if (log.isDebugEnabled()) {
+        log.debug("Success refresh flow rules count: {}", rules.size());
+      }
     }
   }
 

@@ -8,6 +8,7 @@ import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.OnOffEnum;
+import com.gitee.sqlrest.common.enums.ParamLocationEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
@@ -18,7 +19,6 @@ import com.gitee.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import com.gitee.sqlrest.core.dto.ApiDebugExecuteRequest;
 import com.gitee.sqlrest.core.dto.AssignmentSearchRequest;
 import com.gitee.sqlrest.core.dto.DataTypeFormatMapValue;
-import com.gitee.sqlrest.core.dto.NameValueRemarkResponse;
 import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.dto.SqlParamParseResponse;
 import com.gitee.sqlrest.core.exec.ApiExecuteService;
@@ -42,8 +42,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +54,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -140,7 +137,7 @@ public class ApiAssignmentService {
         String paramName = entry.getKey();
         List<ParamValue> value = entry.getValue();
         ParamTypeEnum type = value.get(0).getType();
-        if (value.size() > 1) {
+        if (value.get(0).getIsArray()) {
           List<Object> values = value.stream().map(ParamValue::getValue)
               .map(s -> type.getConverter().apply(s))
               .collect(Collectors.toList());
@@ -183,6 +180,28 @@ public class ApiAssignmentService {
       String message = String.format("path=[%s]%s", request.getMethod().name(), request.getPath());
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, message);
     }
+    if (!CollectionUtils.isEmpty(request.getParams())) {
+      if (!request.getMethod().isHasBody()) {
+        if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+              "Request with GET/HEAD method cannot have body.");
+        }
+      } else {
+        if ("application/json".equals(request.getContentType())) {
+          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
+              .anyMatch(i -> ParamLocationEnum.REQUEST_BODY != i.getLocation())) {
+            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+                "Request with 'application/json' content-type must use body parameter.");
+          }
+        } else {
+          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
+              .anyMatch(i -> ParamLocationEnum.REQUEST_FORM != i.getLocation())) {
+            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+                "Request with '" + request.getContentType() + "' content-type must use form parameter.");
+          }
+        }
+      }
+    }
     if (CollectionUtils.isEmpty(request.getContextList())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "contextList");
     }
@@ -222,6 +241,12 @@ public class ApiAssignmentService {
     if (null == exists) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
     }
+    if (exists.getMethod() != request.getMethod()) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "can't update method");
+    }
+    if (!StringUtils.equals(exists.getPath(), request.getPath())) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "can't update path");
+    }
     if (exists.getStatus()) {
       throw new CommonException(ResponseErrorCode.ERROR_EDIT_ALREADY_PUBLISHED, "id=" + request.getId());
     }
@@ -231,7 +256,28 @@ public class ApiAssignmentService {
     if (CollectionUtils.isEmpty(request.getContextList())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "sqlTextList");
     }
-
+    if (!CollectionUtils.isEmpty(request.getParams())) {
+      if (!request.getMethod().isHasBody()) {
+        if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+              "Request with GET/HEAD method cannot have body.");
+        }
+      } else {
+        if ("application/json".equals(request.getContentType())) {
+          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
+              .anyMatch(i -> ParamLocationEnum.REQUEST_BODY != i.getLocation())) {
+            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+                "Request with 'application/json' content-type must use body parameter.");
+          }
+        } else {
+          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
+              .anyMatch(i -> ParamLocationEnum.REQUEST_FORM != i.getLocation())) {
+            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+                "Request with '" + request.getContentType() + "' content-type must use form parameter.");
+          }
+        }
+      }
+    }
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
     }

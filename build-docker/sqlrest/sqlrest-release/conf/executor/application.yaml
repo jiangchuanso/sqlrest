@@ -50,6 +50,13 @@ eureka:
     service-url:
       defaultZone: http://${MANAGER_HOST}:${MANAGER_PORT}/eureka/
 
+springfox:
+  documentation:
+    enabled: true
+    auto-startup: false
+    swagger-ui:
+      enabled: false
+
 datasource:
   driver:
     base-path: ${APP_DRIVERS_PATH}

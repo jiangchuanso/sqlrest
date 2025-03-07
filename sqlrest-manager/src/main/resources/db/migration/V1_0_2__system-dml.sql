@@ -16,6 +16,10 @@ VALUES ('1', '测试', '测试使用', 'test', 'test', 'FOR_EVER', '-1', md5(uui
 INSERT INTO `SQLREST_CLIENT_GROUP` (`id`, `client_id`, `group_id`)
 VALUES ('1', '1', '1');
 
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('apiDocOpen', 'BOOLEAN', 'true');
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('apiDocInfoTitle', 'STRING', '在线接口文档');
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('apiDocInfoVersion', 'STRING', '1.0');
+INSERT INTO `SQLREST_SYSTEM_PARAM` (`param_key`, `param_type`, `param_value`) VALUES ('apiDocInfoDescription', 'STRING', 'Swagger在线接口文档');
 
 
 

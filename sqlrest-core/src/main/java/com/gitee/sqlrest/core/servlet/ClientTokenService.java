@@ -64,9 +64,13 @@ public class ClientTokenService {
 
   public AccessToken generateToken(String clientId, String clientSecret) {
     AppClientEntity appClient = appClientDao.getByAppKey(clientId);
-    if (null == appClient || !StringUtils.equals(appClient.getAppSecret(), clientSecret)) {
-      return null;
+    if (null == appClient) {
+      throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "clientId invalid");
     }
+    if (!StringUtils.equals(appClient.getAppSecret(), clientSecret)) {
+      throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "secret invalid");
+    }
+
     String token = TokenUtils.generateValue();
     AccessToken clientToken = AccessToken.builder()
         .realName(appClient.getName())
