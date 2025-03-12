@@ -25,7 +25,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
   }
 
   @Override
-  public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
+  public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     List<Object> dataList = new ArrayList<>();
     Configuration cfg = new Configuration();
     try (Connection connection = this.dataSource.getConnection()) {
@@ -39,7 +39,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           dataList.add(SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size));
         }
         connection.commit();
-        return scripts.size() > 1 ? dataList : dataList.stream().findFirst().orElse(null);
+        return dataList;
       } catch (Exception e) {
         try {
           connection.rollback();

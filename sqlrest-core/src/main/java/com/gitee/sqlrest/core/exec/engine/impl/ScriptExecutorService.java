@@ -87,7 +87,7 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
   }
 
   @Override
-  public Object execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
+  public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     EnvVarModule envModule = SpringUtil.getBean(EnvVarModule.class);
     DbVarModule dbModule = new DbVarModule(dataSource, productType, params, strategy);
 

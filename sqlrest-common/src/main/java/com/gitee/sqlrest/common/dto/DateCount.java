@@ -2,6 +2,7 @@ package com.gitee.sqlrest.common.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("按照日期的统计")
-public class DateCount {
+public class DateCount implements Serializable {
 
   @ApiModelProperty("日期")
   private String ofDate;

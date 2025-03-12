@@ -157,10 +157,10 @@ public class ApiAssignmentService {
     ResultEntity entity;
     try {
       HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
-      Object result = ApiExecutorEngineFactory
+      List<Object> results = ApiExecutorEngineFactory
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
           .execute(scripts, params, request.getNamingStrategy());
-      entity = ResultEntity.success(result);
+      entity = ResultEntity.success(results.size() > 1 ? results : results.get(0));
     } catch (Exception e) {
       entity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(e));
     }
@@ -185,20 +185,6 @@ public class ApiAssignmentService {
         if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
               "Request with GET/HEAD method cannot have body.");
-        }
-      } else {
-        if ("application/json".equals(request.getContentType())) {
-          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
-              .anyMatch(i -> ParamLocationEnum.REQUEST_BODY != i.getLocation())) {
-            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-                "Request with 'application/json' content-type must use body parameter.");
-          }
-        } else {
-          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
-              .anyMatch(i -> ParamLocationEnum.REQUEST_FORM != i.getLocation())) {
-            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-                "Request with '" + request.getContentType() + "' content-type must use form parameter.");
-          }
         }
       }
     }
@@ -261,20 +247,6 @@ public class ApiAssignmentService {
         if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
               "Request with GET/HEAD method cannot have body.");
-        }
-      } else {
-        if ("application/json".equals(request.getContentType())) {
-          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
-              .anyMatch(i -> ParamLocationEnum.REQUEST_BODY != i.getLocation())) {
-            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-                "Request with 'application/json' content-type must use body parameter.");
-          }
-        } else {
-          if (request.getParams().stream().filter(i -> ParamLocationEnum.REQUEST_HEADER != i.getLocation())
-              .anyMatch(i -> ParamLocationEnum.REQUEST_FORM != i.getLocation())) {
-            throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-                "Request with '" + request.getContentType() + "' content-type must use form parameter.");
-          }
         }
       }
     }

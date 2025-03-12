@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.common.dto;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductContext {
+public class ProductContext implements Serializable {
 
   private int id;
   private String quote;

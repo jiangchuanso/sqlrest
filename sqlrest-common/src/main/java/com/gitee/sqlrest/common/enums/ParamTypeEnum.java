@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public enum ParamTypeEnum {
-  LONG("整型", "number", 0L, Long.class, (String str) -> StringUtils.isNotBlank(str) ? Long.valueOf(str) : str),
-  DOUBLE("浮点型", "number", 0D, Double.class, (String str) -> StringUtils.isNotBlank(str) ? Double.valueOf(str) : str),
+  LONG("整型", "number", 0L, Long.class, (String str) -> StringUtils.isNotBlank(str) ? Long.valueOf(str) : null),
+  DOUBLE("浮点型", "number", 0D, Double.class, (String str) -> StringUtils.isNotBlank(str) ? Double.valueOf(str) : null),
   STRING("字符串", "string", "", String.class, (String str) -> str),
   DATE("日期", "string", "", String.class, (String str) -> str),
   TIME("时间", "string", "", String.class, (String str) -> str),

@@ -3,13 +3,14 @@ package com.gitee.sqlrest.common.dto;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @ApiModel(description = "响应结果")
 @AllArgsConstructor
 @Data
-public class ResultEntity<T> {
+public class ResultEntity<T> implements Serializable {
 
   private static final String SUCCESS = "success";
 

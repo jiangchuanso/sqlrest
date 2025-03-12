@@ -19,6 +19,9 @@
 - 支持接口的token安全认证功能
 > 执行器支持生成token及token认证。
 
+- 支持接口的x-www-form-urlencoded和JSON入参格式
+> HTTP入参支持application/x-www-form-urlencoded及application/json等请求格式。
+
 - 支持生成在线接口文档功能
 > 基于swagger-ui提供生成在线接口文档功能。
 
@@ -75,8 +78,8 @@
 - (3) SQL结果集的出参格式转换
 > SQL查询结果集到接口出参相应的格式转换。
 
-- (4) 前端界面中拓扑结构美化
-> 美化签到界面的拓扑结构图的展示。
+- (4) 前端界面整体美化
+> 美化界面的交互展示。
 
 ## 二、编译打包
 
@@ -221,6 +224,12 @@ MYSQLDB_PASSWORD=123456
 
 ![009.png](docs/images/009.PNG)
 
-## 四、问题反馈
+![010.png](docs/images/010.PNG)
+
+## 四、项目推荐
+
+[dbswitch] (https://gitee.com/inrgihc/dbswitch)
+
+## 五、问题反馈
 
 如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。

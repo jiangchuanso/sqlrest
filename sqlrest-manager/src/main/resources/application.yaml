@@ -36,6 +36,9 @@ mybatis:
     aggressive-lazy-loading: false
     map-underscore-to-camel-case: true
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis-plus:
+  global-config:
+    banner: false
 
 logging:
   config: classpath:logback-manager.xml

@@ -2,6 +2,7 @@ package com.gitee.sqlrest.common.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "分页结果")
 @NoArgsConstructor
 @Data
-public class PageResult<E> {
+public class PageResult<E> implements Serializable {
 
   @ApiModelProperty("状态码")
   private Integer code = 0;

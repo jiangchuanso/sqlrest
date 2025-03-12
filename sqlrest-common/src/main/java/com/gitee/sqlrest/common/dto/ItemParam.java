@@ -4,6 +4,7 @@ import com.gitee.sqlrest.common.enums.ParamLocationEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("参数信息")
-public class ItemParam {
+public class ItemParam implements Serializable {
 
   @ApiModelProperty("参数名")
   private String name;
