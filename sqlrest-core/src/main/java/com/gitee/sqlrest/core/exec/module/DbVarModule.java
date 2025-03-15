@@ -1,7 +1,5 @@
 package com.gitee.sqlrest.core.exec.module;
 
-import cn.hutool.core.util.NumberUtil;
-import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.exec.annotation.Comment;
@@ -19,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +31,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 @Module("db")
 public class DbVarModule {
 
-  private static Pattern REPLACE_ORDER_BY = Pattern
-      .compile("order\\s+by\\s+[^,\\s]+(\\s+asc|\\s+desc)?(\\s*,\\s*[^,\\s]+(\\s+asc|\\s+desc)?)*",
-          Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
   private static Configuration cfg = new Configuration();
 
   private JdbcTemplate jdbcTemplate;
@@ -77,8 +71,7 @@ public class DbVarModule {
     log.info("Enter selectCount() function, SQL:{},params:{}", sqlOrXml, params);
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
-    String sql = REPLACE_ORDER_BY.matcher(sqlMeta.getSql()).replaceAll("");
-    String countSql = String.format("select count(*) from (%s) a", sql);
+    String countSql = String.format("select count(*) from (%s) a", sqlMeta.getSql());
     return jdbcTemplate.queryForObject(countSql, Integer.class, sqlMeta.getParameter().toArray());
   }
 

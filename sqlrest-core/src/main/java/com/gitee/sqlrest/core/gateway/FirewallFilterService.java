@@ -26,6 +26,14 @@ public class FirewallFilterService {
   private FirewallRulesDao firewallRulesDao;
 
   @PostConstruct
+  public void init() {
+    try {
+      refresh();
+    } catch (Exception e) {
+      log.warn("load firewall rules failed:{}", e.getMessage());
+    }
+  }
+
   public void refresh() {
     this.firewallRules = firewallRulesDao.getFirewallRules();
   }

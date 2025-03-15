@@ -3,6 +3,7 @@ package com.gitee.sqlrest.core.exec;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.gitee.sqlrest.common.dto.ItemParam;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.common.enums.ParamLocationEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
@@ -165,12 +166,15 @@ public class ApiExecuteService {
   }
 
   public Map<String, Object> getRequestBodyMap(HttpServletRequest request) throws IOException {
-    MediaType contentType = MediaType.parseMediaType(request.getContentType());
-    Charset charset = (contentType != null && contentType.getCharset() != null ?
-        contentType.getCharset() : StandardCharsets.UTF_8);
-    for (HttpRequestBodyExtractor bodyExtractor : requestBodyExtractors) {
-      if (bodyExtractor.support(contentType)) {
-        return bodyExtractor.read(charset, request.getInputStream());
+    HttpMethodEnum methodEnum = HttpMethodEnum.valueOf(request.getMethod());
+    if (methodEnum.isHasBody()) {
+      MediaType contentType = MediaType.parseMediaType(request.getContentType());
+      Charset charset = (contentType != null && contentType.getCharset() != null ?
+          contentType.getCharset() : StandardCharsets.UTF_8);
+      for (HttpRequestBodyExtractor bodyExtractor : requestBodyExtractors) {
+        if (bodyExtractor.support(contentType)) {
+          return bodyExtractor.read(charset, request.getInputStream());
+        }
       }
     }
     return Collections.emptyMap();

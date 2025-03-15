@@ -96,7 +96,7 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
       Binding binding = new Binding();
       params.forEach((k, v) -> binding.setProperty(k, v));
       binding.setProperty(getModuleVarName(dbModule.getClass()), dbModule);
-      binding.setProperty(getModuleVarName(entity.getClass()), envModule);
+      binding.setProperty(getModuleVarName(envModule.getClass()), envModule);
 
       GroovyShell groovyShell = new GroovyShell(binding);
       try {
