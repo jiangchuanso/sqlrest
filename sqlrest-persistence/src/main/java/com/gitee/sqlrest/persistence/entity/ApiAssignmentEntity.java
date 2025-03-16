@@ -6,11 +6,13 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.dto.OutParam;
 import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.persistence.handler.FormatMapHandler;
+import com.gitee.sqlrest.persistence.handler.ListOutputHandler;
 import com.gitee.sqlrest.persistence.handler.ListParamHandler;
 import java.sql.Timestamp;
 import java.util.List;
@@ -54,6 +56,9 @@ public class ApiAssignmentEntity {
 
   @TableField(value = "params", typeHandler = ListParamHandler.class)
   private List<ItemParam> params;
+
+  @TableField(value = "outputs", typeHandler = ListOutputHandler.class)
+  private List<OutParam> outputs;
 
   @TableField("status")
   private Boolean status;

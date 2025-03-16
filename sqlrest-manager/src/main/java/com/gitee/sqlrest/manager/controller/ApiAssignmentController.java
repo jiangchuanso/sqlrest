@@ -108,12 +108,6 @@ public class ApiAssignmentController {
     return ResultEntity.success(apiAssignmentService.detailAssignment(id));
   }
 
-  @ApiOperation(value = "测试API执行")
-  @PostMapping(value = "/test/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void test(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response) {
-    apiAssignmentService.testAssignment(id, request, response);
-  }
-
   @ApiOperation(value = "删除API配置")
   @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity delete(@PathVariable("id") Long id) {

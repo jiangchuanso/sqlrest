@@ -77,14 +77,16 @@
                 </el-row>
                 <el-row v-if="createParam.engine==='SQL'">
                   <el-col :span="24">
-                    <el-form-item label="语句"
-                                  label-width="65px">
-                      <el-tooltip placement="top">
-                        <i class="el-icon-question"></i>
-                        <div slot="content">
-                          每个SQL窗口中至多写一条SQL语句，支持Mybatis的动态SQL语法
-                        </div>
-                      </el-tooltip>
+                    <el-form-item label-width="65px">
+                      <span slot="label"
+                            style="display:inline-block;">
+                        语句
+                        <el-tooltip effect="dark"
+                                    content="每个SQL窗口中至多写一条SQL语句，支持Mybatis的动态SQL语法"
+                                    placement="bottom">
+                          <i class='el-icon-question' />
+                        </el-tooltip>
+                      </span>
                       <multi-sql-editer ref="sqlEditors"
                                         :tableHints="tableHints"
                                         :tabSqls="createParam.sqls"
@@ -94,148 +96,203 @@
                 </el-row>
                 <el-row v-if="createParam.engine==='SCRIPT'">
                   <el-col :span="24">
-                    <el-form-item label="脚本"
-                                  label-width="65px">
-                      <el-tooltip placement="top">
-                        <i class="el-icon-question"></i>
-                        <div slot="content">
-                          可以编写符合groovy语法格式的脚本内容
-                        </div>
-                      </el-tooltip>
+                    <el-form-item label-width="65px">
+                      <span slot="label"
+                            style="display:inline-block;">
+                        脚本
+                        <el-tooltip effect="dark"
+                                    content="可以编写符合groovy语法格式的脚本内容"
+                                    placement="bottom">
+                          <i class='el-icon-question' />
+                        </el-tooltip>
+                      </span>
                       <script-editer ref="scriptEditer"
                                      :content="createParam.script"></script-editer>
                     </el-form-item>
                   </el-col>
                 </el-row>
-                <el-row>
-                  <el-col :span="3"
-                          v-if="createParam.engine==='SQL'">
-                    <el-button type="primary"
-                               size="mini"
-                               icon="el-icon-arrow-down"
-                               v-if="!isOnlyShowDetail"
-                               @click="handleParseInputParams">
-                      入参解析
-                    </el-button>
-                  </el-col>
-                  <el-col :span="3">
-                    <el-button type="primary"
-                               size="mini"
-                               icon="el-icon-arrow-down"
-                               v-if="!isOnlyShowDetail"
-                               @click="handleAddInputParams">
-                      添加入参
-                    </el-button>
-                  </el-col>
-                  <el-col :span="3">
-                    <el-button type="primary"
-                               size="mini"
-                               icon="el-icon-arrow-down"
-                               v-if="!isOnlyShowDetail"
-                               @click="handleAddPagableParams">
-                      分页参数
-                    </el-button>
-                  </el-col>
-                  <el-col :span="15">
-                  </el-col>
-                </el-row>
-                <el-table :data="inputParams"
-                          :header-cell-style="{background:'#eef1f6',color:'#606266'}"
-                          size="mini"
-                          border>
-                  <template slot="empty">
-                    <span>请输入sql后点击"入参解析"按钮后解析出这里的入参</span>
-                  </template>
-                  <el-table-column label="参数名"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-input v-model="scope.row.name"
-                                type="string"
-                                :disabled="isOnlyShowDetail"> </el-input>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="参数位置"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-select v-model="scope.row.location"
-                                 :disabled="isOnlyShowDetail">
-                        <el-option label='header'
-                                   value='REQUEST_HEADER'></el-option>
-                        <el-option label='body'
-                                   value='REQUEST_BODY'></el-option>
-                        <el-option label='query'
-                                   value='REQUEST_FORM'></el-option>
-                      </el-select>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="参数类型"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-select v-model="scope.row.type"
-                                 :disabled="isOnlyShowDetail">
-                        <el-option label='整型'
-                                   value='LONG'></el-option>
-                        <el-option label='浮点型'
-                                   value='DOUBLE'></el-option>
-                        <el-option label='字符串'
-                                   value='STRING'></el-option>
-                        <el-option label='日期'
-                                   value='DATE'></el-option>
-                        <el-option label='时间'
-                                   value='TIME'></el-option>
-                      </el-select>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="为数组"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-select v-model="scope.row.isArray"
-                                 :disabled="isOnlyShowDetail">
-                        <el-option label='是'
-                                   :value=true></el-option>
-                        <el-option label='否'
-                                   :value=false></el-option>
-                      </el-select>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="必填"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-select v-model="scope.row.required"
-                                 :disabled="isOnlyShowDetail">
-                        <el-option label='是'
-                                   :value=true></el-option>
-                        <el-option label='否'
-                                   :value=false></el-option>
-                      </el-select>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="默认值"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-input v-model="scope.row.defaultValue"
-                                type="string"
-                                :disabled="isOnlyShowDetail"></el-input>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="描述"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-input v-model="scope.row.remark"
-                                type="string"
-                                :disabled="isOnlyShowDetail"></el-input>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="操作"
+
+                <el-tabs type="border-card" tab-position="left">
+                  <el-tab-pane label="入参">
+                    <el-row>
+                      <el-col :span="3"
+                              v-if="createParam.engine==='SQL'">
+                        <el-button type="primary"
+                                   size="mini"
+                                   icon="el-icon-arrow-down"
                                    v-if="!isOnlyShowDetail"
-                                   min-width="25%">
-                    <template slot-scope="scope">
-                      <el-button size="mini"
-                                 type="danger"
-                                 @click="deleteInputParamsItem(scope.$index)">删除</el-button>
-                    </template>
-                  </el-table-column>
-                </el-table>
+                                   @click="handleParseInputParams">
+                          入参解析
+                        </el-button>
+                      </el-col>
+                      <el-col :span="3">
+                        <el-button type="primary"
+                                   size="mini"
+                                   icon="el-icon-arrow-down"
+                                   v-if="!isOnlyShowDetail"
+                                   @click="handleAddInputParams">
+                          添加入参
+                        </el-button>
+                      </el-col>
+                      <el-col :span="3">
+                        <el-button type="primary"
+                                   size="mini"
+                                   icon="el-icon-arrow-down"
+                                   v-if="!isOnlyShowDetail"
+                                   @click="handleAddPagableParams">
+                          分页参数
+                        </el-button>
+                      </el-col>
+                      <el-col :span="15">
+                      </el-col>
+                    </el-row>
+                    <el-table :data="inputParams"
+                              :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                              size="mini"
+                              border>
+                      <template slot="empty">
+                        <span>请输入sql后点击"入参解析"按钮后解析出这里的入参</span>
+                      </template>
+                      <el-table-column label="参数名"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-input v-model="scope.row.name"
+                                    type="string"
+                                    :disabled="isOnlyShowDetail"> </el-input>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="参数位置"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-select v-model="scope.row.location"
+                                     :disabled="isOnlyShowDetail">
+                            <el-option label='header'
+                                       value='REQUEST_HEADER'></el-option>
+                            <el-option label='body'
+                                       value='REQUEST_BODY'></el-option>
+                            <el-option label='query'
+                                       value='REQUEST_FORM'></el-option>
+                          </el-select>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="参数类型"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-select v-model="scope.row.type"
+                                     :disabled="isOnlyShowDetail">
+                            <el-option v-for="(item,index) in paramTypeList"
+                                       :key="index"
+                                       :label="item.name"
+                                       :value="item.value"></el-option>
+                          </el-select>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="为数组"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-select v-model="scope.row.isArray"
+                                     :disabled="isOnlyShowDetail">
+                            <el-option label='是'
+                                       :value=true></el-option>
+                            <el-option label='否'
+                                       :value=false></el-option>
+                          </el-select>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="必填"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-select v-model="scope.row.required"
+                                     :disabled="isOnlyShowDetail">
+                            <el-option label='是'
+                                       :value=true></el-option>
+                            <el-option label='否'
+                                       :value=false></el-option>
+                          </el-select>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="默认值"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-input v-model="scope.row.defaultValue"
+                                    type="string"
+                                    :disabled="isOnlyShowDetail"></el-input>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="描述"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-input v-model="scope.row.remark"
+                                    type="string"
+                                    :disabled="isOnlyShowDetail"></el-input>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="操作"
+                                       v-if="!isOnlyShowDetail"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-button size="mini"
+                                     type="danger"
+                                     @click="deleteInputParamsItem(scope.$index)">删除</el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </el-tab-pane>
+                  <el-tab-pane label="出参">
+                    <el-button type="primary"
+                               size="mini"
+                               icon="el-icon-arrow-down"
+                               v-if="!isOnlyShowDetail"
+                               @click="handleAddOutputParams">
+                      添加出参
+                    </el-button>
+                    <el-table :data="outputParams"
+                              :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                              size="mini"
+                              border>
+                      <template slot="empty">
+                        <span>请输入sql后成功执行"调试"按钮后解析出这里的出参</span>
+                      </template>
+                      <el-table-column label="参数名"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-input v-model="scope.row.name"
+                                    type="string"
+                                    :disabled="isOnlyShowDetail"> </el-input>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="参数类型"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-select v-model="scope.row.type"
+                                     :disabled="isOnlyShowDetail">
+                            <el-option v-for="(item,index) in paramTypeList"
+                                       :key="index"
+                                       :label="item.name"
+                                       :value="item.value"></el-option>
+                          </el-select>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="描述"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-input v-model="scope.row.remark"
+                                    type="string"
+                                    :disabled="isOnlyShowDetail"></el-input>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="操作"
+                                       v-if="!isOnlyShowDetail"
+                                       min-width="25%">
+                        <template slot-scope="scope">
+                          <el-button size="mini"
+                                     type="danger"
+                                     @click="deleteOutputParamsItem(scope.$index)">删除</el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
+                  </el-tab-pane>
+                </el-tabs>
               </el-tab-pane>
               <el-tab-pane label="接口配置>>"
                            name="detail">
@@ -352,10 +409,18 @@
                 <el-row>
                   <el-col :span="12">
                     <div>
-                      <el-form-item label="命名策略"
-                                    label-width="80px"
-                                    prop="description"
-                                    style="width:100%">
+                      <el-form-item label-width="120px"
+                                    prop="namingStrategy"
+                                    style="width:60%">
+                        <span slot="label"
+                              style="display:inline-block;">
+                          命名策略
+                          <el-tooltip effect="dark"
+                                      content="修改命名策略后，需再次执行“调试”操作以纠正出参列表"
+                                      placement="top">
+                            <i class='el-icon-question' />
+                          </el-tooltip>
+                        </span>
                         <el-select v-model="createParam.namingStrategy"
                                    placeholder="请选择"
                                    :disabled="isOnlyShowDetail">
@@ -371,9 +436,9 @@
                 <el-row>
                   <el-col :span="12">
                     <el-form-item label="数据格式"
-                                  label-width="80px"
+                                  label-width="120px"
                                   prop="formatMap"
-                                  style="width:100%">
+                                  style="width:60%">
                       <div v-for="item in createParam.formatMap"
                            :key="item.key"
                            v-bind="item">
@@ -582,6 +647,13 @@ export default {
       groupList: [],
       moduleList: [],
       connectionList: [],
+      paramTypeList: [
+        { name: "整型", value: "LONG" },
+        { name: "浮点型", value: "DOUBLE" },
+        { name: "字符串", value: "STRING" },
+        { name: "日期", value: "DATE" },
+        { name: "时间", value: "TIME" }
+      ],
       contentTypes: ['application/x-www-form-urlencoded', 'application/json'],
       showTree: true,
       createParam: {
@@ -620,6 +692,7 @@ export default {
       inputParams: [],
       debugParams: [],
       debugResponse: "",
+      outputParams: [],
       responseNamingStrategy: [],
       responseTypeFormat: [],
       rules: {
@@ -723,6 +796,10 @@ export default {
           this.inputParams = []
           if (detail.params) {
             this.inputParams = detail.params
+          }
+          this.outputParams = []
+          if (detail.outputs) {
+            this.outputParams = detail.outputs;
           }
           if (detail.sqlList && detail.sqlList.length > 0) {
             if (this.createParam.engine === 'SQL') {
@@ -1130,6 +1207,9 @@ export default {
     deleteInputParamsItem: function (index) {
       this.inputParams.splice(index, 1);
     },
+    deleteInputParamsItem: function (index) {
+      this.outputParams.slice(index, 1);
+    },
     checkSqlsOrScriptEmpty: function (sqls) {
       if (sqls === null || sqls === undefined || !Array.isArray(sqls) || sqls.length === 0 || sqls.includes('')) {
         return true
@@ -1192,7 +1272,8 @@ export default {
           flowCount: this.createParam.flowCount,
           engine: this.createParam.engine,
           contextList: sqls,
-          params: this.inputParams
+          params: this.inputParams,
+          outputs: this.outputParams
         })
       }).then(
         res => {
@@ -1232,7 +1313,8 @@ export default {
           flowCount: this.createParam.flowCount,
           engine: this.createParam.engine,
           contextList: sqls,
-          params: this.inputParams
+          params: this.inputParams,
+          outputs: this.outputParams
         })
       }).then(
         res => {
@@ -1320,7 +1402,18 @@ export default {
       }).then(
         res => {
           if (0 === res.data.code) {
-            this.debugResponse = JSON.stringify(res.data.data, null, 2);
+            this.debugResponse = JSON.stringify(res.data.data.answer, null, 2);
+            this.outputParams = [];
+            let map = res.data.data.types;
+            for (let key in map) {
+              this.outputParams.push(
+                {
+                  name: key,
+                  type: map[key],
+                  remark: null
+                }
+              )
+            }
           } else {
             if (res.data.message) {
               alert("调试操作失败:" + res.data.message);
@@ -1328,6 +1421,18 @@ export default {
           }
         }
       );
+    },
+    handleAddOutputParams: function () {
+      this.outputParams.push(
+        {
+          name: '',
+          type: 'STRING',
+          remark: null
+        },
+      )
+    },
+    deleteOutputParamsItem: function (index) {
+      this.outputParams.splice(index, 1);
     }
   },
   created () {

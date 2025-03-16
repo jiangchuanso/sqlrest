@@ -37,6 +37,7 @@ import com.gitee.sqlrest.persistence.util.PageUtils;
 import com.gitee.sqlrest.template.Configuration;
 import com.gitee.sqlrest.template.SqlTemplate;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.io.IOException;
@@ -160,7 +161,9 @@ public class ApiAssignmentService {
       List<Object> results = ApiExecutorEngineFactory
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
           .execute(scripts, params, request.getNamingStrategy());
-      entity = ResultEntity.success(results.size() > 1 ? results : results.get(0));
+      Object answer = results.size() > 1 ? results : results.get(0);
+      Map<String, ParamTypeEnum> types = JacksonUtils.parseFieldTypes(results);
+      entity = ResultEntity.success(ImmutableMap.of("answer", answer, "types", types));
     } catch (Exception e) {
       entity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(e));
     }
@@ -207,6 +210,7 @@ public class ApiAssignmentService {
     assignmentEntity.setPath(request.getPath());
     assignmentEntity.setContentType(request.getContentType());
     assignmentEntity.setParams(request.getParams());
+    assignmentEntity.setOutputs(request.getOutputs());
     assignmentEntity.setOpen(Optional.ofNullable(request.getOpen()).orElse(false));
     assignmentEntity.setEngine(request.getEngine());
     assignmentEntity.setStatus(false);
@@ -267,6 +271,7 @@ public class ApiAssignmentService {
     //assignmentEntity.setPath(request.getPath());
     assignmentEntity.setContentType(request.getContentType());
     assignmentEntity.setParams(request.getParams());
+    assignmentEntity.setOutputs(request.getOutputs());
     assignmentEntity.setOpen(Optional.ofNullable(request.getOpen()).orElse(false));
     assignmentEntity.setStatus(false);
     assignmentEntity.setEngine(request.getEngine());
@@ -302,31 +307,6 @@ public class ApiAssignmentService {
     }
     response.setFormatMap(formatMap);
     return response;
-  }
-
-  public void testAssignment(Long id, HttpServletRequest request, HttpServletResponse response) {
-    ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(id, true);
-    if (null == assignmentEntity) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
-    }
-
-    String json;
-    ResultEntity result = apiExecuteService.execute(assignmentEntity, request);
-    if (0 != result.getCode()) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-      json = JacksonUtils.toJsonStr(ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR));
-    } else {
-      response.setStatus(HttpServletResponse.SC_OK);
-      json = JacksonUtils.toJsonStr(result, assignmentEntity.getResponseFormat());
-    }
-
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setCharacterEncoding(Charsets.UTF_8.name());
-    try {
-      response.getWriter().append(json);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public void deleteAssignment(Long id) {

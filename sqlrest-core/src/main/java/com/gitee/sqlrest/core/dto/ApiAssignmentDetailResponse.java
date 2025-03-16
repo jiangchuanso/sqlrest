@@ -2,6 +2,7 @@ package com.gitee.sqlrest.core.dto;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.dto.OutParam;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
 import io.swagger.annotations.ApiModel;
@@ -29,6 +30,9 @@ public class ApiAssignmentDetailResponse extends ApiAssignmentBaseResponse {
 
   @ApiModelProperty("接口入参")
   private List<ItemParam> params;
+
+  @ApiModelProperty("接口出参")
+  private List<OutParam> outputs;
 
   @ApiModelProperty("HTTP请求的contentType")
   private String contentType;
