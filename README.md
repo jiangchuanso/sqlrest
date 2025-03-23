@@ -4,6 +4,10 @@
 
 > 将数据库的SQL生成RESTful风格的http接口的工具
 
+
+> [《SQLREST工具使用说明文档》](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
+
+
 ## 一、工具介绍
 
 ### 1、功能介绍
