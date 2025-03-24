@@ -107,6 +107,25 @@ public class TemplateTest {
   }
 
   @Test
+  public void testTrim() {
+    String content = "SELECT * from employees.employees \n"
+        + "<trim prefix =\"WHERE\" prefixOverrides=\"AND | OR\">\n"
+        + "  <if test=\"empNo != null\">\n"
+        + "    AND emp_no = #{empNo}\n"
+        + "  </if>\n"
+        + "  <if test=\"firstName != null\">\n"
+        + "    AND first_name like concat('%', #{firstName}, '%')\n"
+        + "  </if>\n"
+        + "  <if test=\"lastName != null \">\n"
+        + "    AND last_name like concat('%', #{lastName}, '%')\n"
+        + "  </if>\n"
+        + " </trim>";
+    Configuration cfg = new Configuration();
+    SqlTemplate template = cfg.getTemplate(content);
+    System.out.println(template.getParameterNames());
+  }
+
+  @Test
   public void parseParams() {
     String content = "SELECT count(DISTINCT datasource_uuid,database_name,table_name) \n"
         + "FROM t_test_record \n"

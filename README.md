@@ -1,12 +1,6 @@
-# SQLREST
+![SQLREST](docs/images/SQLREST.PNG#pic_center)
 
-![SQLREST](https://gitee.com/inrgihc/sqlrest/raw/master/sqlrest-manager-ui/src/assets/LOGO.png#pic_center)
-
-> 将数据库的SQL生成RESTful风格的http接口的工具
-
-
-> [《SQLREST工具使用说明文档》](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
-
+> 将数据库可执行的SQL生成RESTful风格的http接口的工具
 
 ## 一、工具介绍
 
@@ -206,7 +200,11 @@ MYSQLDB_PASSWORD=123456
 
 ## 三、使用教程
 
-### 1、部分系统截图
+### 1、使用说明文档
+
+[《SQLREST工具使用说明文档》](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
+
+### 2、部分系统截图
 
 ![000.png](docs/images/000.PNG)
 
@@ -236,4 +234,6 @@ MYSQLDB_PASSWORD=123456
 
 ## 五、问题反馈
 
-如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。
+如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。也可扫描下方二维码入群讨论：（加好友请注明："程序交流"）
+
+![structure](https://gitee.com/inrgihc/dbswitch/raw/master/images/weixin.PNG)

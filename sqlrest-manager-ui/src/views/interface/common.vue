@@ -1207,9 +1207,6 @@ export default {
     deleteInputParamsItem: function (index) {
       this.inputParams.splice(index, 1);
     },
-    deleteInputParamsItem: function (index) {
-      this.outputParams.slice(index, 1);
-    },
     checkSqlsOrScriptEmpty: function (sqls) {
       if (sqls === null || sqls === undefined || !Array.isArray(sqls) || sqls.length === 0 || sqls.includes('')) {
         return true
