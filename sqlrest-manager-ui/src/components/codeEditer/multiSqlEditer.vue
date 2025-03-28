@@ -91,6 +91,10 @@ export default {
     canAddSql: {
       type: Boolean,
       default: true
+    },
+    editorHeightNum: {
+      type: Number,
+      default: 300
     }
   },
   components: {
@@ -102,6 +106,12 @@ export default {
     },
     tableHints (newVal, OldVal) {
       this.cmOptions.hintOptions.tables = newVal
+    },
+    editorHeightNum (newVal, OldVal) {
+      var cm = this.cmMapper.get(this.currentTabName);
+      if (cm) {
+        cm.setSize('100%', newVal + 'px')
+      }
     }
   },
   methods: {
@@ -161,7 +171,7 @@ export default {
         val = "\n<trim prefix=\"\" suffix=\"\" suffixesToOverride=\"\" prefixesToOverride=\"\"></trim>"
       }
 
-      if(this.cmMapper.size===0){
+      if (this.cmMapper.size === 0) {
         alert("请先点击‘添加SQL窗口’来添加一个SQL窗口！")
         return
       }

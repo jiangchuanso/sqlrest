@@ -76,7 +76,7 @@ const constantRouter = new Router({
         },
         {
           path: '/interface',
-          name: '接口管理',
+          name: '接口开发',
           icon: "el-icon-paperclip",
           component: () => import('@/views/interface/index'),
           children: [
@@ -88,7 +88,7 @@ const constantRouter = new Router({
             },
             {
               path: '/interface/list',
-              name: '接口配置',
+              name: '接口管理',
               icon: "el-icon-refrigerator",
               component: () => import('@/views/interface/list'),
             },

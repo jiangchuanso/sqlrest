@@ -21,7 +21,6 @@ import com.gitee.sqlrest.core.dto.AssignmentSearchRequest;
 import com.gitee.sqlrest.core.dto.DataTypeFormatMapValue;
 import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.dto.SqlParamParseResponse;
-import com.gitee.sqlrest.core.exec.ApiExecuteService;
 import com.gitee.sqlrest.core.exec.annotation.Comment;
 import com.gitee.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import com.gitee.sqlrest.core.exec.engine.impl.ScriptExecutorService;
@@ -52,7 +51,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -72,8 +70,6 @@ public class ApiAssignmentService {
   private DataSourceDao dataSourceDao;
   @Resource
   private DriverLoadService driverLoadService;
-  @Resource
-  private ApiExecuteService apiExecuteService;
 
   public List<ScriptEditorCompletion> completions() {
     return memCache.computeIfAbsent("COMPLETION", this::computeCompletions);

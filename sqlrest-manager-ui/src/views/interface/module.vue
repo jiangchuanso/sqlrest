@@ -220,7 +220,7 @@ export default {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
             },
-            url: "/sqlrest/manager/api/v1/group/module/" + this.updateform.id,
+            url: "/sqlrest/manager/api/v1/module/update/" + this.updateform.id,
             data: qs.stringify({
               name: this.updateform.name,
             })

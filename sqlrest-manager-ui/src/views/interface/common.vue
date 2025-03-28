@@ -14,6 +14,12 @@
       </el-col>
       <el-col :span="22">
         <div style="float:right">
+          <el-button type="warning"
+                     size="mini"
+                     @click="handleHelp">
+            <i class="el-icon-question">
+              帮助</i>
+          </el-button>
           <el-button type="primary"
                      size="mini"
                      @click="handleGoBack">
@@ -58,10 +64,10 @@
                    ref="form">
             <el-tabs type="border-card"
                      v-model="tabActiveName">
-              <el-tab-pane label="基础配置>>"
+              <el-tab-pane label="SQL配置"
                            name="basic">
                 <el-row>
-                  <el-col :span="12">
+                  <el-col :span="6">
                     <el-form-item label="执行"
                                   label-width="65px">
                       <el-radio-group size="small"
@@ -73,6 +79,12 @@
                                          :disabled="$route.query.id>0 && createParam.engine==='SQL'">Groovy脚本</el-radio-button>
                       </el-radio-group>
                     </el-form-item>
+                  </el-col>
+                  <el-col :span="6">
+                    <el-input-number v-model="editorHeightNum"
+                                     size="small"
+                                     :step="20"
+                                     step-strictly></el-input-number>
                   </el-col>
                 </el-row>
                 <el-row v-if="createParam.engine==='SQL'">
@@ -88,6 +100,7 @@
                         </el-tooltip>
                       </span>
                       <multi-sql-editer ref="sqlEditors"
+                                        :editorHeightNum="editorHeightNum"
                                         :tableHints="tableHints"
                                         :tabSqls="createParam.sqls"
                                         :canAddSql="!isOnlyShowDetail"></multi-sql-editer>
@@ -107,12 +120,14 @@
                         </el-tooltip>
                       </span>
                       <script-editer ref="scriptEditer"
+                                     :editorHeightNum="editorHeightNum"
                                      :content="createParam.script"></script-editer>
                     </el-form-item>
                   </el-col>
                 </el-row>
 
-                <el-tabs type="border-card" tab-position="left">
+                <el-tabs type="border-card"
+                         tab-position="left">
                   <el-tab-pane label="入参">
                     <el-row>
                       <el-col :span="3"
@@ -294,7 +309,7 @@
                   </el-tab-pane>
                 </el-tabs>
               </el-tab-pane>
-              <el-tab-pane label="接口配置>>"
+              <el-tab-pane label="接口配置"
                            name="detail">
                 <el-row>
                   <el-col :span="12">
@@ -404,7 +419,7 @@
                   </el-col>
                 </el-row>
               </el-tab-pane>
-              <el-tab-pane label="出参格式>>"
+              <el-tab-pane label="出参格式"
                            name="outputParams">
                 <el-row>
                   <el-col :span="12">
@@ -656,6 +671,7 @@ export default {
       ],
       contentTypes: ['application/x-www-form-urlencoded', 'application/json'],
       showTree: true,
+      editorHeightNum: 300,
       createParam: {
         id: null,
         name: null,
@@ -771,7 +787,6 @@ export default {
       ).then(res => {
         if (0 === res.data.code) {
           this.showTree = false;
-          console.log("showTree:" + this.showTree)
           let detail = res.data.data;
           this.createParam = {
             id: detail.id,
@@ -905,7 +920,6 @@ export default {
       ).then(res => {
         if (0 === res.data.code) {
           this.responseNamingStrategy = res.data.data;
-          console.log(this.responseNamingStrategy)
         }
       });
     },
@@ -1101,6 +1115,10 @@ export default {
     },
     handleNodeClick: function () {
 
+    },
+    handleHelp: function () {
+      const url = 'https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb#Wkpmx';
+      window.open(url, '_blank');
     },
     handleGoBack: function () {
       this.$router.go(-1);
@@ -1494,5 +1512,8 @@ export default {
   left: 0;
   overflow: hidden;
   margin: 0;
+}
+/deep/ .el-input.is-disabled .el-input__inner {
+  color: #5f5e5e !important;
 }
 </style>

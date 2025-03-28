@@ -8,7 +8,7 @@
                        size="mini"
                        :clearable="true"
                        style="width:15%"
-                       placeholder="请选择分组">
+                       placeholder="选择授权分组">
               <el-option v-for="(item,index) in groupLists"
                          :key="index"
                          :label="item.name"
@@ -96,7 +96,7 @@
                          label="方法"
                          min-width="8%"></el-table-column>
         <el-table-column prop="path"
-                         label="路径"
+                         label="接口路径"
                          show-overflow-tooltip
                          min-width="25%"></el-table-column>
         <el-table-column prop="engine"
@@ -119,7 +119,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime"
-                         label="时间"
+                         label="创建时间"
                          min-width="20%"></el-table-column>
         <el-table-column label="操作"
                          min-width="30%">

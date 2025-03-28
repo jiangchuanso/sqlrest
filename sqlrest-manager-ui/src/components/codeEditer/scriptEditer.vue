@@ -15,7 +15,7 @@
             @init="editorInit"
             lang="groovy"
             theme="vibrant_ink"
-            height="300"
+            :height="editorHeightNum"
             :options="options"></editor>
   </div>
 </template>
@@ -33,6 +33,7 @@ export default {
     return {
       editor: null,
       value: "",
+      keywordHints: [],
       options: {
         enableBasicAutocompletion: true,
         enableSnippets: true,
@@ -49,10 +50,9 @@ export default {
       type: String,
       default: ''
     },
-    keywordHints: {
-      type: Array,
-      default: () => [
-      ]
+    editorHeightNum: {
+      type: Number,
+      default: 300
     }
   },
   methods: {
@@ -108,8 +108,8 @@ export default {
     this.value = this.content
   },
   watch: {
-    keywordHints (newVal, OldVal) {
-      this.keywordHints = newVal
+    editorHeightNum (newVal, OldVal) {
+      this.editorHeightNum = newVal;
     }
   },
 }
