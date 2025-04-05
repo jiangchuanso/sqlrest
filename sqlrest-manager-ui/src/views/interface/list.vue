@@ -28,7 +28,7 @@
                        size="mini"
                        :clearable="true"
                        style="width:10%"
-                       placeholder="是否发布">
+                       placeholder="已上线">
               <el-option :key=true
                          label="是"
                          :value=true></el-option>
@@ -60,6 +60,7 @@
                        icon="el-icon-search"
                        @click="handleSearch">搜索</el-button>
             <el-switch v-model="apiDocStatus"
+                       name="Swagger文档开关"
                        active-color="#13ce66"
                        inactive-color="#ff4949"
                        :active-value=true
@@ -74,7 +75,7 @@
                    size="mini"
                    :disabled="apiDocStatus==false"
                    icon="el-icon-document-add"
-                   @click="openSwagger">文档</el-button>
+                   @click="openSwagger">Swagger文档</el-button>
         <el-button type="primary"
                    size="mini"
                    icon="el-icon-document-add"
@@ -92,18 +93,26 @@
                          label="名称"
                          show-overflow-tooltip
                          min-width="30%"></el-table-column>
-        <el-table-column prop="method"
-                         label="方法"
-                         min-width="8%"></el-table-column>
+        <el-table-column label="方法"
+                         min-width="10%">
+          <template slot-scope="scope">
+            <el-tag size="medium"
+                    class="name-wrapper-tag">{{ scope.row.method }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="path"
                          label="接口路径"
                          show-overflow-tooltip
-                         min-width="25%"></el-table-column>
-        <el-table-column prop="engine"
-                         label="引擎"
-                         min-width="8%"></el-table-column>
+                         min-width="20%"></el-table-column>
+        <el-table-column label="引擎"
+                         min-width="10%">
+          <template slot-scope="scope">
+            <el-tag size="medium"
+                    class="name-wrapper-tag">{{ scope.row.engine }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="status"
-                         label="发布"
+                         label="已上线"
                          :formatter="boolFormatPublish"
                          show-overflow-tooltip
                          min-width="8%"></el-table-column>
@@ -111,7 +120,7 @@
                          label="公开"
                          min-width="8%">
           <template slot-scope="scope">
-            <el-tooltip :content="'公开: ' + boolFormatOpen(scope.row)"
+            <el-tooltip :content="boolFormatOpen(scope.row)"
                         placement="top">
               <el-switch v-model="scope.row.open"
                          @change="hanldeOpenStateChanged(scope.row)" />
@@ -120,7 +129,7 @@
         </el-table-column>
         <el-table-column prop="createTime"
                          label="创建时间"
-                         min-width="20%"></el-table-column>
+                         min-width="18%"></el-table-column>
         <el-table-column label="操作"
                          min-width="30%">
           <template slot-scope="scope">
@@ -130,7 +139,7 @@
                          icon="el-icon-timer"
                          v-if="scope.row.status===false"
                          @click="handlePublish(scope.$index, scope.row)"
-                         round>发布</el-button>
+                         round>上线</el-button>
               <el-button size="small"
                          type="info"
                          icon="el-icon-delete-location"
@@ -293,9 +302,9 @@ export default {
     },
     boolFormatOpen (row) {
       if (row.open === true) {
-        return "是";
+        return "Token认证";
       } else {
-        return "否";
+        return "无认证";
       }
     },
     hanldeOpenStateChanged (row) {

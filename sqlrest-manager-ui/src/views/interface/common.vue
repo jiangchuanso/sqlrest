@@ -205,25 +205,15 @@
                       <el-table-column label="为数组"
                                        min-width="25%">
                         <template slot-scope="scope">
-                          <el-select v-model="scope.row.isArray"
-                                     :disabled="isOnlyShowDetail">
-                            <el-option label='是'
-                                       :value=true></el-option>
-                            <el-option label='否'
-                                       :value=false></el-option>
-                          </el-select>
+                          <el-checkbox v-model="scope.row.isArray"
+                                       :disabled="isOnlyShowDetail"></el-checkbox>
                         </template>
                       </el-table-column>
                       <el-table-column label="必填"
                                        min-width="25%">
                         <template slot-scope="scope">
-                          <el-select v-model="scope.row.required"
-                                     :disabled="isOnlyShowDetail">
-                            <el-option label='是'
-                                       :value=true></el-option>
-                            <el-option label='否'
-                                       :value=false></el-option>
-                          </el-select>
+                          <el-checkbox v-model="scope.row.required"
+                                       :disabled="isOnlyShowDetail"></el-checkbox>
                         </template>
                       </el-table-column>
                       <el-table-column label="默认值"
@@ -246,9 +236,8 @@
                                        v-if="!isOnlyShowDetail"
                                        min-width="25%">
                         <template slot-scope="scope">
-                          <el-button size="mini"
-                                     type="danger"
-                                     @click="deleteInputParamsItem(scope.$index)">删除</el-button>
+                          <el-link icon="el-icon-delete"
+                                   @click="deleteInputParamsItem(scope.$index)"></el-link>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -300,9 +289,8 @@
                                        v-if="!isOnlyShowDetail"
                                        min-width="25%">
                         <template slot-scope="scope">
-                          <el-button size="mini"
-                                     type="danger"
-                                     @click="deleteOutputParamsItem(scope.$index)">删除</el-button>
+                          <el-link icon="el-icon-delete"
+                                   @click="deleteOutputParamsItem(scope.$index)"></el-link>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -1150,17 +1138,19 @@ export default {
               return
             }
             for (let item of res.data.data) {
-              this.inputParams.push(
-                {
-                  name: item.name,
-                  location: 'REQUEST_FORM',
-                  type: "STRING",
-                  isArray: item.isArray,
-                  required: true,
-                  defaultValue: "",
-                  remark: ""
-                }
-              )
+              if (!this.inputParams.find(i => i.name === item.name)) {
+                this.inputParams.push(
+                  {
+                    name: item.name,
+                    location: 'REQUEST_FORM',
+                    type: "STRING",
+                    isArray: item.isArray,
+                    required: true,
+                    defaultValue: "",
+                    remark: ""
+                  }
+                )
+              }
             };
           } else {
             if (res.data.message) {

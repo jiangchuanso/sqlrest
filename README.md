@@ -6,12 +6,13 @@
 
 ### 1、功能介绍
 
-一句话, sqlrest工具提供快速构建RESTful的API接口工具，包括SQl方式和Groovy脚本方式。功能包括：
+一句话, sqlrest工具提供快速构建RESTful的API接口工具，包括SQl方式和Groovy脚本方式。利用SQL生成数据API的方式，用户只需选择数据
+源、输入SQL或脚本、简单path配置即可快速生成API接口。具体功能包括：
 
-- SQL方式构建RESTful接口
+- Mybatis的SQL方式构建RESTful接口
 > 提供类似mybatis的动态SQL语法方式构建接口。
 
-- 脚本方式构建RESTful接口
+- Groovy脚本方式构建RESTful接口
 > 基于groovy脚本的语法方式构建复杂场景下的接口。
 
 - 支持接口的token安全认证功能
@@ -20,8 +21,8 @@
 - 支持接口的x-www-form-urlencoded和JSON入参格式
 > HTTP入参支持application/x-www-form-urlencoded及application/json等请求格式。
 
-- 支持生成在线接口文档功能
-> 基于swagger-ui提供生成在线接口文档功能。
+- 支持自动生成在线接口文档功能
+> 基于swagger-ui提供自动生成在线接口文档功能。
 
 - 支持接口的流量控制功能
 > 执行器基于sentinel支持接口的流量控制功能。
@@ -67,8 +68,8 @@
 
 ### 4、正在规划中的功能
 
-- (1) 接口响应出参列表及说明文档
-> 通过人工配制或接口调试，以构建接口出参及其说明文档。
+- (1) 接口检索及说明文档
+> 支持接口检索及接口入参出参说明文档。
 
 - (2) 支持接口的缓存配置功能
 > 基于分布式缓存等构建支持接口的缓存配置功能。
@@ -172,7 +173,7 @@ MYSQLDB_USERNAME=root
 MYSQLDB_PASSWORD=123456
 ```
 
-- 步骤3：如果为多主机节点部署，需要将sqlrest-relase-x.x.x分发到其他主机节点上；如果为单机（单节点）部署可直接忽略本步骤。
+- 步骤3：如果为多主机节点部署，需要将sqlrest-release-x.x.x分发到其他主机节点上；如果为单机（单节点）部署可直接忽略本步骤。
 
 - 步骤4：启动服务
 
@@ -230,7 +231,7 @@ MYSQLDB_PASSWORD=123456
 
 ## 四、项目推荐
 
-[dbswitch] (https://gitee.com/inrgihc/dbswitch)
+[数据库迁移同步工具dbswitch] (https://gitee.com/inrgihc/dbswitch)
 
 ## 五、问题反馈
 
