@@ -6,7 +6,7 @@
 
 ### 1、功能介绍
 
-一句话, sqlrest工具提供快速构建RESTful的API接口工具，包括SQl方式和Groovy脚本方式。利用SQL生成数据API的方式，用户只需选择数据
+一句话, sqlrest提供利用SQL快速构建RESTful接口的工具，包括SQl方式和Groovy脚本方式。用户只需选择数据
 源、输入SQL或脚本、简单path配置即可快速生成API接口。具体功能包括：
 
 - Mybatis的SQL方式构建RESTful接口
@@ -235,6 +235,6 @@ MYSQLDB_PASSWORD=123456
 
 ## 五、问题反馈
 
-如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。也可扫描下方二维码入群讨论：（加好友请注明："程序交流"）
+如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。也可扫描下方二维码入群讨论：（加好友请注明："SQLREST交流"）
 
 ![structure](https://gitee.com/inrgihc/dbswitch/raw/master/images/weixin.PNG)

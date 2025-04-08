@@ -11,10 +11,12 @@ import 'element-ui/lib/theme-chalk/index.css';
 import * as echarts from 'echarts'
 import VueCodeMirror from 'vue-codemirror'
 import 'codemirror/lib/codemirror.css'
+import JsonViewer from 'vue-json-viewer'
 
 Vue.use(VueCodeMirror)
 Vue.use(axios)
 Vue.use(ElementUI)
+Vue.use(JsonViewer) 
 
 Vue.prototype.$http = axios
 Vue.config.productionTip = false

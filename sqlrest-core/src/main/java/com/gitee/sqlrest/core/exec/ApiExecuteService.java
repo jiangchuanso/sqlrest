@@ -71,7 +71,7 @@ public class ApiExecuteService {
 
   private String convertInvalidArgs(List<ItemParam> invalidArgs) {
     return "无效参数," + invalidArgs.stream().map(
-        p -> p.getIsArray() ? "数组" : "" + "参数'" + p.getName() + "'位于" + p.getLocation().getIn()
+        p -> (p.getIsArray() ? "数组" : "") + "参数'" + p.getName() + "'位于" + p.getLocation().getIn()
     ).collect(Collectors.joining(";"));
   }
 
@@ -96,7 +96,9 @@ public class ApiExecuteService {
             .collect(Collectors.toList());
         if (isArray) {
           if (CollectionUtils.isEmpty(hv)) {
-            invalidArgs.add(param);
+            if(required) {
+              invalidArgs.add(param);
+            }
           } else {
             map.put(name, hv);
           }
@@ -146,7 +148,9 @@ public class ApiExecuteService {
                 .collect(Collectors.toList());
             map.put(name, list);
           } else {
-            invalidArgs.add(param);
+            if(required) {
+              invalidArgs.add(param);
+            }
           }
         } else {
           String value = request.getParameter(name);

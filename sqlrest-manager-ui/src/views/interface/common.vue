@@ -521,7 +521,7 @@
       <el-card>
         <el-row>
           <el-col>
-            <div style="float: right; padding: 25px">
+            <div style="float: right; padding: 0px">
               <el-button type="primary"
                          size="mini"
                          icon="el-icon-arrow-down"
@@ -605,9 +605,8 @@
                                v-if="!isOnlyShowDetail"
                                min-width="25%">
                 <template slot-scope="scope">
-                  <el-button size="mini"
-                             type="danger"
-                             @click="deleteDebugParamsItem(scope.$index)">删除</el-button>
+                  <el-link icon="el-icon-delete"
+                           @click="deleteDebugParamsItem(scope.$index)"></el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -627,8 +626,17 @@
         </el-row>
         <el-row>
           <el-col :span="24">
-            <textarea v-model="debugResponse"
-                      style="width:98%; height:400px"></textarea>
+            <el-tabs type="border-card">
+              <el-tab-pane label="执行结果">
+                <json-viewer :value="debugResponse"
+                             :expand-depth=5
+                             copyable
+                             boxed
+                             sort></json-viewer>
+              </el-tab-pane>
+              <el-tab-pane label="执行信息">
+              </el-tab-pane>
+            </el-tabs>
           </el-col>
         </el-row>
       </el-card>
@@ -641,6 +649,7 @@ import multiSqlEditer from '@/components/codeEditer/multiSqlEditer'
 import scriptEditer from '@/components/codeEditer/scriptEditer'
 import urlencode from "urlencode";
 import qs from "qs";
+import JsonViewer from 'vue-json-viewer';
 
 export default {
   name: "common",
@@ -695,7 +704,7 @@ export default {
       keywordHints: [],
       inputParams: [],
       debugParams: [],
-      debugResponse: "",
+      debugResponse: {},
       outputParams: [],
       responseNamingStrategy: [],
       responseTypeFormat: [],
@@ -758,7 +767,7 @@ export default {
       default: false
     }
   },
-  components: { multiSqlEditer, scriptEditer },
+  components: { multiSqlEditer, scriptEditer, JsonViewer },
   methods: {
     isUpdatePage: function () {
       if (this.$route.query.id) {
@@ -1239,6 +1248,11 @@ export default {
             sqls = this.$refs.scriptEditer.queryContent()
           }
 
+          if (!this.createParam.dataSourceId) {
+            alert('请选择一个数据源来')
+            return
+          }
+
           if (this.checkSqlsOrScriptEmpty(sqls)) {
             alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容')
           } else {
@@ -1335,7 +1349,7 @@ export default {
       );
     },
     handleDebug: function () {
-      this.debugResponse = ""
+      this.debugResponse = {}
       var sqls = []
       var isSql = true;
       if (this.createParam.engine === 'SQL') {
@@ -1344,6 +1358,11 @@ export default {
       } else {
         isSql = false
         sqls = this.$refs.scriptEditer.queryContent()
+      }
+
+      if (!this.createParam.dataSourceId) {
+        alert('请选择一个数据源来')
+        return
       }
 
       if (this.checkSqlsOrScriptEmpty(sqls)) {
@@ -1407,7 +1426,7 @@ export default {
       }).then(
         res => {
           if (0 === res.data.code) {
-            this.debugResponse = JSON.stringify(res.data.data.answer, null, 2);
+            this.debugResponse = res.data.data.answer;
             this.outputParams = [];
             let map = res.data.data.types;
             for (let key in map) {

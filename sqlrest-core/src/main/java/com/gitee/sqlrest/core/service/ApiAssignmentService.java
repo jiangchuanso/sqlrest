@@ -128,8 +128,24 @@ public class ApiAssignmentService {
         .collect(Collectors.toList());
     Map<String, Object> params = new HashMap<>();
     if (!CollectionUtils.isEmpty(request.getParamValues())) {
+      List<ParamValue> invalidArgs = new ArrayList<>();
+      for (ParamValue paramValue : request.getParamValues()) {
+        if (paramValue.getRequired()) {
+          if (StringUtils.isBlank(paramValue.getValue())) {
+            invalidArgs.add(paramValue);
+          }
+        }
+      }
+      if (invalidArgs.size() > 0) {
+        String msg = "必填参数为空," + invalidArgs.stream().map(
+            p -> (p.getIsArray() ? "数组" : "") + "参数'" + p.getName()
+        ).collect(Collectors.joining(";"));
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, msg);
+      }
+
       Map<String, List<ParamValue>> names = request.getParamValues()
-          .stream().collect(Collectors.groupingBy(ParamValue::getName));
+          .stream().filter(i -> StringUtils.isNotBlank(i.getValue()))
+          .collect(Collectors.groupingBy(ParamValue::getName));
       for (Map.Entry<String, List<ParamValue>> entry : names.entrySet()) {
         String paramName = entry.getKey();
         List<ParamValue> value = entry.getValue();
@@ -167,8 +183,14 @@ public class ApiAssignmentService {
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(Charsets.UTF_8.name());
-    response.getWriter().append(JacksonUtils.toJsonStr(entity, request.getFormatMap().stream()
-        .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a))));
+
+    Map<DataTypeFormatEnum, String> formatMap = request.getFormatMap().stream()
+        .collect(
+            Collectors.toMap(
+                DataTypeFormatMapValue::getKey,
+                DataTypeFormatMapValue::getValue,
+                (a, b) -> a));
+    response.getWriter().append(JacksonUtils.toJsonStr(entity, formatMap));
   }
 
   public Long createAssignment(ApiAssignmentSaveRequest request) {
@@ -186,6 +208,10 @@ public class ApiAssignmentService {
               "Request with GET/HEAD method cannot have body.");
         }
       }
+    }
+    if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+          "Invalid datasourceId or maybe not exist.");
     }
     if (CollectionUtils.isEmpty(request.getContextList())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "contextList");
@@ -249,6 +275,10 @@ public class ApiAssignmentService {
               "Request with GET/HEAD method cannot have body.");
         }
       }
+    }
+    if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+          "Invalid datasourceId or maybe not exist.");
     }
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
