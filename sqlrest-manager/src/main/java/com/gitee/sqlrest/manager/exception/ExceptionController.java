@@ -4,6 +4,7 @@ import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -11,6 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Slf4j
 @ControllerAdvice
 public class ExceptionController {
+
+  @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+  public ResultEntity argumentValidException(MethodArgumentNotValidException e) {
+    log.error("Invalid arguments error:", e);
+    return ResultEntity.failed(ResponseErrorCode.ERROR_INVALID_ARGUMENT, e.getMessage());
+  }
 
   @ResponseBody
   @ExceptionHandler(value = Exception.class)

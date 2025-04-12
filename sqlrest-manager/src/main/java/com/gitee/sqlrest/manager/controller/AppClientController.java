@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,7 @@ public class AppClientController {
 
   @ApiOperation(value = "添加客户端应用")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity create(@RequestBody AppClientSaveRequest request) {
+  public ResultEntity create(@Valid @RequestBody AppClientSaveRequest request) {
     appClientService.create(request);
     return ResultEntity.success();
   }
@@ -58,7 +59,7 @@ public class AppClientController {
 
   @ApiOperation(value = "创建分组关联")
   @PostMapping(value = "/auth/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity createGroupAuth(@RequestBody AppClientGroupRequest request) {
+  public ResultEntity createGroupAuth(@Valid @RequestBody AppClientGroupRequest request) {
     appClientService.createGroupAuth(request);
     return ResultEntity.success();
   }

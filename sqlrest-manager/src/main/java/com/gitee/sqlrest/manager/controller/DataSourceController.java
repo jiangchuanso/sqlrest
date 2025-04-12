@@ -13,6 +13,7 @@ import com.gitee.sqlrest.core.service.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.annotation.Resource;
+import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,14 +67,14 @@ public class DataSourceController {
 
   @ApiOperation(value = "添加数据源")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity create(@RequestBody DataSourceSaveRequest request) {
+  public ResultEntity create(@Valid @RequestBody DataSourceSaveRequest request) {
     datasourceService.createDataSource(request);
     return ResultEntity.success();
   }
 
   @ApiOperation(value = "修改数据源")
   @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity update(@RequestBody DataSourceSaveRequest request) {
+  public ResultEntity update(@Valid @RequestBody DataSourceSaveRequest request) {
     datasourceService.updateDataSource(request);
     return ResultEntity.success();
   }

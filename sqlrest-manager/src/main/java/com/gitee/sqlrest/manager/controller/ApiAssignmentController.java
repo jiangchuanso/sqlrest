@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,20 +84,21 @@ public class ApiAssignmentController {
 
   @ApiOperation(value = "调试API配置")
   @PostMapping(value = "/debug", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void debug(@RequestBody ApiDebugExecuteRequest request, HttpServletResponse response) throws IOException {
+  public void debug(@Valid @RequestBody ApiDebugExecuteRequest request, HttpServletResponse response)
+      throws IOException {
     apiAssignmentService.debugExecute(request, response);
   }
 
   @ApiOperation(value = "添加API配置")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity create(@RequestBody ApiAssignmentSaveRequest request) {
+  public ResultEntity create(@Valid @RequestBody ApiAssignmentSaveRequest request) {
     Long id = apiAssignmentService.createAssignment(request);
     return ResultEntity.success(id);
   }
 
   @ApiOperation(value = "更新API配置")
   @PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity update(@RequestBody ApiAssignmentSaveRequest request) {
+  public ResultEntity update(@Valid @RequestBody ApiAssignmentSaveRequest request) {
     apiAssignmentService.updateAssignment(request);
     return ResultEntity.success();
   }

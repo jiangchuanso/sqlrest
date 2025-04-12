@@ -1,10 +1,19 @@
 package com.gitee.sqlrest.core.service;
 
+import cn.hutool.extra.spring.SpringUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sqlrest.common.dto.DateCount;
 import com.gitee.sqlrest.common.dto.NameCount;
+import com.gitee.sqlrest.common.dto.PageResult;
+import com.gitee.sqlrest.core.dto.ApiAccessLogBasicResponse;
+import com.gitee.sqlrest.persistence.dao.AppClientDao;
+import com.gitee.sqlrest.persistence.entity.AccessRecordEntity;
+import com.gitee.sqlrest.persistence.entity.AppClientEntity;
 import com.gitee.sqlrest.persistence.mapper.AccessRecordMapper;
+import com.gitee.sqlrest.persistence.util.PageUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -36,5 +45,32 @@ public class OverviewService {
 
   public List<NameCount> topClient(Integer days, Integer n) {
     return accessRecordMapper.getTopAppClientAccess(days > 0 ? days - 1 : days, n);
+  }
+
+  public PageResult<ApiAccessLogBasicResponse> pageByApiId(Long apiId, Integer page, Integer size) {
+    Map<String, String> map = SpringUtil.getBean(AppClientDao.class)
+        .listAll(null).stream()
+        .collect(
+            Collectors.toMap(
+                AppClientEntity::getAppKey,
+                one -> String.format("[%d]%s(%s)", one.getId(), one.getName(), one.getAppKey())));
+    return PageUtils.getPage(() ->
+            accessRecordMapper.selectList(
+                Wrappers.<AccessRecordEntity>lambdaQuery()
+                    .eq(AccessRecordEntity::getApiId, apiId)
+                    .orderByDesc(AccessRecordEntity::getId)
+            ).stream().map(
+                record -> ApiAccessLogBasicResponse.builder()
+                    .id(record.getId())
+                    .status(record.getStatus())
+                    .duration(record.getDuration())
+                    .ipAddr(record.getIpAddr())
+                    .userAgent(record.getUserAgent())
+                    .clientApp(map.get(record.getClientKey()))
+                    .exception(record.getException())
+                    .createTime(record.getCreateTime())
+                    .build()
+            ).collect(Collectors.toList())
+        , page, size);
   }
 }

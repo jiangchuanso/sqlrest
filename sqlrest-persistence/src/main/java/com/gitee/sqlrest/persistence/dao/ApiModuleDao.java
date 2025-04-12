@@ -1,10 +1,12 @@
 package com.gitee.sqlrest.persistence.dao;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
 import com.gitee.sqlrest.persistence.mapper.ApiModuleMapper;
 import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 public class ApiModuleDao {
@@ -21,7 +23,15 @@ public class ApiModuleDao {
   }
 
   public List<ApiModuleEntity> listAll() {
-    return apiModuleMapper.selectList(null);
+    return listAll(null);
+  }
+
+  public List<ApiModuleEntity> listAll(String searchText) {
+    return apiModuleMapper.selectList(
+        Wrappers.<ApiModuleEntity>lambdaQuery()
+            .like(StringUtils.hasText(searchText), ApiModuleEntity::getName, searchText)
+            .orderByDesc(ApiModuleEntity::getId)
+    );
   }
 
   public void updateById(ApiModuleEntity entity) {

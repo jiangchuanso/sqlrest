@@ -77,27 +77,35 @@ const constantRouter = new Router({
         {
           path: '/interface',
           name: '接口开发',
-          icon: "el-icon-paperclip",
+          icon: "el-icon-edit-outline",
           component: () => import('@/views/interface/index'),
           children: [
             {
               path: '/interface/module',
-              name: '模块管理',
+              name: '模块配置',
               icon: "el-icon-folder",
               component: () => import('@/views/interface/module'),
             },
             {
               path: '/interface/list',
-              name: '接口管理',
+              name: '接口配置',
               icon: "el-icon-refrigerator",
               component: () => import('@/views/interface/list'),
-            },
-            // {
-            //   path: '/interface/swagger',
-            //   name: '接口文档',
-            //   icon: "el-icon-pie-chart",
-            //   component: () => import('@/views/interface/swagger')
-            // }
+            }
+          ]
+        },
+        {
+          path: '/service',
+          name: '接口仓库',
+          icon: "el-icon-school",
+          component: () => import('@/views/service/index'),
+          children: [
+            {
+              path: '/service/interface',
+              name: '服务接口',
+              icon: "el-icon-lightning",
+              component: () => import('@/views/service/interface'),
+            }
           ]
         },
         {

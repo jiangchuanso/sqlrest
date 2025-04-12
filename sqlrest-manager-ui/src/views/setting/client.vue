@@ -5,6 +5,7 @@
         <div class="left-search-input-group">
           <div class="left-search-input">
             <el-input placeholder="请输入名称关键字搜索"
+                      size="mini"
                       v-model="keyword"
                       @change="searchByKeyword"
                       :clearable=true

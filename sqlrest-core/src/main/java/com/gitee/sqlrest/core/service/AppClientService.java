@@ -33,6 +33,9 @@ public class AppClientService {
     if (null != appClientDao.getByAppKey(request.getAppKey())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "Duplicate app key :" + request.getAppKey());
     }
+    if (appClientDao.getByName(request.getName()).size() > 0) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "Duplicate Name :" + request.getName());
+    }
 
     AppClientEntity appClientEntity = new AppClientEntity();
     BeanUtil.copyProperties(request, appClientEntity);

@@ -57,7 +57,7 @@ public class ApiAssignmentDao {
 
   public void makeOpen(Long id, Boolean open) {
     ApiAssignmentEntity assignmentEntity = apiAssignmentMapper.selectById(id);
-    if (null != assignmentEntity) {
+    if (null != assignmentEntity && null != open) {
       assignmentEntity.setOpen(open);
       apiAssignmentMapper.updateById(assignmentEntity);
     }

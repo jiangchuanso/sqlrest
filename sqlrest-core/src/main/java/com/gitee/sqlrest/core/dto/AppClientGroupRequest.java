@@ -3,6 +3,8 @@ package com.gitee.sqlrest.core.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,9 +13,11 @@ import lombok.NoArgsConstructor;
 @ApiModel("客户端分组关联")
 public class AppClientGroupRequest {
 
+  @NotNull(message = "id不能为null")
   @ApiModelProperty("客户端应用ID")
   private Long id;
 
+  @NotEmpty(message = "groupIds不能为空列表")
   @ApiModelProperty("分组ID列表")
   private List<Long> groupIds;
 }

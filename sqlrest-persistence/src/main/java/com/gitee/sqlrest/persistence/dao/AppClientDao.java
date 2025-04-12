@@ -46,6 +46,12 @@ public class AppClientDao {
     return appClientMapper.selectOne(queryWrapper);
   }
 
+  public List<AppClientEntity> getByName(String name) {
+    QueryWrapper<AppClientEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(AppClientEntity::getName, name);
+    return appClientMapper.selectList(queryWrapper);
+  }
+
   public Set<Long> getAuthGroups(String appKey) {
     AppClientEntity appClientEntity = getByAppKey(appKey);
     if (null == appClientEntity) {

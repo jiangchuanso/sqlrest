@@ -852,7 +852,15 @@ export default {
       this.groupList = [];
       this.$http({
         method: "POST",
-        url: "/sqlrest/manager/api/v1/group/listAll"
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/group/listAll",
+        data: JSON.stringify({
+          page: 1,
+          size: 2147483647,
+          searchText: null
+        })
       }).then(
         res => {
           if (0 === res.data.code) {
@@ -870,7 +878,15 @@ export default {
       this.moduleList = [];
       this.$http({
         method: "POST",
-        url: "/sqlrest/manager/api/v1/module/listAll"
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/module/listAll",
+        data: JSON.stringify({
+          page: 1,
+          size: 2147483647,
+          searchText: null
+        })
       }).then(
         res => {
           if (0 === res.data.code) {

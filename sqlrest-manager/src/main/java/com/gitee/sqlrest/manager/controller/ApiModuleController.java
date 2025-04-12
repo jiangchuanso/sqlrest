@@ -1,15 +1,21 @@
 package com.gitee.sqlrest.manager.controller;
 
 import com.gitee.sqlrest.common.consts.Constants;
+import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.core.service.ApiModuleService;
+import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.annotation.Resource;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,14 +30,15 @@ public class ApiModuleController {
 
   @ApiOperation(value = "添加模块")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity create(@RequestParam("name") String name) {
+  public ResultEntity create(@Valid @NotBlank(message = "name不能为空") @RequestParam("name") String name) {
     apiModuleService.createModule(name);
     return ResultEntity.success();
   }
 
   @ApiOperation(value = "更新模块")
   @PostMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity update(@PathVariable("id") Long id, @RequestParam("name") String name) {
+  public ResultEntity update(@PathVariable("id") Long id,
+      @Valid @NotBlank(message = "name不能为空") @RequestParam("name") String name) {
     apiModuleService.updateModule(id, name);
     return ResultEntity.success();
   }
@@ -45,7 +52,7 @@ public class ApiModuleController {
 
   @ApiOperation(value = "模块列表")
   @PostMapping(value = "/listAll", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity listAll() {
-    return ResultEntity.success(apiModuleService.listAll());
+  public PageResult<ApiModuleEntity> listAll(@RequestBody EntitySearchRequest request) {
+    return apiModuleService.listAll(request);
   }
 }

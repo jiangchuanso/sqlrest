@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +27,7 @@ public class AuthenticationController {
 
   @ApiOperation(value = "账号登录", notes = "使用一个账号密码登录")
   @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity login(@RequestBody UserLoginRequest request) {
+  public ResultEntity login(@Valid @RequestBody UserLoginRequest request) {
     return ResultEntity.success(systemUserService.login(request.getUsername(), request.getPassword()));
   }
 

@@ -1,12 +1,14 @@
 package com.gitee.sqlrest.core.service;
 
+import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
+import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.ApiGroupDao;
 import com.gitee.sqlrest.persistence.dao.AppClientDao;
 import com.gitee.sqlrest.persistence.entity.ApiGroupEntity;
-import java.util.List;
+import com.gitee.sqlrest.persistence.util.PageUtils;
 import javax.annotation.Resource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -49,7 +51,11 @@ public class ApiGroupService {
     appClientDao.deleteClientAuthByGroupId(id);
   }
 
-  public List<ApiGroupEntity> listAll() {
-    return apiGroupDao.listAll();
+  public PageResult<ApiGroupEntity> listAll(EntitySearchRequest request) {
+    return PageUtils.getPage(
+        () -> apiGroupDao.listAll(request.getSearchText()),
+        request.getPage(),
+        request.getSize()
+    );
   }
 }

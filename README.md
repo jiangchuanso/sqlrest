@@ -229,6 +229,8 @@ MYSQLDB_PASSWORD=123456
 
 ![010.png](docs/images/010.PNG)
 
+![010.png](docs/images/011.PNG)
+
 ## 四、项目推荐
 
 [数据库迁移同步工具dbswitch] (https://gitee.com/inrgihc/dbswitch)

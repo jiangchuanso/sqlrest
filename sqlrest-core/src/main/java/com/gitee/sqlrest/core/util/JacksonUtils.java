@@ -80,7 +80,15 @@ public final class JacksonUtils {
   private static void parseFieldTypes(String prefix, Map<String, Object> map, Map<String, ParamTypeEnum> results) {
     for (String name : map.keySet()) {
       Object value = map.get(name);
-      results.put(name, parseValueType(value));
+      ParamTypeEnum typeEnum = parseValueType(value);
+      if (null != typeEnum) {
+        // TODO: 暂时先忽略不支持的对象的情况
+        if (StringUtils.isBlank(prefix)) {
+          results.put(name, typeEnum);
+        } else {
+          results.put(prefix + "." + name, typeEnum);
+        }
+      }
       String subPrefix = StringUtils.isBlank(prefix) ? name : prefix + "." + name;
       if (value instanceof Map) {
         parseFieldTypes(subPrefix, (Map) value, results);
@@ -103,8 +111,10 @@ public final class JacksonUtils {
       return ParamTypeEnum.TIME;
     } else if (value instanceof Date) {
       return ParamTypeEnum.DATE;
-    } else {
+    } else if (value instanceof String) {
       return ParamTypeEnum.STRING;
+    } else {
+      return null;
     }
   }
 }

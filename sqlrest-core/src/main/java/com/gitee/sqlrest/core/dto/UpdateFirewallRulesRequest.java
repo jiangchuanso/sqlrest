@@ -4,6 +4,7 @@ import com.gitee.sqlrest.common.enums.OnOffEnum;
 import com.gitee.sqlrest.common.enums.WhiteBlackEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @ApiModel("防火墙规则")
 public class UpdateFirewallRulesRequest {
 
+  @NotNull(message = "status不能为null")
   @ApiModelProperty("开启状态")
   private OnOffEnum status;
 

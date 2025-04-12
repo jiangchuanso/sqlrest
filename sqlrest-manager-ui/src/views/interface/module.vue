@@ -2,6 +2,17 @@
   <div>
     <el-card>
       <div class="group-list-top">
+        <div class="left-search-input-group">
+          <div class="left-search-input">
+            <el-input placeholder="名称搜索"
+                      size="mini"
+                      v-model="searchText"
+                      :clearable=true
+                      style="width:300px"
+                      @change="searchByKeyword">
+            </el-input>
+          </div>
+        </div>
         <div class="right-add-button-group">
           <el-button type="primary"
                      size="mini"
@@ -46,6 +57,16 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="page"
+           align="right">
+        <el-pagination @size-change="handleSizeChange"
+                       @current-change="handleCurrentChange"
+                       :current-page="currentPageNum"
+                       :page-sizes="[5, 10, 20, 40]"
+                       :page-size="currentPageSize"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       :total="totalItemCount"></el-pagination>
+      </div>
 
       <el-dialog title="添加信息"
                  :visible.sync="createFormVisible"
@@ -115,6 +136,10 @@ export default {
       lists: [],
       tableData: [
       ],
+      currentPageNum: 1,
+      currentPageSize: 10,
+      totalItemCount: 0,
+      searchText: '',
       createform: {
         title: "",
       },
@@ -144,9 +169,13 @@ export default {
         },
         url: "/sqlrest/manager/api/v1/module/listAll",
         data: JSON.stringify({
+          page: this.currentPageNum,
+          size: this.currentPageSize,
+          searchText: this.searchText
         })
       }).then(res => {
         if (0 === res.data.code) {
+          this.totalItemCount = res.data.pagination.total
           this.tableData = res.data.data;
         } else {
           alert("加载数据失败:" + res.data.message);
@@ -240,9 +269,17 @@ export default {
       });
     },
     handleSizeChange: function (pageSize) {
-      this.loading = true;
+      this.currentPageSize = pageSize;
       this.loadData();
-    }
+    },
+    handleCurrentChange: function (currentPage) {
+      this.currentPageNum = currentPage;
+      this.loadData();
+    },
+    searchByKeyword: function () {
+      this.currentPage = 1;
+      this.loadData();
+    },
   },
   mounted () {
     this.loadData();

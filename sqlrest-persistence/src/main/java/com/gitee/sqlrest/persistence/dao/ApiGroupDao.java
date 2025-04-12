@@ -1,10 +1,12 @@
 package com.gitee.sqlrest.persistence.dao;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sqlrest.persistence.entity.ApiGroupEntity;
 import com.gitee.sqlrest.persistence.mapper.ApiGroupMapper;
 import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 @Repository
 public class ApiGroupDao {
@@ -20,8 +22,12 @@ public class ApiGroupDao {
     return apiGroupMapper.selectById(id);
   }
 
-  public List<ApiGroupEntity> listAll() {
-    return apiGroupMapper.selectList(null);
+  public List<ApiGroupEntity> listAll(String searchText) {
+    return apiGroupMapper.selectList(
+        Wrappers.<ApiGroupEntity>lambdaQuery()
+            .like(StringUtils.hasText(searchText), ApiGroupEntity::getName, searchText)
+            .orderByDesc(ApiGroupEntity::getId)
+    );
   }
 
   public void updateById(ApiGroupEntity entity) {

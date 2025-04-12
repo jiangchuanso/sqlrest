@@ -3,7 +3,9 @@ package com.gitee.sqlrest.manager.controller;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.DateCount;
 import com.gitee.sqlrest.common.dto.NameCount;
+import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.core.dto.ApiAccessLogBasicResponse;
 import com.gitee.sqlrest.core.service.OverviewService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,4 +62,10 @@ public class OverviewController {
     return ResultEntity.success(overviewService.topClient(days, n));
   }
 
+  @ApiOperation(value = "接口调用日志")
+  @GetMapping(value = "/log/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public PageResult<ApiAccessLogBasicResponse> callLogs(@PathVariable("id") Long id, @RequestParam("page") Integer page,
+      @RequestParam("size") Integer size) {
+    return overviewService.pageByApiId(id, page, size);
+  }
 }
