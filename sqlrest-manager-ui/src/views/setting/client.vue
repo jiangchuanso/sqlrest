@@ -280,7 +280,18 @@ export default {
       });
     },
     loadAllGroups: function () {
-      this.$http.post("/sqlrest/manager/api/v1/group/listAll").then((res) => {
+      this.$http({
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/group/listAll",
+        data: JSON.stringify({
+          page: 1,
+          size: 2147483647,
+          searchText: null
+        })
+      }).then((res) => {
         if (0 === res.data.code) {
           this.groups = res.data.data
         } else {

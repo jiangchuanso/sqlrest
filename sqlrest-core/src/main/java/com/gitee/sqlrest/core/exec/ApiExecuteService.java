@@ -171,7 +171,7 @@ public class ApiExecuteService {
 
   public Map<String, Object> getRequestBodyMap(HttpServletRequest request) throws IOException {
     HttpMethodEnum methodEnum = HttpMethodEnum.valueOf(request.getMethod());
-    if (methodEnum.isHasBody()) {
+    if (methodEnum.isHasBody() && null != request.getContentType()) {
       MediaType contentType = MediaType.parseMediaType(request.getContentType());
       Charset charset = (contentType != null && contentType.getCharset() != null ?
           contentType.getCharset() : StandardCharsets.UTF_8);
