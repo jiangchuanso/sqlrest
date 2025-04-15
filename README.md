@@ -207,29 +207,23 @@ MYSQLDB_PASSWORD=123456
 
 ### 2、部分系统截图
 
-![000.png](docs/images/000.PNG)
+![002.png](docs/images/001.PNG)
 
-![001.png](docs/images/001.PNG)
+![003.png](docs/images/002.PNG)
 
-![002.png](docs/images/002.PNG)
+![004.png](docs/images/003.PNG)
 
-![003.png](docs/images/003.PNG)
+![005.png](docs/images/004.PNG)
 
-![004.png](docs/images/004.PNG)
+![006.png](docs/images/005.PNG)
 
-![005.png](docs/images/005.PNG)
+![007.png](docs/images/006.PNG)
 
-![006.png](docs/images/006.PNG)
+![008.png](docs/images/007.PNG)
 
-![007.png](docs/images/007.PNG)
+![010.png](docs/images/008.PNG)
 
-![008.png](docs/images/008.PNG)
-
-![009.png](docs/images/009.PNG)
-
-![010.png](docs/images/010.PNG)
-
-![010.png](docs/images/011.PNG)
+![010.png](docs/images/009.PNG)
 
 ## 四、项目推荐
 

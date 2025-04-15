@@ -502,11 +502,20 @@ export default {
       this.$http.get(
         "/sqlrest/manager/api/v1/datasource/test/" + row.id
       ).then(res => {
-        //console.log(res);
         if (0 === res.data.code) {
-          alert("测试连接成功!");
+          this.$alert("测试连接成功!", "提示信息",
+            {
+              confirmButtonText: "确定",
+              type: "success"
+            }
+          );
         } else {
-          alert("测试连接失败," + res.data.message);
+          this.$alert(res.data.message, "错误信息",
+            {
+              confirmButtonText: "确定",
+              type: "error"
+            }
+          );
         }
       });
     },
@@ -518,7 +527,6 @@ export default {
       let driverClass = "";
       if (this.databaseType.length > 0) {
         for (let i = 0; i < this.databaseType.length; i++) {
-          //console.log(this.databaseType[i])
           if (this.databaseType[i].type == this.createform.type) {
             driverClass = this.databaseType[i].driver;
             break;
@@ -550,11 +558,21 @@ export default {
               this.createform = {};
               this.loadData();
             } else {
-              alert("添加连接信息失败:" + res.data.message);
+              this.$alert(res.data.message, "添加连接信息失败",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
             }
           });
         } else {
-          alert("请检查输入");
+          this.$alert("请检查输入", "提示信息",
+            {
+              confirmButtonText: "确定",
+              type: "info"
+            }
+          );
         }
       });
     },
@@ -596,7 +614,6 @@ export default {
       let driverClass = "";
       if (this.databaseType.length > 0) {
         for (let i = 0; i < this.databaseType.length; i++) {
-          //console.log(this.databaseType[i])
           if (this.databaseType[i].type == this.updateform.type) {
             driverClass = this.databaseType[i].driver;
             break;
@@ -629,11 +646,21 @@ export default {
               this.loadData();
               this.updateform = {};
             } else {
-              alert("修改连接信息失败:" + res.data.message);
+              this.$alert(res.data.message, "修改连接信息失败",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
             }
           });
         } else {
-          alert("请检查输入");
+          this.$alert("请检查输入", "提示信息",
+            {
+              confirmButtonText: "确定",
+              type: "info"
+            }
+          );
         }
       });
     },

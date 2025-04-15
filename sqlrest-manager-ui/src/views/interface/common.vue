@@ -1034,17 +1034,6 @@ export default {
             if (this.$refs.sqlEditors) {
               this.$refs.sqlEditors.setTableHints(this.tableHints)
             }
-            // if (this.$refs.scriptEditer) {
-            //   let keywords = []
-            //   for (let key in this.tableHints) {
-            //     let value = this.tableHints[key]
-            //     for (let item of value) {
-            //       keywords.push({ meta: "数据表", caption: key + "." + item, value: key + "." + item, score: 1 });
-            //     }
-            //   }
-            //   this.$refs.scriptEditer.setTableHints(keywords)
-            // }
-
             return resolve(tableList);
           } else {
             this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
@@ -1159,7 +1148,12 @@ export default {
         res => {
           if (0 === res.data.code) {
             if (res.data.data && res.data.data.length === 0) {
-              alert("解析的入参为空")
+              this.$alert("解析的入参为空", "错误信息",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
               return
             }
             for (let item of res.data.data) {
@@ -1179,7 +1173,12 @@ export default {
             };
           } else {
             if (res.data.message) {
-              alert("操作失败失败:" + res.data.message);
+              this.$alert(res.data.message, "错误信息",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
             }
           }
         }
@@ -1234,7 +1233,12 @@ export default {
         )
       }
       if (!add) {
-        alert("已经存在分页参数了！")
+        this.$alert("已经存在分页参数了！", "提示信息",
+          {
+            confirmButtonText: "确定",
+            type: "info"
+          }
+        );
       }
     },
     deleteInputParamsItem: function (index) {
@@ -1265,12 +1269,22 @@ export default {
           }
 
           if (!this.createParam.dataSourceId) {
-            alert('请选择一个数据源来')
+            this.$alert('请选择一个数据源来', "错误信息",
+              {
+                confirmButtonText: "确定",
+                type: "error"
+              }
+            );
             return
           }
 
           if (this.checkSqlsOrScriptEmpty(sqls)) {
-            alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容')
+            this.$alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容', "错误信息",
+              {
+                confirmButtonText: "确定",
+                type: "error"
+              }
+            );
           } else {
             if (this.isUpdatePage()) {
               this.handleUpdateSave(sqls);
@@ -1317,7 +1331,12 @@ export default {
             this.$message("添加信息成功");
           } else {
             if (res.data.message) {
-              alert("操作失败失败:" + res.data.message);
+              this.$alert(res.data.message, "错误信息",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
             }
           }
         }
@@ -1358,7 +1377,12 @@ export default {
             this.$message("更新信息成功");
           } else {
             if (res.data.message) {
-              alert("操作失败失败:" + res.data.message);
+              this.$alert(res.data.message, "错误信息",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
             }
           }
         }
@@ -1377,12 +1401,22 @@ export default {
       }
 
       if (!this.createParam.dataSourceId) {
-        alert('请选择一个数据源来')
+        this.$alert('请选择一个数据源来', "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
         return
       }
 
       if (this.checkSqlsOrScriptEmpty(sqls)) {
-        alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容')
+        this.$alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容', "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
       } else {
         this.debugParams = []
         this.inputParams.forEach(item => {
@@ -1456,7 +1490,12 @@ export default {
             }
           } else {
             if (res.data.message) {
-              alert("调试操作失败:" + res.data.message);
+              this.$alert(res.data.message, "错误信息",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
             }
           }
         }

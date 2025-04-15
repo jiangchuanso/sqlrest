@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public final class JacksonUtils {
@@ -57,16 +58,25 @@ public final class JacksonUtils {
       parseFieldTypes("", (Map) obj, results);
     } else if (obj instanceof Collection) {
       Collection collection = (Collection) obj;
+      if (CollectionUtils.isEmpty(collection)) {
+        return results;
+      }
       Object item = collection.stream().findFirst().get();
       if (item instanceof Map) {
         parseFieldTypes("", (Map) item, results);
       } else if (item instanceof Collection) {
         Collection subCollection = (Collection) item;
+        if (CollectionUtils.isEmpty(subCollection)) {
+          return results;
+        }
         Object subItem = subCollection.stream().findFirst().get();
         if (subItem instanceof Map) {
           parseFieldTypes("", (Map) subItem, results);
         } else if (subItem instanceof Collection) {
           Collection thSubCollection = (Collection) subItem;
+          if (CollectionUtils.isEmpty(thSubCollection)) {
+            return results;
+          }
           Object thSubItem = thSubCollection.stream().findFirst().get();
           if (thSubItem instanceof Map) {
             parseFieldTypes("", (Map) thSubItem, results);

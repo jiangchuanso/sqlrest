@@ -53,6 +53,7 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -150,13 +151,17 @@ public class ApiAssignmentService {
         String paramName = entry.getKey();
         List<ParamValue> value = entry.getValue();
         ParamTypeEnum type = value.get(0).getType();
-        if (value.get(0).getIsArray()) {
-          List<Object> values = value.stream().map(ParamValue::getValue)
-              .map(s -> type.getConverter().apply(s))
-              .collect(Collectors.toList());
-          params.put(paramName, values);
-        } else {
-          params.put(paramName, type.getConverter().apply(value.get(0).getValue()));
+        try {
+          if (value.get(0).getIsArray()) {
+            List<Object> values = value.stream().map(ParamValue::getValue)
+                .map(s -> type.getConverter().apply(s))
+                .collect(Collectors.toList());
+            params.put(paramName, values);
+          } else {
+            params.put(paramName, type.getConverter().apply(value.get(0).getValue()));
+          }
+        } catch (Exception e) {
+          throw new RuntimeException(String.format("[%s] value type invalid, %s", paramName, e.getMessage()));
         }
       }
     }
@@ -175,9 +180,13 @@ public class ApiAssignmentService {
           .execute(scripts, params, request.getNamingStrategy());
       Object answer = results.size() > 1 ? results : results.get(0);
       Map<String, ParamTypeEnum> types = JacksonUtils.parseFieldTypes(results);
-      entity = ResultEntity.success(ImmutableMap.of("answer", answer, "types", types));
+      if (MapUtils.isNotEmpty(types)) {
+        entity = ResultEntity.success(ImmutableMap.of("answer", answer, "types", types));
+      } else {
+        entity = ResultEntity.failed("No result data set!");
+      }
     } catch (Exception e) {
-      entity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(e));
+      entity = ResultEntity.failed(ExceptionUtil.getMessage(e));
     }
 
     response.setStatus(HttpServletResponse.SC_OK);

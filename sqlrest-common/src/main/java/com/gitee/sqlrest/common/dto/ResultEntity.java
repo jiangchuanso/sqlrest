@@ -36,7 +36,10 @@ public class ResultEntity<T> implements Serializable {
   }
 
   public static ResultEntity failed(ResponseErrorCode code, String message) {
-    return new ResultEntity(code.getCode(), code.getMessage() + ":" + message, null);
+    return new ResultEntity(code.getCode(), code.getMessage() + "," + message, null);
   }
 
+  public static ResultEntity failed(String message) {
+    return new ResultEntity(ResponseErrorCode.ERROR_INTERNAL_ERROR.getCode(), message, null);
+  }
 }

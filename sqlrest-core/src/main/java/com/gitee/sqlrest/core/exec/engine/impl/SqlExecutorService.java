@@ -46,8 +46,10 @@ public class SqlExecutorService extends AbstractExecutorEngine {
         } catch (SQLException se) {
           log.warn("Failed to call jdbc Connection::rollback(): {}", se.getMessage(), se);
         }
-        throw new RuntimeException(e);
+        throw e;
       }
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -158,7 +158,7 @@
       <outputDirectory>lib/common</outputDirectory>
       <excludes>
         <exclude>sqlrest-manager-*.jar</exclude>
-        <exclude>flyway-core-*.jar</exclude>
+        <exclude>liquibase-core-*.jar</exclude>
         <exclude>spring-boot-starter-tomcat-*.jar</exclude>
         <exclude>spring-boot-starter-web-*.jar</exclude>
         <exclude>tomcat-embed-websocket-*.jar</exclude>
@@ -187,7 +187,7 @@
       <outputDirectory>lib/manager</outputDirectory>
       <includes>
         <include>sqlrest-manager-*.jar</include>
-        <include>flyway-core-*.jar</include>
+        <include>liquibase-core-*.jar</include>
         <include>spring-cloud-netflix-eureka-server-*.jar</include>
         <include>spring-cloud-starter-netflix-eureka-server-*.jar</include>
       </includes>
