@@ -2,6 +2,7 @@ package com.gitee.sqlrest.core.exec.module;
 
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
+import com.gitee.sqlrest.core.exec.SqlExecuteLogger;
 import com.gitee.sqlrest.core.exec.annotation.Comment;
 import com.gitee.sqlrest.core.exec.annotation.Module;
 import com.gitee.sqlrest.core.util.ConvertUtils;
@@ -14,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -63,7 +65,12 @@ public class DbVarModule {
     log.info("Enter selectAll() function, SQL:{},params:{}", sqlOrXml, params);
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
-    return build(jdbcTemplate.queryForList(sqlMeta.getSql(), sqlMeta.getParameter().toArray()));
+    long start = System.currentTimeMillis();
+    try {
+      return build(jdbcTemplate.queryForList(sqlMeta.getSql(), sqlMeta.getParameter().toArray()));
+    } finally {
+      SqlExecuteLogger.add(sqlMeta.getSql(), sqlMeta.getParameter(), System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("count所有数据的总数")
@@ -72,7 +79,12 @@ public class DbVarModule {
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     String countSql = String.format("select count(*) from (%s) a", sqlMeta.getSql());
-    return jdbcTemplate.queryForObject(countSql, Integer.class, sqlMeta.getParameter().toArray());
+    long start = System.currentTimeMillis();
+    try {
+      return jdbcTemplate.queryForObject(countSql, Integer.class, sqlMeta.getParameter().toArray());
+    } finally {
+      SqlExecuteLogger.add(countSql, sqlMeta.getParameter(), System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("查询单条结果，并传入变量信息，查不到返回null")
@@ -80,19 +92,24 @@ public class DbVarModule {
     log.info("Enter selectOne() function, SQL:{},params:{}", sqlOrXml, params);
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
-    return build(jdbcTemplate
-        .query(sqlMeta.getSql(), new ResultSetExtractor<Map<String, Object>>() {
-              private ColumnMapRowMapper mapper = new ColumnMapRowMapper();
+    long start = System.currentTimeMillis();
+    try {
+      return build(jdbcTemplate
+          .query(sqlMeta.getSql(), new ResultSetExtractor<Map<String, Object>>() {
+                private ColumnMapRowMapper mapper = new ColumnMapRowMapper();
 
-              @Override
-              public Map<String, Object> extractData(ResultSet rs) throws SQLException, DataAccessException {
-                if (rs.next()) {
-                  return mapper.mapRow(rs, 0);
+                @Override
+                public Map<String, Object> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                  if (rs.next()) {
+                    return mapper.mapRow(rs, 0);
+                  }
+                  return null;
                 }
-                return null;
-              }
-            },
-            sqlMeta.getParameter().toArray()));
+              },
+              sqlMeta.getParameter().toArray()));
+    } finally {
+      SqlExecuteLogger.add(sqlMeta.getSql(), sqlMeta.getParameter(), System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("分页查询数据列表")
@@ -106,7 +123,12 @@ public class DbVarModule {
     String pageSql = productType.getPageSql(sqlMeta.getSql(), page, size);
     List<Object> parameters = sqlMeta.getParameter();
     this.productType.getPageConsumer().accept(page, size, parameters);
-    return build(jdbcTemplate.queryForList(pageSql, parameters.toArray()));
+    long start = System.currentTimeMillis();
+    try {
+      return build(jdbcTemplate.queryForList(pageSql, parameters.toArray()));
+    } finally {
+      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("执行insert操作，返回插入主键")
@@ -116,14 +138,19 @@ public class DbVarModule {
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
     GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-    jdbcTemplate.update(
-        connection -> {
-          PreparedStatement ps = connection.prepareStatement(sqlMeta.getSql(), Statement.RETURN_GENERATED_KEYS);
-          new ArgumentPreparedStatementSetter(parameters.toArray()).setValues(ps);
-          return ps;
-        },
-        keyHolder);
-    return build(keyHolder.getKeys());
+    long start = System.currentTimeMillis();
+    try {
+      jdbcTemplate.update(
+          connection -> {
+            PreparedStatement ps = connection.prepareStatement(sqlMeta.getSql(), Statement.RETURN_GENERATED_KEYS);
+            new ArgumentPreparedStatementSetter(parameters.toArray()).setValues(ps);
+            return ps;
+          },
+          keyHolder);
+      return build(keyHolder.getKeys());
+    } finally {
+      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("执行update操作，返回受影响行数")
@@ -132,13 +159,24 @@ public class DbVarModule {
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
-    return jdbcTemplate.update(sqlMeta.getSql(), parameters.toArray());
+    long start = System.currentTimeMillis();
+    try {
+      return jdbcTemplate.update(sqlMeta.getSql(), parameters.toArray());
+    } finally {
+      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("批量执行操作，返回受影响的行数")
   public int batchUpdate(@Comment("sqlList") List<String> sqlList) {
     log.info("Enter batchUpdate() function, SQL:{},params:{}", sqlList);
-    return Arrays.stream(jdbcTemplate.batchUpdate(sqlList.toArray(new String[0]))).sum();
+    long start = System.currentTimeMillis();
+    try {
+      return Arrays.stream(jdbcTemplate.batchUpdate(sqlList.toArray(new String[0]))).sum();
+    } finally {
+      SqlExecuteLogger.add(sqlList.stream().collect(Collectors.joining(";")),
+          Collections.emptyList(), System.currentTimeMillis() - start);
+    }
   }
 
   @Comment("执行delete操作，返回受影响行数")
@@ -147,7 +185,12 @@ public class DbVarModule {
     SqlTemplate template = cfg.getTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
-    return jdbcTemplate.update(sqlMeta.getSql(), parameters.toArray());
+    long start = System.currentTimeMillis();
+    try {
+      return jdbcTemplate.update(sqlMeta.getSql(), parameters.toArray());
+    } finally {
+      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+    }
   }
 }
 

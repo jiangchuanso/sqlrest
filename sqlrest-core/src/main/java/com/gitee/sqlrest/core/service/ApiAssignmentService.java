@@ -19,8 +19,10 @@ import com.gitee.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import com.gitee.sqlrest.core.dto.ApiDebugExecuteRequest;
 import com.gitee.sqlrest.core.dto.AssignmentSearchRequest;
 import com.gitee.sqlrest.core.dto.DataTypeFormatMapValue;
+import com.gitee.sqlrest.core.dto.ExecuteSqlRecord;
 import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.dto.SqlParamParseResponse;
+import com.gitee.sqlrest.core.exec.SqlExecuteLogger;
 import com.gitee.sqlrest.core.exec.annotation.Comment;
 import com.gitee.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import com.gitee.sqlrest.core.exec.engine.impl.ScriptExecutorService;
@@ -42,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +56,6 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -164,6 +166,22 @@ public class ApiAssignmentService {
           throw new RuntimeException(String.format("[%s] value type invalid, %s", paramName, e.getMessage()));
         }
       }
+
+      List<ParamValue> emptyList = request.getParamValues()
+          .stream().filter(i -> StringUtils.isBlank(i.getValue()))
+          .collect(Collectors.toList());
+      for (ParamValue paramValue : emptyList) {
+        ParamTypeEnum type = paramValue.getType();
+        if (!params.containsKey(paramValue.getName())) {
+          if (!paramValue.getRequired()) {
+            if (paramValue.getIsArray()) {
+              params.put(paramValue.getName(), Collections.emptyList());
+            } else {
+              params.put(paramValue.getName(), type.getConverter().apply(paramValue.getDefaultValue()));
+            }
+          }
+        }
+      }
     }
 
     if (null == request.getNamingStrategy()) {
@@ -174,19 +192,26 @@ public class ApiAssignmentService {
 
     ResultEntity entity;
     try {
+      SqlExecuteLogger.init();
       HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
       List<Object> results = ApiExecutorEngineFactory
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
           .execute(scripts, params, request.getNamingStrategy());
-      Object answer = results.size() > 1 ? results : results.get(0);
+      Object answer = results.size() > 1 ? results : (1 == results.size()) ? results.get(0) : null;
       Map<String, ParamTypeEnum> types = JacksonUtils.parseFieldTypes(results);
-      if (MapUtils.isNotEmpty(types)) {
-        entity = ResultEntity.success(ImmutableMap.of("answer", answer, "types", types));
-      } else {
-        entity = ResultEntity.failed("No result data set!");
-      }
+      String logs = Optional.ofNullable(SqlExecuteLogger.get())
+          .orElseGet(ArrayList::new).stream().map(ExecuteSqlRecord::getDisplayText)
+          .collect(Collectors.toList()).stream().collect(Collectors.joining("\n\n"));
+      entity = ResultEntity.success(
+          ImmutableMap.of(
+              "answer", answer,
+              "logs", logs,
+              "types", types)
+      );
     } catch (Exception e) {
       entity = ResultEntity.failed(ExceptionUtil.getMessage(e));
+    } finally {
+      SqlExecuteLogger.clear();
     }
 
     response.setStatus(HttpServletResponse.SC_OK);
@@ -227,6 +252,9 @@ public class ApiAssignmentService {
     }
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
+    }
+    while (request.getPath().startsWith("/")) {
+      request.setPath(request.getPath().substring(1));
     }
 
     List<ApiContextEntity> contextList = getContextListEntity(request.getContextList());

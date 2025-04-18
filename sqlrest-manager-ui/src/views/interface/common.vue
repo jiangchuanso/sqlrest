@@ -635,6 +635,9 @@
                              sort></json-viewer>
               </el-tab-pane>
               <el-tab-pane label="执行信息">
+                <div class="debug-console-log-text">
+                  {{debugConsoleLog}}<br />
+                </div>
               </el-tab-pane>
             </el-tabs>
           </el-col>
@@ -705,6 +708,7 @@ export default {
       inputParams: [],
       debugParams: [],
       debugResponse: {},
+      debugConsoleLog: "",
       outputParams: [],
       responseNamingStrategy: [],
       responseTypeFormat: [],
@@ -1390,6 +1394,7 @@ export default {
     },
     handleDebug: function () {
       this.debugResponse = {}
+      this.debugConsoleLog = ""
       var sqls = []
       var isSql = true;
       if (this.createParam.engine === 'SQL') {
@@ -1477,16 +1482,26 @@ export default {
         res => {
           if (0 === res.data.code) {
             this.debugResponse = res.data.data.answer;
+            this.debugConsoleLog = res.data.data.logs;
             this.outputParams = [];
             let map = res.data.data.types;
-            for (let key in map) {
-              this.outputParams.push(
+            if (Object.keys(map).length === 0) {
+              this.$alert("结果集内容为空", "提示信息",
                 {
-                  name: key,
-                  type: map[key],
-                  remark: null
+                  confirmButtonText: "确定",
+                  type: "info"
                 }
-              )
+              );
+            } else {
+              for (let key in map) {
+                this.outputParams.push(
+                  {
+                    name: key,
+                    type: map[key],
+                    remark: null
+                  }
+                )
+              }
             }
           } else {
             if (res.data.message) {
@@ -1579,5 +1594,9 @@ export default {
 }
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #5f5e5e !important;
+}
+
+.debug-console-log-text {
+  white-space: pre-line;
 }
 </style>

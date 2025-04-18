@@ -31,6 +31,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -142,7 +144,7 @@ public class ApiExecuteService {
       } else {
         if (isArray) {
           String[] values = request.getParameterValues(name);
-          if (null != values && values.length > 0) {
+          if (ArrayUtils.isNotEmpty(values)) {
             List list = Arrays.asList(values).stream()
                 .map(v -> type.getConverter().apply(v))
                 .collect(Collectors.toList());
@@ -154,7 +156,7 @@ public class ApiExecuteService {
           }
         } else {
           String value = request.getParameter(name);
-          if (null == value) {
+          if (StringUtils.isEmpty(value)) {
             if (required) {
               invalidArgs.add(param);
             } else {

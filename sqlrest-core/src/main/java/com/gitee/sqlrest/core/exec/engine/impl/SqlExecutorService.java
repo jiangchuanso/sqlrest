@@ -36,7 +36,10 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           SqlMeta sqlMeta = template.process(params);
           int page = PageSizeUtils.getPageFromParams(params);
           int size = PageSizeUtils.getSizeFromParams(params);
-          dataList.add(SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size));
+          Object result = SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size);
+          if (sqlMeta.isQuerySQL()) {
+            dataList.add(result);
+          }
         }
         connection.commit();
         return dataList;

@@ -9,7 +9,7 @@ public class SqlMeta {
 
   public SqlMeta(String sql, List<Object> parameter) {
     super();
-    this.sql = sql;
+    this.sql = sql.trim();
     this.parameter = parameter;
   }
 
@@ -18,7 +18,7 @@ public class SqlMeta {
   }
 
   public void setSql(String sql) {
-    this.sql = sql;
+    this.sql = sql.trim();
   }
 
   public List<Object> getParameter() {
@@ -27,6 +27,11 @@ public class SqlMeta {
 
   public void setParameter(List<Object> parameter) {
     this.parameter = parameter;
+  }
+
+  public boolean isQuerySQL() {
+    String upperSql = sql.toUpperCase().trim();
+    return upperSql.startsWith("SELECT") || upperSql.startsWith("WITH");
   }
 
   @Override
