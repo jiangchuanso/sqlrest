@@ -74,7 +74,10 @@
     <fileSet>
       <directory>src/main/assembly/conf</directory>
       <outputDirectory>conf</outputDirectory>
-      <!-- lineEnding>unix</lineEnding -->
+      <lineEnding>unix</lineEnding>
+      <includes>
+        <include>*.ini</include>
+      </includes>
     </fileSet>
 
     <!-- 打包sqlrest-manager中的配置文件到打包目录/conf/manager 下 -->
