@@ -7,6 +7,7 @@ body:
       label: sqlrest版本
       options:
         - "1.0.0"
+        - "1.1.0"
     validations:
       required: true
   - type: dropdown

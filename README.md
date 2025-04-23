@@ -1,6 +1,9 @@
+![](https://gitee.com/inrgihc/sqlrest/badge/star.svg)
+![](https://gitee.com/inrgihc/sqlrest/badge/fork.svg?theme=gvp)
+
 ![SQLREST](docs/images/SQLREST.PNG#pic_center)
 
-> 将数据库可执行的SQL生成RESTful风格的http接口的工具
+> 将数据库可执行的SQL直接RESTful风格的http接口的便捷工具
 
 ## 一、工具介绍
 
@@ -52,6 +55,8 @@
 
 ### 3、模块结构功能
 
+![STRUCTURE.PNG](docs/images/STRUCTURE.PNG)
+
 ```
 └── sqlrest
     ├── sqlrest-common           // sqlrest通用定义模块
@@ -60,7 +65,7 @@
     ├── sqlrest-persistence      // sqlrest的数据库持久化模块
     ├── sqlrest-core             // sqlrest-core的接口实现模块
     ├── sqlrest-gateway          // Gateway网关节点
-    ├── sqlrest-executor         // Executor接口执行节点
+    ├── sqlrest-executor         // Executor执行节点
     ├── sqlrest-manager          // Manager管理节点
     ├── sqlrest-manager-ui       // 基于Vue2的Manager前段WEB交互页面
     ├── sqlrest-dist             // 基于maven-assembly-plugin插件的项目打包模块
