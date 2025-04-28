@@ -7,7 +7,7 @@ import java.util.function.Function;
 public class ConvertUtils {
 
   public static Map<String, Object> to(Map<String, Object> row) {
-    return row;
+    return to(row, null);
   }
 
   public static Map<String, Object> to(Map<String, Object> row, Function<String, String> converter) {

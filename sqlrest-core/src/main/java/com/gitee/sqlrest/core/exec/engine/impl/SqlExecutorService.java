@@ -6,9 +6,8 @@ import com.gitee.sqlrest.core.exec.engine.AbstractExecutorEngine;
 import com.gitee.sqlrest.core.util.PageSizeUtils;
 import com.gitee.sqlrest.core.util.SqlJdbcUtils;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
-import com.gitee.sqlrest.template.Configuration;
 import com.gitee.sqlrest.template.SqlMeta;
-import com.gitee.sqlrest.template.SqlTemplate;
+import com.gitee.sqlrest.template.XmlSqlTemplate;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -27,12 +26,11 @@ public class SqlExecutorService extends AbstractExecutorEngine {
   @Override
   public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     List<Object> dataList = new ArrayList<>();
-    Configuration cfg = new Configuration();
     try (Connection connection = this.dataSource.getConnection()) {
       try {
         connection.setAutoCommit(false);
         for (ApiContextEntity sql : scripts) {
-          SqlTemplate template = cfg.getTemplate(sql.getSqlText());
+          XmlSqlTemplate template = new XmlSqlTemplate(sql.getSqlText());
           SqlMeta sqlMeta = template.process(params);
           int page = PageSizeUtils.getPageFromParams(params);
           int size = PageSizeUtils.getSizeFromParams(params);

@@ -1,38 +1,43 @@
 package com.gitee.sqlrest.common.dto;
 
-import com.gitee.sqlrest.common.enums.ParamLocationEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
+import com.gitee.sqlrest.common.exception.CommonException;
+import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel("入参信息")
-public class ItemParam implements Serializable {
+public class ItemParam extends BaseParam {
 
-  @ApiModelProperty("参数名")
-  private String name;
+  @ApiModelProperty("Object类型的子元素")
+  private List<BaseParam> children;
 
-  @ApiModelProperty("参数位置")
-  private ParamLocationEnum location;
+  public boolean valid() {
+    if (StringUtils.isBlank(getName())) {
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+    }
+    if (getType() == ParamTypeEnum.OBJECT) {
+      if (null != children && children.size() > 0) {
+        for (BaseParam param : children) {
+          if (StringUtils.isBlank(param.getName())) {
+            throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+          }
+        }
+        return true;
+      }
+    } else {
+      children = Collections.emptyList();
+    }
 
-  @ApiModelProperty("参数类型")
-  private ParamTypeEnum type;
-
-  @ApiModelProperty("是否为数组")
-  private Boolean isArray;
-
-  @ApiModelProperty("是否必填")
-  private Boolean required;
-
-  @ApiModelProperty("默认值")
-  private String defaultValue;
-
-  @ApiModelProperty("参数描述")
-  private String remark;
+    return false;
+  }
 }

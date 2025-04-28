@@ -71,7 +71,7 @@
         </div>
         <el-tabs v-if="showDetail"
                  type="border-card">
-          <el-tab-pane label="接口文档">
+          <el-tab-pane label="接口定义">
             <el-row class="detail-row">
               <el-col :span="4">
                 <i class="el-icon-user">接口名称：</i>
@@ -102,7 +102,7 @@
             </el-row>
             <el-row class="detail-row">
               <el-col :span="4">
-                <i class="el-icon-s-check">需要认证：</i>
+                <i class="el-icon-s-check">访问认证：</i>
               </el-col>
               <el-col :span="20">
                 <el-tag size="small"
@@ -126,43 +126,46 @@
                 <el-table :data="interfaceDetail.inputParams"
                           :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                           size="mini"
+                          default-expand-all
+                          row-key="id"
+                          :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                           border>
                   <template slot="empty">
                     <span>请求参数为空</span>
                   </template>
                   <el-table-column label="参数名"
                                    prop="name"
-                                   min-width="25%">
+                                   min-width="40%">
                   </el-table-column>
                   <el-table-column label="参数位置"
                                    prop="location"
-                                   min-width="25%">
+                                   min-width="15%">
                     <template slot-scope="scope">
                       {{enumTypeLocationFormat(scope.row.location)}}
                     </template>
                   </el-table-column>
                   <el-table-column label="参数类型"
                                    prop="type"
-                                   min-width="25%">
+                                   min-width="15%">
                     <template slot-scope="scope">
                       {{enumTypeValueFormat(scope.row.type)}}
                     </template>
                   </el-table-column>
-                  <el-table-column label="为数组"
-                                   min-width="25%">
+                  <el-table-column label="数组"
+                                   min-width="15%">
                     <template slot-scope="scope">
                       {{boolTypeFormat(scope.row.isArray)}}
                     </template>
                   </el-table-column>
                   <el-table-column label="必填"
-                                   min-width="25%">
+                                   min-width="15%">
                     <template slot-scope="scope">
                       {{boolTypeFormat(scope.row.required)}}
                     </template>
                   </el-table-column>
                   <el-table-column label="默认值"
                                    prop="defaultValue"
-                                   min-width="25%">
+                                   min-width="20%">
                     <template slot-scope="scope">
                       {{scope.row.defaultValue}}
                     </template>
@@ -185,6 +188,9 @@
                 <el-table :data="interfaceDetail.outputParams"
                           :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                           size="mini"
+                          default-expand-all
+                          row-key="id"
+                          :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                           border>
                   <template slot="empty">
                     <span>响应参数为空</span>
@@ -259,7 +265,7 @@
     </div>
   </el-card>
 </template>
- 
+
 <script>
 import '@/assets/sysicon/iconfont.js'
 
@@ -276,7 +282,8 @@ export default {
         { name: "浮点型", value: "DOUBLE" },
         { name: "字符串", value: "STRING" },
         { name: "日期", value: "DATE" },
-        { name: "时间", value: "TIME" }
+        { name: "时间", value: "TIME" },
+        { name: "对象", value: "OBJECT" }
       ],
       leftWidth: 0, // 左边div的初始宽度
       rightWidth: 0, // 右边div的初始宽度
@@ -509,7 +516,7 @@ export default {
             dataSourceId: detail.datasourceId,
             engine: detail.engine,
             inputParams: detail.params,
-            outputParams: detail.outputs,
+            outputParams: detail.outputs || [],
           }
         }
       });
@@ -557,7 +564,7 @@ export default {
           return item.name;
         }
       }
-      return returnUnknownValue();
+      return this.returnUnknownValue();
     },
     enumTypeValueFormat (value) {
       for (const item of this.paramTypeList) {
@@ -565,12 +572,12 @@ export default {
           return item.name;
         }
       }
-      return returnUnknownValue();
+      return this.returnUnknownValue();
     }
   },
 };
 </script>
- 
+
 <style scoped>
 .el-card {
   width: 100%;
@@ -616,6 +623,4 @@ export default {
   font-size: 13px;
   padding: 2px;
 }
-
-
 </style>

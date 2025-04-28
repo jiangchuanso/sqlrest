@@ -65,7 +65,7 @@ public class ApiExecuteService {
       List<Object> results = ApiExecutorEngineFactory
           .getExecutor(config.getEngine(), dataSource, dsEntity.getType())
           .execute(config.getContextList(), paramValues, config.getNamingStrategy());
-      return ResultEntity.success(results.size() > 1 ? results : results.get(0));
+      return ResultEntity.success(results.size() > 1 ? results : results.stream().findAny().orElse(null));
     } catch (Throwable t) {
       return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(t));
     }
@@ -98,7 +98,7 @@ public class ApiExecuteService {
             .collect(Collectors.toList());
         if (isArray) {
           if (CollectionUtils.isEmpty(hv)) {
-            if(required) {
+            if (required) {
               invalidArgs.add(param);
             }
           } else {
@@ -130,15 +130,26 @@ public class ApiExecuteService {
             List<Object> values = (paramValue instanceof List)
                 ? (List) paramValue
                 : Lists.newArrayList(paramValue);
-            List<Object> hv = values
-                .stream().map(v -> type.getConverter().apply(v.toString()))
-                .collect(Collectors.toList());
-            map.put(name, hv);
+            if (type.isObject()) {
+              map.put(name, values);
+            } else {
+              List<Object> hv = values
+                  .stream().map(v -> type.getConverter().apply(v.toString()))
+                  .collect(Collectors.toList());
+              map.put(name, hv);
+            }
           } else {
-            Object targetValue = (paramValue instanceof List)
-                ? ((List) paramValue).get(0)
-                : paramValue;
-            map.put(name, type.getConverter().apply(targetValue.toString()));
+            if (type.isObject()) {
+              Map<String, Object> objectMap = (paramValue instanceof Map)
+                  ? (Map<String, Object>) paramValue
+                  : new HashMap<>();
+              map.put(name, objectMap);
+            } else {
+              Object targetValue = (paramValue instanceof List)
+                  ? ((List) paramValue).get(0)
+                  : paramValue;
+              map.put(name, type.getConverter().apply(targetValue.toString()));
+            }
           }
         }
       } else {
@@ -150,7 +161,7 @@ public class ApiExecuteService {
                 .collect(Collectors.toList());
             map.put(name, list);
           } else {
-            if(required) {
+            if (required) {
               invalidArgs.add(param);
             }
           }

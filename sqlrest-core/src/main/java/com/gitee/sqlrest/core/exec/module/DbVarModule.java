@@ -7,9 +7,8 @@ import com.gitee.sqlrest.core.exec.annotation.Comment;
 import com.gitee.sqlrest.core.exec.annotation.Module;
 import com.gitee.sqlrest.core.util.ConvertUtils;
 import com.gitee.sqlrest.core.util.PageSizeUtils;
-import com.gitee.sqlrest.template.Configuration;
 import com.gitee.sqlrest.template.SqlMeta;
-import com.gitee.sqlrest.template.SqlTemplate;
+import com.gitee.sqlrest.template.XmlSqlTemplate;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,8 +31,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 @Slf4j
 @Module("db")
 public class DbVarModule {
-
-  private static Configuration cfg = new Configuration();
 
   private JdbcTemplate jdbcTemplate;
   private ProductTypeEnum productType;
@@ -63,7 +60,7 @@ public class DbVarModule {
   @Comment("查询所有的数据列表")
   public List<Map<String, Object>> selectAll(@Comment("sqlOrXml") String sqlOrXml) throws SQLException {
     log.info("Enter selectAll() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     long start = System.currentTimeMillis();
     try {
@@ -76,7 +73,7 @@ public class DbVarModule {
   @Comment("count所有数据的总数")
   public Integer selectCount(@Comment("sqlOrXml") String sqlOrXml) {
     log.info("Enter selectCount() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     String countSql = String.format("select count(*) from (%s) a", sqlMeta.getSql());
     long start = System.currentTimeMillis();
@@ -90,7 +87,7 @@ public class DbVarModule {
   @Comment("查询单条结果，并传入变量信息，查不到返回null")
   public Map<String, Object> selectOne(@Comment("sqlOrXml") String sqlOrXml) {
     log.info("Enter selectOne() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     long start = System.currentTimeMillis();
     try {
@@ -118,7 +115,7 @@ public class DbVarModule {
     log.info("Enter page() function, SQL:{},params:{}", sqlOrXml, params);
     int page = PageSizeUtils.getPageFromParams(params);
     int size = PageSizeUtils.getSizeFromParams(params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     String pageSql = productType.getPageSql(sqlMeta.getSql(), page, size);
     List<Object> parameters = sqlMeta.getParameter();
@@ -127,14 +124,14 @@ public class DbVarModule {
     try {
       return build(jdbcTemplate.queryForList(pageSql, parameters.toArray()));
     } finally {
-      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+      SqlExecuteLogger.add(pageSql, parameters, System.currentTimeMillis() - start);
     }
   }
 
   @Comment("执行insert操作，返回插入主键")
   public Map<String, Object> insert(@Comment("sqlOrXml") String sqlOrXml) {
     log.info("Enter insert() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
     GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
@@ -156,7 +153,7 @@ public class DbVarModule {
   @Comment("执行update操作，返回受影响行数")
   public int update(@Comment("sqlOrXml") String sqlOrXml) {
     log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
     long start = System.currentTimeMillis();
@@ -182,7 +179,7 @@ public class DbVarModule {
   @Comment("执行delete操作，返回受影响行数")
   public int delete(@Comment("sqlOrXml") String sqlOrXml) {
     log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
-    SqlTemplate template = cfg.getTemplate(sqlOrXml);
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
     long start = System.currentTimeMillis();

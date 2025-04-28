@@ -164,12 +164,16 @@
                     <el-table :data="inputParams"
                               :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                               size="mini"
+                              default-expand-all
+                              row-key="id"
+                              :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                               border>
+                      <!--如果不是懒加载的话，后端不要设置hasChildren 这个属性，要不然不能树形显示； -->
                       <template slot="empty">
                         <span>请输入sql后点击"入参解析"按钮后解析出这里的入参</span>
                       </template>
                       <el-table-column label="参数名"
-                                       min-width="25%">
+                                       min-width="35%">
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.name"
                                     type="string"
@@ -198,19 +202,20 @@
                             <el-option v-for="(item,index) in paramTypeList"
                                        :key="index"
                                        :label="item.name"
-                                       :value="item.value"></el-option>
+                                       :value="item.value"
+                                       v-if="shouldShowOption(item,scope.row)"></el-option>
                           </el-select>
                         </template>
                       </el-table-column>
-                      <el-table-column label="为数组"
-                                       min-width="25%">
+                      <el-table-column label="数组"
+                                       min-width="10%">
                         <template slot-scope="scope">
                           <el-checkbox v-model="scope.row.isArray"
                                        :disabled="isOnlyShowDetail"></el-checkbox>
                         </template>
                       </el-table-column>
                       <el-table-column label="必填"
-                                       min-width="25%">
+                                       min-width="10%">
                         <template slot-scope="scope">
                           <el-checkbox v-model="scope.row.required"
                                        :disabled="isOnlyShowDetail"></el-checkbox>
@@ -221,7 +226,7 @@
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.defaultValue"
                                     type="string"
-                                    :disabled="isOnlyShowDetail"></el-input>
+                                    :disabled="isOnlyShowDetail "></el-input>
                         </template>
                       </el-table-column>
                       <el-table-column label="描述"
@@ -236,8 +241,12 @@
                                        v-if="!isOnlyShowDetail"
                                        min-width="25%">
                         <template slot-scope="scope">
+                          <el-link icon="el-icon-plus"
+                                   v-if="scope.row.type=='OBJECT' && scope.row.location=='REQUEST_BODY'"
+                                   @click="addInputSubParamsItem(scope.row)"></el-link>
+                          &nbsp;&nbsp;&nbsp;&nbsp;
                           <el-link icon="el-icon-delete"
-                                   @click="deleteInputParamsItem(scope.$index)"></el-link>
+                                   @click="deleteInputParamsItem(scope.$index,scope.row)"></el-link>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -253,6 +262,9 @@
                     <el-table :data="outputParams"
                               :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                               size="mini"
+                              default-expand-all
+                              row-key="id"
+                              :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                               border>
                       <template slot="empty">
                         <span>请输入sql后成功执行"调试"按钮后解析出这里的出参</span>
@@ -536,10 +548,13 @@
           <el-col :span="24">
             <el-table :data="debugParams"
                       :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                      row-key="id"
+                      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+                      default-expand-all
                       size="mini"
                       border>
               <el-table-column label="参数名"
-                               min-width="25%">
+                               min-width="35%">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.name"
                             type="string"> </el-input>
@@ -548,21 +563,16 @@
               <el-table-column label="参数类型"
                                min-width="25%">
                 <template slot-scope="scope">
-                  <el-select v-model="scope.row.type">
-                    <el-option label='整型'
-                               value='LONG'></el-option>
-                    <el-option label='浮点型'
-                               value='DOUBLE'></el-option>
-                    <el-option label='字符串'
-                               value='STRING'></el-option>
-                    <el-option label='日期'
-                               value='DATE'></el-option>
-                    <el-option label='时间'
-                               value='TIME'></el-option>
+                  <el-select v-model="scope.row.type"
+                             :disabled="true">
+                    <el-option v-for="(item,index) in paramTypeList"
+                               :key="index"
+                               :label="item.name"
+                               :value="item.value"></el-option>
                   </el-select>
                 </template>
               </el-table-column>
-              <el-table-column label="为数组"
+              <el-table-column label="数组"
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-select v-model="scope.row.isArray"
@@ -598,6 +608,7 @@
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.value"
+                            :disabled="scope.row.type=='OBJECT'"
                             type="string"></el-input>
                 </template>
               </el-table-column>
@@ -653,6 +664,7 @@ import scriptEditer from '@/components/codeEditer/scriptEditer'
 import urlencode from "urlencode";
 import qs from "qs";
 import JsonViewer from 'vue-json-viewer';
+import Vue from "vue";
 
 export default {
   name: "common",
@@ -667,7 +679,8 @@ export default {
         { name: "浮点型", value: "DOUBLE" },
         { name: "字符串", value: "STRING" },
         { name: "日期", value: "DATE" },
-        { name: "时间", value: "TIME" }
+        { name: "时间", value: "TIME" },
+        { name: "对象", value: "OBJECT" }
       ],
       contentTypes: ['application/x-www-form-urlencoded', 'application/json'],
       showTree: true,
@@ -773,6 +786,19 @@ export default {
   },
   components: { multiSqlEditer, scriptEditer, JsonViewer },
   methods: {
+    uuid: function () {
+      var s = [];
+      var hexDigits = "0123456789abcdef";
+      for (var i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+      }
+      s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      s[8] = s[13] = s[18] = s[23] = "-";
+
+      var uuid = s.join("");
+      return uuid;
+    },
     isUpdatePage: function () {
       if (this.$route.query.id) {
         return true;
@@ -812,11 +838,13 @@ export default {
           this.inputParams = []
           if (detail.params) {
             this.inputParams = detail.params
+            for (let item of this.inputParams) {
+              if (!item.id) {
+                Vue.set(item, 'id', this.uuid());
+              }
+            }
           }
-          this.outputParams = []
-          if (detail.outputs) {
-            this.outputParams = detail.outputs;
-          }
+          this.outputParams = detail.outputs || [];
           if (detail.sqlList && detail.sqlList.length > 0) {
             if (this.createParam.engine === 'SQL') {
               this.createParam.sqls = detail.sqlList.map(obj => obj['sqlText'])
@@ -842,7 +870,7 @@ export default {
       }).then(
         res => {
           if (0 === res.data.code) {
-            this.connectionList = res.data.data;
+            this.connectionList = res.data.data || [];
           } else {
             if (res.data.message) {
               alert("加载数据失败:" + res.data.message);
@@ -868,7 +896,7 @@ export default {
       }).then(
         res => {
           if (0 === res.data.code) {
-            this.groupList = res.data.data;
+            this.groupList = res.data.data || [];
           } else {
             if (res.data.message) {
               alert("加载数据失败:" + res.data.message);
@@ -894,7 +922,7 @@ export default {
       }).then(
         res => {
           if (0 === res.data.code) {
-            this.moduleList = res.data.data;
+            this.moduleList = res.data.data || [];
           } else {
             if (res.data.message) {
               alert("加载数据失败:" + res.data.message);
@@ -1162,15 +1190,36 @@ export default {
             }
             for (let item of res.data.data) {
               if (!this.inputParams.find(i => i.name === item.name)) {
+                let type = "STRING";
+                let children = [];
+                if (item.children) {
+                  for (let child of item.children) {
+                    children.push(
+                      {
+                        id: this.uuid(),
+                        name: child.name,
+                        location: 'REQUEST_BODY',
+                        type: "STRING",
+                        isArray: child.isArray,
+                        required: true,
+                        defaultValue: "",
+                        remark: "",
+                      }
+                    );
+                    type = "OBJECT";
+                  }
+                }
                 this.inputParams.push(
                   {
+                    id: this.uuid(),
                     name: item.name,
-                    location: 'REQUEST_FORM',
-                    type: "STRING",
+                    location: 'REQUEST_BODY',
+                    type: type,
                     isArray: item.isArray,
                     required: true,
                     defaultValue: "",
-                    remark: ""
+                    remark: "",
+                    children: children,
                   }
                 )
               }
@@ -1196,8 +1245,9 @@ export default {
     handleAddInputParams: function () {
       this.inputParams.push(
         {
+          id: this.uuid(),
           name: "",
-          location: 'REQUEST_FORM',
+          location: 'REQUEST_BODY',
           type: "STRING",
           isArray: false,
           required: true,
@@ -1212,6 +1262,7 @@ export default {
         add = true
         this.inputParams.push(
           {
+            id: this.uuid(),
             name: "apiPageNum",
             type: "LONG",
             location: 'REQUEST_FORM',
@@ -1226,6 +1277,7 @@ export default {
         add = true
         this.inputParams.push(
           {
+            id: this.uuid(),
             name: "apiPageSize",
             type: "LONG",
             location: 'REQUEST_FORM',
@@ -1245,8 +1297,71 @@ export default {
         );
       }
     },
-    deleteInputParamsItem: function (index) {
-      this.inputParams.splice(index, 1);
+    shouldShowOption: function (item, row) {
+      if (this.getParentRow(row)) {
+        return item.value != 'OBJECT';
+      }
+      return true;
+    },
+    getParentRow: function (childRow) {
+      for (const row of this.inputParams) {
+        if (row.children && row.children.includes(childRow)) {
+          return row;
+        }
+      }
+      return null;
+    },
+    deleteInputParamsItem: function (idx, row) {
+      const index = this.inputParams.indexOf(row);
+      if (index !== -1) {
+        this.inputParams.splice(index, 1);
+      } else {
+        this.deleteInputSubParamsItem(idx, row);
+      }
+    },
+    deleteInputSubParamsItem: function (index, childRow) {
+      // 通过 childRow 访问父级行数据
+      const parentRow = this.getParentRow(childRow);
+      if (parentRow) {
+        const childIndex = parentRow.children.indexOf(childRow);
+        if (childIndex !== -1) {
+          parentRow.children.splice(childIndex, 1);
+        } else {
+          console.warn('Child not found');
+        }
+      }
+    },
+    addInputSubParamsItem: function (row) {
+      const index = this.inputParams.findIndex(item => row == item)
+      if (index !== -1) {
+        if (!this.inputParams[index].children) {
+          // 如果还没有 children 数组，则创建它
+          // 使用 Vue.set 来确保响应性
+          Vue.set(this.inputParams[index], 'children', []);
+        }
+        this.inputParams[index].location = 'REQUEST_BODY';
+        this.inputParams[index].type = 'OBJECT';
+        this.inputParams[index].children.push(
+          {
+            id: this.uuid(),
+            name: "",
+            type: "STRING",
+            location: 'REQUEST_BODY',
+            isArray: false,
+            required: true,
+            defaultValue: "",
+            remark: ""
+          },
+        );
+      } else {
+        row.type = 'STRING';
+        this.$alert('只允许嵌套一层，类型被还原为字符串类型', "操作提示",
+          {
+            confirmButtonText: "确定",
+            type: "info"
+          }
+        );
+      }
     },
     checkSqlsOrScriptEmpty: function (sqls) {
       if (sqls === null || sqls === undefined || !Array.isArray(sqls) || sqls.length === 0 || sqls.includes('')) {
@@ -1427,6 +1542,7 @@ export default {
         this.inputParams.forEach(item => {
           this.debugParams.push(
             {
+              id: item.id,
               name: item.name,
               type: item.type,
               isArray: item.isArray,
@@ -1434,6 +1550,7 @@ export default {
               defaultValue: item.defaultValue,
               remark: item.remark,
               value: null,
+              children: item.children
             },
           )
         })
@@ -1443,6 +1560,7 @@ export default {
     handleAddDebugParams: function () {
       this.debugParams.push(
         {
+          id: this.uuid(),
           name: '',
           type: 'LONG',
           isArray: true,
@@ -1484,8 +1602,8 @@ export default {
             this.debugResponse = res.data.data.answer;
             this.debugConsoleLog = res.data.data.logs;
             this.outputParams = [];
-            let map = res.data.data.types;
-            if (Object.keys(map).length === 0) {
+            let arr = res.data.data.types;
+            if (Array.isArray(arr) && arr.length === 0) {
               this.$alert("结果集内容为空", "提示信息",
                 {
                   confirmButtonText: "确定",
@@ -1493,12 +1611,15 @@ export default {
                 }
               );
             } else {
-              for (let key in map) {
+              for (let item of arr) {
                 this.outputParams.push(
                   {
-                    name: key,
-                    type: map[key],
-                    remark: null
+                    id: item.id,
+                    name: item.name,
+                    type: item.type,
+                    isArray: item.isArray,
+                    remark: item.remark,
+                    children: item.children,
                   }
                 )
               }
@@ -1527,7 +1648,8 @@ export default {
     },
     deleteOutputParamsItem: function (index) {
       this.outputParams.splice(index, 1);
-    }
+    },
+
   },
   created () {
     this.loadAssignmentDetail();
@@ -1595,7 +1717,17 @@ export default {
 /deep/ .el-input.is-disabled .el-input__inner {
   color: #5f5e5e !important;
 }
-
+/deep/.el-table .cell {
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 23px;
+  padding-right: 10px;
+  display: flex;
+  flex-direction: row;
+}
 .debug-console-log-text {
   white-space: pre-line;
 }

@@ -5,18 +5,24 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.gitee.sqlrest.common.dto.OutParam;
 import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
+import com.gitee.sqlrest.common.util.UuidUtils;
 import com.gitee.sqlrest.core.serdes.DateTimeSerDesFactory;
+import com.google.common.collect.Lists;
 import java.math.BigInteger;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public final class JacksonUtils {
 
@@ -48,38 +54,41 @@ public final class JacksonUtils {
     return module;
   }
 
-  public static Map<String, ParamTypeEnum> parseFieldTypes(Object obj) {
-    Map<String, ParamTypeEnum> results = new LinkedHashMap<>();
+  public static List<OutParam> parseFieldTypes(Object obj) {
+    List<OutParam> results = new LinkedList<>();
     if (null == obj) {
       return results;
     }
 
     if (obj instanceof Map) {
-      parseFieldTypes("", (Map) obj, results);
+      parseFieldTypes(null, (Map) obj, results);
     } else if (obj instanceof Collection) {
       Collection collection = (Collection) obj;
       if (CollectionUtils.isEmpty(collection)) {
         return results;
       }
-      Object item = collection.stream().findFirst().get();
-      if (item instanceof Map) {
-        parseFieldTypes("", (Map) item, results);
-      } else if (item instanceof Collection) {
-        Collection subCollection = (Collection) item;
-        if (CollectionUtils.isEmpty(subCollection)) {
-          return results;
-        }
-        Object subItem = subCollection.stream().findFirst().get();
-        if (subItem instanceof Map) {
-          parseFieldTypes("", (Map) subItem, results);
-        } else if (subItem instanceof Collection) {
-          Collection thSubCollection = (Collection) subItem;
-          if (CollectionUtils.isEmpty(thSubCollection)) {
+      for (Object item : collection) {
+        if (item instanceof Map) {
+          parseFieldTypes(null, (Map) item, results);
+        } else if (item instanceof Collection) {
+          Collection subCollection = (Collection) item;
+          if (CollectionUtils.isEmpty(subCollection)) {
             return results;
           }
-          Object thSubItem = thSubCollection.stream().findFirst().get();
-          if (thSubItem instanceof Map) {
-            parseFieldTypes("", (Map) thSubItem, results);
+          for (Object subItem : subCollection) {
+            if (subItem instanceof Map) {
+              parseFieldTypes(null, (Map) subItem, results);
+            } else if (subItem instanceof Collection) {
+              Collection thSubCollection = (Collection) subItem;
+              if (CollectionUtils.isEmpty(thSubCollection)) {
+                return results;
+              }
+              for (Object thSubItem : thSubCollection) {
+                if (thSubItem instanceof Map) {
+                  parseFieldTypes(null, (Map) thSubItem, results);
+                }
+              }
+            }
           }
         }
       }
@@ -87,25 +96,35 @@ public final class JacksonUtils {
     return results;
   }
 
-  private static void parseFieldTypes(String prefix, Map<String, Object> map, Map<String, ParamTypeEnum> results) {
+  private static void parseFieldTypes(OutParam parent, Map<String, Object> map, List<OutParam> results) {
     for (String name : map.keySet()) {
       Object value = map.get(name);
+      boolean isArray = (value instanceof Collection);
       ParamTypeEnum typeEnum = parseValueType(value);
-      if (null != typeEnum) {
-        // TODO: 暂时先忽略不支持的对象的情况
-        if (StringUtils.isBlank(prefix)) {
-          results.put(name, typeEnum);
-        } else {
-          results.put(prefix + "." + name, typeEnum);
+      String id = UuidUtils.generateUuid();
+      OutParam outParam = new OutParam(id, name, typeEnum, isArray, null, Lists.newArrayList());
+      if (isArray) {
+        outParam.setType(parseValueType(((Collection) value).stream().findFirst().orElse(null)));
+      }
+      if (null == parent) {
+        if (results.stream().noneMatch(one -> name.equals(one.getName()))) {
+          results.add(outParam);
+        }
+      } else {
+        if (parent.getChildren().stream().noneMatch(one -> name.equals(one.getName()))) {
+          parent.getChildren().add(outParam);
         }
       }
-      String subPrefix = StringUtils.isBlank(prefix) ? name : prefix + "." + name;
-      if (value instanceof Map) {
-        parseFieldTypes(subPrefix, (Map) value, results);
-      } else if (value instanceof Collection) {
+
+      if (isArray) {
         Collection collection = (Collection) value;
         Object item = collection.stream().findFirst().get();
-        parseFieldTypes(subPrefix, (Map) item, results);
+        ParamTypeEnum subTypeEnum = parseValueType(item);
+        if (null != subTypeEnum && subTypeEnum.isObject()) {
+          parseFieldTypes(outParam, (Map) item, results);
+        }
+      } else if (value instanceof Map) {
+        parseFieldTypes(outParam, (Map) value, results);
       }
     }
   }
@@ -117,13 +136,16 @@ public final class JacksonUtils {
       return ParamTypeEnum.LONG;
     } else if (value instanceof Number) {
       return ParamTypeEnum.DOUBLE;
-    } else if (value instanceof Time) {
+    } else if (value instanceof Time || value instanceof Timestamp || value instanceof LocalDateTime) {
       return ParamTypeEnum.TIME;
-    } else if (value instanceof Date) {
+    } else if (value instanceof Date || value instanceof LocalDate) {
       return ParamTypeEnum.DATE;
     } else if (value instanceof String) {
       return ParamTypeEnum.STRING;
+    } else if (value instanceof Map) {
+      return ParamTypeEnum.OBJECT;
     } else {
+      // List的情况返回null
       return null;
     }
   }

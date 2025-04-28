@@ -2,8 +2,11 @@ package com.gitee.sqlrest.core.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.dto.OutParam;
 import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ParamValue;
+import com.gitee.sqlrest.common.dto.ParamValue.BaseParamValue;
 import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
@@ -35,17 +38,17 @@ import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
 import com.gitee.sqlrest.persistence.entity.DataSourceEntity;
 import com.gitee.sqlrest.persistence.util.PageUtils;
-import com.gitee.sqlrest.template.Configuration;
-import com.gitee.sqlrest.template.SqlTemplate;
+import com.gitee.sqlrest.template.XmlSqlTemplate;
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -108,12 +111,35 @@ public class ApiAssignmentService {
     return results;
   }
 
-  public List<SqlParamParseResponse> parseSqlParams(String text) {
-    Configuration cfg = new Configuration();
-    SqlTemplate template = cfg.getTemplate(text);
-    return template.getParameterNames().entrySet().stream()
-        .map(e -> new SqlParamParseResponse(e.getKey(), e.getValue()))
-        .collect(Collectors.toList());
+  public List<SqlParamParseResponse> parseSqlParams(String sqlOrXml) {
+    XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
+    List<SqlParamParseResponse> results = new LinkedList<>();
+    Map<String, Boolean> names = template.getParameterNames();
+    // 先处理没有点号的常规参数
+    names.forEach(
+        (name, isArray) -> {
+          if (!name.contains(".")) {
+            results.add(new SqlParamParseResponse(name, isArray));
+          }
+        }
+    );
+    // 再处理有点号的对象参数
+    names.forEach(
+        (name, isArray) -> {
+          if (name.contains(".")) {
+            int idx = name.indexOf(".");
+            String objName = name.substring(0, idx);
+            String subName = name.substring(idx + 1);
+            Optional<SqlParamParseResponse> parentParam = results.stream()
+                .filter(it -> objName.equals(it.getName()))
+                .findFirst();
+            if (parentParam.isPresent()) {
+              parentParam.get().getChildren().add(new SqlParamParseResponse(subName, isArray));
+            }
+          }
+        }
+    );
+    return results;
   }
 
   public void debugExecute(ApiDebugExecuteRequest request, HttpServletResponse response) throws IOException {
@@ -133,9 +159,28 @@ public class ApiAssignmentService {
     if (!CollectionUtils.isEmpty(request.getParamValues())) {
       List<ParamValue> invalidArgs = new ArrayList<>();
       for (ParamValue paramValue : request.getParamValues()) {
-        if (paramValue.getRequired()) {
-          if (StringUtils.isBlank(paramValue.getValue())) {
-            invalidArgs.add(paramValue);
+        if (StringUtils.isBlank(paramValue.getName())) {
+          throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+        }
+        if (paramValue.getType().isObject()) {
+          if (null != paramValue.getChildren()) {
+            for (BaseParamValue subParamValue : paramValue.getChildren()) {
+              if (StringUtils.isBlank(subParamValue.getName())) {
+                throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+              }
+              if (subParamValue.getRequired()) {
+                if (StringUtils.isBlank(subParamValue.getValue())) {
+                  paramValue.setName(String.format("%s->%s", paramValue.getName(), subParamValue.getName()));
+                  invalidArgs.add(paramValue);
+                }
+              }
+            }
+          }
+        } else {
+          if (paramValue.getRequired()) {
+            if (StringUtils.isBlank(paramValue.getValue())) {
+              invalidArgs.add(paramValue);
+            }
           }
         }
       }
@@ -147,20 +192,65 @@ public class ApiAssignmentService {
       }
 
       Map<String, List<ParamValue>> names = request.getParamValues()
-          .stream().filter(i -> StringUtils.isNotBlank(i.getValue()))
-          .collect(Collectors.groupingBy(ParamValue::getName));
+          .stream()
+          .filter(
+              i -> {
+                if (i.getType().isObject()) {
+                  return true;
+                }
+                return StringUtils.isNotBlank(i.getValue());
+              }
+          ).collect(Collectors.groupingBy(ParamValue::getName));
       for (Map.Entry<String, List<ParamValue>> entry : names.entrySet()) {
         String paramName = entry.getKey();
         List<ParamValue> value = entry.getValue();
         ParamTypeEnum type = value.get(0).getType();
         try {
           if (value.get(0).getIsArray()) {
-            List<Object> values = value.stream().map(ParamValue::getValue)
-                .map(s -> type.getConverter().apply(s))
-                .collect(Collectors.toList());
-            params.put(paramName, values);
+            if (value.get(0).getType().isObject()) {
+              List<Map<String, Object>> collection = new ArrayList<>();
+              for (ParamValue pv : value) {
+                if (pv.getType().isObject() && null != pv.getChildren()) {
+                  Map<String, Object> objectMap = new HashMap<>(4);
+                  for (BaseParamValue spv : pv.getChildren()) {
+                    if (spv.getIsArray()) {
+                      objectMap.put(spv.getName(), Arrays.asList(spv.getType().getConverter().apply(spv.getValue())));
+                    } else {
+                      objectMap.put(spv.getName(), spv.getType().getConverter().apply(spv.getValue()));
+                    }
+                  }
+                  if (objectMap.size() > 0) {
+                    collection.add(objectMap);
+                  }
+                }
+              }
+              if (collection.size() > 0) {
+                params.put(paramName, collection);
+              }
+            } else {
+              List<Object> values = value.stream().map(ParamValue::getValue)
+                  .map(s -> type.getConverter().apply(s))
+                  .collect(Collectors.toList());
+              params.put(paramName, values);
+            }
           } else {
-            params.put(paramName, type.getConverter().apply(value.get(0).getValue()));
+            if (value.get(0).getType().isObject()) {
+              if (null != value.get(0).getChildren()) {
+                Map<String, Object> objectMap = new HashMap<>(4);
+                for (BaseParamValue spv : value.get(0).getChildren()) {
+                  if (spv.getIsArray()) {
+                    objectMap.put(spv.getName(), Arrays.asList(spv.getType().getConverter().apply(spv.getValue())));
+                  } else {
+                    objectMap.put(spv.getName(), spv.getType().getConverter().apply(spv.getValue()));
+                  }
+                }
+                if (objectMap.size() > 0) {
+                  params.put(paramName, objectMap);
+                }
+              }
+            } else {
+              params.put(paramName, type.getConverter().apply(value.get(0).getValue()));
+            }
           }
         } catch (Exception e) {
           throw new RuntimeException(String.format("[%s] value type invalid, %s", paramName, e.getMessage()));
@@ -198,16 +288,15 @@ public class ApiAssignmentService {
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
           .execute(scripts, params, request.getNamingStrategy());
       Object answer = results.size() > 1 ? results : (1 == results.size()) ? results.get(0) : null;
-      Map<String, ParamTypeEnum> types = JacksonUtils.parseFieldTypes(results);
+      List<OutParam> types = JacksonUtils.parseFieldTypes(results);
       String logs = Optional.ofNullable(SqlExecuteLogger.get())
           .orElseGet(ArrayList::new).stream().map(ExecuteSqlRecord::getDisplayText)
           .collect(Collectors.toList()).stream().collect(Collectors.joining("\n\n"));
-      entity = ResultEntity.success(
-          ImmutableMap.of(
-              "answer", answer,
-              "logs", logs,
-              "types", types)
-      );
+      Map<String, Object> respMap = new HashMap<>(4);
+      respMap.put("answer", answer);
+      respMap.put("logs", logs);
+      respMap.put("types", types);
+      entity = ResultEntity.success(respMap);
     } catch (Exception e) {
       entity = ResultEntity.failed(ExceptionUtil.getMessage(e));
     } finally {
@@ -240,6 +329,13 @@ public class ApiAssignmentService {
         if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
               "Request with GET/HEAD method cannot have body.");
+        }
+      }
+
+      for (ItemParam itemParam : request.getParams()) {
+        if (!itemParam.valid()) {
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+              "Object Input param must have child parameter.");
         }
       }
     }
@@ -310,6 +406,12 @@ public class ApiAssignmentService {
         if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
               "Request with GET/HEAD method cannot have body.");
+        }
+      }
+      for (ItemParam itemParam : request.getParams()) {
+        if (!itemParam.valid()) {
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+              "Object Input param must have child parameter.");
         }
       }
     }

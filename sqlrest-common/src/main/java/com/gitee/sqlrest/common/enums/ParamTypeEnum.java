@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.common.enums;
 
+import java.util.Map;
 import java.util.function.Function;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +12,8 @@ public enum ParamTypeEnum {
   STRING("字符串", "string", "", String.class, (String str) -> str),
   DATE("日期", "string", "", String.class, (String str) -> str),
   TIME("时间", "string", "", String.class, (String str) -> str),
-  BOOLEAN("布尔", "string", "true", Boolean.class, (String str) -> Boolean.parseBoolean(str));
+  BOOLEAN("布尔", "string", "true", Boolean.class, (String str) -> Boolean.parseBoolean(str)),
+  OBJECT("对象", "object", "{}", Map.class, s -> s);
 
   private String name;
   private String jsType;
@@ -25,5 +27,9 @@ public enum ParamTypeEnum {
     this.example = example;
     this.clazz = clazz;
     this.converter = converter;
+  }
+
+  public boolean isObject() {
+    return OBJECT == this;
   }
 }

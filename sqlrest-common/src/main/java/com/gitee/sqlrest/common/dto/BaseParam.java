@@ -1,10 +1,9 @@
 package com.gitee.sqlrest.common.dto;
 
+import com.gitee.sqlrest.common.enums.ParamLocationEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,8 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel("出参信息")
-public class OutParam implements Serializable {
+public class BaseParam implements Serializable {
 
   @ApiModelProperty("ID(前端生成并使用)")
   private String id;
@@ -24,12 +22,18 @@ public class OutParam implements Serializable {
   @ApiModelProperty("参数类型")
   private ParamTypeEnum type;
 
+  @ApiModelProperty("参数位置")
+  private ParamLocationEnum location;
+
   @ApiModelProperty("是否为数组")
   private Boolean isArray;
 
+  @ApiModelProperty("是否必填")
+  private Boolean required;
+
+  @ApiModelProperty("默认值")
+  private String defaultValue;
+
   @ApiModelProperty("参数描述")
   private String remark;
-
-  @ApiModelProperty("Object类型的子元素")
-  private List<OutParam> children;
 }

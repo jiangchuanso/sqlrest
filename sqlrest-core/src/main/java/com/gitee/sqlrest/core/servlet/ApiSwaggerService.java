@@ -1,6 +1,7 @@
 package com.gitee.sqlrest.core.servlet;
 
 import com.gitee.sqlrest.common.consts.Constants;
+import com.gitee.sqlrest.common.dto.BaseParam;
 import com.gitee.sqlrest.common.dto.ItemParam;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
@@ -170,10 +171,43 @@ public class ApiSwaggerService {
 
             Schema schema = new Schema().type(type.getJsType());
             if (param.getIsArray()) {
-              ArraySchema arraySchema = new ArraySchema().items(schema);
-              objectSchema.addProperties(param.getName(), arraySchema);
+              if (type.isObject()) {
+                Schema subObjectSchema = new ObjectSchema().name(param.getName());
+                if (null != param.getChildren()) {
+                  for (BaseParam baseParam : param.getChildren()) {
+                    Schema subSchema = new Schema().type(baseParam.getType().getJsType());
+                    if (Optional.ofNullable(baseParam.getIsArray()).orElse(false)) {
+                      ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+                      subObjectSchema.addProperties(baseParam.getName(), subArraySchema);
+                    } else {
+                      subObjectSchema.addProperties(baseParam.getName(), subSchema);
+                    }
+                  }
+                }
+                ArraySchema arraySchema = new ArraySchema().items(subObjectSchema);
+                objectSchema.addProperties(param.getName(), arraySchema);
+              } else {
+                ArraySchema arraySchema = new ArraySchema().items(schema);
+                objectSchema.addProperties(param.getName(), arraySchema);
+              }
             } else {
-              objectSchema.addProperties(param.getName(), schema);
+              if (type.isObject()) {
+                Schema subObjectSchema = new ObjectSchema().name(param.getName());
+                if (null != param.getChildren()) {
+                  for (BaseParam baseParam : param.getChildren()) {
+                    Schema subSchema = new Schema().type(baseParam.getType().getJsType());
+                    if (Optional.ofNullable(baseParam.getIsArray()).orElse(false)) {
+                      ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+                      subObjectSchema.addProperties(baseParam.getName(), subArraySchema);
+                    } else {
+                      subObjectSchema.addProperties(baseParam.getName(), subSchema);
+                    }
+                  }
+                }
+                objectSchema.addProperties(param.getName(), subObjectSchema);
+              } else {
+                objectSchema.addProperties(param.getName(), schema);
+              }
             }
           }
 

@@ -2,6 +2,8 @@ package com.gitee.sqlrest.core.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.LinkedList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,4 +19,13 @@ public class SqlParamParseResponse {
 
   @ApiModelProperty("是否为数组")
   private Boolean isArray;
+
+  @ApiModelProperty("Object类型的子元素")
+  private List<SqlParamParseResponse> children;
+
+  public SqlParamParseResponse(String name, Boolean isArray) {
+    this.name = name;
+    this.isArray = isArray;
+    this.children = new LinkedList<>();
+  }
 }
