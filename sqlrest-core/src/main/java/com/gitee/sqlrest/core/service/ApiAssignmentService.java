@@ -333,10 +333,7 @@ public class ApiAssignmentService {
       }
 
       for (ItemParam itemParam : request.getParams()) {
-        if (!itemParam.valid()) {
-          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-              "Object Input param must have child parameter.");
-        }
+        itemParam.checkValid();
       }
     }
     if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {
@@ -409,10 +406,7 @@ public class ApiAssignmentService {
         }
       }
       for (ItemParam itemParam : request.getParams()) {
-        if (!itemParam.valid()) {
-          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-              "Object Input param must have child parameter.");
-        }
+        itemParam.checkValid();
       }
     }
     if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {

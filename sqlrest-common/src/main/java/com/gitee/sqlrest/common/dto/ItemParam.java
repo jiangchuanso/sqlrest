@@ -21,7 +21,7 @@ public class ItemParam extends BaseParam {
   @ApiModelProperty("Object类型的子元素")
   private List<BaseParam> children;
 
-  public boolean valid() {
+  public void checkValid() {
     if (StringUtils.isBlank(getName())) {
       throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
     }
@@ -32,12 +32,12 @@ public class ItemParam extends BaseParam {
             throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
           }
         }
-        return true;
+      } else {
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
+            "Object Input param '" + getName() + "' must have child parameter.");
       }
     } else {
       children = Collections.emptyList();
     }
-
-    return false;
   }
 }
