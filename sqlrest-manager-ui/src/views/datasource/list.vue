@@ -235,9 +235,12 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="createFormVisible = false">取 消</el-button>
+          <el-button type="success"
+                     @click="handlePreTest(createform,'createform')">测试</el-button>
           <el-button type="primary"
                      @click="handleCreate">确 定</el-button>
+          <el-button type="info"
+                     @click="createFormVisible = false">取 消</el-button>
         </div>
       </el-dialog>
 
@@ -314,9 +317,12 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="updateFormVisible = false">取 消</el-button>
+          <el-button type="success"
+                     @click="handlePreTest(updateform,'updateform')">测试</el-button>
           <el-button type="primary"
                      @click="handleSave">确 定</el-button>
+          <el-button type="info"
+                     @click="updateFormVisible = false">取 消</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -522,6 +528,61 @@ export default {
     addConnection: function () {
       this.createFormVisible = true;
       this.createform = {};
+    },
+    handlePreTest: function (form, refName,) {
+      let driverClass = "";
+      if (this.databaseType.length > 0) {
+        for (let i = 0; i < this.databaseType.length; i++) {
+          if (this.databaseType[i].type == form.type) {
+            driverClass = this.databaseType[i].driver;
+            break;
+          }
+        }
+      }
+
+      this.$refs[refName].validate(valid => {
+        if (valid) {
+          this.$http({
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            url: "/sqlrest/manager/api/v1/datasource/preTest",
+            data: JSON.stringify({
+              name: form.name,
+              type: form.type,
+              version: form.version,
+              driver: driverClass,
+              url: form.url,
+              username: form.username,
+              password: form.password
+            })
+          }).then(res => {
+            if (0 === res.data.code) {
+              this.$alert("测试连接信息成功", "测试操作成功",
+                {
+                  confirmButtonText: "确定",
+                  type: "info"
+                }
+              );
+            } else {
+              this.$alert(res.data.message, "测试操作失败",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
+            }
+          });
+        } else {
+          this.$alert("请检查输入", "提示信息",
+            {
+              confirmButtonText: "确定",
+              type: "info"
+            }
+          );
+        }
+      });
     },
     handleCreate: function () {
       let driverClass = "";

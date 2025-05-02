@@ -8,6 +8,7 @@ import com.gitee.sqlrest.persistence.entity.DataSourceEntity;
 import com.zaxxer.hikari.HikariDataSource;
 import java.net.URLClassLoader;
 import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +32,17 @@ public final class DataSourceUtils {
     if (!datasourceMap.containsKey(entity.getId())) {
       HikariDataSource ds = createDataSource(entity, driverPath);
       try (Connection connection = ds.getConnection()) {
-        connection.isValid(2);
+        if (StringUtils.isNotBlank(entity.getType().getSql())) {
+          try (Statement statement = connection.createStatement()) {
+            statement.execute(entity.getType().getSql());
+          }
+        } else {
+          if (!connection.isValid(2)) {
+            throw new RuntimeException("Connection is invalid!");
+          }
+        }
+      } catch (RuntimeException e) {
+        throw e;
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -48,15 +59,19 @@ public final class DataSourceUtils {
   public static void dropHikariDataSource(Long dataSourceId) {
     Pair<DataSourceEntity, HikariDataSource> dsPair = datasourceMap.remove(dataSourceId);
     if (null != dsPair) {
-      try {
-        dsPair.getRight().close();
-      } catch (Exception e) {
-        log.warn("Error when close HikariDataSource:{}", e.getMessage());
-      }
+      closeHikariDataSource(dsPair.getRight());
     }
   }
 
-  private static HikariDataSource createDataSource(DataSourceEntity properties, String driverPath) {
+  public static void closeHikariDataSource(HikariDataSource ds) {
+    try {
+      ds.close();
+    } catch (Exception e) {
+      log.warn("Error when close HikariDataSource:{}", e.getMessage());
+    }
+  }
+
+  public static HikariDataSource createDataSource(DataSourceEntity properties, String driverPath) {
     Properties parameters = new Properties();
     HikariDataSource ds = new HikariDataSource();
     ds.setPoolName("The_JDBC_Connection");

@@ -3,6 +3,7 @@ package com.gitee.sqlrest.template;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.builder.BaseBuilder;
@@ -197,6 +198,19 @@ public class XmlScriptBuilder extends BaseBuilder {
       String separator = nodeToHandle.getStringAttribute("separator");
 
       inputParams.put(collection, true);
+
+      // extract object item
+      Map<String, Boolean> objectItems = new LinkedHashMap<>();
+      storeParameter(nodeToHandle.getStringBody(), objectItems);
+      for (Map.Entry<String, Boolean> entry : objectItems.entrySet()) {
+        String param = entry.getKey();
+        if (null != param && param.length() > 0) {
+          String name = param.replaceFirst(item, collection);
+          if (!collection.equals(name)) {
+            inputParams.put(name, false);
+          }
+        }
+      }
 
       ForEachSqlNode forEachSqlNode = new ForEachSqlNode(configuration, mixedSqlNode, collection, nullable, index, item,
           open, close, separator);

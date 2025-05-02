@@ -62,16 +62,29 @@ public class XmlSqlTemplate {
       if (idx > 0) {
         subName = name;
         name = name.substring(0, idx);
-      }
-      if (entry.getValue()) {
-        names.put(name, true);
-        if (null != subName) {
-          names.put(subName, true);
+        if (entry.getValue()) {
+          names.put(name, false);
+          if (null != subName) {
+            names.put(subName, true);
+          }
+        } else {
+          names.putIfAbsent(name, entry.getValue());
+          if (null != subName) {
+            names.putIfAbsent(subName, entry.getValue());
+          }
         }
+        continue;
       } else {
-        names.putIfAbsent(name, entry.getValue());
-        if (null != subName) {
-          names.putIfAbsent(subName, entry.getValue());
+        if (entry.getValue()) {
+          names.put(name, true);
+          if (null != subName) {
+            names.put(subName, true);
+          }
+        } else {
+          names.putIfAbsent(name, entry.getValue());
+          if (null != subName) {
+            names.putIfAbsent(subName, entry.getValue());
+          }
         }
       }
     }

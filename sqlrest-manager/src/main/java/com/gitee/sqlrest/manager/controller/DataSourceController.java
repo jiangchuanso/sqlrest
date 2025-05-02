@@ -5,6 +5,7 @@ import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.driver.DriverLoadService;
+import com.gitee.sqlrest.core.dto.DataSourceBaseRequest;
 import com.gitee.sqlrest.core.dto.DataSourceSaveRequest;
 import com.gitee.sqlrest.core.dto.DatasourceDetailResponse;
 import com.gitee.sqlrest.core.dto.EntityIdNameResponse;
@@ -44,6 +45,13 @@ public class DataSourceController {
   @GetMapping(value = "/{type}/drivers", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity getDrivers(@PathVariable("type") ProductTypeEnum type) {
     return ResultEntity.success(driverLoadService.getDrivers(type));
+  }
+
+  @ApiOperation(value = "连接预测试")
+  @PostMapping(value = "/preTest", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity preTest(@Valid @RequestBody DataSourceBaseRequest request) {
+    datasourceService.preTest(request);
+    return ResultEntity.success();
   }
 
   @ApiOperation(value = "数据源列表")

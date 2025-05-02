@@ -8,6 +8,7 @@ import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.common.util.JdbcUrlUtils;
 import com.gitee.sqlrest.core.driver.DriverLoadService;
+import com.gitee.sqlrest.core.dto.DataSourceBaseRequest;
 import com.gitee.sqlrest.core.dto.DataSourceSaveRequest;
 import com.gitee.sqlrest.core.dto.DatabaseTypeDetailResponse;
 import com.gitee.sqlrest.core.dto.DatasourceDetailResponse;
@@ -74,21 +75,57 @@ public class DataSourceService {
     return response;
   }
 
+  private void testConnection(HikariDataSource ds, ProductTypeEnum type) {
+    try (Connection connection = ds.getConnection()) {
+      if (StringUtils.isNotBlank(type.getSql())) {
+        try (Statement statement = connection.createStatement()) {
+          statement.execute(type.getSql());
+        }
+      } else {
+        if (!connection.isValid(2)) {
+          throw new RuntimeException("Connection is invalid!");
+        }
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void preTest(DataSourceBaseRequest request) {
+    DataSourceEntity dataSourceEntity = DataSourceEntity.builder()
+        .name(request.getName())
+        .type(request.getType())
+        .driver(request.getDriver())
+        .version(request.getVersion())
+        .url(request.getUrl())
+        .username(request.getUsername())
+        .password(request.getPassword())
+        .build();
+    File driverPathFile = SpringUtil.getBean(DriverLoadService.class)
+        .getVersionDriverFile(dataSourceEntity.getType(),
+            dataSourceEntity.getVersion());
+    String driverPath = driverPathFile.getAbsolutePath();
+    HikariDataSource ds = DataSourceUtils.createDataSource(dataSourceEntity, driverPath);
+    try {
+      testConnection(ds, request.getType());
+    } finally {
+      DataSourceUtils.closeHikariDataSource(ds);
+    }
+  }
+
   public void testDataSource(Long id) {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(id);
+    if (null == dataSourceEntity) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
+    }
     File driverPathFile = SpringUtil.getBean(DriverLoadService.class)
         .getVersionDriverFile(dataSourceEntity.getType(),
             dataSourceEntity.getVersion());
     String driverPath = driverPathFile.getAbsolutePath();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);
-    if (StringUtils.isNotBlank(dataSourceEntity.getType().getSql())) {
-      try (Connection connection = ds.getConnection()) {
-        Statement statement = connection.createStatement();
-        statement.execute(dataSourceEntity.getType().getSql());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
+    testConnection(ds, dataSourceEntity.getType());
   }
 
   public void createDataSource(DataSourceSaveRequest request) {
