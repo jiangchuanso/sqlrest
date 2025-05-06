@@ -58,6 +58,12 @@ public class XmlSqlTemplate {
         name = name.replaceAll(Pattern.quote(matcher.group()), "");
         matcher = pattern.matcher(name);
       }
+
+      int commaIdx = name.indexOf(",");
+      if (commaIdx > 0) {
+        name = name.substring(0, commaIdx);
+      }
+
       int idx = name.indexOf(".");
       if (idx > 0) {
         subName = name;

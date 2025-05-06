@@ -23,18 +23,18 @@ public class ItemParam extends BaseParam {
 
   public void checkValid() {
     if (StringUtils.isBlank(getName())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "input parameter name must is not blank");
     }
     if (getType() == ParamTypeEnum.OBJECT) {
       if (null != children && children.size() > 0) {
         for (BaseParam param : children) {
           if (StringUtils.isBlank(param.getName())) {
-            throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+            throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "input parameter name must is not blank");
           }
         }
       } else {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-            "Object Input param '" + getName() + "' must have child parameter.");
+            "Object input param '" + getName() + "' must have child parameter.");
       }
     } else {
       children = Collections.emptyList();

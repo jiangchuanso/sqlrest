@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -213,10 +214,11 @@ public class ApiAssignmentService {
                 if (pv.getType().isObject() && null != pv.getChildren()) {
                   Map<String, Object> objectMap = new HashMap<>(4);
                   for (BaseParamValue spv : pv.getChildren()) {
+                    Object v = spv.getType().getConverter().apply(spv.getValue());
                     if (spv.getIsArray()) {
-                      objectMap.put(spv.getName(), Arrays.asList(spv.getType().getConverter().apply(spv.getValue())));
+                      objectMap.put(spv.getName(), null == v ? null : Arrays.asList(v));
                     } else {
-                      objectMap.put(spv.getName(), spv.getType().getConverter().apply(spv.getValue()));
+                      objectMap.put(spv.getName(), v);
                     }
                   }
                   if (objectMap.size() > 0) {
@@ -230,6 +232,7 @@ public class ApiAssignmentService {
             } else {
               List<Object> values = value.stream().map(ParamValue::getValue)
                   .map(s -> type.getConverter().apply(s))
+                  .filter(Objects::nonNull)
                   .collect(Collectors.toList());
               params.put(paramName, values);
             }
@@ -238,15 +241,14 @@ public class ApiAssignmentService {
               if (null != value.get(0).getChildren()) {
                 Map<String, Object> objectMap = new HashMap<>(4);
                 for (BaseParamValue spv : value.get(0).getChildren()) {
+                  Object v = spv.getType().getConverter().apply(spv.getValue());
                   if (spv.getIsArray()) {
-                    objectMap.put(spv.getName(), Arrays.asList(spv.getType().getConverter().apply(spv.getValue())));
+                    objectMap.put(spv.getName(), null == v ? null : Arrays.asList(v));
                   } else {
-                    objectMap.put(spv.getName(), spv.getType().getConverter().apply(spv.getValue()));
+                    objectMap.put(spv.getName(), v);
                   }
                 }
-                if (objectMap.size() > 0) {
-                  params.put(paramName, objectMap);
-                }
+                params.put(paramName, objectMap);
               }
             } else {
               params.put(paramName, type.getConverter().apply(value.get(0).getValue()));
@@ -336,6 +338,11 @@ public class ApiAssignmentService {
         itemParam.checkValid();
       }
     }
+    if (!CollectionUtils.isEmpty(request.getOutputs())) {
+      for (OutParam outParam : request.getOutputs()) {
+        outParam.checkValid();
+      }
+    }
     if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
           "Invalid datasourceId or maybe not exist.");
@@ -407,6 +414,11 @@ public class ApiAssignmentService {
       }
       for (ItemParam itemParam : request.getParams()) {
         itemParam.checkValid();
+      }
+    }
+    if (!CollectionUtils.isEmpty(request.getOutputs())) {
+      for (OutParam outParam : request.getOutputs()) {
+        outParam.checkValid();
       }
     }
     if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {

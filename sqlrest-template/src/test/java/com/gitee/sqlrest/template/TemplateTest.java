@@ -210,4 +210,23 @@ public class TemplateTest {
     SqlMeta sqlMeta = template.process(params);
     System.out.println(sqlMeta);
   }
+
+  @Test
+  public void testObjNotRequiredField() {
+    String sql = "SELECT * from employees.departments "
+        + "<if test='obj.deptNo != null and obj.deptNo.size() > 0'> "
+        + " WHERE dept_no in "
+        + " <foreach open=\"(\" close=\")\" collection=\"obj.deptNo\" separator=\",\" item=\"item\" index=\"index\"> "
+        + " #{item} "
+        + " </foreach> "
+        + "</if>";
+    XmlSqlTemplate template = new XmlSqlTemplate(sql);
+    System.out.println(template.getParameterNames());
+
+    Map<String, Object> obj = new HashMap<>();
+    Map<String, Object> params = new HashMap<>();
+    params.put("obj", obj);
+    SqlMeta sqlMeta = template.process(params);
+    System.out.println(sqlMeta);
+  }
 }
