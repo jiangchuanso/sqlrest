@@ -11,7 +11,7 @@ public class HazelcastCacheFactory implements CacheFactory {
   private HazelcastInstance hazelcastInstance;
 
   @Override
-  public <T> Map<String, T> getCacheMap(String key) {
+  public <T> Map<String, T> getCacheMap(String key, Class<T> clazz) {
     return hazelcastInstance.getMap(key);
   }
 

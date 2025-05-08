@@ -1,6 +1,5 @@
 package com.gitee.sqlrest.cache.redis;
 
-import cn.hutool.core.lang.TypeReference;
 import cn.hutool.json.JSONUtil;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,11 +10,13 @@ import java.util.Set;
 public class RedisCacheMap<V> implements Map<String, V> {
 
   private final String hashTableKey;
-  final private JedisClient jedisClient;
+  private final JedisClient jedisClient;
+  private final Class<V> valueClazz;
 
-  public RedisCacheMap(String hashTableKey, JedisClient jedisClient) {
+  public RedisCacheMap(String hashTableKey, JedisClient jedisClient, Class<V> clazz) {
     this.hashTableKey = hashTableKey;
     this.jedisClient = jedisClient;
+    this.valueClazz = clazz;
   }
 
   @Override
@@ -47,8 +48,7 @@ public class RedisCacheMap<V> implements Map<String, V> {
     return jedisClient.doAction(
         jedis -> {
           String value = jedis.hget(hashTableKey, o.toString());
-          return JSONUtil.toBean(value, new TypeReference<V>() {
-          }, true);
+          return JSONUtil.toBean(value, valueClazz, true);
         }
     );
   }
@@ -59,8 +59,7 @@ public class RedisCacheMap<V> implements Map<String, V> {
         jedis -> {
           String value = jedis.hget(hashTableKey, k);
           jedis.hset(hashTableKey, k, JSONUtil.toJsonStr(v));
-          return JSONUtil.toBean(value, new TypeReference<V>() {
-          }, true);
+          return JSONUtil.toBean(value, valueClazz, true);
         }
     );
   }
@@ -71,8 +70,7 @@ public class RedisCacheMap<V> implements Map<String, V> {
         jedis -> {
           String value = jedis.hget(hashTableKey, o.toString());
           jedis.hdel(hashTableKey, o.toString());
-          return JSONUtil.toBean(value, new TypeReference<V>() {
-          }, true);
+          return JSONUtil.toBean(value, valueClazz, true);
         }
     );
   }

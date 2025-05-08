@@ -6,6 +6,8 @@ import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
+import com.gitee.sqlrest.common.exception.UnAuthorizedException;
+import com.gitee.sqlrest.common.exception.UnPermissionException;
 import com.gitee.sqlrest.common.util.TokenUtils;
 import com.gitee.sqlrest.core.servlet.ClientTokenService;
 import com.gitee.sqlrest.core.util.ServletUtils;
@@ -89,30 +91,34 @@ public class AuthenticationFilter implements Filter {
         accessRecordEntity.setClientKey(appKey);
         if (null == appKey) {
           log.error("Failed get app key from token [{}].", tokenStr);
-          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-          String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
-          ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, message);
-          response.getWriter().append(JSONUtil.toJsonStr(result));
-          return;
+          throw new UnAuthorizedException("Failed to verify token: " + tokenStr);
         } else {
           boolean verify = clientTokenService.verifyAuthGroup(appKey, apiConfigEntity.getGroupId());
           if (!verify) {
             log.error("Failed verify group from token [{}] , app key [{}].", tokenStr, appKey);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            String message = String.format("%s[%s]", path, method.name());
-            ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, message);
-            response.getWriter().append(JSONUtil.toJsonStr(result));
-            return;
+            String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
+            throw new UnPermissionException("No Permission to access: " + message);
           }
         }
       }
       chain.doFilter(request, response);
+    } catch (UnAuthorizedException e) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      accessRecordEntity.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      ResultEntity resultEntity = ResultEntity.failed(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, e.getMessage());
+      response.getWriter().append(JSONUtil.toJsonStr(resultEntity));
+    } catch (UnPermissionException e) {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      accessRecordEntity.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      ResultEntity resultEntity = ResultEntity.failed(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, e.getMessage());
+      response.getWriter().append(JSONUtil.toJsonStr(resultEntity));
     } catch (Throwable t) {
       String exception = (null != t.getMessage()) ? t.getMessage() : ExceptionUtil.stacktraceToString(t, 100);
+      accessRecordEntity.setException(exception);
       ResultEntity resultEntity = ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, exception);
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      accessRecordEntity.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
       response.getWriter().append(JSONUtil.toJsonStr(resultEntity));
-      accessRecordEntity.setException(exception);
     } finally {
       accessRecordEntity.setDuration(System.currentTimeMillis() - accessRecordEntity.getDuration());
       CompletableFuture.runAsync(() -> accessRecordMapper.insert(accessRecordEntity));

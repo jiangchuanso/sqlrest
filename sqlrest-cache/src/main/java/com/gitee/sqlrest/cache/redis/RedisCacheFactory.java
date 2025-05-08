@@ -10,7 +10,7 @@ public class RedisCacheFactory implements CacheFactory {
   private JedisClient jedisClient;
 
   @Override
-  public <T> Map<String, T> getCacheMap(String key) {
-    return new RedisCacheMap<>(key, jedisClient);
+  public <T> Map<String, T> getCacheMap(String key, Class<T> clazz) {
+    return new RedisCacheMap<>(key, jedisClient, clazz);
   }
 }

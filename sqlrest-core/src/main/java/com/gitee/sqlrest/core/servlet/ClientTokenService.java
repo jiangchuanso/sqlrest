@@ -9,6 +9,7 @@ import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.common.util.TokenUtils;
 import com.gitee.sqlrest.persistence.dao.AppClientDao;
 import com.gitee.sqlrest.persistence.entity.AppClientEntity;
+import com.gitee.sqlrest.persistence.util.JsonUtils;
 import java.time.LocalDateTime;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -32,7 +33,8 @@ public class ClientTokenService {
     LocalDateTime now = LocalDateTime.now();
     try {
       for (AppClientEntity appClient : appClientDao.listAll(null)) {
-        log.info("Load client app token from persistence :{}", appClient);
+        appClient.setAppSecret("******");
+        log.info("Load client app token from persistence :{}", JsonUtils.toJsonString(appClient));
         if (StringUtils.isNotBlank(appClient.getAccessToken())) {
           AccessToken clientToken = AccessToken.builder()
               .realName(appClient.getName())
@@ -51,7 +53,8 @@ public class ClientTokenService {
             }
           }
 
-          Map tokenClientMap = cacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
+          Map<String, AccessToken> tokenClientMap = cacheFactory
+              .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
           tokenClientMap.put(appClient.getAccessToken(), clientToken);
         }
       }
@@ -96,7 +99,8 @@ public class ClientTokenService {
       appClientDao.updateTokenByAppKey(clientId, token);
     }
 
-    Map tokenClientMap = cacheFactory.getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
+    Map<String, AccessToken> tokenClientMap = cacheFactory
+        .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
     tokenClientMap.put(token, clientToken);
 
     return clientToken;
@@ -107,7 +111,7 @@ public class ClientTokenService {
       return null;
     }
     Map<String, AccessToken> tokenClientMap = cacheFactory
-        .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT);
+        .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
     AccessToken clientToken = tokenClientMap.get(tokenStr);
     if (null == clientToken) {
       return null;

@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface CacheFactory {
 
-  <T> Map<String, T> getCacheMap(String key);
+  <T> Map<String, T> getCacheMap(String key, Class<T> clazz);
 }

@@ -28,6 +28,6 @@ public class RedisProperties {
   private Duration timeout = Duration.ofSeconds(1);
   private Duration connectTimeout = Duration.ofSeconds(1);
   private String clientName = "sqlrest";
-  private Pool pool;
+  private Pool pool = new Pool();
 
 }
