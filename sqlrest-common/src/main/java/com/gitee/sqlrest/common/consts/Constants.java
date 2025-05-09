@@ -18,6 +18,10 @@ public abstract class Constants {
 
   public static final int SC_TOO_MANY_REQUESTS = 429;
 
+  public static final String CACHE_NAME_API_RESPONSE = "response_result";
+
+  public static final String CACHE_NAME_API_VAR = "variable_value";
+
   public static final String API_DOC_PATH_PREFIX = "/apidoc";
 
   public static final String SYS_PARAM_KEY_API_DOC_OPEN = "apiDocOpen";

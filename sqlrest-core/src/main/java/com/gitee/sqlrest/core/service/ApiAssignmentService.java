@@ -8,6 +8,7 @@ import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ParamValue;
 import com.gitee.sqlrest.common.dto.ParamValue.BaseParamValue;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.common.enums.CacheKeyTypeEnum;
 import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.OnOffEnum;
@@ -353,8 +354,28 @@ public class ApiAssignmentService {
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
     }
+    if (null == request.getCacheKeyType()) {
+      request.setCacheKeyType(CacheKeyTypeEnum.NONE);
+    }
     while (request.getPath().startsWith("/")) {
       request.setPath(request.getPath().substring(1));
+    }
+
+    if (request.getCacheKeyType().isUseCache()) {
+      if (request.getCacheExpireSeconds() <= 0) {
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "Invalid param cacheExpireSeconds");
+      }
+      if (CacheKeyTypeEnum.SPEL == request.getCacheKeyType()) {
+        if (StringUtils.isBlank(request.getCacheKeyExpr())) {
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "SPEL cache must has cacheKeyExpr");
+        }
+      }
+      if (CacheKeyTypeEnum.AUTO == request.getCacheKeyType()) {
+        request.setCacheKeyExpr(null);
+      }
+    } else {
+      request.setCacheExpireSeconds(0L);
+      request.setCacheKeyExpr(null);
     }
 
     List<ApiContextEntity> contextList = getContextListEntity(request.getContextList());
@@ -380,6 +401,9 @@ public class ApiAssignmentService {
     assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
     assignmentEntity.setFlowGrade(request.getFlowGrade());
     assignmentEntity.setFlowCount(request.getFlowCount());
+    assignmentEntity.setCacheKeyType(request.getCacheKeyType());
+    assignmentEntity.setCacheKeyExpr(request.getCacheKeyExpr());
+    assignmentEntity.setCacheExpireSeconds(Optional.ofNullable(request.getCacheExpireSeconds()).orElse(0L));
 
     apiAssignmentDao.insert(assignmentEntity);
     return assignmentEntity.getId();
@@ -428,6 +452,26 @@ public class ApiAssignmentService {
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
     }
+    if (null == request.getCacheKeyType()) {
+      request.setCacheKeyType(CacheKeyTypeEnum.NONE);
+    }
+
+    if (request.getCacheKeyType().isUseCache()) {
+      if (request.getCacheExpireSeconds() <= 0) {
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "Invalid param cacheExpireSeconds");
+      }
+      if (CacheKeyTypeEnum.SPEL == request.getCacheKeyType()) {
+        if (StringUtils.isBlank(request.getCacheKeyExpr())) {
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "SPEL cache must has cacheKeyExpr");
+        }
+      }
+      if (CacheKeyTypeEnum.AUTO == request.getCacheKeyType()) {
+        request.setCacheKeyExpr(null);
+      }
+    } else {
+      request.setCacheExpireSeconds(0L);
+      request.setCacheKeyExpr(null);
+    }
 
     List<ApiContextEntity> contextList = getContextListEntity(request.getContextList());
 
@@ -453,6 +497,9 @@ public class ApiAssignmentService {
     assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
     assignmentEntity.setFlowGrade(request.getFlowGrade());
     assignmentEntity.setFlowCount(request.getFlowCount());
+    assignmentEntity.setCacheKeyType(request.getCacheKeyType());
+    assignmentEntity.setCacheKeyExpr(request.getCacheKeyExpr());
+    assignmentEntity.setCacheExpireSeconds(Optional.ofNullable(request.getCacheExpireSeconds()).orElse(0L));
 
     apiAssignmentDao.update(assignmentEntity);
   }

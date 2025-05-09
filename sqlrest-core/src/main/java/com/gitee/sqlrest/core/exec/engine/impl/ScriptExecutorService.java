@@ -6,6 +6,7 @@ import com.gitee.sqlrest.common.enums.ProductTypeEnum;
 import com.gitee.sqlrest.core.dto.ScriptEditorCompletion;
 import com.gitee.sqlrest.core.exec.annotation.Module;
 import com.gitee.sqlrest.core.exec.engine.AbstractExecutorEngine;
+import com.gitee.sqlrest.core.exec.module.CacheVarModule;
 import com.gitee.sqlrest.core.exec.module.DbVarModule;
 import com.gitee.sqlrest.core.exec.module.EnvVarModule;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
@@ -21,7 +22,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 public class ScriptExecutorService extends AbstractExecutorEngine {
 
   public static List<ScriptEditorCompletion> syntax = new ArrayList<>();
-  public static List<Class> modules = Arrays.asList(EnvVarModule.class, DbVarModule.class);
+  public static List<Class> modules = Arrays.asList(EnvVarModule.class, DbVarModule.class, CacheVarModule.class);
 
   static {
     syntax.add(
@@ -89,6 +90,7 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
   @Override
   public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     EnvVarModule envModule = SpringUtil.getBean(EnvVarModule.class);
+    CacheVarModule cacheModule = SpringUtil.getBean(CacheVarModule.class);
     DbVarModule dbModule = new DbVarModule(dataSource, productType, params, strategy);
 
     List<Object> results = new ArrayList<>();
@@ -97,6 +99,7 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
       params.forEach((k, v) -> binding.setProperty(k, v));
       binding.setProperty(getModuleVarName(dbModule.getClass()), dbModule);
       binding.setProperty(getModuleVarName(envModule.getClass()), envModule);
+      binding.setProperty(getModuleVarName(cacheModule.getClass()), cacheModule);
 
       GroovyShell groovyShell = new GroovyShell(binding);
       try {

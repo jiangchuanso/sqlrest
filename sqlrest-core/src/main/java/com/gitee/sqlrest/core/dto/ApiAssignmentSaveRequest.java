@@ -1,7 +1,9 @@
 package com.gitee.sqlrest.core.dto;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.gitee.sqlrest.common.dto.ItemParam;
 import com.gitee.sqlrest.common.dto.OutParam;
+import com.gitee.sqlrest.common.enums.CacheKeyTypeEnum;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
@@ -87,4 +89,13 @@ public class ApiAssignmentSaveRequest {
 
   @ApiModelProperty("单机阈值")
   private Integer flowCount;
+
+  @ApiModelProperty("缓存键类型")
+  private CacheKeyTypeEnum cacheKeyType;
+
+  @TableField("缓存表达式")
+  private String cacheKeyExpr;
+
+  @TableField("缓存时常")
+  private Long cacheExpireSeconds;
 }

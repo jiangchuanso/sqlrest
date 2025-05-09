@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.gitee.sqlrest.common.dto.ItemParam;
 import com.gitee.sqlrest.common.dto.OutParam;
+import com.gitee.sqlrest.common.enums.CacheKeyTypeEnum;
 import com.gitee.sqlrest.common.enums.DataTypeFormatEnum;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
@@ -78,7 +79,7 @@ public class ApiAssignmentEntity {
   @TableField(value = "naming_strategy", typeHandler = EnumTypeHandler.class)
   private NamingStrategyEnum namingStrategy;
 
-  @TableField(value = "flow_status")
+  @TableField("flow_status")
   private Boolean flowStatus;
 
   @TableField("flow_grade")
@@ -86,6 +87,15 @@ public class ApiAssignmentEntity {
 
   @TableField("flow_count")
   private Integer flowCount;
+
+  @TableField(value = "cache_key_type", typeHandler = EnumTypeHandler.class)
+  private CacheKeyTypeEnum cacheKeyType;
+
+  @TableField("cache_key_expr")
+  private String cacheKeyExpr;
+
+  @TableField("cache_expire_seconds")
+  private Long cacheExpireSeconds;
 
   @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;

@@ -467,6 +467,49 @@
                   </el-col>
                 </el-row>
               </el-tab-pane>
+              <el-tab-pane label="缓存配置"
+                           name="cacheConfig">
+                <el-form-item label="缓存方法"
+                              label-width="120px"
+                              style="width:60%">
+                  <el-select v-model="createParam.cacheKeyType"
+                             style="width:40%"
+                             :disabled="isOnlyShowDetail">
+                    <el-option v-for="item in cacheKeyTypeList"
+                               :key="item.value"
+                               :label="item.name"
+                               :value="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label-width="120px"
+                              style="width:60%"
+                              v-show="createParam.cacheKeyType==='SPEL'">
+                  <span slot="label"
+                        style="display:inline-block;">
+                    SpEL表达式
+                    <el-tooltip effect="dark"
+                                content="必填，可以使用Spring表达式语言(Spring Expression Language，SpEL)计算入参值的缓存KEY,例如：#deptNo或#dept.deptNo等形式"
+                                placement="top">
+                      <i class='el-icon-question' />
+                    </el-tooltip>
+                  </span>
+                  <el-input v-model="createParam.cacheKeyExpr"
+                            auto-complete="off"
+                            style="width:75%"
+                            :disabled="isOnlyShowDetail"></el-input>
+                </el-form-item>
+                <el-form-item label="过期时长(秒)"
+                              label-width="120px"
+                              style="width:60%"
+                              v-show="createParam.cacheKeyType==='SPEL'|| createParam.cacheKeyType==='AUTO'">
+                  <el-input-number v-model="createParam.cacheExpireSeconds"
+                                   size="small"
+                                   :min="10"
+                                   :step="1"
+                                   :disabled="isOnlyShowDetail"
+                                   step-strictly></el-input-number>
+                </el-form-item>
+              </el-tab-pane>
               <el-tab-pane label="流量控制"
                            name="flowControl">
                 <el-row>
@@ -683,6 +726,11 @@ export default {
         { name: "对象", value: "OBJECT" }
       ],
       contentTypes: ['application/x-www-form-urlencoded', 'application/json'],
+      cacheKeyTypeList: [
+        { name: "关闭缓存功能", value: "NONE" },
+        { name: "哈希生存缓存KEY", value: "AUTO" },
+        { name: "SpEL生成缓存KEY", value: "SPEL" },
+      ],
       showTree: true,
       editorHeightNum: 300,
       createParam: {
@@ -703,7 +751,10 @@ export default {
         formatMap: null,
         flowStatus: false,
         flowGrade: 1,
-        flowCount: 5
+        flowCount: 5,
+        cacheKeyType: 'NONE',
+        cacheKeyExpr: '',
+        cacheExpireSeconds: '300',
       },
       showDebugDrawer: false,
       gatewayApiPrefix: 'http://127.0.0.1:8081/api/',
@@ -833,7 +884,10 @@ export default {
             formatMap: detail.formatMap,
             flowStatus: detail.flowStatus,
             flowGrade: detail.flowGrade,
-            flowCount: detail.flowCount
+            flowCount: detail.flowCount,
+            cacheKeyType: detail.cacheKeyType,
+            cacheKeyExpr: detail.cacheKeyExpr,
+            cacheExpireSeconds: detail.cacheExpireSeconds,
           }
           this.inputParams = []
           if (detail.params) {
@@ -1438,6 +1492,9 @@ export default {
           flowStatus: this.createParam.flowStatus,
           flowGrade: this.createParam.flowGrade,
           flowCount: this.createParam.flowCount,
+          cacheKeyType: this.createParam.cacheKeyType,
+          cacheKeyExpr: this.createParam.cacheKeyExpr,
+          cacheExpireSeconds: this.createParam.cacheExpireSeconds,
           engine: this.createParam.engine,
           contextList: sqls,
           params: this.inputParams,
@@ -1484,6 +1541,9 @@ export default {
           flowStatus: this.createParam.flowStatus,
           flowGrade: this.createParam.flowGrade,
           flowCount: this.createParam.flowCount,
+          cacheKeyType: this.createParam.cacheKeyType,
+          cacheKeyExpr: this.createParam.cacheKeyExpr,
+          cacheExpireSeconds: this.createParam.cacheExpireSeconds,
           engine: this.createParam.engine,
           contextList: sqls,
           params: this.inputParams,

@@ -30,6 +30,9 @@
 - 支持自动生成在线接口文档功能
 > 基于swagger-ui提供自动生成在线接口文档功能。
 
+- 支持接口缓存配置功能
+> 执行器基于Hazelcast/Redis支持接口的缓存配置功能。
+
 - 支持接口的流量控制功能
 > 执行器基于sentinel支持接口的流量控制功能。
 
@@ -66,12 +69,12 @@
     ├── sqlrest-template         // sqlrest的SQL内容模板模块
     ├── sqlrest-cache            // sqlrest执行器缓存模块
     ├── sqlrest-persistence      // sqlrest的数据库持久化模块
-    ├── sqlrest-core             // sqlrest-core的接口实现模块
+    ├── sqlrest-core             // sqlrest接口核心实现模块
     ├── sqlrest-gateway          // Gateway网关节点
     ├── sqlrest-executor         // Executor执行节点
     ├── sqlrest-manager          // Manager管理节点
-    ├── sqlrest-manager-ui       // 基于Vue2的Manager前段WEB交互页面
-    ├── sqlrest-dist             // 基于maven-assembly-plugin插件的项目打包模块
+    ├── sqlrest-manager-ui       // WEB交互页面
+    ├── sqlrest-dist             // 项目打包模块
 ```
 
 ### 4、正在规划中的功能
@@ -79,10 +82,13 @@
 - (1) 接口检索功能
 > 支持类似百度搜索的接口搜索功能，方便接口查找
 
-- (2) 支持接口的缓存配置功能
-> 基于分布式缓存等构建支持接口的缓存配置功能。
+- (2) 接口详情功能
+> 支持接口的详细定义、数据来源、访问分析等功能
 
-- (3) 前端界面整体美化
+- (3) 支持接口的长效Token功能
+> 支持配置接口的长期Token功能。
+
+- (4) 前端界面整体美化
 > 美化界面的交互展示，尤其是“拓扑结构”页面。
 
 ## 二、编译打包
@@ -198,7 +204,27 @@ MYSQLDB_PASSWORD=123456
 
 启动gateway服务：sh bin/sqlrestctl.sh start gateway
 
-### 3、系统访问
+### 3、高级配置
+
+>sqlrest的缓存同时支持分布式嵌入的hazelcast和redis，在manager/gateway/executor的application.yml配
+>置文件中，可通过如下配置所使用的缓存，默认为使用hazelcast缓存。
+
+```
+sqlrest:
+  cache:
+    hazelcast:
+      # 是否开启使用hazelcast缓存
+      enabled: true
+    redis:
+      # 是否开启使用redis缓存
+      enabled: false
+      host: 127.0.0.1
+      port: 6379
+      password: 123456
+      database: 0
+```
+
+### 4、系统访问
 
 启动完成后,通过http://<MANAGER_HOST>:<MANAGER_PORT> 地址即可访问。
 

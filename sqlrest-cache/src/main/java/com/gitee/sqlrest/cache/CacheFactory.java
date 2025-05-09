@@ -5,4 +5,6 @@ import java.util.Map;
 public interface CacheFactory {
 
   <T> Map<String, T> getCacheMap(String key, Class<T> clazz);
+
+  DistributedCache getDistributedCache(String name);
 }
