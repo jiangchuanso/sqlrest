@@ -7,10 +7,7 @@ import com.gitee.sqlrest.persistence.entity.AppClientEntity;
 import com.gitee.sqlrest.persistence.entity.ClientGroupEntity;
 import com.gitee.sqlrest.persistence.mapper.AppClientMapper;
 import com.gitee.sqlrest.persistence.mapper.ClientGroupMapper;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -46,23 +43,28 @@ public class AppClientDao {
     return appClientMapper.selectOne(queryWrapper);
   }
 
+  public AppClientEntity getByAccessToken(String accessToken) {
+    QueryWrapper<AppClientEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().eq(AppClientEntity::getAccessToken, accessToken);
+    return appClientMapper.selectOne(queryWrapper);
+  }
+
   public List<AppClientEntity> getByName(String name) {
     QueryWrapper<AppClientEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(AppClientEntity::getName, name);
     return appClientMapper.selectList(queryWrapper);
   }
 
-  public Set<Long> getAuthGroups(String appKey) {
+  public boolean existsAuthGroups(String appKey, Long groupId) {
     AppClientEntity appClientEntity = getByAppKey(appKey);
     if (null == appClientEntity) {
-      return Collections.emptySet();
+      return false;
     }
-
     QueryWrapper<ClientGroupEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.lambda().eq(ClientGroupEntity::getClientId, appClientEntity.getId());
-    return clientAuthMapper.selectList(queryWrapper)
-        .stream().map(ClientGroupEntity::getGroupId)
-        .collect(Collectors.toSet());
+    queryWrapper.lambda()
+        .eq(ClientGroupEntity::getClientId, appClientEntity.getId())
+        .eq(ClientGroupEntity::getGroupId, groupId);
+    return clientAuthMapper.selectCount(queryWrapper) > 0;
   }
 
   public void updateTokenByAppKey(String appKey, String token) {
@@ -106,7 +108,7 @@ public class AppClientDao {
     }
   }
 
-  public List<IdWithName> getGroupAuth(Long id){
+  public List<IdWithName> getGroupAuth(Long id) {
     return clientAuthMapper.getGroupAuth(id);
   }
 }

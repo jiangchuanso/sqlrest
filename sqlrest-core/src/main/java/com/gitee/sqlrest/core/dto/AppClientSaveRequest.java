@@ -1,5 +1,6 @@
 package com.gitee.sqlrest.core.dto;
 
+import com.gitee.sqlrest.common.enums.AliveTimeEnum;
 import com.gitee.sqlrest.common.enums.ExpireTimeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -27,4 +28,8 @@ public class AppClientSaveRequest {
   @NotNull(message = "expireTime不能为null")
   @ApiModelProperty("到期时间")
   private ExpireTimeEnum expireTime;
+
+  @NotNull(message = "tokenAlive不能为null")
+  @ApiModelProperty("Token存活期")
+  private AliveTimeEnum tokenAlive;
 }

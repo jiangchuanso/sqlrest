@@ -16,6 +16,8 @@ public abstract class Constants {
 
   public static final Long CLIENT_TOKEN_DURATION_SECONDS = 7200L;
 
+  public static final Long CLIENT_TOKEN_LONGEVITY = -1L;
+
   public static final int SC_TOO_MANY_REQUESTS = 429;
 
   public static final String CACHE_NAME_API_RESPONSE = "response_result";

@@ -62,6 +62,11 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="tokenAlive"
+                         label="Token生命期"
+                         :formatter="stringFormatTokenAlive"
+                         show-overflow-tooltip
+                         min-width="18%"></el-table-column>
         <el-table-column prop="createTime"
                          label="创建时间"
                          min-width="18%">
@@ -136,12 +141,12 @@
             <el-input v-model="createform.appKey"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="到期时长"
+          <el-form-item label="应用到期时长"
                         label-width="120px"
                         prop="expireTime"
                         style="width:85%">
             <el-select v-model="createform.expireTime">
-              <el-option label="永远"
+              <el-option label="无期"
                          value="EXPIRE_FOR_EVER"></el-option>
               <el-option label="一次"
                          value="EXPIRE_ONLY_ONCE"></el-option>
@@ -159,6 +164,25 @@
                          value="EXPIRE_15_DAY"></el-option>
               <el-option label="1个月"
                          value="EXPIRE_01_MOUTH"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label-width="120px"
+                        prop="tokenAlive"
+                        style="width:35%">
+            <span slot="label"
+                  style="display:inline-block;">
+              Token生命
+              <el-tooltip effect="dark"
+                          content="‘短期’的token时长为7200秒，到期续约再调用认证接口获取;‘长期’的token永不会过期，但应用过期时也即随之过期,应用被删除时也即随之消亡."
+                          placement="bottom">
+                <i class='el-icon-question' />
+              </el-tooltip>
+            </span>
+            <el-select v-model="createform.tokenAlive">
+              <el-option label="短期"
+                         value="PERIOD"></el-option>
+              <el-option label="长期"
+                         value="LONGEVITY"></el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -227,7 +251,8 @@ export default {
         name: "",
         description: "",
         appKey: "",
-        expireTime: ""
+        expireTime: "",
+        tokenAlive: "",
       },
       rules: {
         name: [
@@ -248,6 +273,13 @@ export default {
           {
             required: true,
             message: "到期时间必须选择",
+            trigger: "change"
+          }
+        ],
+        tokenAlive: [
+          {
+            required: true,
+            message: "Token生命期必须选择",
             trigger: "change"
           }
         ]
@@ -310,6 +342,14 @@ export default {
       }
       return "-";
     },
+    stringFormatTokenAlive (row, column) {
+      if (row.tokenAlive === "LONGEVITY") {
+        return "长期";
+      } else if (row.tokenAlive === "PERIOD") {
+        return "短期";
+      }
+      return "-";
+    },
     searchByKeyword: function () {
       this.currentPage = 1;
       this.loadData();
@@ -354,7 +394,8 @@ export default {
               name: this.createform.name,
               description: this.createform.description,
               appKey: this.createform.appKey,
-              expireTime: this.createform.expireTime
+              expireTime: this.createform.expireTime,
+              tokenAlive: this.createform.tokenAlive,
             })
           }).then(res => {
             if (0 === res.data.code) {

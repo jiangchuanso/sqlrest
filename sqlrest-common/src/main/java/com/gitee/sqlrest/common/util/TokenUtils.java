@@ -36,6 +36,10 @@ public final class TokenUtils {
     return generateValue(UUID.randomUUID().toString());
   }
 
+  public static int getTokenStringLength() {
+    return "9097ac1ab13198dfa4ddb2ecc1079693".length();
+  }
+
   protected static String generateValue(String param) {
     try {
       MessageDigest algorithm = MessageDigest.getInstance("MD5");

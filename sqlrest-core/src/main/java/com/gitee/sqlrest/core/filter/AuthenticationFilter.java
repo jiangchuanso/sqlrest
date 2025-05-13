@@ -26,6 +26,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -87,11 +88,14 @@ public class AuthenticationFilter implements Filter {
     try {
       if (!apiConfigEntity.getOpen()) {
         String tokenStr = TokenUtils.getRequestToken(request);
+        if (StringUtils.isBlank(tokenStr)) {
+          throw new UnAuthorizedException("Need bearer token.");
+        }
         String appKey = clientTokenService.verifyTokenAndGetAppKey(tokenStr);
         accessRecordEntity.setClientKey(appKey);
         if (null == appKey) {
-          log.error("Failed get app key from token [{}].", tokenStr);
-          throw new UnAuthorizedException("Failed to verify token: " + tokenStr);
+          log.error("Failed get app key from token [{}], maybe is invalid or expired. ", tokenStr);
+          throw new UnAuthorizedException("Invalid or Expired Token : " + tokenStr);
         } else {
           boolean verify = clientTokenService.verifyAuthGroup(appKey, apiConfigEntity.getGroupId());
           if (!verify) {

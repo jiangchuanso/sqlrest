@@ -2,7 +2,11 @@ package com.gitee.sqlrest.core.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import com.gitee.sqlrest.cache.CacheFactory;
+import com.gitee.sqlrest.common.consts.Constants;
+import com.gitee.sqlrest.common.dto.AccessToken;
 import com.gitee.sqlrest.common.dto.PageResult;
+import com.gitee.sqlrest.common.enums.AliveTimeEnum;
 import com.gitee.sqlrest.common.enums.DurationTimeEnum;
 import com.gitee.sqlrest.common.enums.ExpireTimeEnum;
 import com.gitee.sqlrest.common.exception.CommonException;
@@ -18,9 +22,11 @@ import com.gitee.sqlrest.persistence.entity.AppClientEntity;
 import com.gitee.sqlrest.persistence.util.PageUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +34,8 @@ public class AppClientService {
 
   @Resource
   private AppClientDao appClientDao;
+  @Resource
+  private CacheFactory cacheFactory;
 
   public void create(AppClientSaveRequest request) {
     if (null != appClientDao.getByAppKey(request.getAppKey())) {
@@ -41,13 +49,29 @@ public class AppClientService {
     BeanUtil.copyProperties(request, appClientEntity);
     appClientEntity.setAppSecret(TokenUtils.generateValue());
     appClientEntity.setExpireDuration(request.getExpireTime().getDuration());
-    appClientEntity.setExpireAt(request.getExpireTime().getValue() + (System.currentTimeMillis() / 1000));
+    if (DurationTimeEnum.TIME_VALUE.equals(request.getExpireTime().getDuration())) {
+      appClientEntity.setExpireAt(request.getExpireTime().getValue() + (System.currentTimeMillis() / 1000));
+    } else if (DurationTimeEnum.FOR_EVER.equals(request.getExpireTime().getDuration())) {
+      appClientEntity.setExpireAt(-1L);
+    } else {
+      appClientEntity.setExpireAt(0L);
+    }
     appClientEntity.setAccessToken(null);
+    appClientEntity.setTokenAlive(request.getTokenAlive());
     appClientDao.insert(appClientEntity);
   }
 
   public void delete(Long id) {
-    appClientDao.deleteById(id);
+    AppClientEntity entity = appClientDao.getById(id);
+    if (null != entity) {
+      String token = entity.getAccessToken();
+      if (StringUtils.isNotBlank(token)) {
+        Map<String, AccessToken> tokenClientMap = cacheFactory
+            .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
+        tokenClientMap.remove(token);
+      }
+      appClientDao.deleteById(id);
+    }
   }
 
   public PageResult<AppClientDetailResponse> searchList(EntitySearchRequest request) {

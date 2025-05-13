@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.gitee.sqlrest.common.enums.AliveTimeEnum;
 import com.gitee.sqlrest.common.enums.DurationTimeEnum;
 import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,9 @@ public class AppClientEntity {
 
   @TableField(value = "access_token", insertStrategy = FieldStrategy.NEVER)
   private String accessToken;
+
+  @TableField(value = "token_alive", typeHandler = EnumTypeHandler.class)
+  private AliveTimeEnum tokenAlive;
 
   @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;

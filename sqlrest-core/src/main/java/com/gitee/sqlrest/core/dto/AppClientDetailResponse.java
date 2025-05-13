@@ -1,8 +1,8 @@
 package com.gitee.sqlrest.core.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.gitee.sqlrest.common.enums.AliveTimeEnum;
 import com.gitee.sqlrest.common.enums.DurationTimeEnum;
-import com.gitee.sqlrest.common.enums.ExpireTimeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
@@ -40,6 +40,9 @@ public class AppClientDetailResponse {
 
   @ApiModelProperty("是否过期")
   private Boolean isExpired;
+
+  @ApiModelProperty("Token生命期")
+  private AliveTimeEnum tokenAlive;
 
   @ApiModelProperty("创建时间")
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
