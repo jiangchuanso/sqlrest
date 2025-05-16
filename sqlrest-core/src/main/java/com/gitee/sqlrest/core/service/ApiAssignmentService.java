@@ -336,7 +336,7 @@ public class ApiAssignmentService {
       }
 
       for (ItemParam itemParam : request.getParams()) {
-        itemParam.checkValid();
+        itemParam.checkValid(request.getMethod());
       }
     }
     if (!CollectionUtils.isEmpty(request.getOutputs())) {
@@ -437,7 +437,7 @@ public class ApiAssignmentService {
         }
       }
       for (ItemParam itemParam : request.getParams()) {
-        itemParam.checkValid();
+        itemParam.checkValid(exists.getMethod());
       }
     }
     if (!CollectionUtils.isEmpty(request.getOutputs())) {

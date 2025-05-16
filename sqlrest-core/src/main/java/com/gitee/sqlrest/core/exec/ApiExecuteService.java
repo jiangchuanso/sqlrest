@@ -89,8 +89,7 @@ public class ApiExecuteService {
         }
         return result;
       } else {
-        ResultEntity result = doExecute(getDataSourceEntity(config), config, paramValues);
-        return ResultEntity.success(result);
+        return doExecute(getDataSourceEntity(config), config, paramValues);
       }
     } catch (CommonException e) {
       return ResultEntity.failed(e.getCode(), e.getMessage());
