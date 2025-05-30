@@ -85,8 +85,8 @@
 - (2) 接口详情功能
 > 支持接口的详细定义、数据来源、访问分析等功能
 
-- (3) 支持接口的长效Token功能
-> 支持配置接口的长期Token功能。
+- (3) 支持接口的异常告警
+> 对接已有的告警系统，来支持接口的异常告警。
 
 - (4) 前端界面整体美化
 > 美化界面的交互展示，尤其是“拓扑结构”页面。
@@ -137,7 +137,7 @@ sh ./docker-maven-build.sh
 (2) 基于docker-compose提供linux联网环境下的一键安装，x86的CentOS系统下安装命令如下：
 
 ```
-curl -k -sSL https://gitee.com/inrgihc/dbswitch/attach_files/1978630/download -o /tmp/sr.sh && bash /tmp/sr.sh && rm -f /tmp/sr.sh
+curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2210760/download -o /tmp/sr.sh && systemctl stop firewalld && bash /tmp/sr.sh && rm -f /tmp/sr.sh
 ```
 
 文档详见: [build-docker/install/README.md](build-docker/install)

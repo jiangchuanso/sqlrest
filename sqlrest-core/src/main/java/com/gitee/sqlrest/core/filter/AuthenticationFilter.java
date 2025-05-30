@@ -15,6 +15,7 @@ import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.entity.AccessRecordEntity;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.gitee.sqlrest.persistence.mapper.AccessRecordMapper;
+import com.google.common.base.Charsets;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Resource;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -48,6 +50,8 @@ public class AuthenticationFilter implements Filter {
       throws IOException, ServletException {
     HttpServletRequest request = (HttpServletRequest) req;
     HttpServletResponse response = (HttpServletResponse) resp;
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding(Charsets.UTF_8.name());
     String path = request.getRequestURI().substring(Constants.API_PATH_PREFIX.length() + 2);
     HttpMethodEnum method = HttpMethodEnum.exists(request.getMethod())
         ? HttpMethodEnum.valueOf(request.getMethod().toUpperCase())

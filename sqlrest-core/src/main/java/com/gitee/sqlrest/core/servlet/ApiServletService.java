@@ -29,8 +29,6 @@ public class ApiServletService {
 
   public void process(HttpMethodEnum method, HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response.setCharacterEncoding(Charsets.UTF_8.name());
     String path = request.getRequestURI().substring(Constants.API_PATH_PREFIX.length() + 2);
     ResultEntity result = ResultEntity.success();
     ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path);
