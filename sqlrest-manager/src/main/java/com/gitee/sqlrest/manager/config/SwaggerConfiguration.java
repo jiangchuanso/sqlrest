@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -22,6 +23,9 @@ public class SwaggerConfiguration {
 
   private static final String API_CONTROLLER_PACKAGE = "com.gitee.sqlrest.manager.controller";
 
+  @Value("${sqlrest.manager.swagger.enable:true}")
+  private boolean enable;
+
   @Bean
   public Docket managerApi() {
     RequestParameterBuilder ticketPar = new RequestParameterBuilder();
@@ -34,7 +38,7 @@ public class SwaggerConfiguration {
     pars.add(ticketPar.build());
 
     return new Docket(DocumentationType.SWAGGER_2)
-        .enable(true)
+        .enable(enable)
         .groupName("Manager的接口")
         .apiInfo(new ApiInfoBuilder()
             .title("Manager服务API文档")

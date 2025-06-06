@@ -127,6 +127,17 @@
             </el-tooltip>
           </template>
         </el-table-column>
+        <el-table-column prop="alarm"
+                         label="告警"
+                         min-width="8%">
+          <template slot-scope="scope">
+            <el-tooltip :content="boolFormatAlarm(scope.row)"
+                        placement="top">
+              <el-switch v-model="scope.row.alarm"
+                         @change="hanldeAlarmStateChanged(scope.row)" />
+            </el-tooltip>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime"
                          label="创建时间"
                          min-width="18%"></el-table-column>
@@ -323,6 +334,13 @@ export default {
         return "无认证";
       }
     },
+    boolFormatAlarm (row) {
+      if (row.alarm === true) {
+        return "告警开启";
+      } else {
+        return "告警关闭";
+      }
+    },
     hanldeOpenStateChanged (row) {
       var open = true;
       if (true === row.open) {
@@ -330,6 +348,23 @@ export default {
       }
       this.$http.put(
         "/sqlrest/manager/api/v1/assignment/open/" + row.id + "?open=" + !open
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.loadData();
+        } else {
+          if (res.data.message) {
+            alert("操作失败:" + res.data.message);
+          }
+        }
+      });
+    },
+    hanldeAlarmStateChanged (row) {
+      var open = true;
+      if (true === row.alarm) {
+        open = false
+      }
+      this.$http.put(
+        "/sqlrest/manager/api/v1/assignment/alarm/" + row.id + "?open=" + !open
       ).then(res => {
         if (0 === res.data.code) {
           this.loadData();

@@ -15,6 +15,7 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
         "com.gitee.sqlrest.persistence",
         "com.gitee.sqlrest.core.driver",
         "com.gitee.sqlrest.core.gateway",
+        "com.gitee.sqlrest.core.executor",
         "com.gitee.sqlrest.core.service",
         "com.gitee.sqlrest.core.exec",
         "com.gitee.sqlrest.cache",

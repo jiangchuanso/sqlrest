@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 public class NameValueBaseResponse {
 
   @ApiModelProperty("枚举至")
-  private Enum key;
+  private String key;
 
   @ApiModelProperty("说明")
   private String value;

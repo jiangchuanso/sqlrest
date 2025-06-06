@@ -63,6 +63,14 @@ public class ApiAssignmentDao {
     }
   }
 
+  public void makeAlarm(Long id, Boolean alarm) {
+    ApiAssignmentEntity assignmentEntity = apiAssignmentMapper.selectById(id);
+    if (null != assignmentEntity && null != alarm) {
+      assignmentEntity.setAlarm(alarm);
+      apiAssignmentMapper.updateById(assignmentEntity);
+    }
+  }
+
   public ApiAssignmentEntity getByUk(HttpMethodEnum method, String path) {
     return getByUk(method, path, true);
   }

@@ -541,6 +541,10 @@ public class ApiAssignmentService {
     apiAssignmentDao.makeOpen(id, open);
   }
 
+  public void makeAlarm(Long id, Boolean open) {
+    apiAssignmentDao.makeAlarm(id, open);
+  }
+
   public void deployAssignment(Long id) {
     apiAssignmentDao.updateStatus(id, true);
   }

@@ -67,6 +67,9 @@ public class ApiAssignmentEntity {
   @TableField("open")
   private Boolean open;
 
+  @TableField("alarm")
+  private Boolean alarm;
+
   @TableField("content_type")
   private String contentType;
 

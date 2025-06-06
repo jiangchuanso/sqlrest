@@ -53,7 +53,7 @@ public class ApiAssignmentController {
             .map(
                 e ->
                     NameValueBaseResponse.builder()
-                        .key(e)
+                        .key(e.name())
                         .value(e.getDescription())
                         .build()
             ).collect(Collectors.toList())
@@ -68,7 +68,7 @@ public class ApiAssignmentController {
             .map(
                 e ->
                     NameValueRemarkResponse.builder()
-                        .key(e)
+                        .key(e.name())
                         .value(e.getDefault())
                         .remark(e.getClassName())
                         .build()
@@ -124,8 +124,15 @@ public class ApiAssignmentController {
 
   @ApiOperation(value = "开放")
   @PutMapping(value = "/open/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity deploy(@PathVariable("id") Long id, @RequestParam("open") Boolean open) {
+  public ResultEntity makeOpen(@PathVariable("id") Long id, @RequestParam("open") Boolean open) {
     apiAssignmentService.makeOpen(id, open);
+    return ResultEntity.success();
+  }
+
+  @ApiOperation(value = "告警")
+  @PutMapping(value = "/alarm/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity makeAlarm(@PathVariable("id") Long id, @RequestParam("open") Boolean open) {
+    apiAssignmentService.makeAlarm(id, open);
     return ResultEntity.success();
   }
 

@@ -67,6 +67,12 @@ const constantRouter = new Router({
               component: () => import('@/views/setting/firewall')
             },
             {
+              path: '/setting/alarm',
+              name: '告警配置',
+              icon: "el-icon-s-comment",
+              component: () => import('@/views/setting/alarm')
+            },
+            {
               path: '/setting/topology',
               name: '拓扑结构',
               icon: "el-icon-link",

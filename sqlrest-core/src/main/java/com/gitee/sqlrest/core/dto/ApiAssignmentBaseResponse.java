@@ -33,6 +33,9 @@ public class ApiAssignmentBaseResponse {
   @ApiModelProperty("是否公开")
   private Boolean open;
 
+  @ApiModelProperty("是否告警")
+  private Boolean alarm;
+
   @ApiModelProperty("执行引擎")
   private ExecuteEngineEnum engine;
 

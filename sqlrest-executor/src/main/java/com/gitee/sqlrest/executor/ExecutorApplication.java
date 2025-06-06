@@ -17,6 +17,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
         "com.gitee.sqlrest.core.driver",
         "com.gitee.sqlrest.core.servlet",
         "com.gitee.sqlrest.core.exec",
+        "com.gitee.sqlrest.core.executor",
         "com.gitee.sqlrest.cache",
         "com.gitee.sqlrest.executor",
     }

@@ -99,7 +99,12 @@ export default {
         })
       }).then(res => {
         if (0 === res.data.code) {
-          this.$message("保存成功");
+          this.$alert("访问控制保存成功", "提示信息",
+            {
+              confirmButtonText: "确定",
+              type: "info"
+            }
+          );
           this.loadData();
         } else {
           alert("保存失败:" + res.data.message);
