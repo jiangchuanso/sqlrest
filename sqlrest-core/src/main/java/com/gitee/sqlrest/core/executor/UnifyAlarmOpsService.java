@@ -32,6 +32,11 @@ public class UnifyAlarmOpsService {
 
   @Resource
   private UnifyAlarmDao unifyAlarmDao;
+  private final RestTemplate restTemplate;
+
+  public UnifyAlarmOpsService() {
+    this.restTemplate = new RestTemplate(new AlarmHttpRequestFactory());
+  }
 
   public UnifyAlarmEntity getUnifyAlarmConfig() {
     return unifyAlarmDao.getUnifyAlarmConfig();
@@ -110,9 +115,8 @@ public class UnifyAlarmOpsService {
     HttpHeaders headers = new HttpHeaders();
     MediaType type = MediaType.parseMediaType(config.getContentType().replace(";", "") + "; charset=UTF-8");
     headers.setContentType(type);
-    headers.add("Accept", MediaType.APPLICATION_JSON.toString());
+    headers.add("Accept", MediaType.ALL_VALUE.toString());
     HttpEntity<String> httpEntity = new HttpEntity<>(bodyStr, headers);
-    RestTemplate restTemplate = new RestTemplate();
     return restTemplate.exchange(config.getEndpoint(), HttpMethod.POST, httpEntity, String.class);
   }
 
