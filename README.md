@@ -185,6 +185,24 @@ MYSQLDB_USERNAME=root
 MYSQLDB_PASSWORD=123456
 ```
 
+>sqlrest的缓存支持使用分布式的hazelcast或者redis，在conf/{manager,gateway,executor}/目录下的application.yml配
+>置文件中，可通过如下配置所使用的缓存，默认为使用hazelcast缓存。
+
+```
+sqlrest:
+  cache:
+    hazelcast:
+      # 是否开启使用hazelcast缓存
+      enabled: false
+    redis:
+      # 是否开启使用redis缓存，开启时需要配置对应redis信息
+      enabled: true
+      host: 127.0.0.1
+      port: 6379
+      password: 123456
+      database: 0
+```
+
 - 步骤3：如果为多主机节点部署，需要将sqlrest-release-x.x.x分发到其他主机节点上；如果为单机（单节点）部署可直接忽略本步骤。
 
 - 步骤4：启动服务
@@ -205,27 +223,7 @@ MYSQLDB_PASSWORD=123456
 
 启动gateway服务：sh bin/sqlrestctl.sh start gateway
 
-### 3、高级配置
-
->sqlrest的缓存同时支持分布式嵌入的hazelcast和redis，在manager/gateway/executor的application.yml配
->置文件中，可通过如下配置所使用的缓存，默认为使用hazelcast缓存。
-
-```
-sqlrest:
-  cache:
-    hazelcast:
-      # 是否开启使用hazelcast缓存
-      enabled: true
-    redis:
-      # 是否开启使用redis缓存
-      enabled: false
-      host: 127.0.0.1
-      port: 6379
-      password: 123456
-      database: 0
-```
-
-### 4、系统访问
+### 3、系统访问
 
 启动完成后,通过http://<MANAGER_HOST>:<MANAGER_PORT> 地址即可访问。
 
