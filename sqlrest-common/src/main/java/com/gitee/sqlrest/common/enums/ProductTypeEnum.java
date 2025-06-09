@@ -451,6 +451,30 @@ public enum ProductTypeEnum {
                 parameters.add((page - 1) * size);
               }
           ).build()),
+
+  /**
+   * TDEngine数据库类型
+   */
+  TDENGINE(
+      ProductContext.builder()
+          .id(19)
+          .quote("`")
+          .name("TDEngine")
+          .driver("com.taosdata.jdbc.rs.RestfulDriver")
+          .defaultPort(6041)
+          .testSql("/* ping */ SELECT 1")
+          .urlPrefix("jdbc:TAOS-RS://")
+          .tplUrls(new String[]{"jdbc:TAOS-RS://{host}[:{port}]/[{database}][\\?{params}]"})
+          .urlSample("jdbc:TAOS-RS://172.17.2.10:6041/test")
+          .sqlSchemaList("SELECT name FROM `information_schema`.`ins_databases`")
+          .adapter(database -> Pair.of(database, null))
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          ).build()),
   ;
 
   private ProductContext context;

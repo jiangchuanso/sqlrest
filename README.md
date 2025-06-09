@@ -61,6 +61,7 @@
 - Apache Doris
 - StarRocks
 - OceanBase
+- TDEngine
 
 ### 3、模块结构功能
 
