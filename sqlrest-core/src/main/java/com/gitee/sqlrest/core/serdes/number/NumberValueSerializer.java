@@ -33,7 +33,7 @@ public class NumberValueSerializer extends StdSerializer<Number> {
       throws IOException {
     if (value != null) {
       if (value instanceof BigDecimal) {
-        BigDecimal decimal = ((BigDecimal) value).setScale(this.decimalScale);
+        BigDecimal decimal = ((BigDecimal) value).setScale(this.decimalScale, BigDecimal.ROUND_FLOOR);
         jsonGenerator.writeNumber(decimal);
       } else if (value instanceof BigInteger) {
         jsonGenerator.writeNumber((BigInteger) value);

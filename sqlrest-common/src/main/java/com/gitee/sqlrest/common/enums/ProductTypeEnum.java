@@ -468,7 +468,7 @@ public enum ProductTypeEnum {
       ProductContext.builder()
           .id(19)
           .quote("`")
-          .name("TDEngine")
+          .name("TDengine")
           .driver("com.taosdata.jdbc.rs.RestfulDriver")
           .defaultPort(6041)
           .testSql("/* ping */ SELECT 1")

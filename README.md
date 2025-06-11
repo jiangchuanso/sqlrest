@@ -37,7 +37,7 @@
 > 执行器基于sentinel支持接口的流量控制功能。
 
 - 支持接口异常触发告警功能
-> 执行器简单配置即可对接已有的告警平台,支持接口的异常告警功能。
+> 简单配置即可对接已有的告警平台,支持接口异常时的告警功能。
 
 ### 2、支持的数据库
 
@@ -61,7 +61,7 @@
 - Apache Doris
 - StarRocks
 - OceanBase
-- TDEngine
+- TDengine
 
 ### 3、模块结构功能
 
@@ -186,7 +186,7 @@ MYSQLDB_PASSWORD=123456
 ```
 
 >sqlrest的缓存支持使用分布式的hazelcast或者redis，在conf/{manager,gateway,executor}/目录下的application.yml配
->置文件中，可通过如下配置所使用的缓存，默认为使用hazelcast缓存。
+>置文件中，可通过如下调整配置实用redis缓存，默认为使用hazelcast缓存。
 
 ```
 sqlrest:
@@ -195,7 +195,7 @@ sqlrest:
       # 是否开启使用hazelcast缓存
       enabled: false
     redis:
-      # 是否开启使用redis缓存，开启时需要配置对应redis信息
+      # 是否开启使用redis缓存，开启时需要配置下面对应的redis信息
       enabled: true
       host: 127.0.0.1
       port: 6379
