@@ -69,7 +69,7 @@ const constantRouter = new Router({
             {
               path: '/setting/alarm',
               name: '告警配置',
-              icon: "el-icon-s-comment",
+              icon: "el-icon-message-solid",
               component: () => import('@/views/setting/alarm')
             },
             {
@@ -111,6 +111,26 @@ const constantRouter = new Router({
               name: '服务接口',
               icon: "el-icon-lightning",
               component: () => import('@/views/service/interface'),
+            }
+          ]
+        },
+        {
+          path: '/mcp',
+          name: 'MCP服务',
+          icon: "el-icon-s-promotion",
+          component: () => import('@/views/mcp/index'),
+          children: [
+            {
+              path: '/mcp/client',
+              name: '令牌配置',
+              icon: "el-icon-s-platform",
+              component: () => import('@/views/mcp/client'),
+            },
+            {
+              path: '/mcp/tool',
+              name: '工具配置',
+              icon: "el-icon-setting",
+              component: () => import('@/views/mcp/tool'),
             }
           ]
         },

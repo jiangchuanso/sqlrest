@@ -39,6 +39,9 @@
 - 支持接口异常触发告警功能
 > 简单配置即可对接已有的告警平台,支持接口异常时的告警功能。
 
+- 支持作为大模型MCP服务断快速创建tool
+> 基于已有接口,简单配置即可快速创建MCP的tool，为大模型提供MCP服务端工具。
+
 ### 2、支持的数据库
 
 - 甲骨文的Oracle
@@ -70,6 +73,7 @@
 ```
 └── sqlrest
     ├── sqlrest-common           // sqlrest通用定义模块
+    ├── sqlrest-mcp              // sqlrest的MCP协议模块
     ├── sqlrest-template         // sqlrest的SQL内容模板模块
     ├── sqlrest-cache            // sqlrest执行器缓存模块
     ├── sqlrest-persistence      // sqlrest的数据库持久化模块
@@ -237,23 +241,27 @@ sqlrest:
 
 ### 2、部分系统截图
 
-![002.png](docs/images/001.PNG)
+![001.png](docs/images/001.PNG)
 
-![003.png](docs/images/002.PNG)
+![002.png](docs/images/002.PNG)
 
-![004.png](docs/images/003.PNG)
+![003.png](docs/images/003.PNG)
 
-![005.png](docs/images/004.PNG)
+![004.png](docs/images/004.PNG)
 
-![006.png](docs/images/005.PNG)
+![005.png](docs/images/005.PNG)
 
-![007.png](docs/images/006.PNG)
+![006.png](docs/images/006.PNG)
 
-![008.png](docs/images/007.PNG)
+![007.png](docs/images/007.PNG)
 
-![010.png](docs/images/008.PNG)
+![008.png](docs/images/008.PNG)
 
-![010.png](docs/images/009.PNG)
+![009.png](docs/images/009.PNG)
+
+![010.png](docs/images/010.PNG)
+
+![011.png](docs/images/011.PNG)
 
 ## 四、贡献参与
 

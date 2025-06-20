@@ -56,6 +56,10 @@ public class ApiAssignmentDao {
     return apiConfigEntity;
   }
 
+  public List<ApiAssignmentEntity> getByIds(List<Long> ids) {
+    return apiAssignmentMapper.selectBatchIds(ids);
+  }
+
   public void updateStatus(Long id, Boolean onOff) {
     ApiAssignmentEntity assignmentEntity = apiAssignmentMapper.selectById(id);
     if (null != assignmentEntity) {

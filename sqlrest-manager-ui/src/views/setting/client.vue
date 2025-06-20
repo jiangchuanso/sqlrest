@@ -434,7 +434,6 @@ export default {
         })
     },
     handleCopyText: function () {
-      secretTextInput
       var d = document.getElementById("secretTextInput")
       d.select() //选中
       document.execCommand("copy")

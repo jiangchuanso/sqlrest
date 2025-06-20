@@ -21,6 +21,8 @@ public abstract class Constants {
 
   public static final String GATEWAY_APPLICATION_NAME = "sqlrest-gateway";
 
+  public static final String MANAGER_APPLICATION_NAME = "sqlrest-manager";
+
   public static final String CACHE_KEY_TOKEN_CLIENT = "token_client";
 
   public static final Long CLIENT_TOKEN_DURATION_SECONDS = 7200L;
@@ -42,6 +44,11 @@ public abstract class Constants {
   public static final String SYS_PARAM_KEY_SWAGGER_INFO_VERSION = "apiDocInfoVersion";
 
   public static final String SYS_PARAM_KEY_SWAGGER_INFO_DESCRIPTION = "apiDocInfoDescription";
+
+  public static final String DEFAULT_SSE_TOKEN_PRAM_NAME = "token";
+  public static final String DEFAULT_SSE_ENDPOINT = "/mcp/sse";
+  public static final String MESSAGE_ENDPOINT = "/mcp/message";
+  public static final String MCP_SERVER_NAME = "sqlrest-mcp-server";
 
   public static final String getResourceName(String method, String path) {
     return String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method);

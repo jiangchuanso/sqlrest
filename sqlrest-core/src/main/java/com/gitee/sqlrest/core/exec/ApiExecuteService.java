@@ -85,25 +85,29 @@ public class ApiExecuteService {
       if (invalidArgs.size() > 0) {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, convertInvalidArgs(invalidArgs));
       }
-      if (config.getCacheKeyType().isUseCache()) {
-        String key = getCacheKeyValue(config, paramValues);
-        DistributedCache cache = getDistributedCache();
-        ResultEntity result = cache.get(key, ResultEntity.class);
-        if (null == result) {
-          result = doExecute(getDataSourceEntity(config), config, paramValues);
-          cache.put(key, result, config.getCacheExpireSeconds(), TimeUnit.SECONDS);
-        } else {
-          String resourceName = Constants.getResourceName(config.getMethod().name(), config.getPath());
-          log.info("Execute for {} find cache response by cacheKey={}", resourceName, key);
-        }
-        return result;
-      } else {
-        return doExecute(getDataSourceEntity(config), config, paramValues);
-      }
+      return execute(config, paramValues);
     } catch (CommonException e) {
       return ResultEntity.failed(e.getCode(), e.getMessage());
     } catch (Throwable t) {
       return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(t));
+    }
+  }
+
+  public ResultEntity<Object> execute(ApiAssignmentEntity config, Map<String, Object> paramValues) {
+    if (config.getCacheKeyType().isUseCache()) {
+      String key = getCacheKeyValue(config, paramValues);
+      DistributedCache cache = getDistributedCache();
+      ResultEntity result = cache.get(key, ResultEntity.class);
+      if (null == result) {
+        result = doExecute(getDataSourceEntity(config), config, paramValues);
+        cache.put(key, result, config.getCacheExpireSeconds(), TimeUnit.SECONDS);
+      } else {
+        String resourceName = Constants.getResourceName(config.getMethod().name(), config.getPath());
+        log.info("Execute for {} find cache response by cacheKey={}", resourceName, key);
+      }
+      return result;
+    } else {
+      return doExecute(getDataSourceEntity(config), config, paramValues);
     }
   }
 

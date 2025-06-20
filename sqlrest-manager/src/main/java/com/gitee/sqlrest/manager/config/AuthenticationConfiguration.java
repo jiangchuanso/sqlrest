@@ -36,6 +36,7 @@ public class AuthenticationConfiguration implements WebMvcConfigurer {
         .excludePathPatterns(Arrays.asList(
             "/user/login",
             "/api/**",
+            "/mcp/**",
             "/js/**",
             "/css/**",
             "/fonts/**",

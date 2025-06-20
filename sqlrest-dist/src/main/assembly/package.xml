@@ -169,6 +169,8 @@
         <exclude>spring-webmvc-*.jar</exclude>
         <exclude>spring-cloud-netflix-eureka-server-*.jar</exclude>
         <exclude>spring-cloud-starter-netflix-eureka-server-*.jar</exclude>
+        <exclude>httpclient5-*.jar</exclude>
+        <exclude>httpcore5-*.jar</exclude>
       </excludes>
       <includes>
         <include>*.jar</include>
@@ -183,6 +185,8 @@
         <include>tomcat-embed-websocket-*.jar</include>
         <include>tomcat-embed-core-*.jar</include>
         <include>spring-webmvc-*.jar</include>
+        <include>httpclient5-*.jar</include>
+        <include>httpcore5-*.jar</include>
       </includes>
     </fileSet>
     <fileSet>

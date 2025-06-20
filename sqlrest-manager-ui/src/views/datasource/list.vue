@@ -301,14 +301,12 @@
           </el-form-item>
           <el-form-item label="账号名称"
                         label-width="120px"
-                        prop="username"
                         style="width:85%">
             <el-input v-model="updateform.username"
                       auto-complete="off"></el-input>
           </el-form-item>
           <el-form-item label="连接密码"
                         label-width="120px"
-                        prop="password"
                         style="width:85%">
             <el-input type="password"
                       v-model="updateform.password"
@@ -403,20 +401,6 @@ export default {
           {
             required: true,
             message: "Jdbc URL必须提供",
-            trigger: "blur"
-          }
-        ],
-        username: [
-          {
-            required: true,
-            message: "连接账号名必须提供",
-            trigger: "blur"
-          }
-        ],
-        password: [
-          {
-            required: true,
-            message: "连接密码必须提供",
             trigger: "blur"
           }
         ]
