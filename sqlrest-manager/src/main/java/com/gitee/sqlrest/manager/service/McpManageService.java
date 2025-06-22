@@ -18,6 +18,7 @@ import com.gitee.sqlrest.common.util.TokenUtils;
 import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.core.dto.McpToolResponse;
 import com.gitee.sqlrest.core.dto.McpToolSaveRequest;
+import com.gitee.sqlrest.manager.model.McpToolCallHandler;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.ApiModuleDao;
 import com.gitee.sqlrest.persistence.dao.McpClientDao;

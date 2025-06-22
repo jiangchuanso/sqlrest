@@ -7,7 +7,7 @@
 // Date : 2024/3/31
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package com.gitee.sqlrest.manager.service;
+package com.gitee.sqlrest.manager.model;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;

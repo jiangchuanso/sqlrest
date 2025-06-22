@@ -48,6 +48,7 @@ eureka:
     enabled: false
     path: /dashboard
   instance:
+    ip-address: ${MANAGER_HOST}
     prefer-ip-address: true
     secure-port-enabled: false
     non-secure-port-enabled: true

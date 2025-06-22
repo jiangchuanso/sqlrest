@@ -15,6 +15,7 @@ import com.gitee.sqlrest.common.dto.NameCount;
 import com.gitee.sqlrest.persistence.entity.AccessRecordEntity;
 import java.util.List;
 import java.util.Map;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -71,10 +72,17 @@ public interface AccessRecordMapper extends BaseMapper<AccessRecordEntity> {
       + " count(*) as total, "
       + " sum(success) as success "
       + "FROM (  "
-      + "  SELECT id,path,case when status=200 then 1 else 0 end as success, create_time FROM SQLREST_ACCESS_RECORD "
+      + "  SELECT id,path,case when status=200 then 1 else 0 end as success, create_time "
+      + "  FROM SQLREST_ACCESS_RECORD "
       + "  WHERE DATE_SUB( CURDATE(), INTERVAL ${days} DAY ) &lt;= date(create_time) "
       + " ) t  "
       + " GROUP BY of_date"
       + "</script>")
   List<DateCount> getDailyTrend(@Param("days") Integer days);
+
+  @Delete("<script>"
+      + "DELETE FROM SQLREST_ACCESS_RECORD "
+      + "WHERE date(create_time) &lt;= DATE_SUB( CURDATE(), INTERVAL ${days} DAY ) "
+      + "</script>")
+  void deleteHistoryBeforeDays(@Param("days") Integer days);
 }

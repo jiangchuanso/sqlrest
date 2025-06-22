@@ -3,53 +3,46 @@
 
 ![SQLREST](docs/images/SQLREST.PNG#pic_center)
 
-> 将数据库可执行的SQL直接RESTful风格的http接口的便捷工具
+> 将 SQL 查询转化为 RESTful API的便捷工具
 
 ## 一、工具介绍
 
+SQLREST 是一个开源项目，旨在提供一种简单而强大的方式来将 SQL 查询转化为 RESTful API。它支持多种数据库，允许用户通过配置 SQL 语句来创建 API，无
+需编写复杂的后端逻辑，用户只需选择数据源、输入SQL或脚本、简单path配置即可快速生成API接口。
+
 ### 1、功能介绍
 
-一句话, sqlrest提供利用SQL快速构建RESTful接口的工具，包括SQl方式和Groovy脚本方式。用户只需选择数据
-源、输入SQL或脚本、简单path配置即可快速生成API接口。具体功能包括：
+SQLREST的功能包括：
 
-- Mybatis的SQL方式构建RESTful接口
-> 提供类似mybatis的动态SQL语法方式构建接口。
+- **SQL直接构建API**：通过配置SQL和参数即可生成 RESTful API。
+- **多数据库支持**：支持常见的20+种数据库，其中包含多款国产数据库。
+- **MyBatis语法支持**：支持MyBatis的动态SQL语法。
+- **Groovy脚本支持**：支持groovy语法构建复杂场景下的接口。
+- **参数类型支持**：支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型。
+- **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种请求格式。
+- **身份认证**：提供基于 Token 的认证机制，保护 API 安全。
+- **Swagger在线文档**：支持自动生成swagger-ui的在线接口文档。
+- **缓存配置支持**：支持 Hazelcast 和 Redis 缓存，提升 API 访问性能。
+- **流控配置管理**：通过 Sentinel 支持流量控制，防止系统过载。
+- **统一告警对接**：支持统一告警系统的对接与触发。
+- **大模型MCP服务**：支持简单配置即可创建MCP的tool。
 
-- Groovy脚本方式构建RESTful接口
-> 基于groovy脚本的语法方式构建复杂场景下的接口。
+SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 
-- 支持接口的token安全认证功能
-> 执行器支持生成token及token认证。
+- **快速将 SQL 转换为 API**
+- **企业级数据库访问统一接口**
+- **API 访问控制与流控**
+- **适用于数据中台、BI 工具、低代码平台等**
 
-- 支持接口的x-www-form-urlencoded和JSON入参格式
-> HTTP入参支持application/x-www-form-urlencoded及application/json等请求格式。
+### 2、数据库清单
 
-- 接口入参出参支持基本、对象及对象等多种类型
-> HTTP入参出参支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型
-
-- 支持自动生成在线接口文档功能
-> 基于swagger-ui提供自动生成在线接口文档功能。
-
-- 支持接口缓存配置功能
-> 执行器基于Hazelcast/Redis支持接口的缓存配置功能。
-
-- 支持接口的流量控制功能
-> 执行器基于sentinel支持接口的流量控制功能。
-
-- 支持接口异常触发告警功能
-> 简单配置即可对接已有的告警平台,支持接口异常时的告警功能。
-
-- 支持作为大模型MCP服务断快速创建tool
-> 基于已有接口,简单配置即可快速创建MCP的tool，为大模型提供MCP服务端工具。
-
-### 2、支持的数据库
+截至当前，已支持的数据库包括：
 
 - 甲骨文的Oracle
-- 微软的Microsoft SQLServer
+- 微软的Microsoft SQLServer(2005+)
 - MySQL
 - MariaDB
-- PostgreSQL
-- Greenplum(需使用PostgreSQL类型)
+- PostgreSQL/Greenplum
 - IBM的DB2
 - Sybase数据库
 - 国产达梦数据库DM
@@ -87,18 +80,14 @@
 
 ### 4、正在规划中的功能
 
-- (1) 接口检索功能
-> 支持类似百度搜索的接口搜索功能，方便接口查找
-
-- (2) 接口详情功能
-> 支持接口的详细定义、数据来源、访问分析等功能
-
-- (3) 前端界面整体美化
-> 美化界面的交互展示，尤其是“拓扑结构”页面。
+- **接口检索功能**: 支持类似百度搜索的接口搜索功能，方便接口查找。
+- **接口详情功能**:支持接口的详细定义、数据来源、访问分析等功能。
+- **前端界面美化**: 美化界面的交互展示，尤其是“拓扑结构”页面。
+- **增强SQ语法自动提示**: 在实现的库名表名提示的基础上，基于数据库元信息的增强智能提示，强化用户体验。
 
 ## 二、编译打包
 
-本工具纯Java语言开发，依赖全部来自于开源项目。
+本工具纯Java语言开发，依赖全部来自于开源项目。SQLREST项目采用Maven构建。
 
 ### 1、编译打包
 
@@ -190,7 +179,7 @@ MYSQLDB_PASSWORD=123456
 ```
 
 >sqlrest的缓存支持使用分布式的hazelcast或者redis，在conf/{manager,gateway,executor}/目录下的application.yml配
->置文件中，可通过如下调整配置实用redis缓存，默认为使用hazelcast缓存。
+>置文件中，可通过如下调整配置实用redis缓存，默认为使用hazelcast缓存(注意:manager/gateway/executor三者的缓存配置要一致)。
 
 ```
 sqlrest:
@@ -253,10 +242,6 @@ sqlrest:
 
 ![006.png](docs/images/006.PNG)
 
-![007.png](docs/images/007.PNG)
-
-![008.png](docs/images/008.PNG)
-
 ![009.png](docs/images/009.PNG)
 
 ![010.png](docs/images/010.PNG)
@@ -265,7 +250,13 @@ sqlrest:
 
 ## 四、贡献参与
 
-为了能让项目得到更好的可持续的发展，sqlrest期望获得更多的代码开发爱好者参与代码贡献，具体可参考文档说明：[贡献说明指南](https://gitee.com/inrgihc/dbswitch/blob/master/CONTRIBUTE.md)
+为了能让项目得到更好的可持续的发展，SQLREST期望获得更多的代码开发爱好者参与代码贡献，包括但不限于：
+
+- 改进前端 UI/UX
+- 修复 bug 和性能优化
+- 增加新的易用性功能
+
+贡献操作文档参考：[贡献说明指南](https://gitee.com/inrgihc/dbswitch/blob/master/CONTRIBUTE.md)
 
 ## 五、项目推荐
 
