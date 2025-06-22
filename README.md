@@ -131,7 +131,7 @@ sh ./docker-maven-build.sh
 (2) 基于docker-compose提供linux联网环境下的一键安装，x86的CentOS系统下安装命令如下：
 
 ```
-curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2210760/download -o /tmp/sr.sh && systemctl stop firewalld && bash /tmp/sr.sh && rm -f /tmp/sr.sh
+curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2241027/download -o /tmp/sr.sh && systemctl stop firewalld && bash /tmp/sr.sh && rm -f /tmp/sr.sh
 ```
 
 文档详见: [build-docker/install/README.md](build-docker/install)
