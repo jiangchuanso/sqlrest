@@ -17,6 +17,6 @@ import org.apache.ibatis.annotations.Update;
 
 public interface UnifyAlarmMapper extends BaseMapper<UnifyAlarmEntity> {
 
-  @Update("update `SQLREST_UNIFY_ALARM` set status = #{status}　where id = #{id}")
+  @Update("update SQLREST_UNIFY_ALARM set status = #{status}　where id = #{id}")
   void updateStatus(@Param("id") Long id, @Param("status") OnOffEnum status);
 }

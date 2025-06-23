@@ -138,11 +138,10 @@ curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2241027/download -o 
 
 (3) 物理机方式部署
 
-- 步骤1：准备好一个MySQL5.7+的数据库，假设连接地址如下：
+- 步骤1：准备好一个MySQL5.7+/PostgreSQL11+的数据库
 
-| mysql的host地址 | mysql的端口号 | mysql的账号 | mysql的密码 |
-| :------| :------ | :------ | :------ |
-| 127.0.0.1 | 3306 | root | 123456 |
+> 当使用MySQL数据库时，config.ini里的DB_TYPE配置mysql,并需要配置 MYSQLDB_ 前缀的参数
+> 当使用PostgreSQL数据库时，config.ini里的DB_TYPE配置postgres,并需要配置 PGDB_ 前缀的参数
 
 - 步骤2：修改sqlrest-relase-x.x.x/conf/config.ini配置文件
 
@@ -162,20 +161,30 @@ EXECUTOR_PORT=8092
 GATEWAY_PORT=8091
 
 
-# mysql的host地址
-MYSQLDB_HOST=127.0.0.1
+# 数据库类型:mysql或postgres
+DB_TYPE=mysql
 
+# mysql的host地址
+MYSQLDB_HOST=192.168.31.57
 # mysql的端口号
 MYSQLDB_PORT=3306
-
 # mysql的库名
 MYSQLDB_NAME=sqlrest
-
 # mysql的账号
 MYSQLDB_USERNAME=root
-
 # mysql的密码
 MYSQLDB_PASSWORD=123456
+
+# pgsql的host地址
+PGDB_HOST=192.168.31.57
+# pgsql的端口号
+PGDB_PORT=5432
+# pgsql的库名
+PGDB_NAME=sqlrest
+# pgsql的账号
+PGDB_USERNAME=postgres
+# pgsql的密码
+PGDB_PASSWORD=123456
 ```
 
 >sqlrest的缓存支持使用分布式的hazelcast或者redis，在conf/{manager,gateway,executor}/目录下的application.yml配

@@ -18,6 +18,6 @@ import org.apache.ibatis.annotations.Select;
 
 public interface ClientGroupMapper extends BaseMapper<ClientGroupEntity> {
 
-  @Select("SELECT g.id,g.name from `SQLREST_CLIENT_GROUP` a LEFT JOIN `SQLREST_API_GROUP` g on a.group_id=g.id where a.client_id= #{id}")
+  @Select("SELECT g.id,g.name from SQLREST_CLIENT_GROUP a LEFT JOIN SQLREST_API_GROUP g on a.group_id=g.id where a.client_id= #{id}")
   List<IdWithName> getGroupAuth(@Param("id") Long id);
 }

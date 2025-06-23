@@ -1,0 +1,9 @@
+databaseChangeLog:
+- changeSet:
+    id: 1.0.2
+    author: sqlrest
+    runOnChange: false
+    changes:
+      - sqlFile:
+          encoding: UTF-8
+          path: pg/migration/V1_0_2__system-dml.sql

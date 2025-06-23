@@ -17,7 +17,7 @@ import org.apache.ibatis.annotations.Update;
 
 public interface FirewallRulesMapper extends BaseMapper<FirewallRulesEntity> {
 
-  @Update("update `SQLREST_FIREWALL_RULES` set status = #{status}　where id = #{id}")
+  @Update("update SQLREST_FIREWALL_RULES set status = #{status}　where id = #{id}")
   void updateStatus(@Param("id") Long id, @Param("status") OnOffEnum status);
 
 }

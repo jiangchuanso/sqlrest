@@ -39,11 +39,17 @@ export MANAGER_HOST=$(grep -oP '(?<=^MANAGER_HOST=).*' ${APP_CONF_PATH}/config.i
 export MANAGER_PORT=$(grep -oP '(?<=^MANAGER_PORT=).*' ${APP_CONF_PATH}/config.ini)
 export EXECUTOR_PORT=$(grep -oP '(?<=^EXECUTOR_PORT=).*' ${APP_CONF_PATH}/config.ini)
 export GATEWAY_PORT=$(grep -oP '(?<=^GATEWAY_PORT=).*' ${APP_CONF_PATH}/config.ini)
+export DB_TYPE=$(grep -oP '(?<=^DB_TYPE=).*' ${APP_CONF_PATH}/config.ini)
 export MYSQLDB_HOST=$(grep -oP '(?<=^MYSQLDB_HOST=).*' ${APP_CONF_PATH}/config.ini)
 export MYSQLDB_PORT=$(grep -oP '(?<=^MYSQLDB_PORT=).*' ${APP_CONF_PATH}/config.ini)
 export MYSQLDB_NAME=$(grep -oP '(?<=^MYSQLDB_NAME=).*' ${APP_CONF_PATH}/config.ini)
 export MYSQLDB_USERNAME=$(grep -oP '(?<=^MYSQLDB_USERNAME=).*' ${APP_CONF_PATH}/config.ini)
 export MYSQLDB_PASSWORD=$(grep -oP '(?<=^MYSQLDB_PASSWORD=).*' ${APP_CONF_PATH}/config.ini)
+export PGDB_HOST=$(grep -oP '(?<=^PGDB_HOST=).*' ${APP_CONF_PATH}/config.ini)
+export PGDB_PORT=$(grep -oP '(?<=^PGDB_PORT=).*' ${APP_CONF_PATH}/config.ini)
+export PGDB_NAME=$(grep -oP '(?<=^PGDB_NAME=).*' ${APP_CONF_PATH}/config.ini)
+export PGDB_USERNAME=$(grep -oP '(?<=^PGDB_USERNAME=).*' ${APP_CONF_PATH}/config.ini)
+export PGDB_PASSWORD=$(grep -oP '(?<=^PGDB_PASSWORD=).*' ${APP_CONF_PATH}/config.ini)
 
 # JVM参数可以在这里设置
 JVMFLAGS="-server -Xms1024m -Xmx1024m -Xmn1024m -XX:+DisableExplicitGC -Djava.awt.headless=true -Dfile.encoding=UTF-8 "

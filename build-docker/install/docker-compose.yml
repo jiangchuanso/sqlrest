@@ -23,6 +23,7 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-manager:latest
     network_mode: host
     environment:
+      DB_TYPE: mysql
       MYSQLDB_HOST: localhost
       MYSQLDB_PORT: 3306
       MYSQLDB_USERNAME: tangyibo
@@ -44,6 +45,7 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-executor:latest
     network_mode: host
     environment:
+      DB_TYPE: mysql
       MYSQLDB_HOST: localhost
       MYSQLDB_PORT: 3306
       MYSQLDB_USERNAME: tangyibo
@@ -65,6 +67,7 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/inrgihc/sqlrest-gateway:latest
     network_mode: host
     environment:
+      DB_TYPE: mysql
       MYSQLDB_HOST: localhost
       MYSQLDB_PORT: 3306
       MYSQLDB_USERNAME: tangyibo

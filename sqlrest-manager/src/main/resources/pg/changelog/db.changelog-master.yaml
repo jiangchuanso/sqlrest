@@ -1,0 +1,13 @@
+databaseChangeLog:
+- include:
+    file: classpath:pg/changelog/log-v1.0.1.yaml
+- include:
+    file: classpath:pg/changelog/log-v1.0.2.yaml
+- include:
+    file: classpath:pg/changelog/log-v1.1.1.yaml
+- include:
+    file: classpath:pg/changelog/log-v1.1.2.yaml
+- include:
+    file: classpath:pg/changelog/log-v1.2.1.yaml
+- include:
+    file: classpath:pg/changelog/log-v1.2.2.yaml
