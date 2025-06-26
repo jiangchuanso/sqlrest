@@ -10,6 +10,7 @@
 package com.gitee.sqlrest.core.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -35,16 +36,17 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public final class JacksonUtils {
 
-  public static String toJsonStr(Object obj) {
-    return toJsonStr(obj, Collections.emptyMap());
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  static {
+    objectMapper.disable(MapperFeature.IGNORE_DUPLICATE_MODULE_REGISTRATIONS);
   }
 
   public static String toJsonStr(Object obj, Map<DataTypeFormatEnum, String> formatMap) {
-    // https://www.jianshu.com/p/1368547350c6
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.registerModule(createSerializeModule(formatMap));
+    ObjectMapper mapper = objectMapper.copy();
+    mapper.registerModule(createSerializeModule(formatMap));
     try {
-      return objectMapper.writeValueAsString(obj);
+      return mapper.writeValueAsString(obj);
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
@@ -61,6 +63,23 @@ public final class JacksonUtils {
             }
         );
     return module;
+  }
+
+  public static List<OutParam> parseFiledTypesAndFillNullAsString(Object obj) {
+    List<OutParam> types = parseFieldTypes(obj);
+    for (OutParam param : types) {
+      if (null == param.getType()) {
+        param.setType(ParamTypeEnum.STRING);
+      }
+      if (CollectionUtils.isNotEmpty(param.getChildren())) {
+        for (OutParam subParam : param.getChildren()) {
+          if (null == subParam.getType()) {
+            subParam.setType(ParamTypeEnum.STRING);
+          }
+        }
+      }
+    }
+    return types;
   }
 
   public static List<OutParam> parseFieldTypes(Object obj) {

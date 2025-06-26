@@ -12,6 +12,7 @@ package com.gitee.sqlrest.manager.model;
 import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.gitee.sqlrest.common.dto.BaseParam;
 import com.gitee.sqlrest.common.dto.ItemParam;
@@ -37,6 +38,7 @@ public class McpToolCallHandler {
   private static final String FN_ID = "id";
   private static final String FN_DESCRIPTION = "description";
   private static final String FN_PROPERTIES = "properties";
+  private static final String FN_REQUIRED = "required";
   private static final String FN_ITEMS = "items";
   private static final String FV_ID = "urn:jsonschema:Operation";
   private static final String FV_OBJECT = "object";
@@ -61,31 +63,42 @@ public class McpToolCallHandler {
     rootNode.put(FN_TYPE, FV_OBJECT);
     rootNode.put(FN_ID, FV_ID);
     ObjectNode propertiesNode = objectMapper.createObjectNode();
+    ArrayNode rootRequired = objectMapper.createArrayNode();
     for (ItemParam param : params) {
       ObjectNode node = objectMapper.createObjectNode();
       if (param.getIsArray()) {
+        rootRequired.add(param.getName());
         ObjectNode items = objectMapper.createObjectNode();
         items.put(FN_TYPE, param.getType().getJsType());
         node.put(FN_TYPE, FV_ARRAY);
         node.put(FN_DESCRIPTION, param.getRemark());
         node.set(FN_ITEMS, items);
       } else {
+        if (param.getRequired()) {
+          rootRequired.add(param.getName());
+        }
         node.put(FN_TYPE, param.getType().getJsType());
         node.put(FN_DESCRIPTION, param.getRemark());
         if (CollectionUtils.isNotEmpty(param.getChildren())) {
+          ArrayNode subRequired = objectMapper.createArrayNode();
           ObjectNode properties = objectMapper.createObjectNode();
           for (BaseParam subParam : param.getChildren()) {
+            if (subParam.getRequired()) {
+              subRequired.add(subParam.getName());
+            }
             ObjectNode item = objectMapper.createObjectNode();
             item.put(FN_TYPE, subParam.getType().getJsType());
             item.put(FN_DESCRIPTION, subParam.getRemark());
             properties.set(subParam.getName(), item);
           }
           node.set(FN_PROPERTIES, properties);
+          node.set(FN_REQUIRED, subRequired);
         }
       }
       propertiesNode.set(param.getName(), node);
     }
     rootNode.set(FN_PROPERTIES, propertiesNode);
+    rootNode.set(FN_REQUIRED, rootRequired);
 
     try {
       String schema = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);

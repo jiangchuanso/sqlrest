@@ -300,7 +300,7 @@ public class ApiAssignmentService {
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
           .execute(scripts, params, request.getNamingStrategy());
       Object answer = results.size() > 1 ? results : (1 == results.size()) ? results.get(0) : null;
-      List<OutParam> types = JacksonUtils.parseFieldTypes(results);
+      List<OutParam> types = JacksonUtils.parseFiledTypesAndFillNullAsString(results);
       String logs = Optional.ofNullable(SqlExecuteLogger.get())
           .orElseGet(ArrayList::new).stream().map(ExecuteSqlRecord::getDisplayText)
           .collect(Collectors.toList()).stream().collect(Collectors.joining("\n\n"));

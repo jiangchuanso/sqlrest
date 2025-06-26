@@ -138,9 +138,10 @@ curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2241027/download -o 
 
 (3) 物理机方式部署
 
-- 步骤1：准备好一个MySQL5.7+/PostgreSQL11+的数据库
+- 步骤1：准备好一个MySQL5.7+或PostgreSQL11+的数据库
 
-> 当使用MySQL数据库时，config.ini里的DB_TYPE配置mysql,并需要配置 MYSQLDB_ 前缀的参数
+> 当使用MySQL数据库时，config.ini里的DB_TYPE配置mysql,并需要配置 MYSQLDB_ 前缀的参数;
+> 
 > 当使用PostgreSQL数据库时，config.ini里的DB_TYPE配置postgres,并需要配置 PGDB_ 前缀的参数
 
 - 步骤2：修改sqlrest-relase-x.x.x/conf/config.ini配置文件
