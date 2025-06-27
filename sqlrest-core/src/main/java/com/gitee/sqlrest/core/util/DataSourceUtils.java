@@ -18,8 +18,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import lombok.experimental.UtilityClass;
@@ -78,6 +80,10 @@ public final class DataSourceUtils {
     } catch (Exception e) {
       log.warn("Error when close HikariDataSource:{}", e.getMessage());
     }
+  }
+
+  public static Set<Long> getAllDataSourceIdSet() {
+    return new HashSet<>(datasourceMap.keySet());
   }
 
   public static HikariDataSource createDataSource(DataSourceEntity properties, String driverPath) {

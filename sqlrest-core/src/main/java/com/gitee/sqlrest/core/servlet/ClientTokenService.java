@@ -132,7 +132,11 @@ public class ClientTokenService {
     } else if (appClient.getExpireAt() == 0) {
       clientToken.setExpireSeconds(0L);
     } else {
-      clientToken.setExpireSeconds(-1L);
+      if (AliveTimeEnum.LONGEVITY.equals(appClient.getTokenAlive())) {
+        clientToken.setExpireSeconds(-1L);
+      } else {
+        clientToken.setExpireSeconds(Constants.CLIENT_TOKEN_DURATION_SECONDS);
+      }
     }
 
     // 将token持久化到数据库中，以备重启服务器后原token继续可用

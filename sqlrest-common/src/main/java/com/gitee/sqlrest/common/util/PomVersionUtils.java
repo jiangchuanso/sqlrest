@@ -20,6 +20,8 @@ import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import lombok.experimental.UtilityClass;
@@ -34,7 +36,13 @@ public final class PomVersionUtils {
 
   private static final String PREFIX = "version=";
 
-  public static String getProjectVersion() {
+  private static final Map<String, String> persistCache = new ConcurrentHashMap<>();
+
+  public static String getCachedProjectVersion() {
+    return persistCache.computeIfAbsent(PREFIX, key -> getProjectVersion());
+  }
+
+  private static String getProjectVersion() {
     Class<?> clazz = PomVersionUtils.class;
     String resourcePath = clazz.getResource("").toString();
     if (resourcePath.startsWith("file:")) {

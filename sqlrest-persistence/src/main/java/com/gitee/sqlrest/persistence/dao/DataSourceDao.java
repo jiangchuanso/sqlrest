@@ -9,11 +9,14 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.sqlrest.persistence.dao;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sqlrest.persistence.entity.DataSourceEntity;
 import com.gitee.sqlrest.persistence.mapper.DataSourceMapper;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -44,6 +47,13 @@ public class DataSourceDao {
             .like(StringUtils.hasText(searchText), DataSourceEntity::getName, searchText)
             .orderByDesc(DataSourceEntity::getCreateTime)
     );
+  }
+
+  public Set<Long> getAllIdList() {
+    LambdaQueryWrapper<DataSourceEntity> queryWrapper = new LambdaQueryWrapper<>();
+    queryWrapper.select(DataSourceEntity::getId);
+    return dataSourceMapper.selectList(queryWrapper).stream().map(DataSourceEntity::getId)
+        .collect(Collectors.toSet());
   }
 
   public void updateById(DataSourceEntity databaseConnectionEntity) {

@@ -62,7 +62,7 @@ public class McpServerConfiguration {
   @Bean
   public McpSyncServer mcpSyncServer(WebMvcSseServerTransportProvider transportProvider) {
     McpSyncServer syncServer = McpServer.sync(transportProvider)
-        .serverInfo(Constants.MCP_SERVER_NAME, PomVersionUtils.getProjectVersion())
+        .serverInfo(Constants.MCP_SERVER_NAME, PomVersionUtils.getCachedProjectVersion())
         .capabilities(
             ServerCapabilities.builder()
                 .resources(true, true)

@@ -34,7 +34,6 @@ logging:
 
 eureka:
   instance:
-    ip-address: ${MANAGER_HOST}
     prefer-ip-address: true
     secure-port-enabled: false
     non-secure-port-enabled: true

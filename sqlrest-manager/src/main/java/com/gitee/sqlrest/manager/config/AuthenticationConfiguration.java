@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.sqlrest.manager.config;
 
+import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.common.util.CacheUtils;
@@ -53,6 +54,7 @@ public class AuthenticationConfiguration implements WebMvcConfigurer {
             "/actuator/**",
             "/eureka/**",
             "/error**",
+            Constants.MANGER_API_V1 + "/health/**",
             "/dashboard",
             "/dashboard/**"
         ))
