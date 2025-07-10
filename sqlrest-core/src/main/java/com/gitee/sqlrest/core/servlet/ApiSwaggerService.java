@@ -134,6 +134,9 @@ public class ApiSwaggerService {
       Operation operation = new Operation();
       operation.setOperationId(String.valueOf(assignment.getId()));
       operation.addTagsItem(moduleIdMap.get(assignment.getModuleId()).getName());
+      //FIX：导入接口文档到apifox时，方法名不能正常显示接口名称问题
+      operation.setSummary(assignment.getName());
+      operation.setDescription(StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
 
       // 入参
       List<ItemParam> params = assignment.getParams();
@@ -285,6 +288,9 @@ public class ApiSwaggerService {
     operation.setOperationId("0");
     operation.addTagsItem(TOKEN_MODEL);
     operation.setRequestBody(requestBody);
+    //FIX：导入接口文档到apifox时，方法名不能正常显示接口名称问题
+    operation.setSummary(TOKEN_MODEL);
+    operation.setDescription(TOKEN_MODEL);
 
     ApiResponses apiResponses = new ApiResponses();
     apiResponses.addApiResponse("200",

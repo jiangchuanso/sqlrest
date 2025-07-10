@@ -11,8 +11,11 @@ package com.gitee.sqlrest.common.enums;
 
 import java.util.Map;
 import java.util.function.Function;
-import lombok.Getter;
+
 import org.apache.commons.lang3.StringUtils;
+
+import cn.hutool.json.JSONUtil;
+import lombok.Getter;
 
 @Getter
 public enum ParamTypeEnum {
@@ -21,8 +24,10 @@ public enum ParamTypeEnum {
   STRING("字符串", "string", "", String.class, (String str) -> str),
   DATE("日期", "string", "", String.class, (String str) -> str),
   TIME("时间", "string", "", String.class, (String str) -> str),
-  BOOLEAN("布尔", "string", "true", Boolean.class, (String str) -> Boolean.parseBoolean(str)),
-  OBJECT("对象", "object", "{}", Map.class, s -> s);
+  //fix: 直接在swagger上展示boolean类型
+  BOOLEAN("布尔", "boolean", "true", Boolean.class, (String str) -> StringUtils.isNotBlank(str) ? Boolean.parseBoolean(str): null),
+  //fix: 修复对象不传时，默认值为空字符串问题
+  OBJECT("对象", "object", "{}", Map.class, (String str) -> StringUtils.isNotBlank(str) ? JSONUtil.toBean(str, Map.class) : null);
 
   private String name;
   private String jsType;

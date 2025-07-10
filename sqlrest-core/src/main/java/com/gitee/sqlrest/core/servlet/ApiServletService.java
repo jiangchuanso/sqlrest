@@ -45,6 +45,7 @@ public class ApiServletService {
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
       String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
       result = ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS, message);
+      log.warn("<SR出错>404路径不存在：{}", message);
     } else {
       result = apiExecuteService.execute(apiConfigEntity, request);
     }

@@ -78,6 +78,7 @@ public class AuthenticationFilter implements Filter {
       String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
       ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS, message);
       response.getWriter().append(JSONUtil.toJsonStr(result));
+      log.warn("<SR出错>404路径不存在：{}", message);
       return;
     }
 

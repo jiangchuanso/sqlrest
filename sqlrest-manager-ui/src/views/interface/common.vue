@@ -723,6 +723,7 @@ export default {
         { name: "字符串", value: "STRING" },
         { name: "日期", value: "DATE" },
         { name: "时间", value: "TIME" },
+        { name: "布尔", value: "BOOLEAN" },
         { name: "对象", value: "OBJECT" }
       ],
       contentTypes: ['application/x-www-form-urlencoded', 'application/json'],

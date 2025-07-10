@@ -87,8 +87,10 @@ public class ApiExecuteService {
       }
       return execute(config, paramValues);
     } catch (CommonException e) {
+      log.warn("<SR出错>参数校验错误，错误消息：" + e.getMessage(), e);
       return ResultEntity.failed(e.getCode(), e.getMessage());
     } catch (Throwable t) {
+      log.warn("<SR出错>方法执行出错，错误消息：" + t.getMessage(), t);
       return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(t));
     }
   }
