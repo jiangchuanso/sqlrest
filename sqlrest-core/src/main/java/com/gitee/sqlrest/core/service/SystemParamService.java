@@ -9,13 +9,16 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.sqlrest.core.service;
 
+import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.persistence.dao.SystemParamDao;
 import com.gitee.sqlrest.persistence.entity.SystemParamEntity;
 import javax.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class SystemParamService {
 
@@ -43,5 +46,21 @@ public class SystemParamService {
       throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "Invalid param value:[" + value + "]");
     }
     systemParamDao.updateByParamKey(key, String.valueOf(paramValue));
+  }
+
+  public Integer getIntByParamKey(String key, int defaultValue) {
+    SystemParamEntity entity = systemParamDao.getByParamKey(key);
+    if (null == entity) {
+      return defaultValue;
+    }
+    if (ParamTypeEnum.LONG.equals(entity.getParamType())) {
+      try {
+        return Integer.parseInt(entity.getParamValue());
+      } catch (Exception e) {
+        log.warn("Read system param integer value by key={} failed,use default value={},error:{} ",
+            key, defaultValue, e.getMessage());
+      }
+    }
+    return defaultValue;
   }
 }

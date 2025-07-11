@@ -3,24 +3,24 @@
 
 ![SQLREST](docs/images/SQLREST.PNG#pic_center)
 
-> 将 SQL 查询转化为 RESTful API的便捷工具
+> 将 SQL 操作转化为 RESTful API的便捷工具
 
 ## 一、工具介绍
 
-SQLREST 是一个开源项目，旨在提供一种简单而强大的方式来将 SQL 查询转化为 RESTful API。它支持多种数据库，允许用户通过配置 SQL 语句来创建 API，无
+SQLREST 是一个开源项目，旨在提供一种简单而强大的方式来将 SQL 操作转化为 RESTful API。它支持多种数据库，允许用户通过配置 SQL 语句来创建 API，无
 需编写复杂的后端逻辑，用户只需选择数据源、输入SQL或脚本、简单path配置即可快速生成API接口。
 
 ### 1、功能介绍
 
 SQLREST的功能包括：
 
-- **SQL直接构建API**：通过配置SQL和参数即可生成 RESTful API。
+- **SQL直接构建API**：通过配置增删改查SQL和参数即可生成 RESTful API。
 - **多数据库支持**：支持常见的20+种数据库，其中包含多款国产数据库。
 - **MyBatis语法支持**：支持MyBatis的动态SQL语法。
 - **Groovy脚本支持**：支持groovy语法构建复杂场景下的接口。
 - **参数类型支持**：支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型。
 - **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种请求格式。
-- **身份认证**：提供基于 Token 的认证机制，保护 API 安全。
+- **身份认证支持**：提供基于 Token 的认证机制，保护 API 安全。
 - **Swagger在线文档**：支持自动生成swagger-ui的在线接口文档。
 - **缓存配置支持**：支持 Hazelcast 和 Redis 缓存，提升 API 访问性能。
 - **流控配置管理**：通过 Sentinel 支持流量控制，防止系统过载。

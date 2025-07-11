@@ -1,0 +1,1 @@
+INSERT INTO SQLREST_SYSTEM_PARAM ("param_key", "param_type", "param_value") VALUES ('mcpToolListPageSize', 'LONG', '1000');

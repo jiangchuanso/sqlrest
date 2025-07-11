@@ -14,10 +14,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.BaseParam;
 import com.gitee.sqlrest.common.dto.ItemParam;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.core.exec.ApiExecuteService;
+import com.gitee.sqlrest.core.service.SystemParamService;
 import com.gitee.sqlrest.core.util.JacksonUtils;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.google.common.collect.Lists;
@@ -48,13 +51,15 @@ public class McpToolCallHandler {
   private final String toolDescription;
   private final ApiAssignmentEntity config;
   private final ApiExecuteService apiExecuteService;
+  private final int defaultPageSize;
 
-  public McpToolCallHandler(String toolName, String toolDescription,
-      ApiAssignmentEntity config) {
+  public McpToolCallHandler(String toolName, String description, ApiAssignmentEntity config) {
     this.toolName = toolName;
-    this.toolDescription = toolDescription;
+    this.toolDescription = description;
     this.config = config;
     this.apiExecuteService = SpringUtil.getBean(ApiExecuteService.class);
+    this.defaultPageSize = SpringUtil.getBean(SystemParamService.class)
+        .getIntByParamKey(Constants.SYS_PARAM_KEY_MCP_TOOL_LIST_PAGE_SIZE, 1000);
   }
 
   public McpSchema.Tool getMcpToolSchema() {
@@ -110,15 +115,35 @@ public class McpToolCallHandler {
   }
 
   public CallToolResult executeTool(McpSyncServerExchange exchange, Map<String, Object> arguments) {
+    prepareArgumentsPageSizeParameter(arguments);
     ResultEntity<Object> resultEntity = apiExecuteService.execute(config, arguments);
     if (0 == resultEntity.getCode()) {
       String json = JacksonUtils.toJsonStr(resultEntity.getData(), config.getResponseFormat());
-      McpSchema.TextContent content = new McpSchema.TextContent("获取JSON格式的数据为:\n " + json);
+      McpSchema.TextContent content = new McpSchema.TextContent("操作成功，JSON格式的响应数据为:\n " + json);
       return new McpSchema.CallToolResult(Lists.newArrayList(content), false);
     } else {
       String message = resultEntity.getMessage();
-      McpSchema.TextContent content = new McpSchema.TextContent("获取数据异常:\n " + message);
+      McpSchema.TextContent content = new McpSchema.TextContent("操作异常，JSON格式的响应数据为:\n " + message);
       return new McpSchema.CallToolResult(Lists.newArrayList(content), true);
+    }
+  }
+
+  private void prepareArgumentsPageSizeParameter(Map<String, Object> arguments) {
+    if (CollectionUtils.isNotEmpty(config.getParams())) {
+      for (ItemParam param : config.getParams()) {
+        String name = param.getName();
+        ParamTypeEnum type = param.getType();
+        Boolean required = param.getRequired();
+        String defaultValue = param.getDefaultValue();
+        if (!required && !arguments.containsKey(param.getName())) {
+          if (!type.isObject()) {
+            arguments.put(name, type.getConverter().apply(defaultValue));
+          }
+        }
+      }
+    }
+    if (!arguments.containsKey(Constants.PARAM_PAGE_SIZE)) {
+      arguments.put(Constants.PARAM_PAGE_SIZE, defaultPageSize);
     }
   }
 }

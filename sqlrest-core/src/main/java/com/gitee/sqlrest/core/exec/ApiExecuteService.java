@@ -79,6 +79,7 @@ public class ApiExecuteService {
   }
 
   public ResultEntity<Object> execute(ApiAssignmentEntity config, HttpServletRequest request) {
+    String resourceName = Constants.getResourceName(config.getMethod().name(), config.getPath());
     try {
       List<ItemParam> invalidArgs = new ArrayList<>();
       Map<String, Object> paramValues = mergeParameters(request, config.getParams(), invalidArgs);
@@ -87,10 +88,10 @@ public class ApiExecuteService {
       }
       return execute(config, paramValues);
     } catch (CommonException e) {
-      log.warn("<SR出错>参数校验错误，错误消息：" + e.getMessage(), e);
+      log.warn("Failed to valid parameters for {}, error:{}", resourceName, e.getMessage());
       return ResultEntity.failed(e.getCode(), e.getMessage());
     } catch (Throwable t) {
-      log.warn("<SR出错>方法执行出错，错误消息：" + t.getMessage(), t);
+      log.warn("Failed to execute for {}, error:{}", resourceName, t.getMessage());
       return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(t));
     }
   }

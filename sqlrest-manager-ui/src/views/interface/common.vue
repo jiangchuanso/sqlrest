@@ -203,7 +203,7 @@
                                        :key="index"
                                        :label="item.name"
                                        :value="item.value"
-                                       v-if="shouldShowOption(item,scope.row)"></el-option>
+                                       v-if="shouldInputShowOption(item,scope.row)"></el-option>
                           </el-select>
                         </template>
                       </el-table-column>
@@ -285,7 +285,8 @@
                             <el-option v-for="(item,index) in paramTypeList"
                                        :key="index"
                                        :label="item.name"
-                                       :value="item.value"></el-option>
+                                       :value="item.value"
+                                       v-if="shouldOutputShowOption(item,scope.row)"></el-option>
                           </el-select>
                         </template>
                       </el-table-column>
@@ -301,8 +302,12 @@
                                        v-if="!isOnlyShowDetail"
                                        min-width="25%">
                         <template slot-scope="scope">
+                          <el-link icon="el-icon-plus"
+                                   v-if="scope.row.type=='OBJECT'"
+                                   @click="addOutputSubParamsItem(scope.row)"></el-link>
+                          &nbsp;&nbsp;&nbsp;&nbsp;
                           <el-link icon="el-icon-delete"
-                                   @click="deleteOutputParamsItem(scope.$index)"></el-link>
+                                   @click="deleteOutputParamsItem(scope.$index,scope.row)"></el-link>
                         </template>
                       </el-table-column>
                     </el-table>
@@ -1352,13 +1357,13 @@ export default {
         );
       }
     },
-    shouldShowOption: function (item, row) {
-      if (this.getParentRow(row)) {
+    shouldInputShowOption: function (item, row) {
+      if (this.getInputParamsParentRow(row)) {
         return item.value != 'OBJECT';
       }
       return true;
     },
-    getParentRow: function (childRow) {
+    getInputParamsParentRow: function (childRow) {
       for (const row of this.inputParams) {
         if (row.children && row.children.includes(childRow)) {
           return row;
@@ -1376,7 +1381,7 @@ export default {
     },
     deleteInputSubParamsItem: function (index, childRow) {
       // 通过 childRow 访问父级行数据
-      const parentRow = this.getParentRow(childRow);
+      const parentRow = this.getInputParamsParentRow(childRow);
       if (parentRow) {
         const childIndex = parentRow.children.indexOf(childRow);
         if (childIndex !== -1) {
@@ -1707,10 +1712,72 @@ export default {
         },
       )
     },
-    deleteOutputParamsItem: function (index) {
-      this.outputParams.splice(index, 1);
+    shouldOutputShowOption: function (item, row) {
+      if (this.getOutputParamsParentRow(row)) {
+        return item.value != 'OBJECT';
+      }
+      return true;
     },
-
+    getOutputParamsParentRow: function (childRow) {
+      for (const row of this.outputParams) {
+        if (row.children && row.children.includes(childRow)) {
+          return row;
+        }
+      }
+      return null;
+    },
+    addOutputSubParamsItem: function (row) {
+      const index = this.outputParams.findIndex(item => row == item)
+      if (index !== -1) {
+        if (!this.outputParams[index].children) {
+          // 如果还没有 children 数组，则创建它
+          // 使用 Vue.set 来确保响应性
+          Vue.set(this.outputParams[index], 'children', []);
+        }
+        this.outputParams[index].location = 'REQUEST_BODY';
+        this.outputParams[index].type = 'OBJECT';
+        this.outputParams[index].children.push(
+          {
+            id: this.uuid(),
+            name: "",
+            type: "STRING",
+            location: 'REQUEST_BODY',
+            isArray: false,
+            required: true,
+            defaultValue: "",
+            remark: ""
+          },
+        );
+      } else {
+        row.type = 'STRING';
+        this.$alert('只允许嵌套一层，类型被还原为字符串类型', "操作提示",
+          {
+            confirmButtonText: "确定",
+            type: "info"
+          }
+        );
+      }
+    },
+    deleteOutputParamsItem: function (idx, row) {
+      const index = this.outputParams.indexOf(row);
+      if (index !== -1) {
+        this.outputParams.splice(index, 1);
+      } else {
+        this.deleteOutputSubParamsItem(idx, row);
+      }
+    },
+    deleteOutputSubParamsItem: function (index, childRow) {
+      // 通过 childRow 访问父级行数据
+      const parentRow = this.getOutputParamsParentRow(childRow);
+      if (parentRow) {
+        const childIndex = parentRow.children.indexOf(childRow);
+        if (childIndex !== -1) {
+          parentRow.children.splice(childIndex, 1);
+        } else {
+          console.warn('Child not found');
+        }
+      }
+    },
   },
   created () {
     this.loadAssignmentDetail();

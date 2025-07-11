@@ -18,6 +18,7 @@ import com.gitee.sqlrest.common.util.TokenUtils;
 import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.core.dto.McpToolResponse;
 import com.gitee.sqlrest.core.dto.McpToolSaveRequest;
+import com.gitee.sqlrest.core.util.ApiPathUtils;
 import com.gitee.sqlrest.manager.model.McpToolCallHandler;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.ApiModuleDao;
@@ -205,7 +206,7 @@ public class McpManageService {
             .apiId(toolEntity.getApiId())
             .apiName(config.getName())
             .apiMethod(config.getMethod().name())
-            .apiPath(config.getPath())
+            .apiPath(ApiPathUtils.getFullPath(config.getPath()))
             .createTime(toolEntity.getCreateTime())
             .updateTime(toolEntity.getUpdateTime())
             .build();

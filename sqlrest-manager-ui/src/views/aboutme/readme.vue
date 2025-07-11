@@ -40,6 +40,14 @@
                 <p>
                   执行器基于sentinel支持接口的流量控制功能。
                 </p>
+                <li>支持接口的缓存配置功能</li>
+                <p>
+                  执行器支持哈希及SpEL表达式方式配置缓存功能。
+                </p>
+                <li>支持将接口转换为MCP工具功能</li>
+                <p>
+                  Manager支持作为MCP服务端提供Tool功能。
+                </p>
               </ul>
             </div>
           </el-card>
@@ -65,9 +73,8 @@
                 <li>MariaDB
                 </li>
                 <li>微软的Microsoft SQLServer
-                <li>PostgreSQL
                 </li>
-                <li>Greenplum(需使用PostgreSQL类型)
+                <li>PostgreSQL/Greenplum
                 </li>
                 <li>IBM的DB2
                 </li>
@@ -97,6 +104,8 @@
                 </li>
                 <li>OceanBase
                 </li>
+                <li>TDengine
+                </li>
               </ul>
             </div>
           </el-card>
@@ -118,6 +127,7 @@
               <pre>
             └── sqlrest
                 ├── sqlrest-common                     // sqlrest通用定义模块
+                ├── sqlrest-mcp                        // sqlrest的MCP协议模块
                 ├── sqlrest-template                   // sqlrest的SQL内容模板模块
                 ├── sqlrest-persistence                // sqlrest的数据库持久化模块
                 ├── sqlrest-core                       // sqlrest-core的接口实现模块
