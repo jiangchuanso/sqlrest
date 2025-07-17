@@ -9,7 +9,6 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.sqlrest.core.exec;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.gitee.sqlrest.cache.CacheFactory;
 import com.gitee.sqlrest.cache.DistributedCache;
@@ -87,12 +86,9 @@ public class ApiExecuteService {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, convertInvalidArgs(invalidArgs));
       }
       return execute(config, paramValues);
-    } catch (CommonException e) {
-      log.warn("Failed to valid parameters for {}, error:{}", resourceName, e.getMessage());
-      return ResultEntity.failed(e.getCode(), e.getMessage());
-    } catch (Throwable t) {
-      log.warn("Failed to execute for {}, error:{}", resourceName, t.getMessage());
-      return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, ExceptionUtil.getMessage(t));
+    } catch (IOException e) {
+      log.warn("Failed read input body parameters for {}, error:{}", resourceName, e.getMessage());
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, e);
     }
   }
 

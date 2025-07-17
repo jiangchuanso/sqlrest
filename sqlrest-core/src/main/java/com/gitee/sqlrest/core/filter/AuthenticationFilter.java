@@ -171,12 +171,12 @@ public class AuthenticationFilter implements Filter {
     dataModel.put("method", apiConfigEntity.getMethod().name());
     dataModel.put("contentType", apiConfigEntity.getContentType());
     dataModel.put("name", apiConfigEntity.getName());
-    dataModel.put("description", apiConfigEntity.getDescription());
+    dataModel.put("description", StringUtils.defaultString(apiConfigEntity.getDescription()));
     dataModel.put("open", apiConfigEntity.getOpen().toString());
-    dataModel.put("clientKey", accessRecord.getClientKey());
-    dataModel.put("ipAddr", accessRecord.getIpAddr());
-    dataModel.put("userAgent", accessRecord.getUserAgent());
-    dataModel.put("exception", accessRecord.getException());
+    dataModel.put("clientKey", StringUtils.defaultString(accessRecord.getClientKey()));
+    dataModel.put("ipAddr", StringUtils.defaultString(accessRecord.getIpAddr()));
+    dataModel.put("userAgent", StringUtils.defaultString(accessRecord.getUserAgent()));
+    dataModel.put("exception", StringUtils.defaultString(accessRecord.getException()));
     dataModel.put("accessTime", sdFormatter.format(new Date(accessTimestamp)));
 
     unifyAlarmOpsService.triggerAlarm(dataModel);

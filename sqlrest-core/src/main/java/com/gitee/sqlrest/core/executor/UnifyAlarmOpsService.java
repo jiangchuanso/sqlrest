@@ -111,6 +111,9 @@ public class UnifyAlarmOpsService {
   private ResponseEntity<String> handleAlarm(UnifyAlarmEntity config, Map<String, String> dataModel) {
     StrSubstitutor strSubstitutor = new StrSubstitutor(escape(dataModel));
     String bodyStr = strSubstitutor.replace(config.getInputTemplate());
+    if (log.isDebugEnabled()) {
+      log.debug("Send alarm message body:\n{}", bodyStr);
+    }
     ResponseEntity<String> ret = sentAlarm(config, bodyStr);
     if (ret.getStatusCodeValue() != HttpStatus.OK.value()) {
       log.warn("Error when send alarm message http status: {} ,body: {}", ret.getStatusCode(), ret.getBody());
@@ -124,7 +127,7 @@ public class UnifyAlarmOpsService {
     HttpHeaders headers = new HttpHeaders();
     MediaType type = MediaType.parseMediaType(config.getContentType().replace(";", "") + "; charset=UTF-8");
     headers.setContentType(type);
-    headers.add("Accept", MediaType.ALL_VALUE.toString());
+    headers.add("Accept", MediaType.ALL_VALUE);
     HttpEntity<String> httpEntity = new HttpEntity<>(bodyStr, headers);
     return restTemplate.exchange(config.getEndpoint(), HttpMethod.POST, httpEntity, String.class);
   }

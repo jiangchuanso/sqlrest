@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.sqlrest.manager.model;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -116,13 +117,13 @@ public class McpToolCallHandler {
 
   public CallToolResult executeTool(McpSyncServerExchange exchange, Map<String, Object> arguments) {
     prepareArgumentsPageSizeParameter(arguments);
-    ResultEntity<Object> resultEntity = apiExecuteService.execute(config, arguments);
-    if (0 == resultEntity.getCode()) {
+    try {
+      ResultEntity<Object> resultEntity = apiExecuteService.execute(config, arguments);
       String json = JacksonUtils.toJsonStr(resultEntity.getData(), config.getResponseFormat());
       McpSchema.TextContent content = new McpSchema.TextContent("操作成功，JSON格式的响应数据为:\n " + json);
       return new McpSchema.CallToolResult(Lists.newArrayList(content), false);
-    } else {
-      String message = resultEntity.getMessage();
+    } catch (Throwable t) {
+      String message = null != t.getMessage() ? t.getMessage() : ExceptionUtil.getRootCauseMessage(t);
       McpSchema.TextContent content = new McpSchema.TextContent("操作异常，JSON格式的响应数据为:\n " + message);
       return new McpSchema.CallToolResult(Lists.newArrayList(content), true);
     }

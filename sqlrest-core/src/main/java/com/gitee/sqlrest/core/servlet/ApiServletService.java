@@ -38,9 +38,6 @@ public class ApiServletService {
     String path = request.getRequestURI().substring(Constants.API_PATH_PREFIX.length() + 2);
     ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path);
     ResultEntity result = apiExecuteService.execute(apiConfigEntity, request);
-    if (0 != result.getCode()) {
-      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
     String json = JacksonUtils.toJsonStr(result, apiConfigEntity.getResponseFormat());
     response.getWriter().append(json);
   }

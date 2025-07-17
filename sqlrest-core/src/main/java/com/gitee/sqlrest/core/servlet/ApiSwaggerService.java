@@ -12,6 +12,7 @@ package com.gitee.sqlrest.core.servlet;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.BaseParam;
 import com.gitee.sqlrest.common.dto.ItemParam;
+import com.gitee.sqlrest.common.dto.OutParam;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.common.enums.ParamTypeEnum;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
@@ -248,7 +249,7 @@ public class ApiSwaggerService {
       }
 
       // 响应
-      operation.setResponses(getApiResponses());
+      operation.setResponses(getApiResponses(assignment.getOutputs()));
       operation.security(Collections.singletonList(new SecurityRequirement().addList(AUTHORIZATION)));
 
       openAPI.path(path, pathItem);
@@ -326,16 +327,54 @@ public class ApiSwaggerService {
     return pathItem;
   }
 
-  private ApiResponses getApiResponses() {
+  private ApiResponses getApiResponses(List<OutParam> outputs) {
+    Schema rootSchema = new ObjectSchema()
+        .addProperties("code", new NumberSchema())
+        .addProperties("message", new StringSchema());
+    if (!CollectionUtils.isEmpty(outputs)) {
+      ObjectSchema objectSchema = new ObjectSchema();
+      for (OutParam param : outputs) {
+        ParamTypeEnum typeItem = param.getType();
+        if (Optional.ofNullable(param.getIsArray()).orElse(false)) {
+          Schema subSchema = new Schema().type(param.getType().getJsType())
+              .description(param.getRemark())
+              .format(getTypeFormat(param.getType()));
+          ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+          objectSchema.addProperties(param.getName(), subArraySchema);
+        } else {
+          Schema propertiesItem;
+          if (Optional.ofNullable(typeItem.isObject()).orElse(false)) {
+            propertiesItem = new ObjectSchema().description(param.getRemark());
+            if (!CollectionUtils.isEmpty(param.getChildren())) {
+              for (OutParam subParam : param.getChildren()) {
+                Schema subSchema = new Schema().type(subParam.getType().getJsType())
+                    .description(subParam.getRemark())
+                    .format(getTypeFormat(subParam.getType()));
+                if (Optional.ofNullable(subParam.getIsArray()).orElse(false)) {
+                  ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+                  propertiesItem.addProperties(subParam.getName(), subArraySchema);
+                } else {
+                  propertiesItem.addProperties(subParam.getName(), subSchema);
+                }
+              }
+            }
+          } else {
+            propertiesItem = new Schema().type(typeItem.getJsType())
+                .description(param.getRemark())
+                .format(getTypeFormat(typeItem));
+          }
+          objectSchema.addProperties(param.getName(), propertiesItem);
+        }
+      }
+      rootSchema.addProperties("data", objectSchema);
+    }
+
     ApiResponses apiResponses = new ApiResponses();
     apiResponses.addApiResponse("200",
         new ApiResponse().description("OK").content(
             new Content().addMediaType(
                 "*/*",
-                new MediaType().schema(
-                    new Schema().name("type")
-                        .type("object")
-                )
+                new MediaType().schema(rootSchema)
             )
         )
     );
@@ -352,5 +391,27 @@ public class ApiSwaggerService {
         new ApiResponse().description("Not Found")
     );
     return apiResponses;
+  }
+
+  private String getTypeFormat(ParamTypeEnum type) {
+    String format = null;
+    switch (type) {
+      case LONG:
+        format = "int64";
+        break;
+      case DOUBLE:
+        format = "float32";
+        break;
+      case DATE:
+        format = "date-time";
+        break;
+      case TIME:
+        format = "time";
+        break;
+      case BOOLEAN:
+      default:
+        break;
+    }
+    return format;
   }
 }
