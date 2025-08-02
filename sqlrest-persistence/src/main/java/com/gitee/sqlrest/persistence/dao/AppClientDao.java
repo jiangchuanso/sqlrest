@@ -34,6 +34,20 @@ public class AppClientDao {
     appClientMapper.insert(appClientEntity);
   }
 
+  public List<AppClientEntity> listAll() {
+    return listAll(null);
+  }
+
+  public List<AppClientEntity> listAll(String searchText, Long groupId) {
+    if (null == groupId) {
+      return listAll(searchText);
+    }
+    if (null != searchText) {
+      searchText = "%" + searchText + "%";
+    }
+    return appClientMapper.searchAppClient(searchText, groupId);
+  }
+
   public List<AppClientEntity> listAll(String searchText) {
     return appClientMapper.selectList(
         Wrappers.<AppClientEntity>lambdaQuery()

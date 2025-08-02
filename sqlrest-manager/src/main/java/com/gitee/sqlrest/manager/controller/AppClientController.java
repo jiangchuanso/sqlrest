@@ -15,8 +15,8 @@ import com.gitee.sqlrest.common.dto.ResultEntity;
 import com.gitee.sqlrest.core.dto.AppClientDetailResponse;
 import com.gitee.sqlrest.core.dto.AppClientGroupRequest;
 import com.gitee.sqlrest.core.dto.AppClientSaveRequest;
+import com.gitee.sqlrest.core.dto.AppClientSearchRequest;
 import com.gitee.sqlrest.core.dto.EntityIdNameResponse;
-import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.core.service.AppClientService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,7 +56,7 @@ public class AppClientController {
 
   @ApiOperation(value = "客户端应用列表")
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-  public PageResult<AppClientDetailResponse> searchList(@RequestBody EntitySearchRequest request) {
+  public PageResult<AppClientDetailResponse> searchList(@RequestBody AppClientSearchRequest request) {
     return appClientService.searchList(request);
   }
 

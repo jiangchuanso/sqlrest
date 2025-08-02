@@ -43,9 +43,13 @@ import com.gitee.sqlrest.core.util.ApiPathUtils;
 import com.gitee.sqlrest.core.util.DataSourceUtils;
 import com.gitee.sqlrest.core.util.JacksonUtils;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
+import com.gitee.sqlrest.persistence.dao.ApiGroupDao;
+import com.gitee.sqlrest.persistence.dao.ApiModuleDao;
 import com.gitee.sqlrest.persistence.dao.DataSourceDao;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.gitee.sqlrest.persistence.entity.ApiContextEntity;
+import com.gitee.sqlrest.persistence.entity.ApiGroupEntity;
+import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
 import com.gitee.sqlrest.persistence.entity.DataSourceEntity;
 import com.gitee.sqlrest.persistence.util.PageUtils;
 import com.gitee.sqlrest.template.XmlSqlTemplate;
@@ -55,13 +59,11 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -73,6 +75,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Slf4j
@@ -85,6 +88,10 @@ public class ApiAssignmentService {
   public ApiAssignmentDao apiAssignmentDao;
   @Resource
   private DataSourceDao dataSourceDao;
+  @Resource
+  private ApiGroupDao apiGroupDao;
+  @Resource
+  private ApiModuleDao apiModuleDao;
   @Resource
   private DriverLoadService driverLoadService;
 
@@ -180,17 +187,30 @@ public class ApiAssignmentService {
                 throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
               }
               if (subParamValue.getRequired()) {
-                if (StringUtils.isBlank(subParamValue.getValue())) {
-                  paramValue.setName(String.format("%s->%s", paramValue.getName(), subParamValue.getName()));
-                  invalidArgs.add(paramValue);
+                if (subParamValue.getIsArray()) {
+                  if (CollectionUtils.isEmpty(subParamValue.getArrayValues())) {
+                    paramValue.setName(String.format("%s->%s", paramValue.getName(), subParamValue.getName()));
+                    invalidArgs.add(paramValue);
+                  }
+                } else {
+                  if (StringUtils.isBlank(subParamValue.getValue())) {
+                    paramValue.setName(String.format("%s->%s", paramValue.getName(), subParamValue.getName()));
+                    invalidArgs.add(paramValue);
+                  }
                 }
               }
             }
           }
         } else {
           if (paramValue.getRequired()) {
-            if (StringUtils.isBlank(paramValue.getValue())) {
-              invalidArgs.add(paramValue);
+            if (paramValue.getIsArray()) {
+              if (CollectionUtils.isEmpty(paramValue.getArrayValues())) {
+                invalidArgs.add(paramValue);
+              }
+            } else {
+              if (StringUtils.isBlank(paramValue.getValue())) {
+                invalidArgs.add(paramValue);
+              }
             }
           }
         }
@@ -202,66 +222,73 @@ public class ApiAssignmentService {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, msg);
       }
 
-      Map<String, List<ParamValue>> names = request.getParamValues()
-          .stream()
-          .filter(
-              i -> {
-                if (i.getType().isObject()) {
-                  return true;
-                }
-                return StringUtils.isNotBlank(i.getValue());
-              }
-          ).collect(Collectors.groupingBy(ParamValue::getName));
-      for (Map.Entry<String, List<ParamValue>> entry : names.entrySet()) {
-        String paramName = entry.getKey();
-        List<ParamValue> value = entry.getValue();
-        ParamTypeEnum type = value.get(0).getType();
+      for (ParamValue param : request.getParamValues()) {
+        String paramName = param.getName();
+        ParamTypeEnum type = param.getType();
         try {
-          if (value.get(0).getIsArray()) {
-            if (value.get(0).getType().isObject()) {
+          if (param.getIsArray()) {
+            if (param.getType().isObject()) {
               List<Map<String, Object>> collection = new ArrayList<>();
-              for (ParamValue pv : value) {
-                if (pv.getType().isObject() && null != pv.getChildren()) {
-                  Map<String, Object> objectMap = new HashMap<>(4);
-                  for (BaseParamValue spv : pv.getChildren()) {
-                    Object v = spv.getType().getConverter().apply(spv.getValue());
-                    if (spv.getIsArray()) {
-                      objectMap.put(spv.getName(), null == v ? null : Arrays.asList(v));
-                    } else {
-                      objectMap.put(spv.getName(), v);
-                    }
+              if (null != param.getChildren()) {
+                Map<String, Object> objectMap = new HashMap<>(param.getChildren().size());
+                for (BaseParamValue spv : param.getChildren()) {
+                  if (spv.getIsArray()) {
+                    List<Object> ls = CollectionUtils.isEmpty(spv.getArrayValues())
+                        ? null
+                        : spv.getArrayValues().stream()
+                            .map(item -> spv.getType().getConverter().apply(item))
+                            .collect(Collectors.toList());
+                    objectMap.put(spv.getName(), ls);
+                  } else {
+                    String value = spv.getRequired()
+                        ? spv.getValue()
+                        : (StringUtils.isNotBlank(spv.getValue()) ? spv.getValue() : spv.getDefaultValue());
+                    Object v = spv.getType().getConverter().apply(value);
+                    objectMap.put(spv.getName(), v);
                   }
-                  if (objectMap.size() > 0) {
-                    collection.add(objectMap);
-                  }
+                }
+                if (objectMap.size() > 0) {
+                  collection.add(objectMap);
                 }
               }
               if (collection.size() > 0) {
                 params.put(paramName, collection);
               }
             } else {
-              List<Object> values = value.stream().map(ParamValue::getValue)
-                  .map(s -> type.getConverter().apply(s))
-                  .filter(Objects::nonNull)
-                  .collect(Collectors.toList());
-              params.put(paramName, values);
+              List<Object> ls = CollectionUtils.isEmpty(param.getArrayValues())
+                  ? null
+                  : param.getArrayValues().stream()
+                      .map(item -> type.getConverter().apply(item))
+                      .collect(Collectors.toList());
+              params.put(paramName, ls);
             }
           } else {
-            if (value.get(0).getType().isObject()) {
-              if (null != value.get(0).getChildren()) {
+            if (type.isObject()) {
+              if (null != param.getChildren()) {
                 Map<String, Object> objectMap = new HashMap<>(4);
-                for (BaseParamValue spv : value.get(0).getChildren()) {
-                  Object v = spv.getType().getConverter().apply(spv.getValue());
+                for (BaseParamValue spv : param.getChildren()) {
                   if (spv.getIsArray()) {
-                    objectMap.put(spv.getName(), null == v ? null : Arrays.asList(v));
+                    List<Object> ls = CollectionUtils.isEmpty(spv.getArrayValues())
+                        ? null
+                        : spv.getArrayValues().stream()
+                            .map(item -> spv.getType().getConverter().apply(item))
+                            .collect(Collectors.toList());
+                    objectMap.put(spv.getName(), ls);
                   } else {
+                    String value = spv.getRequired()
+                        ? spv.getValue()
+                        : (StringUtils.isNotBlank(spv.getValue()) ? spv.getValue() : spv.getDefaultValue());
+                    Object v = spv.getType().getConverter().apply(value);
                     objectMap.put(spv.getName(), v);
                   }
                 }
                 params.put(paramName, objectMap);
               }
             } else {
-              params.put(paramName, type.getConverter().apply(value.get(0).getValue()));
+              String value = param.getRequired()
+                  ? param.getValue()
+                  : (StringUtils.isNotBlank(param.getValue()) ? param.getValue() : param.getDefaultValue());
+              params.put(paramName, type.getConverter().apply(value));
             }
           }
         } catch (Exception e) {
@@ -270,7 +297,7 @@ public class ApiAssignmentService {
       }
 
       List<ParamValue> emptyList = request.getParamValues()
-          .stream().filter(i -> StringUtils.isBlank(i.getValue()))
+          .stream().filter(i -> !i.getIsArray()).filter(i -> StringUtils.isBlank(i.getValue()))
           .collect(Collectors.toList());
       for (ParamValue paramValue : emptyList) {
         ParamTypeEnum type = paramValue.getType();
@@ -562,7 +589,20 @@ public class ApiAssignmentService {
     apiAssignmentDao.updateStatus(id, false);
   }
 
+  @Transactional(rollbackFor = Exception.class)
+  public void updateGroup(Long groupId, List<Long> ids) {
+    if (null == groupId || null == apiGroupDao.getById(groupId)) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "groupId=" + groupId);
+    }
+    apiAssignmentDao.resetGroupByGroupId(groupId);
+    apiAssignmentDao.updateGroup(groupId, ids);
+  }
+
   public PageResult<ApiAssignmentBaseResponse> listAll(AssignmentSearchRequest request) {
+    Map<Long, String> moduleIdNameMap = apiModuleDao.listAll().stream()
+        .collect(Collectors.toMap(ApiModuleEntity::getId, ApiModuleEntity::getName));
+    Map<Long, String> groupIdNameMap = apiGroupDao.listAll().stream()
+        .collect(Collectors.toMap(ApiGroupEntity::getId, ApiGroupEntity::getName));
     Supplier<List<ApiAssignmentBaseResponse>> method = () -> {
       List<ApiAssignmentEntity> lists = apiAssignmentDao
           .listAll(request.getGroupId(), request.getModuleId(),
@@ -572,6 +612,8 @@ public class ApiAssignmentService {
           .map(assignmentEntity -> {
             ApiAssignmentBaseResponse response = new ApiAssignmentBaseResponse();
             BeanUtil.copyProperties(assignmentEntity, response);
+            response.setModuleName(moduleIdNameMap.get(assignmentEntity.getModuleId()));
+            response.setGroupName(groupIdNameMap.get(assignmentEntity.getGroupId()));
             response.setPath(ApiPathUtils.getFullPath(response.getPath()));
             return response;
           })

@@ -2,6 +2,8 @@
   <div class="user-dropdown-wrap">
     <el-dropdown>
       <div class="user-dropdown-photo">
+        当前版本号：
+        <el-tag size="medium">{{ version }}</el-tag>
         <span class="user-dropdown-text">
           {{ nickname }}({{username}})
           <i class="el-icon-caret-bottom"></i>
@@ -30,12 +32,14 @@ export default {
   data () {
     return {
       username: "",
-      nickname: ""
+      nickname: "",
+      version: "1.0.0"
     };
   },
   created () {
     this.username = window.sessionStorage.getItem("username");
     this.nickname = window.sessionStorage.getItem("realname");
+    this.version = window.sessionStorage.getItem("version");
   },
   methods: {
     hadleLogout () {

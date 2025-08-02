@@ -58,7 +58,7 @@ public class OverviewService {
 
   public PageResult<ApiAccessLogBasicResponse> pageByApiId(Long apiId, Integer page, Integer size) {
     Map<String, String> map = SpringUtil.getBean(AppClientDao.class)
-        .listAll(null).stream()
+        .listAll().stream()
         .collect(
             Collectors.toMap(
                 AppClientEntity::getAppKey,

@@ -12,11 +12,18 @@ package com.gitee.sqlrest.core.service;
 import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.exception.CommonException;
 import com.gitee.sqlrest.common.exception.ResponseErrorCode;
+import com.gitee.sqlrest.core.dto.ApiModuleAssignments;
 import com.gitee.sqlrest.core.dto.EntitySearchRequest;
+import com.gitee.sqlrest.core.dto.SelectedEntityIdName;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.dao.ApiModuleDao;
 import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
+import com.gitee.sqlrest.persistence.entity.ModuleAssignmentEntity;
 import com.gitee.sqlrest.persistence.util.PageUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -62,5 +69,28 @@ public class ApiModuleService {
         request.getPage(),
         request.getSize()
     );
+  }
+
+  public List<ApiModuleAssignments> moduleTree(Long groupId) {
+    Map<Long, List<ModuleAssignmentEntity>> moduleIdListMap = apiAssignmentDao.getModuleAssignments()
+        .stream().collect(Collectors.groupingBy(ModuleAssignmentEntity::getModuleId));
+    List<ApiModuleAssignments> results = new ArrayList<>(moduleIdListMap.size());
+    for (Map.Entry<Long, List<ModuleAssignmentEntity>> entry : moduleIdListMap.entrySet()) {
+      ModuleAssignmentEntity first = entry.getValue().get(0);
+      ApiModuleAssignments module = new ApiModuleAssignments();
+      module.setId(first.getModuleId());
+      module.setName(first.getModuleName());
+      module.setChildren(
+          entry.getValue().stream()
+              .map(one ->
+                  SelectedEntityIdName.builder()
+                      .id(one.getAssigmentId())
+                      .name(String.format("[%d]%s", one.getAssigmentId(), one.getAssigmentName()))
+                      .selected(one.getGroupId().equals(groupId))
+                      .build())
+              .collect(Collectors.toList()));
+      results.add(module);
+    }
+    return results;
   }
 }

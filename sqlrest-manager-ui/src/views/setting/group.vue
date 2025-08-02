@@ -44,12 +44,18 @@
           <template slot-scope="scope">
             <el-button-group>
               <el-button size="small"
+                         type="danger"
+                         icon="el-icon-document"
+                         @click="handleRelation(scope.$index, scope.row)"
+                         round>关联</el-button>
+              <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
                          round>编辑</el-button>
               <el-button size="small"
                          type="success"
+                         v-if="scope.row.id!==1"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
                          round>删除</el-button>
@@ -119,12 +125,40 @@
                      @click="handleSave">确 定</el-button>
         </div>
       </el-dialog>
+
+      <el-dialog title="修改关联信息"
+                 :visible.sync="relationFormVisible"
+                 :showClose="false"
+                 :before-close="handleClose">
+        <el-alert title="取消勾选后执行修改操作时，被取消勾选项将被修改关联到id=1的“默认分组”中."
+                  type="warning"
+                  show-icon>
+        </el-alert>
+        <el-tree :data="moduleAssignments"
+                 :show-checkbox="true"
+                 ref="relationTree"
+                 node-key="id"
+                 :default-checked-keys="initCheckedKeys"
+                 highlight-current
+                 :props="defaultProps">
+        </el-tree>
+        <div slot="footer"
+             class="dialog-footer">
+          <el-button type="primary"
+                     @click="relationFormVisible = false">关 闭</el-button>
+          <el-button type="danger"
+                     v-if="currentGroupId!==1"
+                     @click="handleRelationSave">修 改</el-button>
+        </div>
+      </el-dialog>
+
     </el-card>
   </div>
 </template>
 
 <script>
 import qs from "qs";
+import Vue from "vue";
 
 export default {
   name: "group",
@@ -157,10 +191,31 @@ export default {
         ]
       },
       createFormVisible: false,
-      updateFormVisible: false
+      updateFormVisible: false,
+      relationFormVisible: false,
+      moduleAssignments: [],
+      initCheckedKeys: [],
+      currentGroupId: 0,
+      defaultProps: {
+        children: 'children',
+        label: 'name'
+      }
     }
   },
   methods: {
+    uuid: function () {
+      var s = [];
+      var hexDigits = "0123456789abcdef";
+      for (var i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+      }
+      s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
+      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      s[8] = s[13] = s[18] = s[23] = "-";
+
+      var uuid = s.join("");
+      return uuid;
+    },
     loadData: function () {
       this.$http({
         method: "POST",
@@ -234,6 +289,48 @@ export default {
           });
         } else {
           alert("请检查输入");
+        }
+      });
+    },
+    handleRelation: function (index, row) {
+      this.moduleAssignments = [];
+      this.$http.get(
+        "/sqlrest/manager/api/v1/module/moduleTree/" + row.id
+      ).then(res => {
+        if (0 === res.data.code) {
+          this.initCheckedKeys = [];
+          this.currentGroupId = row.id;
+          this.moduleAssignments = res.data.data;
+          for (let item of this.moduleAssignments) {
+            Vue.set(item, 'id', this.uuid());
+            if (item.children) {
+              for (let one of item.children) {
+                //Vue.set(one, 'disabled', true);
+                if (one.selected) {
+                  this.initCheckedKeys.push(one.id);
+                }
+              }
+            }
+          }
+        }
+      });
+      this.relationFormVisible = true;
+    },
+    handleRelationSave: function () {
+      let checkedKeys = this.$refs.relationTree.getCheckedKeys(true);
+      this.$http({
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/assignment/group/" + this.currentGroupId,
+        data: checkedKeys
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.relationFormVisible = false;
+          this.$message("修改关联信息成功.");
+        } else {
+          alert("修改失败:" + res.data.message);
         }
       });
     },

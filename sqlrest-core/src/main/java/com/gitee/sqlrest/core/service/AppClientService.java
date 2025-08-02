@@ -15,7 +15,6 @@ import com.gitee.sqlrest.cache.CacheFactory;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.AccessToken;
 import com.gitee.sqlrest.common.dto.PageResult;
-import com.gitee.sqlrest.common.enums.AliveTimeEnum;
 import com.gitee.sqlrest.common.enums.DurationTimeEnum;
 import com.gitee.sqlrest.common.enums.ExpireTimeEnum;
 import com.gitee.sqlrest.common.exception.CommonException;
@@ -24,8 +23,8 @@ import com.gitee.sqlrest.common.util.TokenUtils;
 import com.gitee.sqlrest.core.dto.AppClientDetailResponse;
 import com.gitee.sqlrest.core.dto.AppClientGroupRequest;
 import com.gitee.sqlrest.core.dto.AppClientSaveRequest;
+import com.gitee.sqlrest.core.dto.AppClientSearchRequest;
 import com.gitee.sqlrest.core.dto.EntityIdNameResponse;
-import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.persistence.dao.AppClientDao;
 import com.gitee.sqlrest.persistence.entity.AppClientEntity;
 import com.gitee.sqlrest.persistence.util.PageUtils;
@@ -83,9 +82,9 @@ public class AppClientService {
     }
   }
 
-  public PageResult<AppClientDetailResponse> searchList(EntitySearchRequest request) {
+  public PageResult<AppClientDetailResponse> searchList(AppClientSearchRequest request) {
     Supplier<List<AppClientDetailResponse>> method = () -> {
-      List<AppClientEntity> list = appClientDao.listAll(request.getSearchText());
+      List<AppClientEntity> list = appClientDao.listAll(request.getSearchText(), request.getGroupId());
       return list.stream().map(appClientEntity -> {
         AppClientDetailResponse response = new AppClientDetailResponse();
         BeanUtil.copyProperties(appClientEntity, response);

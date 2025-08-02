@@ -12,7 +12,6 @@ package com.gitee.sqlrest.core.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gitee.sqlrest.common.enums.ExecuteEngineEnum;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
-import com.gitee.sqlrest.common.enums.OnOffEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
@@ -29,6 +28,18 @@ public class ApiAssignmentBaseResponse {
 
   @ApiModelProperty("API配置名称")
   private String name;
+
+  @ApiModelProperty("模块ID")
+  private Long moduleId;
+
+  @ApiModelProperty("模块名称")
+  private String moduleName;
+
+  @ApiModelProperty("授权分组ID")
+  private Long groupId;
+
+  @ApiModelProperty("授权分组名称")
+  private String groupName;
 
   @ApiModelProperty("API请求方法:GET, HEAD, PUT, POST, DELETE")
   private HttpMethodEnum method;

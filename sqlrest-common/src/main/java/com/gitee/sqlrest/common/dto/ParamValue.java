@@ -25,12 +25,17 @@ public class ParamValue extends BaseParam {
   @ApiModelProperty("Object类型的子元素及值")
   private List<BaseParamValue> children;
 
-  @ApiModelProperty("参数值")
+  @ApiModelProperty("非数组参数值")
   private String value;
+
+  @ApiModelProperty("数组参数值")
+  private List<String> arrayValues;
 
   @Data
   public static class BaseParamValue extends BaseParam {
 
     private String value;
+
+    private List<String> arrayValues;
   }
 }

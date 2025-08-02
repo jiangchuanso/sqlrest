@@ -21,6 +21,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -39,7 +40,8 @@ public final class PomVersionUtils {
   private static final Map<String, String> persistCache = new ConcurrentHashMap<>();
 
   public static String getCachedProjectVersion() {
-    return persistCache.computeIfAbsent(PREFIX, key -> getProjectVersion());
+    String versionStr = persistCache.computeIfAbsent(PREFIX, key -> getProjectVersion());
+    return Optional.ofNullable(versionStr).orElse("1.0.0");
   }
 
   private static String getProjectVersion() {

@@ -580,19 +580,6 @@
                :with-header="true">
       <el-card>
         <el-row>
-          <el-col>
-            <div style="float: right; padding: 0px">
-              <el-button type="primary"
-                         size="mini"
-                         icon="el-icon-arrow-down"
-                         v-if="!isOnlyShowDetail"
-                         @click="handleAddDebugParams">
-                添加入参
-              </el-button>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row>
           <el-col :span="24">
             <el-table :data="debugParams"
                       :header-cell-style="{background:'#eef1f6',color:'#606266'}"
@@ -605,6 +592,7 @@
                                min-width="35%">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.name"
+                            :disabled="true"
                             type="string"> </el-input>
                 </template>
               </el-table-column>
@@ -621,27 +609,17 @@
                 </template>
               </el-table-column>
               <el-table-column label="数组"
-                               min-width="25%">
+                               min-width="10%">
                 <template slot-scope="scope">
-                  <el-select v-model="scope.row.isArray"
-                             :disabled="true">
-                    <el-option label='是'
-                               :value=true></el-option>
-                    <el-option label='否'
-                               :value=false></el-option>
-                  </el-select>
+                  <el-checkbox v-model="scope.row.isArray"
+                               :disabled="true"></el-checkbox>
                 </template>
               </el-table-column>
               <el-table-column label="必填"
-                               min-width="25%">
+                               min-width="10%">
                 <template slot-scope="scope">
-                  <el-select v-model="scope.row.required"
-                             :disabled="true">
-                    <el-option label='是'
-                               :value=true></el-option>
-                    <el-option label='否'
-                               :value=false></el-option>
-                  </el-select>
+                  <el-checkbox v-model="scope.row.required"
+                               :disabled="true"></el-checkbox>
                 </template>
               </el-table-column>
               <el-table-column label="描述"
@@ -653,16 +631,37 @@
                 </template>
               </el-table-column>
               <el-table-column label="值"
-                               min-width="25%">
+                               min-width="50%">
                 <template slot-scope="scope">
-                  <el-input v-model="scope.row.value"
-                            :disabled="scope.row.type=='OBJECT'"
-                            type="string"></el-input>
+                  <div v-if="scope.row.isArray">
+                    <el-row v-if="scope.row.type=='OBJECT'">
+                      <el-input v-model="scope.row.value"
+                                :disabled="true"
+                                type="string"></el-input>
+                    </el-row>
+                    <el-row v-else
+                            :gutter="24">
+                      <div style="display: inline-flex;justify-content: center;"
+                           v-for="(arrayItemValue,arrayItemIndex) in scope.row.arrayValues"
+                           :key="arrayItemIndex">
+                        <el-col :span="4"><button @click="delArrayValuesItem(scope.row.arrayValues,arrayItemIndex)">-</button></el-col>
+                        <el-col :span="16"><el-input v-model="scope.row.arrayValues[arrayItemIndex]"
+                                    :disabled="scope.row.type=='OBJECT'"
+                                    type="string"></el-input></el-col>
+                      </div>
+                      <el-col :span="4"><button @click="addArrayValuesItem(scope.row)">+</button></el-col>
+                    </el-row>
+                  </div>
+                  <div v-else>
+                    <el-input v-model="scope.row.value"
+                              :disabled="scope.row.type=='OBJECT'"
+                              type="string"></el-input>
+                  </div>
                 </template>
               </el-table-column>
               <el-table-column label="操作"
                                v-if="!isOnlyShowDetail"
-                               min-width="25%">
+                               min-width="15%">
                 <template slot-scope="scope">
                   <el-link icon="el-icon-delete"
                            @click="deleteDebugParamsItem(scope.$index)"></el-link>
@@ -673,12 +672,17 @@
         </el-row>
         <el-row>
           <el-col>
+            <el-tooltip effect="dark"
+                        content="暂不支持对象数组的入参调试功能，但接口支持对象数组入参"
+                        placement="bottom">
+              <i class='el-icon-question' />
+            </el-tooltip>
             <div style="float: right; padding: 25px">
               <el-button type="primary"
                          size="mini"
                          icon="el-icon-arrow-left"
                          @click="handleExecuteDebug">
-                执行
+                执行调试
               </el-button>
             </div>
           </el-col>
@@ -1606,6 +1610,13 @@ export default {
       } else {
         this.debugParams = []
         this.inputParams.forEach(item => {
+          if (item.children && item.children.length > 0) {
+            for (let it of item.children) {
+              if (!it.arrayValues) {
+                Vue.set(it, 'arrayValues', []);
+              }
+            }
+          }
           this.debugParams.push(
             {
               id: item.id,
@@ -1616,6 +1627,7 @@ export default {
               defaultValue: item.defaultValue,
               remark: item.remark,
               value: null,
+              arrayValues: [],
               children: item.children
             },
           )
@@ -1623,22 +1635,14 @@ export default {
         this.showDebugDrawer = true
       }
     },
-    handleAddDebugParams: function () {
-      this.debugParams.push(
-        {
-          id: this.uuid(),
-          name: '',
-          type: 'LONG',
-          isArray: true,
-          required: true,
-          defaultValue: '',
-          remark: null,
-          value: null,
-        },
-      )
-    },
     deleteDebugParamsItem: function (index) {
       this.debugParams.splice(index, 1);
+    },
+    addArrayValuesItem: function (row) {
+      row.arrayValues.push('');
+    },
+    delArrayValuesItem: function (array, index) {
+      array.splice(index, 1);
     },
     handleExecuteDebug: function () {
       var sqls = []
@@ -1855,6 +1859,10 @@ export default {
   padding-right: 10px;
   display: flex;
   flex-direction: row;
+}
+/deep/.el-table .cell .el-checkbox__input.is-disabled.is-checked .el-checkbox__inner {
+  background-color: #1464dd;
+  border-color: #f4f5f8;
 }
 .debug-console-log-text {
   white-space: pre-line;

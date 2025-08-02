@@ -31,6 +31,10 @@ public class ApiGroupDao {
     return apiGroupMapper.selectById(id);
   }
 
+  public List<ApiGroupEntity> listAll() {
+    return listAll(null);
+  }
+
   public List<ApiGroupEntity> listAll(String searchText) {
     return apiGroupMapper.selectList(
         Wrappers.<ApiGroupEntity>lambdaQuery()

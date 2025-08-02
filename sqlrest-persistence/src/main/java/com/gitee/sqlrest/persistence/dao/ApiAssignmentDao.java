@@ -13,12 +13,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.gitee.sqlrest.common.enums.HttpMethodEnum;
 import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
+import com.gitee.sqlrest.persistence.entity.ModuleAssignmentEntity;
 import com.gitee.sqlrest.persistence.mapper.ApiAssignmentMapper;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Repository
@@ -58,6 +60,21 @@ public class ApiAssignmentDao {
 
   public List<ApiAssignmentEntity> getByIds(List<Long> ids) {
     return apiAssignmentMapper.selectBatchIds(ids);
+  }
+
+  public List<ModuleAssignmentEntity> getModuleAssignments(){
+    return apiAssignmentMapper.getModuleAssignments();
+  }
+
+  public void resetGroupByGroupId(Long groupId) {
+    apiAssignmentMapper.resetGroup(groupId);
+  }
+
+  public void updateGroup(Long groupId, List<Long> ids) {
+    if (CollectionUtils.isEmpty(ids)) {
+      return;
+    }
+    apiAssignmentMapper.updateGroup(groupId, ids);
   }
 
   public void updateStatus(Long id, Boolean onOff) {

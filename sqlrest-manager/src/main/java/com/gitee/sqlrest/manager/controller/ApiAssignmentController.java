@@ -25,6 +25,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -129,6 +130,13 @@ public class ApiAssignmentController {
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
   public PageResult<ApiAssignmentBaseResponse> listAll(@RequestBody AssignmentSearchRequest request) {
     return apiAssignmentService.listAll(request);
+  }
+
+  @ApiOperation(value = "批量更新授权组")
+  @PostMapping(value = "/group/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity updateGroup(@PathVariable("groupId") Long groupId, @RequestBody List<Long> ids) {
+    apiAssignmentService.updateGroup(groupId, ids);
+    return ResultEntity.success();
   }
 
   @ApiOperation(value = "开放")

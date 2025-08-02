@@ -4,6 +4,17 @@
       <div class="client-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
+            <el-select v-model="groupId"
+                       size="mini"
+                       @change="searchByKeyword"
+                       :clearable="true"
+                       style="width:200px"
+                       placeholder="选择授权分组">
+              <el-option v-for="(item,index) in groups"
+                         :key="index"
+                         :label="item.name"
+                         :value="item.id"></el-option>
+            </el-select>
             <el-input placeholder="请输入名称关键字搜索"
                       size="mini"
                       v-model="keyword"
@@ -234,6 +245,7 @@ export default {
   data () {
     return {
       loading: true,
+      groupId: null,
       keyword: null,
       lists: [],
       currentPage: 1,
@@ -296,6 +308,7 @@ export default {
         },
         url: "/sqlrest/manager/api/v1/client/list",
         data: JSON.stringify({
+          groupId: this.groupId,
           searchText: this.keyword,
           page: this.currentPage,
           size: this.pageSize
@@ -472,6 +485,7 @@ export default {
   },
   created () {
     this.loadData();
+    this.loadAllGroups();
   }
 };
 </script>
@@ -500,7 +514,7 @@ export default {
   justify-content: space-between;
 }
 .left-search-input {
-  width: 300px;
+  width: 80%;
   margin-right: auto;
   margin: 10px 5px;
 }

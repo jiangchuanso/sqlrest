@@ -53,6 +53,9 @@ public class ApiGroupService {
 
   @Transactional(rollbackFor = Exception.class)
   public void deleteGroup(Long id) {
+    if (id.equals(1L)) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "forbid delete group which id is 1");
+    }
     if (apiAssignmentDao.existsGroupById(id)) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
     }

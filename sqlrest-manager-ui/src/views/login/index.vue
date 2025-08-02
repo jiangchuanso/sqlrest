@@ -89,6 +89,15 @@ export default {
               window.sessionStorage.setItem('token', res.data.data.accessToken);
               window.sessionStorage.setItem('username', this.ruleForm2.username);
               window.sessionStorage.setItem('realname', res.data.data.realName);
+
+              this.$http.get("/sqlrest/manager/api/v1/health/version").then(
+                res => {
+                  if (0 === res.data.code) {
+                    window.sessionStorage.setItem('version', res.data.data);
+                  }
+                }
+              );
+
               this.$router.push({
                 path: '/dashboard'
               });

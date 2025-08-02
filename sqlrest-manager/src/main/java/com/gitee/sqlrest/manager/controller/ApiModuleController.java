@@ -12,16 +12,19 @@ package com.gitee.sqlrest.manager.controller;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.PageResult;
 import com.gitee.sqlrest.common.dto.ResultEntity;
+import com.gitee.sqlrest.core.dto.ApiModuleAssignments;
 import com.gitee.sqlrest.core.dto.EntitySearchRequest;
 import com.gitee.sqlrest.core.service.ApiModuleService;
 import com.gitee.sqlrest.persistence.entity.ApiModuleEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,5 +66,11 @@ public class ApiModuleController {
   @PostMapping(value = "/listAll", produces = MediaType.APPLICATION_JSON_VALUE)
   public PageResult<ApiModuleEntity> listAll(@RequestBody EntitySearchRequest request) {
     return apiModuleService.listAll(request);
+  }
+
+  @ApiOperation(value = "模块接口树")
+  @GetMapping(value = "/moduleTree/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity moduleTree(@PathVariable("id") Long groupId) {
+    return ResultEntity.success(apiModuleService.moduleTree(groupId));
   }
 }

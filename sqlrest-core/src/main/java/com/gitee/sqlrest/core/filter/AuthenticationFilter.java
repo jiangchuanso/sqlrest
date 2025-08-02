@@ -10,6 +10,7 @@
 package com.gitee.sqlrest.core.filter;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.json.JSONUtil;
 import com.gitee.sqlrest.common.consts.Constants;
 import com.gitee.sqlrest.common.dto.ResultEntity;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import javax.annotation.Resource;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -49,6 +51,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class AuthenticationFilter implements Filter {
+
+  private static final ExecutorService alarmExecutor = ExecutorBuilder.create()
+      .setCorePoolSize(Runtime.getRuntime().availableProcessors())
+      .useArrayBlockingQueue(4096)
+      .build();
 
   @Resource
   private ApiAssignmentDao apiAssignmentDao;
@@ -150,7 +157,8 @@ public class AuthenticationFilter implements Filter {
       final long accessTime = accessRecordEntity.getDuration();
       final int httpStatus = response.getStatus();
       accessRecordEntity.setDuration(System.currentTimeMillis() - accessRecordEntity.getDuration());
-      CompletableFuture.runAsync(() -> finishRecord(apiConfigEntity, accessRecordEntity, httpStatus, accessTime));
+      CompletableFuture
+          .runAsync(() -> finishRecord(apiConfigEntity, accessRecordEntity, httpStatus, accessTime), alarmExecutor);
     }
   }
 

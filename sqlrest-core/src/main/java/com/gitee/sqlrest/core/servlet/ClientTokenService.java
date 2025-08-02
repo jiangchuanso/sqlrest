@@ -42,7 +42,7 @@ public class ClientTokenService {
   public void init() {
     long currentTimestamp = getCurrentTimestamp();
     try {
-      for (AppClientEntity appClient : appClientDao.listAll(null)) {
+      for (AppClientEntity appClient : appClientDao.listAll()) {
         appClient.setAppSecret("******");
         if (StringUtils.isNotBlank(appClient.getAccessToken())) {
           AccessToken clientToken = AccessToken.builder()

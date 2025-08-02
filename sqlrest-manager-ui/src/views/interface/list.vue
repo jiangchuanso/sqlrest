@@ -103,7 +103,15 @@
         <el-table-column prop="path"
                          label="接口路径"
                          show-overflow-tooltip
-                         min-width="20%"></el-table-column>
+                         min-width="15%"></el-table-column>
+        <el-table-column prop="moduleName"
+                         label="模块"
+                         show-overflow-tooltip
+                         min-width="10%"></el-table-column>
+        <el-table-column prop="groupName"
+                         label="授权分组"
+                         show-overflow-tooltip
+                         min-width="10%"></el-table-column>
         <el-table-column label="引擎"
                          min-width="10%">
           <template slot-scope="scope">
