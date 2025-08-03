@@ -187,9 +187,6 @@ export default {
       for (let sql of this.tabSqls) {
         this.addTab(sql)
       }
-      if (this.editableTabs.length === 0) {
-        this.addTab("")
-      }
     },
     setTableHints: function (newVal) {
       this.cmOptions.hintOptions.tables = newVal
