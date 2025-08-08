@@ -11,6 +11,7 @@ package com.gitee.sqlrest.core.util;
 
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
+import com.gitee.sqlrest.common.util.LambdaUtils;
 import com.gitee.sqlrest.core.exec.SqlExecuteLogger;
 import com.gitee.sqlrest.template.SqlMeta;
 import java.sql.Connection;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +35,7 @@ public class SqlJdbcUtils {
   private static final int QUERY_TIMEOUT = 300;
 
   public static Function<String, String> getConverter(NamingStrategyEnum strategy) {
-    return (null == strategy) ? Function.identity() : strategy.getFunction();
+    return Objects.isNull(strategy) ? Function.identity() : strategy.getFunction();
   }
 
   public static Object execute(ProductTypeEnum productType, Connection connection, SqlMeta sqlMeta,
@@ -40,12 +43,12 @@ public class SqlJdbcUtils {
     List<Object> paramValues = sqlMeta.getParameter();
     boolean isQuerySql = sqlMeta.isQuerySQL();
     String sql = isQuerySql ? productType.getPageSql(sqlMeta.getSql(), page, size) : sqlMeta.getSql();
+    Consumer<Connection> executeBeforeQuery = productType.getContext().getExecuteBeforeQuery();
+    LambdaUtils.ifDo(Objects.nonNull(executeBeforeQuery), () -> executeBeforeQuery.accept(connection));
     PreparedStatement statement = connection.prepareStatement(sql);
     statement.setQueryTimeout(QUERY_TIMEOUT);
     statement.setFetchSize(isMySqlConnection(connection) ? Integer.MIN_VALUE : size);
-    if (isQuerySql) {
-      productType.getPageConsumer().accept(page, size, paramValues);
-    }
+    LambdaUtils.ifDo(isQuerySql, () -> productType.getPageConsumer().accept(page, size, paramValues));
     for (int i = 1; i <= paramValues.size(); i++) {
       statement.setObject(i, paramValues.get(i - 1));
     }
@@ -93,5 +96,4 @@ public class SqlJdbcUtils {
       return false;
     }
   }
-
 }

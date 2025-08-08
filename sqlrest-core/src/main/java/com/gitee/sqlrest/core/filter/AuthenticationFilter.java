@@ -19,8 +19,10 @@ import com.gitee.sqlrest.common.exception.ResponseErrorCode;
 import com.gitee.sqlrest.common.exception.UnAuthorizedException;
 import com.gitee.sqlrest.common.exception.UnPermissionException;
 import com.gitee.sqlrest.common.util.TokenUtils;
+import com.gitee.sqlrest.core.exec.RequestParamLogger;
 import com.gitee.sqlrest.core.executor.UnifyAlarmOpsService;
 import com.gitee.sqlrest.core.servlet.ClientTokenService;
+import com.gitee.sqlrest.core.util.AlarmModelUtils;
 import com.gitee.sqlrest.core.util.ServletUtils;
 import com.gitee.sqlrest.persistence.dao.ApiAssignmentDao;
 import com.gitee.sqlrest.persistence.entity.AccessRecordEntity;
@@ -28,12 +30,9 @@ import com.gitee.sqlrest.persistence.entity.ApiAssignmentEntity;
 import com.gitee.sqlrest.persistence.mapper.AccessRecordMapper;
 import com.google.common.base.Charsets;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import javax.annotation.Resource;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -54,7 +53,8 @@ public class AuthenticationFilter implements Filter {
 
   private static final ExecutorService alarmExecutor = ExecutorBuilder.create()
       .setCorePoolSize(Runtime.getRuntime().availableProcessors())
-      .useArrayBlockingQueue(4096)
+      .useArrayBlockingQueue(8912)
+      .setHandler(new CallerRunsPolicy())
       .build();
 
   @Resource
@@ -157,12 +157,12 @@ public class AuthenticationFilter implements Filter {
       final long accessTime = accessRecordEntity.getDuration();
       final int httpStatus = response.getStatus();
       accessRecordEntity.setDuration(System.currentTimeMillis() - accessRecordEntity.getDuration());
-      CompletableFuture
-          .runAsync(() -> finishRecord(apiConfigEntity, accessRecordEntity, httpStatus, accessTime), alarmExecutor);
+      accessRecordEntity.setParameters(RequestParamLogger.getAndClear());
+      alarmExecutor.submit(() -> doRecord(apiConfigEntity, accessRecordEntity, httpStatus, accessTime));
     }
   }
 
-  private void finishRecord(ApiAssignmentEntity apiConfigEntity, AccessRecordEntity accessRecord, int httpStatus,
+  private void doRecord(ApiAssignmentEntity apiConfigEntity, AccessRecordEntity accessRecord, int httpStatus,
       long accessTimestamp) {
     accessRecordMapper.insert(accessRecord);
     if (httpStatus == HttpServletResponse.SC_OK) {
@@ -172,21 +172,7 @@ public class AuthenticationFilter implements Filter {
       return;
     }
 
-    SimpleDateFormat sdFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    Map<String, String> dataModel = new HashMap<>(8);
-    dataModel.put("path", accessRecord.getPath());
-    dataModel.put("method", apiConfigEntity.getMethod().name());
-    dataModel.put("contentType", apiConfigEntity.getContentType());
-    dataModel.put("name", apiConfigEntity.getName());
-    dataModel.put("description", StringUtils.defaultString(apiConfigEntity.getDescription()));
-    dataModel.put("open", apiConfigEntity.getOpen().toString());
-    dataModel.put("clientKey", StringUtils.defaultString(accessRecord.getClientKey()));
-    dataModel.put("ipAddr", StringUtils.defaultString(accessRecord.getIpAddr()));
-    dataModel.put("userAgent", StringUtils.defaultString(accessRecord.getUserAgent()));
-    dataModel.put("exception", StringUtils.defaultString(accessRecord.getException()));
-    dataModel.put("accessTime", sdFormatter.format(new Date(accessTimestamp)));
-
+    Map<String, String> dataModel = AlarmModelUtils.getBusinessModel(apiConfigEntity, accessRecord, accessTimestamp);
     unifyAlarmOpsService.triggerAlarm(dataModel);
   }
 

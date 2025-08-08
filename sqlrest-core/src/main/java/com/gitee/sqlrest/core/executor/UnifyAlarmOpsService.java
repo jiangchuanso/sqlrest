@@ -9,12 +9,12 @@
 /////////////////////////////////////////////////////////////
 package com.gitee.sqlrest.core.executor;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import com.gitee.sqlrest.common.enums.OnOffEnum;
 import com.gitee.sqlrest.core.dto.NameValueBaseResponse;
 import com.gitee.sqlrest.core.dto.TestAlarmConfigRequest;
 import com.gitee.sqlrest.core.dto.UpdateAlarmConfigRequest;
+import com.gitee.sqlrest.core.util.AlarmModelUtils;
 import com.gitee.sqlrest.persistence.dao.UnifyAlarmDao;
 import com.gitee.sqlrest.persistence.entity.UnifyAlarmEntity;
 import java.util.ArrayList;
@@ -52,18 +52,7 @@ public class UnifyAlarmOpsService {
   }
 
   public List<NameValueBaseResponse> getExampleDataModel() {
-    Map<String, String> dataModel = new HashMap<>(8);
-    dataModel.put("path", "/api/test/create");
-    dataModel.put("method", "POST");
-    dataModel.put("contentType", "application/json");
-    dataModel.put("name", "test interface for create");
-    dataModel.put("description", "this is description!");
-    dataModel.put("open", "false");
-    dataModel.put("clientKey", "test");
-    dataModel.put("ipAddr", "127.0.0.1");
-    dataModel.put("userAgent", "sqlrest");
-    dataModel.put("exception", "this is test alarm message");
-
+    Map<String, String> dataModel = AlarmModelUtils.getExampleModel();
     List<NameValueBaseResponse> lists = new ArrayList<>();
     dataModel.forEach((k, v) -> lists.add(NameValueBaseResponse.builder().key(k).value(v).build()));
     return lists;
@@ -91,7 +80,7 @@ public class UnifyAlarmOpsService {
                 NameValueBaseResponse::getKey,
                 NameValueBaseResponse::getValue,
                 (a, b) -> b));
-    dataModel.put("accessTime", DateUtil.now());
+    AlarmModelUtils.setBeforeTestAlarm(dataModel);
     handleAlarm(config, dataModel);
   }
 

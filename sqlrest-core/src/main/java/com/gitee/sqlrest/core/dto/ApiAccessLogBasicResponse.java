@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,6 +43,9 @@ public class ApiAccessLogBasicResponse {
 
   @ApiModelProperty("应用名称")
   private String clientApp;
+
+  @ApiModelProperty("请求入参")
+  private Map<String, Object> parameters;
 
   @ApiModelProperty("错误异常")
   private String exception;

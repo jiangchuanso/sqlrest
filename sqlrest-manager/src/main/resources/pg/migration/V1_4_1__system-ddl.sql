@@ -1,0 +1,1 @@
+ALTER TABLE SQLREST_ACCESS_RECORD ADD COLUMN "parameters" text default null;

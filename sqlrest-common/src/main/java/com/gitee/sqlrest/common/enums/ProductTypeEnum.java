@@ -11,6 +11,8 @@ package com.gitee.sqlrest.common.enums;
 
 import com.gitee.sqlrest.common.dto.ProductContext;
 import com.gitee.sqlrest.common.dto.ThreeConsumer;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collections;
 import lombok.Getter;
@@ -309,6 +311,15 @@ public enum ProductTypeEnum {
               (page, size, parameters) -> {
                 parameters.add(size);
                 parameters.add((page - 1) * size);
+              }
+          )
+          .executeBeforeQuery(
+              connection -> {
+                try (Statement statement = connection.createStatement()) {
+                  statement.execute("set hive.resultset.use.unique.column.names=false");
+                } catch (SQLException e) {
+                  throw new RuntimeException(e);
+                }
               }
           ).build()),
 

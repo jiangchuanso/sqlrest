@@ -11,6 +11,7 @@ package com.gitee.sqlrest.core.exec.engine.impl;
 
 import com.gitee.sqlrest.common.enums.NamingStrategyEnum;
 import com.gitee.sqlrest.common.enums.ProductTypeEnum;
+import com.gitee.sqlrest.common.util.LambdaUtils;
 import com.gitee.sqlrest.core.exec.engine.AbstractExecutorEngine;
 import com.gitee.sqlrest.core.util.PageSizeUtils;
 import com.gitee.sqlrest.core.util.SqlJdbcUtils;
@@ -19,7 +20,6 @@ import com.gitee.sqlrest.template.SqlMeta;
 import com.gitee.sqlrest.template.XmlSqlTemplate;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +36,9 @@ public class SqlExecutorService extends AbstractExecutorEngine {
   public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     List<Object> dataList = new ArrayList<>();
     try (Connection connection = this.dataSource.getConnection()) {
+      boolean supportsTx = connection.getMetaData().supportsTransactions();
       try {
-        connection.setAutoCommit(false);
+        LambdaUtils.ifDo(supportsTx, () -> connection.setAutoCommit(false));
         for (ApiContextEntity sql : scripts) {
           XmlSqlTemplate template = new XmlSqlTemplate(sql.getSqlText());
           SqlMeta sqlMeta = template.process(params);
@@ -48,14 +49,10 @@ public class SqlExecutorService extends AbstractExecutorEngine {
             dataList.add(result);
           }
         }
-        connection.commit();
+        LambdaUtils.ifDo(supportsTx, () -> connection.commit());
         return dataList;
       } catch (Exception e) {
-        try {
-          connection.rollback();
-        } catch (SQLException se) {
-          log.warn("Failed to call jdbc Connection::rollback(): {}", se.getMessage(), se);
-        }
+        LambdaUtils.ifDoIgnoreThrow(supportsTx, () -> connection.rollback());
         throw e;
       }
     } catch (RuntimeException e) {

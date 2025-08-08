@@ -76,6 +76,7 @@ public class OverviewService {
                     .ipAddr(record.getIpAddr())
                     .userAgent(record.getUserAgent())
                     .clientApp(map.get(record.getClientKey()))
+                    .parameters(record.getParameters())
                     .exception(record.getException())
                     .createTime(record.getCreateTime())
                     .build()

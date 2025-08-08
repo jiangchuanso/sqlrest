@@ -10,7 +10,9 @@
 package com.gitee.sqlrest.common.dto;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,4 +41,5 @@ public class ProductContext implements Serializable {
   private Function<String, Pair<String, String>> adapter;
   private String pageSql;
   private ThreeConsumer<Integer, Integer, List<Object>> pageConsumer;
+  private Consumer<Connection> executeBeforeQuery;
 }

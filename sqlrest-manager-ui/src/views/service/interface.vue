@@ -226,17 +226,17 @@
               <el-table-column label="地址"
                                prop="ipAddr"
                                :show-overflow-tooltip="true"
-                               min-width="20%">
+                               min-width="15%">
               </el-table-column>
-              <el-table-column label="HTTP状态"
+              <el-table-column label="状态码"
                                prop="status"
                                :show-overflow-tooltip="true"
-                               min-width="10%">
+                               min-width="12%">
               </el-table-column>
-              <el-table-column label="耗时(毫秒)"
+              <el-table-column label="耗时ms"
                                prop="duration"
                                :show-overflow-tooltip="true"
-                               min-width="15%">
+                               min-width="12%">
               </el-table-column>
               <el-table-column label="调用方"
                                prop="clientApp"
@@ -246,7 +246,21 @@
               <el-table-column label="UserAgent"
                                prop="userAgent"
                                :show-overflow-tooltip="true"
+                               min-width="15%">
+              </el-table-column>
+              <el-table-column label="查看"
                                min-width="20%">
+                <template slot-scope="scope">
+                  <el-link class="btn-text"
+                           type="primary"
+                           @click="handleShowParam(scope.$index, scope.row)">入参</el-link>
+                  <label v-if="scope.row.exception"
+                         class="btn-style">&nbsp;|&nbsp;</label>
+                  <el-link class="btn-text"
+                           v-if="scope.row.exception"
+                           type="primary"
+                           @click="handleShowException(scope.$index, scope.row)">异常</el-link>
+                </template>
               </el-table-column>
             </el-table>
             <div class="page"
@@ -263,11 +277,42 @@
         </el-tabs>
       </div>
     </div>
+
+    <el-dialog title="接口请求入参"
+               :visible.sync="showParamDialogVisible"
+               :showClose="false">
+      <json-viewer :value="requestParameters"
+                   :expand-depth=10
+                   copyable
+                   boxed
+                   sort></json-viewer>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button type="info"
+                   @click="showParamDialogVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="接口异常信息"
+               :visible.sync="showExceptDialogVisible"
+               :showClose="false">
+      <el-input type="textarea"
+                :rows="20"
+                :spellcheck="false"
+                v-model="exeptionText"></el-input>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button type="info"
+                   @click="showExceptDialogVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
   </el-card>
 </template>
 
 <script>
 import '@/assets/sysicon/iconfont.js'
+import JsonViewer from 'vue-json-viewer';
 
 export default {
   data () {
@@ -308,8 +353,13 @@ export default {
       currentAccessPageNum: 1,
       currentAccessPageSize: 10,
       totalAccessItemCount: 0,
+      showParamDialogVisible: false,
+      requestParameters: null,
+      showExceptDialogVisible: false,
+      exeptionText: null,
     };
   },
+  components: { JsonViewer },
   mounted () {
     window.addEventListener('resize', this.initResize);
     this.initResize();
@@ -532,6 +582,14 @@ export default {
         }
       });
     },
+    handleShowParam: function (index, row) {
+      this.requestParameters = row.parameters;
+      this.showParamDialogVisible = true;
+    },
+    handleShowException: function (index, row) {
+      this.exeptionText = row.exception;
+      this.showExceptDialogVisible = true;
+    },
     handleSizeChange: function (pageSize) {
       this.currentPageSize = pageSize;
       this.reloadInterfaceList()
@@ -623,4 +681,14 @@ export default {
   font-size: 13px;
   padding: 2px;
 }
+
+.btn-style {
+  color: #e9e9f3;
+}
+
+.btn-text {
+  font-size: 12px;
+  color: #6873ce;
+}
+
 </style>

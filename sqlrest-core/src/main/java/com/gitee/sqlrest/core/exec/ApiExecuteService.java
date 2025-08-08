@@ -82,6 +82,7 @@ public class ApiExecuteService {
     try {
       List<ItemParam> invalidArgs = new ArrayList<>();
       Map<String, Object> paramValues = mergeParameters(request, config.getParams(), invalidArgs);
+      RequestParamLogger.set(paramValues);
       if (invalidArgs.size() > 0) {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, convertInvalidArgs(invalidArgs));
       }

@@ -659,14 +659,6 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="操作"
-                               v-if="!isOnlyShowDetail"
-                               min-width="15%">
-                <template slot-scope="scope">
-                  <el-link icon="el-icon-delete"
-                           @click="deleteDebugParamsItem(scope.$index)"></el-link>
-                </template>
-              </el-table-column>
             </el-table>
           </el-col>
         </el-row>
@@ -1634,9 +1626,6 @@ export default {
         })
         this.showDebugDrawer = true
       }
-    },
-    deleteDebugParamsItem: function (index) {
-      this.debugParams.splice(index, 1);
     },
     addArrayValuesItem: function (row) {
       row.arrayValues.push('');

@@ -14,7 +14,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.gitee.sqlrest.persistence.handler.ParamMapHandler;
 import java.sql.Timestamp;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,6 +52,9 @@ public class AccessRecordEntity {
 
   @TableField("api_id")
   private Long apiId;
+
+  @TableField(value = "parameters", typeHandler = ParamMapHandler.class)
+  private Map<String, Object> parameters;
 
   @TableField("exception")
   private String exception;
