@@ -14,7 +14,7 @@
       <outputDirectory>lib</outputDirectory>
       <excludes>
         <!--  排除sqlrest-dist自身打的jar包-->
-        <exclude>com.gitee.sqlrest:sqlrest-dist</exclude>
+        <exclude>org.dromara.sqlrest:sqlrest-dist</exclude>
       </excludes>
     </dependencySet>
   </dependencySets>

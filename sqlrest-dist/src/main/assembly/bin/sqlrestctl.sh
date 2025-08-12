@@ -62,16 +62,16 @@ fi
 
 # 配置classpath和启动类
 CLASSPATH=$APP_CONF_PATH
-APP_MAIN_CLASS='com.gitee.sqlrest.manager.ManagerApplication'
+APP_MAIN_CLASS='org.dromara.sqlrest.manager.ManagerApplication'
 if [ "$module" == "manager" ]; then
   CLASSPATH="$APP_CONF_PATH/manager:$APP_LIB_COMMON_PATH/*:$APP_HOME/lib/webmvc/*:$APP_HOME/lib/manager/*"
-  APP_MAIN_CLASS='com.gitee.sqlrest.manager.ManagerApplication'
+  APP_MAIN_CLASS='org.dromara.sqlrest.manager.ManagerApplication'
 elif [ "$module" == "executor" ]; then
   CLASSPATH="$APP_CONF_PATH/executor:$APP_LIB_COMMON_PATH/*:$APP_HOME/lib/webmvc/*:$APP_HOME/lib/executor/*"
-  APP_MAIN_CLASS='com.gitee.sqlrest.executor.ExecutorApplication'
+  APP_MAIN_CLASS='org.dromara.sqlrest.executor.ExecutorApplication'
 elif [ "$module" == "gateway" ]; then
   CLASSPATH="$APP_CONF_PATH/gateway:$APP_LIB_COMMON_PATH/*:$APP_HOME/lib/webflux/*:$APP_HOME/lib/gateway/*"
-  APP_MAIN_CLASS='com.gitee.sqlrest.gateway.GatewayApplication'
+  APP_MAIN_CLASS='org.dromara.sqlrest.gateway.GatewayApplication'
 else
   echo "Error: No module named '$module' was found."
   exit 1

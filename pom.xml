@@ -4,10 +4,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.gitee.sqlrest</groupId>
+  <groupId>org.dromara.sqlrest</groupId>
   <artifactId>sqlrest-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.4.0</version>
+  <version>1.5.0</version>
 
   <scm>
     <url>https://gitee.com/inrgihc/sqlrest</url>

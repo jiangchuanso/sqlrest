@@ -272,7 +272,15 @@ sqlrest:
 
 [数据库迁移同步工具dbswitch] (https://gitee.com/inrgihc/dbswitch)
 
-## 六、问题反馈
+## 六、社区推荐
+
+<div>
+	<a href="https://dromara.org.cn/zh/projects/" target="_blank">
+        <img src="https://dromara.org.cn/logo.svg" alt="dromara" title="让每一位开源爱好者，体会到开源的快乐。">
+    </a>
+</div>
+
+## 七、问题反馈
 
 如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。也可扫描下方二维码入群讨论：（加好友请注明："SQLREST交流"）
 

@@ -8,7 +8,7 @@ setlocal enabledelayedexpansion
 cls
 
 ::需要启动的Java类
-set APP_MAINCLASS=com.gitee.sqlrest.gateway.GatewayApplication
+set APP_MAINCLASS=org.dromara.sqlrest.gateway.GatewayApplication
 
 ::Java应用根目录
 set APP_HOME=%~dp0

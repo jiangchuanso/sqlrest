@@ -4,15 +4,15 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>sqlrest-parent</artifactId>
-    <groupId>com.gitee.sqlrest</groupId>
-    <version>1.4.0</version>
+    <groupId>org.dromara.sqlrest</groupId>
+    <version>1.5.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>sqlrest-cache</artifactId>
 
   <dependencies>
     <dependency>
-      <groupId>com.gitee.sqlrest</groupId>
+      <groupId>org.dromara.sqlrest</groupId>
       <artifactId>sqlrest-common</artifactId>
       <version>${project.version}</version>
     </dependency>
