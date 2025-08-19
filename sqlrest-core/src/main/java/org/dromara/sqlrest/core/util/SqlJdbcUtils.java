@@ -9,11 +9,6 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.util;
 
-import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.common.util.LambdaUtils;
-import org.dromara.sqlrest.core.exec.SqlExecuteLogger;
-import org.dromara.sqlrest.template.SqlMeta;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,6 +22,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.common.util.LambdaUtils;
+import org.dromara.sqlrest.core.exec.SqlExecuteLogger;
+import org.dromara.sqlrest.template.SqlMeta;
 
 @Slf4j
 @UtilityClass
@@ -42,7 +42,9 @@ public class SqlJdbcUtils {
       NamingStrategyEnum strategy, int page, int size) throws SQLException {
     List<Object> paramValues = sqlMeta.getParameter();
     boolean isQuerySql = sqlMeta.isQuerySQL();
-    String sql = isQuerySql ? productType.getPageSql(sqlMeta.getSql(), page, size) : sqlMeta.getSql();
+    String sql = isQuerySql
+        ? PageSqlUtils.getPageSql(productType, connection, sqlMeta.getSql(), page, size)
+        : sqlMeta.getSql();
     Consumer<Connection> executeBeforeQuery = productType.getContext().getExecuteBeforeQuery();
     LambdaUtils.ifDo(Objects.nonNull(executeBeforeQuery), () -> executeBeforeQuery.accept(connection));
     PreparedStatement statement = connection.prepareStatement(sql);

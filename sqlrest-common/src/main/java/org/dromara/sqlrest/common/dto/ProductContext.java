@@ -31,6 +31,7 @@ public class ProductContext implements Serializable {
   private String name;
   private String driver;
   private int defaultPort;
+  private boolean multiDialect;
   private String testSql;
   private String urlPrefix;
   private String[] tplUrls;

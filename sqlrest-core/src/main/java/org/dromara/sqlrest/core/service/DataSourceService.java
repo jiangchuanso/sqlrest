@@ -11,6 +11,23 @@ package org.dromara.sqlrest.core.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import com.zaxxer.hikari.HikariDataSource;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.exception.CommonException;
@@ -29,20 +46,8 @@ import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.DataSourceDao;
 import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
 import org.dromara.sqlrest.persistence.util.PageUtils;
-import com.zaxxer.hikari.HikariDataSource;
-import java.io.File;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DataSourceService {
@@ -168,6 +173,7 @@ public class DataSourceService {
 
     validJdbcUrlFormat(dataSourceEntity);
     dataSourceDao.updateById(dataSourceEntity);
+    DataSourceUtils.dropHikariDataSource(request.getId());
   }
 
   public void deleteDataSource(Long id) {
@@ -191,16 +197,21 @@ public class DataSourceService {
 
   public List<String> getDatasourceSchemas(Long id) {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(id);
+    String sqlList = dataSourceEntity.getType().getContext().getSqlSchemaList();
+    if (null == sqlList) {
+      List<String> ret = dataSourceEntity.getType().getContext().getRetSchemaList();
+      if (null != ret) {
+        return ret;
+      }
+    }
+
     File driverPathFile = SpringUtil.getBean(DriverLoadService.class)
         .getVersionDriverFile(dataSourceEntity.getType(),
             dataSourceEntity.getVersion());
     String driverPath = driverPathFile.getAbsolutePath();
-    String sqlList = dataSourceEntity.getType().getContext().getSqlSchemaList();
-    if (null == sqlList) {
-      return dataSourceEntity.getType().getContext().getRetSchemaList();
-    }
-    List<String> result = new ArrayList<>();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);
+
+    List<String> result = new ArrayList<>();
     if (StringUtils.isNotBlank(sqlList)) {
       try (Connection connection = ds.getConnection();
           Statement statement = connection.createStatement();
@@ -208,7 +219,24 @@ public class DataSourceService {
         while (rs.next()) {
           result.add(rs.getString(1));
         }
-        return result;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    } else {
+      try (Connection connection = ds.getConnection()) {
+        DatabaseMetaData metaData = connection.getMetaData();
+        try (ResultSet rs = metaData.getSchemas(connection.getCatalog(), null)) {
+          while (rs.next()) {
+            result.add(rs.getString("TABLE_SCHEM"));
+          }
+        }
+        if (CollectionUtils.isEmpty(result)) {
+          try (ResultSet catalogRs = metaData.getCatalogs()) {
+            while (catalogRs.next()) {
+              result.add(catalogRs.getString("TABLE_CAT"));
+            }
+          }
+        }
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -228,8 +256,8 @@ public class DataSourceService {
     try (Connection connection = ds.getConnection()) {
       String catalogName = productType.getContext().isHasCatalogAndSchema()
           ? connection.getCatalog()
-          : productType.getContext().getAdapter().apply(schema).getLeft();
-      String schemaName = productType.getContext().getAdapter().apply(schema).getRight();
+          : getAdapter(productType, connection, schema).getLeft();
+      String schemaName = getAdapter(productType, connection, schema).getRight();
       try (ResultSet rs = connection.getMetaData()
           .getTables(catalogName, schemaName, "%", new String[]{"TABLE"})) {
         while (rs.next()) {
@@ -257,8 +285,8 @@ public class DataSourceService {
     try (Connection connection = ds.getConnection()) {
       String catalogName = productType.getContext().isHasCatalogAndSchema()
           ? connection.getCatalog()
-          : productType.getContext().getAdapter().apply(schema).getLeft();
-      String schemaName = productType.getContext().getAdapter().apply(schema).getRight();
+          : getAdapter(productType, connection, schema).getLeft();
+      String schemaName = getAdapter(productType, connection, schema).getRight();
       try (ResultSet rs = connection.getMetaData()
           .getTables(catalogName, schemaName, "%", new String[]{"VIEW"})) {
         while (rs.next()) {
@@ -283,8 +311,8 @@ public class DataSourceService {
     try (Connection connection = ds.getConnection()) {
       String catalogName = productType.getContext().isHasCatalogAndSchema()
           ? connection.getCatalog()
-          : productType.getContext().getAdapter().apply(schema).getLeft();
-      String schemaName = productType.getContext().getAdapter().apply(schema).getRight();
+          : getAdapter(productType, connection, schema).getLeft();
+      String schemaName = getAdapter(productType, connection, schema).getRight();
       try (ResultSet rs = connection.getMetaData()
           .getColumns(catalogName, schemaName, table, null)) {
         while (rs.next()) {
@@ -328,6 +356,57 @@ public class DataSourceService {
 
         break;
       }
+    }
+  }
+
+  private Pair<String, String> getAdapter(ProductTypeEnum productType, Connection connection, String schema) {
+    if (null != productType.getContext().getAdapter()) {
+      return productType.getContext().getAdapter().apply(schema);
+    }
+    return getAdapter(connection, schema);
+  }
+
+  @SneakyThrows
+  private Pair<String, String> getAdapter(Connection connection, String schema) {
+    boolean hasCatalogLayer = hasCatalogLayer(connection);
+    boolean hasSchemaLayer = hasSchemaLayer(connection);
+    if (hasCatalogLayer) {
+      if (hasSchemaLayer) {
+        return Pair.of(connection.getCatalog(), schema);
+      } else {
+        return Pair.of(schema, null);
+      }
+    } else {
+      return Pair.of(null, schema);
+    }
+  }
+
+  private boolean hasCatalogLayer(Connection conn) {
+    try (ResultSet catalogs = conn.getMetaData().getCatalogs()) {
+      return catalogs.next();
+    } catch (SQLException e) {
+      throw new RuntimeException("Detect has catalog layer failed:" + e.getMessage());
+    }
+  }
+
+  private boolean hasSchemaLayer(Connection conn) {
+    try {
+      DatabaseMetaData dbMeta = conn.getMetaData();
+      try (ResultSet catalogRs = dbMeta.getCatalogs()) {
+        while (catalogRs.next()) {
+          String name = catalogRs.getString("TABLE_CAT");
+          try (ResultSet schemaRs = dbMeta.getSchemas(name, null)) {
+            if (schemaRs.next()) {
+              return true;
+            }
+          }
+        }
+      }
+      try (ResultSet schemaRs = dbMeta.getSchemas()) {
+        return schemaRs.next();
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Detect has schema layer failed:" + e.getMessage());
     }
   }
 }

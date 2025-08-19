@@ -9,15 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.exec.module;
 
-import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.core.exec.SqlExecuteLogger;
-import org.dromara.sqlrest.core.exec.annotation.Comment;
-import org.dromara.sqlrest.core.exec.annotation.Module;
-import org.dromara.sqlrest.core.util.ConvertUtils;
-import org.dromara.sqlrest.core.util.PageSizeUtils;
-import org.dromara.sqlrest.template.SqlMeta;
-import org.dromara.sqlrest.template.XmlSqlTemplate;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,6 +22,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.core.exec.SqlExecuteLogger;
+import org.dromara.sqlrest.core.exec.annotation.Comment;
+import org.dromara.sqlrest.core.exec.annotation.Module;
+import org.dromara.sqlrest.core.util.ConvertUtils;
+import org.dromara.sqlrest.core.util.PageSizeUtils;
+import org.dromara.sqlrest.core.util.PageSqlUtils;
+import org.dromara.sqlrest.template.SqlMeta;
+import org.dromara.sqlrest.template.XmlSqlTemplate;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -41,6 +43,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 @Module("db")
 public class DbVarModule {
 
+  private DataSource dataSource;
   private JdbcTemplate jdbcTemplate;
   private ProductTypeEnum productType;
   private Map<String, Object> params;
@@ -48,6 +51,7 @@ public class DbVarModule {
 
   public DbVarModule(DataSource dataSource, ProductTypeEnum productType, Map<String, Object> params,
       NamingStrategyEnum strategy) {
+    this.dataSource = dataSource;
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.productType = productType;
     this.params = params;
@@ -56,6 +60,17 @@ public class DbVarModule {
       strategy = NamingStrategyEnum.NONE;
     }
     this.converter = strategy.getFunction();
+  }
+
+  private String getPageSql(String sql, int page, int size) {
+    if (!productType.isMultiDialect()) {
+      return productType.getPageSql(sql, page, size);
+    }
+    try (Connection connection = dataSource.getConnection()) {
+      return PageSqlUtils.getPageSql(productType, connection, sql, page, size);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private Map<String, Object> build(Map<String, Object> row) {
@@ -126,7 +141,7 @@ public class DbVarModule {
     int size = PageSizeUtils.getSizeFromParams(params);
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
-    String pageSql = productType.getPageSql(sqlMeta.getSql(), page, size);
+    String pageSql = getPageSql(sqlMeta.getSql(), page, size);
     List<Object> parameters = sqlMeta.getParameter();
     this.productType.getPageConsumer().accept(page, size, parameters);
     long start = System.currentTimeMillis();

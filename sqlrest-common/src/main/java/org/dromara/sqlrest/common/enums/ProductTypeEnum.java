@@ -9,8 +9,6 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.common.enums;
 
-import org.dromara.sqlrest.common.dto.ProductContext;
-import org.dromara.sqlrest.common.dto.ThreeConsumer;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
@@ -18,6 +16,8 @@ import java.util.Collections;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.dromara.sqlrest.common.dto.ProductContext;
+import org.dromara.sqlrest.common.dto.ThreeConsumer;
 
 @Getter
 public enum ProductTypeEnum {
@@ -257,7 +257,7 @@ public enum ProductTypeEnum {
           .tplUrls(new String[]{"jdbc:gbase://{host}[:{port}]/[{database}][\\?{params}]"})
           .urlSample("jdbc:gbase://172.17.2.10:5258/test")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
-          .adapter(database -> Pair.of(null, database))
+          .adapter(database -> Pair.of(database, null))
           .pageSql("select * from (%s) alias limit ? offset ? ")
           .pageConsumer(
               (page, size, parameters) -> {
@@ -453,17 +453,17 @@ public enum ProductTypeEnum {
   OCEANBASE(
       ProductContext.builder()
           .id(18)
-          .quote("`")
+          .quote("")
           .name("oceanbase")
           .driver("com.oceanbase.jdbc.Driver")
           .defaultPort(2881)
-          .testSql("/* ping */ SELECT 1")
+          .multiDialect(true)
+          .testSql("show global variables where variable_name = 'ob_compatibility_mode'")
           .urlPrefix("jdbc:oceanbase://")
           .tplUrls(new String[]{"jdbc:oceanbase://{host}[:{port}]/[{database}][\\?{params}]"})
-          .urlSample(
-              "jdbc:oceanbase://127.0.0.1:2881/test?pool=false&useUnicode=true&characterEncoding=utf-8&useSSL=false")
-          .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
-          .adapter(database -> Pair.of(database, null))
+          .urlSample("jdbc:oceanbase://127.0.0.1:2881/test")
+          .sqlSchemaList(null)
+          .adapter(null)
           .pageSql("select * from (%s) alias limit ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
@@ -523,6 +523,10 @@ public enum ProductTypeEnum {
     return this.context.getTplUrls();
   }
 
+  public boolean isMultiDialect() {
+    return this.context.isMultiDialect();
+  }
+
   public String getTestSql() {
     return this.context.getTestSql();
   }
@@ -551,14 +555,14 @@ public enum ProductTypeEnum {
     return this != SQLITE3;
   }
 
-  public String quoteName(String name) {
-    return String.format("%s%s%s", context.getQuote(), name, context.getQuote());
-  }
-
-  public String quoteSchemaTableName(String schema, String table) {
-    String quote = context.getQuote();
-    return String.format("%s%s%s.%s%s%s", quote, schema, quote, quote, table, quote);
-  }
+//  public String quoteName(String name) {
+//    return String.format("%s%s%s", context.getQuote(), name, context.getQuote());
+//  }
+//
+//  public String quoteSchemaTableName(String schema, String table) {
+//    String quote = context.getQuote();
+//    return String.format("%s%s%s.%s%s%s", quote, schema, quote, quote, table, quote);
+//  }
 
   public String getPageSql(String sql, int page, int size) {
     String pageSql = String.format(context.getPageSql(), sql);
