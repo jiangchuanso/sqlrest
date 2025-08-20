@@ -200,10 +200,24 @@ sqlrest:
     redis:
       # 是否开启使用redis缓存，开启时需要配置下面对应的redis信息
       enabled: true
+      # 哨兵模式下不用配置host
       host: 127.0.0.1
+      # 哨兵模式下不用配置port
       port: 6379
       password: 123456
       database: 0
+      pool:
+        min-idle: 1
+        max-idle: 8
+        max-active: 8
+        max-wait: -1
+        time-between-eviction-runs: -1
+      # 非哨兵模式下删除掉sentinel整个节点
+      sentinel:
+        # 哨兵模式下需要配置master
+        master: mymaster
+        # 哨兵模式下需要配置nodes
+        nodes: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381
 ```
 
 - 步骤3：如果为多主机节点部署，需要将sqlrest-release-x.x.x分发到其他主机节点上；如果为单机（单节点）部署可直接忽略本步骤。

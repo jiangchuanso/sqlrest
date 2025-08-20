@@ -12,13 +12,13 @@ package org.dromara.sqlrest.cache.redis;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.util.Pool;
 
 public class JedisClient {
 
-  private JedisPool jedisPool;
+  private Pool<Jedis> jedisPool;
 
-  public JedisClient(JedisPool jedisPool) {
+  public JedisClient(Pool<Jedis> jedisPool) {
     this.jedisPool = jedisPool;
   }
 

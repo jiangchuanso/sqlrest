@@ -10,6 +10,7 @@
 package org.dromara.sqlrest.cache.redis;
 
 import java.time.Duration;
+import java.util.List;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -27,16 +28,23 @@ public class RedisProperties {
     private Duration timeBetweenEvictionRuns;
   }
 
+  @Data
+  public static class Sentinel {
+
+    private String master;
+    private List<String> nodes;
+  }
+
   private boolean enabled = false;
   private int database = 0;
   private String host = "127.0.0.1";
+  private int port = 6379;
   private String username;
   private String password;
-  private int port = 6379;
   private boolean ssl = false;
   private Duration timeout = Duration.ofSeconds(1);
   private Duration connectTimeout = Duration.ofSeconds(1);
   private String clientName = "sqlrest";
   private Pool pool = new Pool();
-
+  private Sentinel sentinel = new Sentinel();
 }
