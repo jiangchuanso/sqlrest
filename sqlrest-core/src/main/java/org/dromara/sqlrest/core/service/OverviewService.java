@@ -79,6 +79,8 @@ public class OverviewService {
                     .parameters(record.getParameters())
                     .exception(record.getException())
                     .createTime(record.getCreateTime())
+                    .executorAddr(record.getExecutorAddr())
+                    .gatewayAddr(record.getGatewayAddr())
                     .build()
             ).collect(Collectors.toList())
         , page, size);

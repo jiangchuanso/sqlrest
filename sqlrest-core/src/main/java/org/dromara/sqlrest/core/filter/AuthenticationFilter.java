@@ -12,22 +12,6 @@ package org.dromara.sqlrest.core.filter;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ExecutorBuilder;
 import cn.hutool.json.JSONUtil;
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.common.dto.ResultEntity;
-import org.dromara.sqlrest.common.enums.HttpMethodEnum;
-import org.dromara.sqlrest.common.exception.ResponseErrorCode;
-import org.dromara.sqlrest.common.exception.UnAuthorizedException;
-import org.dromara.sqlrest.common.exception.UnPermissionException;
-import org.dromara.sqlrest.common.util.TokenUtils;
-import org.dromara.sqlrest.core.exec.RequestParamLogger;
-import org.dromara.sqlrest.core.executor.UnifyAlarmOpsService;
-import org.dromara.sqlrest.core.servlet.ClientTokenService;
-import org.dromara.sqlrest.core.util.AlarmModelUtils;
-import org.dromara.sqlrest.core.util.ServletUtils;
-import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
-import org.dromara.sqlrest.persistence.entity.AccessRecordEntity;
-import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import org.dromara.sqlrest.persistence.mapper.AccessRecordMapper;
 import com.google.common.base.Charsets;
 import java.io.IOException;
 import java.util.Map;
@@ -43,6 +27,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.ResultEntity;
+import org.dromara.sqlrest.common.enums.HttpMethodEnum;
+import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.exception.UnAuthorizedException;
+import org.dromara.sqlrest.common.exception.UnPermissionException;
+import org.dromara.sqlrest.common.util.InetUtils;
+import org.dromara.sqlrest.common.util.TokenUtils;
+import org.dromara.sqlrest.core.exec.logger.RequestParamLogger;
+import org.dromara.sqlrest.core.executor.UnifyAlarmOpsService;
+import org.dromara.sqlrest.core.servlet.ClientTokenService;
+import org.dromara.sqlrest.core.util.AlarmModelUtils;
+import org.dromara.sqlrest.core.util.ServletUtils;
+import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.persistence.entity.AccessRecordEntity;
+import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
+import org.dromara.sqlrest.persistence.mapper.AccessRecordMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -108,6 +109,8 @@ public class AuthenticationFilter implements Filter {
         .ipAddr(ServletUtils.getIpAddr())
         .userAgent(ServletUtils.getUserAgent())
         .apiId(apiConfigEntity.getId())
+        .executorAddr(InetUtils.getLocalIpStr())
+        .gatewayAddr(request.getHeader(Constants.REQUEST_HEADER_GATEWAY_IP))
         .build();
 
     String path = apiConfigEntity.getPath();

@@ -7,7 +7,7 @@
 // Date : 2024/3/31
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package org.dromara.sqlrest.core.exec;
+package org.dromara.sqlrest.core.exec.logger;
 
 import java.util.Map;
 

@@ -10,15 +10,6 @@
 package org.dromara.sqlrest.core.exec.engine.impl;
 
 import cn.hutool.extra.spring.SpringUtil;
-import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
-import org.dromara.sqlrest.core.exec.annotation.Module;
-import org.dromara.sqlrest.core.exec.engine.AbstractExecutorEngine;
-import org.dromara.sqlrest.core.exec.module.CacheVarModule;
-import org.dromara.sqlrest.core.exec.module.DbVarModule;
-import org.dromara.sqlrest.core.exec.module.EnvVarModule;
-import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
 import com.zaxxer.hikari.HikariDataSource;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -27,11 +18,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
+import org.dromara.sqlrest.core.exec.annotation.Module;
+import org.dromara.sqlrest.core.exec.engine.AbstractExecutorEngine;
+import org.dromara.sqlrest.core.exec.module.CacheVarModule;
+import org.dromara.sqlrest.core.exec.module.DbVarModule;
+import org.dromara.sqlrest.core.exec.module.DsVarModule;
+import org.dromara.sqlrest.core.exec.module.EnvVarModule;
+import org.dromara.sqlrest.core.exec.module.ReqVarModule;
+import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
 
 public class ScriptExecutorService extends AbstractExecutorEngine {
 
   public static List<ScriptEditorCompletion> syntax = new ArrayList<>();
-  public static List<Class> modules = Arrays.asList(EnvVarModule.class, DbVarModule.class, CacheVarModule.class);
+  public static List<Class> modules = Arrays.asList(
+      EnvVarModule.class,
+      DbVarModule.class,
+      DsVarModule.class,
+      ReqVarModule.class,
+      CacheVarModule.class);
 
   static {
     syntax.add(
@@ -100,13 +107,17 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
   public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     EnvVarModule envModule = SpringUtil.getBean(EnvVarModule.class);
     CacheVarModule cacheModule = SpringUtil.getBean(CacheVarModule.class);
+    ReqVarModule reqVarModule = new ReqVarModule(params);
     DbVarModule dbModule = new DbVarModule(dataSource, productType, params, strategy);
+    DsVarModule dsVarModule = new DsVarModule(productType, params, strategy);
 
     List<Object> results = new ArrayList<>();
     for (ApiContextEntity entity : scripts) {
       Binding binding = new Binding();
       params.forEach((k, v) -> binding.setProperty(k, v));
       binding.setProperty(getModuleVarName(dbModule.getClass()), dbModule);
+      binding.setProperty(getModuleVarName(dsVarModule.getClass()), dsVarModule);
+      binding.setProperty(getModuleVarName(reqVarModule.getClass()), reqVarModule);
       binding.setProperty(getModuleVarName(envModule.getClass()), envModule);
       binding.setProperty(getModuleVarName(cacheModule.getClass()), cacheModule);
 

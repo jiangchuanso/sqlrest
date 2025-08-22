@@ -16,6 +16,8 @@ public abstract class Constants {
   public static final String MANGER_API_PREFIX = "/sqlrest/manager/api";
   public static final String MANGER_API_V1 = MANGER_API_PREFIX + "/v1";
 
+  public static final String REQUEST_HEADER_GATEWAY_IP = "Request-Gateway-IP";
+
   public static final String PARAM_PAGE_NUMBER = "apiPageNum";
   public static final String PARAM_PAGE_SIZE = "apiPageSize";
 

@@ -10,11 +10,13 @@
 package org.dromara.sqlrest.gateway.filter;
 
 import cn.hutool.json.JSONUtil;
-import org.dromara.sqlrest.common.exception.ResponseErrorCode;
-import org.dromara.sqlrest.core.gateway.FirewallFilterService;
-import org.dromara.sqlrest.common.dto.ResultEntity;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.ResultEntity;
+import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.util.InetUtils;
+import org.dromara.sqlrest.core.gateway.FirewallFilterService;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -63,7 +65,10 @@ public class ClientAddressFilter implements GlobalFilter, Ordered {
       log.info("access api from client : {}, path : {}, method : {}", clientHostAddr, path, method);
     }
 
-    return chain.filter(exchange);
+    ServerHttpRequest newRequest = request.mutate()
+        .header(Constants.REQUEST_HEADER_GATEWAY_IP, InetUtils.getLocalIpStr())
+        .build();
+    return chain.filter(exchange.mutate().request(newRequest).build());
   }
 
   @Override

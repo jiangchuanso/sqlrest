@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import lombok.experimental.UtilityClass;
@@ -46,6 +47,10 @@ public final class PomVersionUtils {
 
   private static String getProjectVersion() {
     Class<?> clazz = PomVersionUtils.class;
+    String implementationVersion = clazz.getPackage().getImplementationVersion();
+    if (implementationVersion != null) {
+      return implementationVersion;
+    }
     String resourcePath = clazz.getResource("").toString();
     if (resourcePath.startsWith("file:")) {
       return getProjectVersionFromFile(resourcePath);
@@ -77,8 +82,9 @@ public final class PomVersionUtils {
           return extractPomVersion(jarFile.getInputStream(entry));
         }
       }
+      return jarFile.getManifest().getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.warn("Get project version from jar failed:{}", e.getMessage(), e);
     }
     return null;
   }

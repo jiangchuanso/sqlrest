@@ -35,7 +35,7 @@ import org.dromara.sqlrest.core.dto.DataTypeFormatMapValue;
 import org.dromara.sqlrest.core.dto.ExecuteSqlRecord;
 import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
 import org.dromara.sqlrest.core.dto.SqlParamParseResponse;
-import org.dromara.sqlrest.core.exec.SqlExecuteLogger;
+import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import org.dromara.sqlrest.core.exec.engine.impl.ScriptExecutorService;

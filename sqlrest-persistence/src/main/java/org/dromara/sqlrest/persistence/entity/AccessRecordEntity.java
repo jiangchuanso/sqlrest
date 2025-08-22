@@ -14,13 +14,13 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.dromara.sqlrest.persistence.handler.ParamMapHandler;
 import java.sql.Timestamp;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.sqlrest.persistence.handler.ParamMapHandler;
 
 @Data
 @Builder
@@ -61,4 +61,10 @@ public class AccessRecordEntity {
 
   @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
+
+  @TableField("executor_addr")
+  private String executorAddr;
+
+  @TableField("gateway_addr")
+  private String gatewayAddr;
 }

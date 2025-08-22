@@ -221,10 +221,20 @@
                       size="small"
                       border>
               <el-table-column prop="createTime"
-                               label="记录时间"
+                               label="时间"
                                min-width="20%"></el-table-column>
-              <el-table-column label="地址"
+              <el-table-column label="客户端地址"
                                prop="ipAddr"
+                               :show-overflow-tooltip="true"
+                               min-width="15%">
+              </el-table-column>
+              <el-table-column label="执行器地址"
+                               prop="executorAddr"
+                               :show-overflow-tooltip="true"
+                               min-width="15%">
+              </el-table-column>
+              <el-table-column label="网关地址"
+                               prop="gatewayAddr"
                                :show-overflow-tooltip="true"
                                min-width="15%">
               </el-table-column>
@@ -233,7 +243,7 @@
                                :show-overflow-tooltip="true"
                                min-width="12%">
               </el-table-column>
-              <el-table-column label="耗时ms"
+              <el-table-column label="耗时(ms)"
                                prop="duration"
                                :show-overflow-tooltip="true"
                                min-width="12%">
@@ -690,5 +700,4 @@ export default {
   font-size: 12px;
   color: #6873ce;
 }
-
 </style>

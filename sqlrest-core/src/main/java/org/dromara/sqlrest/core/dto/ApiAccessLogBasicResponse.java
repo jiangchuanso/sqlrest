@@ -53,4 +53,10 @@ public class ApiAccessLogBasicResponse {
   @ApiModelProperty("记录时间")
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
   private Timestamp createTime;
+
+  @ApiModelProperty("执行器地址")
+  private String executorAddr;
+
+  @ApiModelProperty("网关地址")
+  private String gatewayAddr;
 }

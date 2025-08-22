@@ -24,6 +24,7 @@ import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.core.driver.DriverLoadService;
 import org.dromara.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import org.dromara.sqlrest.core.exec.extractor.HttpRequestBodyExtractor;
+import org.dromara.sqlrest.core.exec.logger.RequestParamLogger;
 import org.dromara.sqlrest.core.util.DataSourceUtils;
 import org.dromara.sqlrest.core.util.SpelUtils;
 import org.dromara.sqlrest.persistence.dao.DataSourceDao;

@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.core.exec.SqlExecuteLogger;
+import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
 import org.dromara.sqlrest.core.util.ConvertUtils;

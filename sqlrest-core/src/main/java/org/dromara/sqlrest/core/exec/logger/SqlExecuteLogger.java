@@ -7,12 +7,12 @@
 // Date : 2024/3/31
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package org.dromara.sqlrest.core.exec;
+package org.dromara.sqlrest.core.exec.logger;
 
-import org.dromara.sqlrest.core.dto.ExecuteSqlRecord;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.dromara.sqlrest.core.dto.ExecuteSqlRecord;
 
 public final class SqlExecuteLogger {
 
