@@ -20,6 +20,7 @@ import java.util.Map;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
 import org.dromara.sqlrest.core.exec.annotation.Module;
 import org.dromara.sqlrest.core.exec.engine.AbstractExecutorEngine;
@@ -91,10 +92,6 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
             .build());
   }
 
-  public ScriptExecutorService(HikariDataSource dataSource, ProductTypeEnum productType) {
-    super(dataSource, productType);
-  }
-
   public static String getModuleVarName(Class clazz) {
     if (clazz.isAnnotationPresent(Module.class)) {
       Module annotation = (Module) clazz.getAnnotation(Module.class);
@@ -103,23 +100,34 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
     return "unknown";
   }
 
+  ////////////////////////////////////////////////////////////////////////////////////////
+
+  public ScriptExecutorService(HikariDataSource dataSource, ProductTypeEnum productType) {
+    super(dataSource, productType);
+  }
+
+  private String getModuleVarName(VarModuleInterface varModule) {
+    return varModule.getVarModuleName();
+  }
+
+  private List<VarModuleInterface> getAllVarModules(Map<String, Object> params, NamingStrategyEnum strategy) {
+    List<VarModuleInterface> moduleList = new ArrayList<>();
+    moduleList.addAll(SpringUtil.getBeansOfType(VarModuleInterface.class).values());
+    moduleList.add(new ReqVarModule(params));
+    moduleList.add(new DsVarModule(params, strategy, printSqlLog));
+    moduleList.add(new DbVarModule(dataSource, productType, params, strategy, printSqlLog));
+    return moduleList;
+  }
+
   @Override
   public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
-    EnvVarModule envModule = SpringUtil.getBean(EnvVarModule.class);
-    CacheVarModule cacheModule = SpringUtil.getBean(CacheVarModule.class);
-    ReqVarModule reqVarModule = new ReqVarModule(params);
-    DbVarModule dbModule = new DbVarModule(dataSource, productType, params, strategy);
-    DsVarModule dsVarModule = new DsVarModule(productType, params, strategy);
+    List<VarModuleInterface> varModuleList = getAllVarModules(params, strategy);
 
     List<Object> results = new ArrayList<>();
     for (ApiContextEntity entity : scripts) {
       Binding binding = new Binding();
       params.forEach((k, v) -> binding.setProperty(k, v));
-      binding.setProperty(getModuleVarName(dbModule.getClass()), dbModule);
-      binding.setProperty(getModuleVarName(dsVarModule.getClass()), dsVarModule);
-      binding.setProperty(getModuleVarName(reqVarModule.getClass()), reqVarModule);
-      binding.setProperty(getModuleVarName(envModule.getClass()), envModule);
-      binding.setProperty(getModuleVarName(cacheModule.getClass()), cacheModule);
+      varModuleList.forEach(m -> binding.setProperty(getModuleVarName(m), m));
 
       GroovyShell groovyShell = new GroovyShell(binding);
       try {

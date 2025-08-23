@@ -15,6 +15,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.Lists;
+import io.modelcontextprotocol.server.McpSyncServerExchange;
+import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.BaseParam;
 import org.dromara.sqlrest.common.dto.ItemParam;
@@ -24,13 +31,6 @@ import org.dromara.sqlrest.core.exec.ApiExecuteService;
 import org.dromara.sqlrest.core.service.SystemParamService;
 import org.dromara.sqlrest.core.util.JacksonUtils;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import com.google.common.collect.Lists;
-import io.modelcontextprotocol.server.McpSyncServerExchange;
-import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * https://mcp-docs.cn/docs/concepts/tools
@@ -118,7 +118,7 @@ public class McpToolCallHandler {
   public CallToolResult executeTool(McpSyncServerExchange exchange, Map<String, Object> arguments) {
     prepareArgumentsPageSizeParameter(arguments);
     try {
-      ResultEntity<Object> resultEntity = apiExecuteService.execute(config, arguments);
+      ResultEntity<Object> resultEntity = apiExecuteService.execute(config, arguments, true);
       String json = JacksonUtils.toJsonStr(resultEntity.getData(), config.getResponseFormat());
       McpSchema.TextContent content = new McpSchema.TextContent("操作成功，JSON格式的响应数据为:\n " + json);
       return new McpSchema.CallToolResult(Lists.newArrayList(content), false);

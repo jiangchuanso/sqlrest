@@ -7,7 +7,7 @@
 // Date : 2024/3/31
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package org.dromara.sqlrest.core.filter;
+package org.dromara.sqlrest.core.servlet;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.thread.ExecutorBuilder;
@@ -33,11 +33,12 @@ import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.exception.UnAuthorizedException;
 import org.dromara.sqlrest.common.exception.UnPermissionException;
+import org.dromara.sqlrest.common.service.FlowControlManger;
 import org.dromara.sqlrest.common.util.InetUtils;
 import org.dromara.sqlrest.common.util.TokenUtils;
+import org.dromara.sqlrest.core.exec.ApiAssignmentCache;
 import org.dromara.sqlrest.core.exec.logger.RequestParamLogger;
 import org.dromara.sqlrest.core.executor.UnifyAlarmOpsService;
-import org.dromara.sqlrest.core.servlet.ClientTokenService;
 import org.dromara.sqlrest.core.util.AlarmModelUtils;
 import org.dromara.sqlrest.core.util.ServletUtils;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
@@ -54,6 +55,7 @@ public class AuthenticationFilter implements Filter {
 
   private static final ExecutorService alarmExecutor = ExecutorBuilder.create()
       .setCorePoolSize(Runtime.getRuntime().availableProcessors())
+      .setMaxPoolSize(5 * Runtime.getRuntime().availableProcessors())
       .useArrayBlockingQueue(8912)
       .setHandler(new CallerRunsPolicy())
       .build();
@@ -80,7 +82,7 @@ public class AuthenticationFilter implements Filter {
     HttpMethodEnum method = HttpMethodEnum.exists(request.getMethod())
         ? HttpMethodEnum.valueOf(request.getMethod().toUpperCase())
         : HttpMethodEnum.GET;
-    ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path, false);
+    ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path);
     if (null == apiConfigEntity || !apiConfigEntity.getStatus()) {
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
       String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
@@ -90,13 +92,19 @@ public class AuthenticationFilter implements Filter {
       return;
     }
 
-    if (apiConfigEntity.getFlowStatus()) {
-      String resourceName = Constants.getResourceName(method.name(), path);
-      if (flowControlManger.checkFlowControl(resourceName, response)) {
+    try {
+      ApiAssignmentCache.set(apiConfigEntity);
+
+      if (apiConfigEntity.getFlowStatus()) {
+        String resourceName = Constants.getResourceName(method.name(), path);
+        if (flowControlManger.checkFlowControl(resourceName, response)) {
+          doAuthenticationFilter(chain, request, response, apiConfigEntity);
+        }
+      } else {
         doAuthenticationFilter(chain, request, response, apiConfigEntity);
       }
-    } else {
-      doAuthenticationFilter(chain, request, response, apiConfigEntity);
+    } finally {
+      ApiAssignmentCache.remove();
     }
   }
 
@@ -165,17 +173,16 @@ public class AuthenticationFilter implements Filter {
     }
   }
 
-  private void doRecord(ApiAssignmentEntity apiConfigEntity, AccessRecordEntity accessRecord, int httpStatus,
-      long accessTimestamp) {
-    accessRecordMapper.insert(accessRecord);
-    if (httpStatus == HttpServletResponse.SC_OK) {
+  private void doRecord(ApiAssignmentEntity config, AccessRecordEntity record, int status, long timestamp) {
+    accessRecordMapper.insert(record);
+    if (status == HttpServletResponse.SC_OK) {
       return;
     }
-    if (!apiConfigEntity.getAlarm()) {
+    if (!config.getAlarm()) {
       return;
     }
 
-    Map<String, String> dataModel = AlarmModelUtils.getBusinessModel(apiConfigEntity, accessRecord, accessTimestamp);
+    Map<String, String> dataModel = AlarmModelUtils.getBusinessModel(config, record, timestamp);
     unifyAlarmOpsService.triggerAlarm(dataModel);
   }
 

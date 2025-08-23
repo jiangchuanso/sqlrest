@@ -14,7 +14,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
 import java.util.Map;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.driver.DriverLoadService;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
@@ -22,20 +22,27 @@ import org.dromara.sqlrest.core.util.DataSourceUtils;
 import org.dromara.sqlrest.persistence.dao.DataSourceDao;
 import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
 
-@Module("ds")
-public class DsVarModule {
+@Module(DsVarModule.VAR_NAME)
+public class DsVarModule implements VarModuleInterface {
+
+  protected static final String VAR_NAME = "ds";
 
   private DataSourceDao dataSourceDao = SpringUtil.getBean(DataSourceDao.class);
   private DriverLoadService driverLoadService = SpringUtil.getBean(DriverLoadService.class);
 
   private Map<String, Object> params;
-  private ProductTypeEnum productType;
   private NamingStrategyEnum strategy;
+  private boolean printSqlLog;
 
-  public DsVarModule(ProductTypeEnum productType, Map<String, Object> params, NamingStrategyEnum strategy) {
-    this.productType = productType;
+  public DsVarModule(Map<String, Object> params, NamingStrategyEnum strategy, boolean printSqlLog) {
     this.params = params;
     this.strategy = strategy;
+    this.printSqlLog = printSqlLog;
+  }
+
+  @Override
+  public String getVarModuleName() {
+    return VAR_NAME;
   }
 
   @Comment("根据数据源ID获取db模块")
@@ -46,7 +53,7 @@ public class DsVarModule {
     }
     File driverPath = driverLoadService.getVersionDriverFile(dsEntity.getType(), dsEntity.getVersion());
     HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dsEntity, driverPath.getAbsolutePath());
-    return new DbVarModule(dataSource, productType, params, strategy);
+    return new DbVarModule(dataSource, dsEntity.getType(), params, strategy, printSqlLog);
   }
 }
 

@@ -324,7 +324,7 @@ public class ApiAssignmentService {
       SqlExecuteLogger.init();
       HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
       List<Object> results = ApiExecutorEngineFactory
-          .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType())
+          .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType(), true)
           .execute(scripts, params, request.getNamingStrategy());
       Object answer = results.size() > 1 ? results : (1 == results.size()) ? results.get(0) : null;
       List<OutParam> types = JacksonUtils.parseFiledTypesAndFillNullAsString(results);
@@ -337,6 +337,7 @@ public class ApiAssignmentService {
       respMap.put("types", types);
       entity = ResultEntity.success(respMap);
     } catch (Exception e) {
+      log.warn("Failed to debug for error:{}", e.getMessage(), e);
       entity = ResultEntity.failed(ExceptionUtil.getMessage(e));
     } finally {
       SqlExecuteLogger.clear();

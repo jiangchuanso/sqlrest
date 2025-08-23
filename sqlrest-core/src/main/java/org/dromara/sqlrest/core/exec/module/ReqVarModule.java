@@ -10,16 +10,24 @@
 package org.dromara.sqlrest.core.exec.module;
 
 import java.util.Map;
+import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
 
-@Module("req")
-public class ReqVarModule {
+@Module(ReqVarModule.VAR_NAME)
+public class ReqVarModule implements VarModuleInterface {
+
+  protected static final String VAR_NAME = "req";
 
   private Map<String, Object> params;
 
   public ReqVarModule(Map<String, Object> params) {
     this.params = params;
+  }
+
+  @Override
+  public String getVarModuleName() {
+    return VAR_NAME;
   }
 
   @Comment("设置一个请求参数，如果存在同名将被覆盖")

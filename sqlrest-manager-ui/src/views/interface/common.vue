@@ -641,7 +641,7 @@
                     </el-row>
                     <el-row v-else
                             :gutter="24">
-                      <div style="display: inline-flex;justify-content: center;"
+                      <div style="display: inline-flex;flex-direction: row ;justify-content: left;align-items: center"
                            v-for="(arrayItemValue,arrayItemIndex) in scope.row.arrayValues"
                            :key="arrayItemIndex">
                         <el-col :span="4"><button @click="delArrayValuesItem(scope.row.arrayValues,arrayItemIndex)">-</button></el-col>
@@ -649,7 +649,9 @@
                                     :disabled="scope.row.type=='OBJECT'"
                                     type="string"></el-input></el-col>
                       </div>
-                      <el-col :span="4"><button @click="addArrayValuesItem(scope.row)">+</button></el-col>
+                      <div style="display: inline-flex;flex-direction: row ;justify-content: left;align-items: center">
+                        <el-col :span="4"><button @click="addArrayValuesItem(scope.row)">+</button></el-col>
+                      </div>
                     </el-row>
                   </div>
                   <div v-else>
@@ -1660,7 +1662,6 @@ export default {
           if (0 === res.data.code) {
             this.debugResponse = res.data.data.answer;
             this.debugConsoleLog = res.data.data.logs;
-            this.outputParams = [];
             let arr = res.data.data.types;
             if (Array.isArray(arr) && arr.length === 0) {
               this.$alert("结果集内容为空", "提示信息",
@@ -1670,14 +1671,31 @@ export default {
                 }
               );
             } else {
+              var paramNameRemarkMap = new Map();
+              for (let one of this.outputParams) {
+                paramNameRemarkMap.set(one.name, one.remark);
+                if (one.children) {
+                  for (let subOne of one.children) {
+                    paramNameRemarkMap.set(one.name + "." + subOne.name, subOne.remark);
+                  }
+                }
+              }
+
+              this.outputParams = [];
               for (let item of arr) {
+                var remark = item.remark || paramNameRemarkMap.get(item.name);
+                if (item.children) {
+                  for (let one of item.children) {
+                    one.remark = one.remark || paramNameRemarkMap.get(item.name + "." + one.name);
+                  }
+                }
                 this.outputParams.push(
                   {
                     id: item.id,
                     name: item.name,
                     type: item.type,
                     isArray: item.isArray,
-                    remark: item.remark,
+                    remark: remark,
                     children: item.children,
                   }
                 )
@@ -1849,7 +1867,10 @@ export default {
   display: flex;
   flex-direction: row;
 }
-/deep/.el-table .cell .el-checkbox__input.is-disabled.is-checked .el-checkbox__inner {
+/deep/.el-table
+  .cell
+  .el-checkbox__input.is-disabled.is-checked
+  .el-checkbox__inner {
   background-color: #1464dd;
   border-color: #f4f5f8;
 }

@@ -9,49 +9,57 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.executor.model;
 
-import org.dromara.sqlrest.common.enums.HttpMethodEnum;
-import org.dromara.sqlrest.core.servlet.ApiServletService;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.dromara.sqlrest.common.dto.ResultEntity;
+import org.dromara.sqlrest.core.exec.ApiAssignmentCache;
+import org.dromara.sqlrest.core.exec.ApiExecuteService;
+import org.dromara.sqlrest.core.util.JacksonUtils;
+import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 
 public class HttpApiServlet extends HttpServlet {
 
-  private ApiServletService apiServletService;
+  private ApiExecuteService apiExecuteService;
+  private boolean printSqlLog;
 
-  public HttpApiServlet(ApiServletService apiServletService) {
-    this.apiServletService = apiServletService;
+  public HttpApiServlet(ApiExecuteService apiExecuteService, boolean printSqlLog) {
+    this.apiExecuteService = apiExecuteService;
+    this.printSqlLog = printSqlLog;
   }
 
-  private void doHandle(HttpMethodEnum method, HttpServletRequest request, HttpServletResponse response)
-      throws ServletException, IOException {
-    apiServletService.process(method, request, response);
+  private void process(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    ApiAssignmentEntity apiConfigEntity = ApiAssignmentCache.get();
+    ResultEntity result = apiExecuteService.execute(apiConfigEntity, request, printSqlLog);
+    String json = JacksonUtils.toJsonStr(result, apiConfigEntity.getResponseFormat());
+    response.getWriter().append(json);
   }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doHandle(HttpMethodEnum.GET, req, resp);
+    process(req, resp);
   }
 
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doHandle(HttpMethodEnum.HEAD, req, resp);
+    process(req, resp);
   }
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doHandle(HttpMethodEnum.POST, req, resp);
+    process(req, resp);
   }
 
   @Override
   protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doHandle(HttpMethodEnum.PUT, req, resp);
+    process(req, resp);
   }
 
   @Override
   protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doHandle(HttpMethodEnum.DELETE, req, resp);
+    process(req, resp);
   }
 }
+

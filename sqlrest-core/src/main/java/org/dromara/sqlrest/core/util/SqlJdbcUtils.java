@@ -39,7 +39,7 @@ public class SqlJdbcUtils {
   }
 
   public static Object execute(ProductTypeEnum productType, Connection connection, SqlMeta sqlMeta,
-      NamingStrategyEnum strategy, int page, int size) throws SQLException {
+      NamingStrategyEnum strategy, int page, int size, boolean printSqlLog) throws SQLException {
     List<Object> paramValues = sqlMeta.getParameter();
     boolean isQuerySql = sqlMeta.isQuerySQL();
     String sql = isQuerySql
@@ -55,7 +55,10 @@ public class SqlJdbcUtils {
       statement.setObject(i, paramValues.get(i - 1));
     }
 
-    log.info("ExecuteSQL:{}\n{}", sql, paramValues);
+    if (printSqlLog) {
+      log.info("ExecuteSQL:{}\n{}", sql, paramValues);
+    }
+
     long start = System.currentTimeMillis();
     try {
       Function<String, String> converter = getConverter(strategy);

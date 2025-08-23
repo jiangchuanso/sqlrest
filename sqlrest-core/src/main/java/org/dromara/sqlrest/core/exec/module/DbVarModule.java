@@ -24,9 +24,10 @@ import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
+import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
+import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
 import org.dromara.sqlrest.core.util.ConvertUtils;
 import org.dromara.sqlrest.core.util.PageSizeUtils;
 import org.dromara.sqlrest.core.util.PageSqlUtils;
@@ -40,17 +41,20 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 @Slf4j
-@Module("db")
-public class DbVarModule {
+@Module(DbVarModule.VAR_NAME)
+public class DbVarModule implements VarModuleInterface {
+
+  protected static final String VAR_NAME = "db";
 
   private DataSource dataSource;
   private JdbcTemplate jdbcTemplate;
   private ProductTypeEnum productType;
   private Map<String, Object> params;
   private Function<String, String> converter;
+  private boolean printSqlLog;
 
   public DbVarModule(DataSource dataSource, ProductTypeEnum productType, Map<String, Object> params,
-      NamingStrategyEnum strategy) {
+      NamingStrategyEnum strategy, boolean printSqlLog) {
     this.dataSource = dataSource;
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.productType = productType;
@@ -60,6 +64,12 @@ public class DbVarModule {
       strategy = NamingStrategyEnum.NONE;
     }
     this.converter = strategy.getFunction();
+    this.printSqlLog = printSqlLog;
+  }
+
+  @Override
+  public String getVarModuleName() {
+    return VAR_NAME;
   }
 
   private String getPageSql(String sql, int page, int size) {
@@ -83,7 +93,9 @@ public class DbVarModule {
 
   @Comment("查询所有的数据列表")
   public List<Map<String, Object>> selectAll(@Comment("sqlOrXml") String sqlOrXml) throws SQLException {
-    log.info("Enter selectAll() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter selectAll() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     long start = System.currentTimeMillis();
@@ -96,7 +108,9 @@ public class DbVarModule {
 
   @Comment("count所有数据的总数")
   public Integer selectCount(@Comment("sqlOrXml") String sqlOrXml) {
-    log.info("Enter selectCount() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter selectCount() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     String countSql = String.format("select count(*) from (%s) a", sqlMeta.getSql());
@@ -110,7 +124,9 @@ public class DbVarModule {
 
   @Comment("查询单条结果，并传入变量信息，查不到返回null")
   public Map<String, Object> selectOne(@Comment("sqlOrXml") String sqlOrXml) {
-    log.info("Enter selectOne() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter selectOne() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     long start = System.currentTimeMillis();
@@ -136,7 +152,9 @@ public class DbVarModule {
   @Comment("分页查询数据列表")
   public List<Map<String, Object>> page(@Comment("sqlOrXml") String sqlOrXml)
       throws SQLException {
-    log.info("Enter page() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter page() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     int page = PageSizeUtils.getPageFromParams(params);
     int size = PageSizeUtils.getSizeFromParams(params);
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
@@ -154,7 +172,9 @@ public class DbVarModule {
 
   @Comment("执行insert操作，返回插入主键")
   public Map<String, Object> insert(@Comment("sqlOrXml") String sqlOrXml) {
-    log.info("Enter insert() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter insert() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
@@ -176,7 +196,9 @@ public class DbVarModule {
 
   @Comment("执行update操作，返回受影响行数")
   public int update(@Comment("sqlOrXml") String sqlOrXml) {
-    log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();
@@ -190,7 +212,9 @@ public class DbVarModule {
 
   @Comment("批量执行操作，返回受影响的行数")
   public int batchUpdate(@Comment("sqlList") List<String> sqlList) {
-    log.info("Enter batchUpdate() function, SQL:{},params:{}", sqlList);
+    if (printSqlLog) {
+      log.info("Enter batchUpdate() function, SQL:{},params:{}", sqlList);
+    }
     long start = System.currentTimeMillis();
     try {
       return Arrays.stream(jdbcTemplate.batchUpdate(sqlList.toArray(new String[0]))).sum();
@@ -202,7 +226,9 @@ public class DbVarModule {
 
   @Comment("执行delete操作，返回受影响行数")
   public int delete(@Comment("sqlOrXml") String sqlOrXml) {
-    log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
+    if (printSqlLog) {
+      log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
+    }
     XmlSqlTemplate template = new XmlSqlTemplate(sqlOrXml);
     SqlMeta sqlMeta = template.process(params);
     List<Object> parameters = sqlMeta.getParameter();

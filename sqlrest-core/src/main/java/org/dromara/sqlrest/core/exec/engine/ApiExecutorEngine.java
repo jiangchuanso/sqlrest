@@ -16,5 +16,7 @@ import java.util.Map;
 
 public interface ApiExecutorEngine {
 
+  void setPrintSqlLog(boolean printSqlLog);
+
   List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy);
 }

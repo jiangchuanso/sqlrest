@@ -15,11 +15,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.dromara.sqlrest.common.dto.OutParam;
-import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
-import org.dromara.sqlrest.common.enums.ParamTypeEnum;
-import org.dromara.sqlrest.common.util.UuidUtils;
-import org.dromara.sqlrest.core.serdes.DateTimeSerDesFactory;
 import com.google.common.collect.Lists;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -33,6 +28,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
+import org.dromara.sqlrest.common.dto.OutParam;
+import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
+import org.dromara.sqlrest.common.enums.ParamTypeEnum;
+import org.dromara.sqlrest.common.util.UuidUtils;
+import org.dromara.sqlrest.core.serdes.DateTimeSerDesFactory;
 
 public final class JacksonUtils {
 
@@ -146,10 +146,12 @@ public final class JacksonUtils {
 
       if (isArray) {
         Collection collection = (Collection) value;
-        Object item = collection.stream().findFirst().get();
-        ParamTypeEnum subTypeEnum = parseValueType(item);
-        if (null != subTypeEnum && subTypeEnum.isObject()) {
-          parseFieldTypes(outParam, (Map) item, results);
+        if (collection.size() > 0) {
+          Object item = collection.stream().findFirst().get();
+          ParamTypeEnum subTypeEnum = parseValueType(item);
+          if (null != subTypeEnum && subTypeEnum.isObject()) {
+            parseFieldTypes(outParam, (Map) item, results);
+          }
         }
       } else if (value instanceof Map) {
         parseFieldTypes(outParam, (Map) value, results);

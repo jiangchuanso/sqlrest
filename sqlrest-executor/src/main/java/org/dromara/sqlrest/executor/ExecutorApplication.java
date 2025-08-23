@@ -22,7 +22,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication(
     scanBasePackages = {
         "org.dromara.sqlrest.persistence",
-        "org.dromara.sqlrest.core.filter",
         "org.dromara.sqlrest.core.driver",
         "org.dromara.sqlrest.core.servlet",
         "org.dromara.sqlrest.core.exec",

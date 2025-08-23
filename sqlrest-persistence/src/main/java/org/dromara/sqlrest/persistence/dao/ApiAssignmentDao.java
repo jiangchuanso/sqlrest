@@ -11,13 +11,13 @@ package org.dromara.sqlrest.persistence.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import java.util.List;
+import java.util.Objects;
+import javax.annotation.Resource;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
 import org.dromara.sqlrest.persistence.mapper.ApiAssignmentMapper;
-import java.util.List;
-import java.util.Objects;
-import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -62,7 +62,7 @@ public class ApiAssignmentDao {
     return apiAssignmentMapper.selectBatchIds(ids);
   }
 
-  public List<ModuleAssignmentEntity> getModuleAssignments(){
+  public List<ModuleAssignmentEntity> getModuleAssignments() {
     return apiAssignmentMapper.getModuleAssignments();
   }
 
@@ -102,18 +102,12 @@ public class ApiAssignmentDao {
   }
 
   public ApiAssignmentEntity getByUk(HttpMethodEnum method, String path) {
-    return getByUk(method, path, true);
-  }
-
-  public ApiAssignmentEntity getByUk(HttpMethodEnum method, String path, boolean withSql) {
     QueryWrapper<ApiAssignmentEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(ApiAssignmentEntity::getMethod, method.name())
         .eq(ApiAssignmentEntity::getPath, path);
     ApiAssignmentEntity apiConfigEntity = apiAssignmentMapper.selectOne(queryWrapper);
-    if (withSql) {
-      if (null != apiConfigEntity) {
-        apiConfigEntity.setContextList(apiContextDao.getByApiConfigId(apiConfigEntity.getId()));
-      }
+    if (null != apiConfigEntity) {
+      apiConfigEntity.setContextList(apiContextDao.getByApiConfigId(apiConfigEntity.getId()));
     }
     return apiConfigEntity;
   }

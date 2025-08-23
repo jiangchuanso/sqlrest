@@ -21,7 +21,7 @@ import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
-import org.dromara.sqlrest.core.filter.FlowControlManger;
+import org.dromara.sqlrest.common.service.FlowControlManger;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import java.io.IOException;

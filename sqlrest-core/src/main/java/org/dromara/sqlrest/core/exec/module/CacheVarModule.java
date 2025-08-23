@@ -9,21 +9,29 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.exec.module;
 
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Resource;
 import org.dromara.sqlrest.cache.CacheFactory;
 import org.dromara.sqlrest.cache.DistributedCache;
 import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 @Service
-@Module("cache")
-public class CacheVarModule {
+@Module(CacheVarModule.VAR_NAME)
+public class CacheVarModule implements VarModuleInterface {
+
+  protected static final String VAR_NAME = "cache";
 
   @Resource
   private CacheFactory cacheFactory;
+
+  @Override
+  public String getVarModuleName() {
+    return VAR_NAME;
+  }
 
   private DistributedCache getDistributedCache() {
     return cacheFactory.getDistributedCache(Constants.CACHE_NAME_API_VAR);

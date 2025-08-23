@@ -9,6 +9,8 @@ spring:
     allow-bean-definition-overriding: false
 
 sqlrest:
+  executor:
+    print-sql-log: false
   cache:
     hazelcast:
       enabled: true

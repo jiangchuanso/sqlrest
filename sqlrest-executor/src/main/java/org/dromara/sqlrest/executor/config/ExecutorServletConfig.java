@@ -9,13 +9,14 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.executor.config;
 
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.core.filter.AuthenticationFilter;
-import org.dromara.sqlrest.core.servlet.ApiServletService;
-import org.dromara.sqlrest.executor.model.HttpApiServlet;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServlet;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.core.exec.ApiExecuteService;
+import org.dromara.sqlrest.core.servlet.AuthenticationFilter;
+import org.dromara.sqlrest.executor.model.HttpApiServlet;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ExecutorServletConfig {
 
   private static final String URL_PATH_PATTERN = String.format("/%s/*", Constants.API_PATH_PREFIX);
+
+  @Value("${sqlrest.executor.print-sql-log}")
+  private boolean printSqlLog;
 
   @Resource
   private AuthenticationFilter authenticationFilter;
@@ -53,8 +57,8 @@ public class ExecutorServletConfig {
    * @return ServletRegistrationBean
    */
   @Bean
-  public ServletRegistrationBean apiServletRegistrationBean(ApiServletService apiServletService) {
-    HttpServlet httpServlet = new HttpApiServlet(apiServletService);
+  public ServletRegistrationBean apiServletRegistrationBean(ApiExecuteService apiExecuteService) {
+    HttpServlet httpServlet = new HttpApiServlet(apiExecuteService, printSqlLog);
     return new ServletRegistrationBean(httpServlet, URL_PATH_PATTERN);
   }
 }

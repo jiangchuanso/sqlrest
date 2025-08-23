@@ -9,19 +9,27 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.exec.module;
 
+import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
-@Module("env")
-public class EnvVarModule {
+@Module(EnvVarModule.VAR_NAME)
+public class EnvVarModule implements VarModuleInterface {
+
+  protected static final String VAR_NAME = "env";
 
   private final Environment environment;
 
   public EnvVarModule(Environment environment) {
     this.environment = environment;
+  }
+
+  @Override
+  public String getVarModuleName() {
+    return VAR_NAME;
   }
 
   @Comment("获取配置")

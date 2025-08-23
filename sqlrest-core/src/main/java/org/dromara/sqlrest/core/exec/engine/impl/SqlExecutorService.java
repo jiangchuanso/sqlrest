@@ -9,6 +9,12 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.exec.engine.impl;
 
+import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.util.LambdaUtils;
@@ -18,12 +24,6 @@ import org.dromara.sqlrest.core.util.SqlJdbcUtils;
 import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
 import org.dromara.sqlrest.template.SqlMeta;
 import org.dromara.sqlrest.template.XmlSqlTemplate;
-import com.zaxxer.hikari.HikariDataSource;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class SqlExecutorService extends AbstractExecutorEngine {
@@ -44,7 +44,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           SqlMeta sqlMeta = template.process(params);
           int page = PageSizeUtils.getPageFromParams(params);
           int size = PageSizeUtils.getSizeFromParams(params);
-          Object result = SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size);
+          Object result = SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size, printSqlLog);
           if (sqlMeta.isQuerySQL()) {
             dataList.add(result);
           }

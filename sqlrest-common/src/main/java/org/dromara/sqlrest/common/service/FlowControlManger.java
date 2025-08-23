@@ -7,7 +7,7 @@
 // Date : 2024/3/31
 // Location: beijing , china
 /////////////////////////////////////////////////////////////
-package org.dromara.sqlrest.core.filter;
+package org.dromara.sqlrest.common.service;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;

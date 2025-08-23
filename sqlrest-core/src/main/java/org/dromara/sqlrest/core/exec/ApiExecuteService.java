@@ -10,6 +10,26 @@
 package org.dromara.sqlrest.core.exec;
 
 import cn.hutool.crypto.digest.DigestUtil;
+import com.google.common.collect.Lists;
+import com.zaxxer.hikari.HikariDataSource;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.cache.CacheFactory;
 import org.dromara.sqlrest.cache.DistributedCache;
 import org.dromara.sqlrest.common.consts.Constants;
@@ -31,26 +51,6 @@ import org.dromara.sqlrest.persistence.dao.DataSourceDao;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
 import org.dromara.sqlrest.persistence.util.JsonUtils;
-import com.google.common.collect.Lists;
-import com.zaxxer.hikari.HikariDataSource;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -78,7 +78,7 @@ public class ApiExecuteService {
     return Constants.getResourceName(config.getMethod().name(), config.getPath()) + ":" + key;
   }
 
-  public ResultEntity<Object> execute(ApiAssignmentEntity config, HttpServletRequest request) {
+  public ResultEntity<Object> execute(ApiAssignmentEntity config, HttpServletRequest request, boolean printSqlLog) {
     String resourceName = Constants.getResourceName(config.getMethod().name(), config.getPath());
     try {
       List<ItemParam> invalidArgs = new ArrayList<>();
@@ -87,20 +87,21 @@ public class ApiExecuteService {
       if (invalidArgs.size() > 0) {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, convertInvalidArgs(invalidArgs));
       }
-      return execute(config, paramValues);
+      return execute(config, paramValues, printSqlLog);
     } catch (IOException e) {
       log.warn("Failed read input body parameters for {}, error:{}", resourceName, e.getMessage());
       throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, e);
     }
   }
 
-  public ResultEntity<Object> execute(ApiAssignmentEntity config, Map<String, Object> paramValues) {
+  public ResultEntity<Object> execute(ApiAssignmentEntity config, Map<String, Object> paramValues,
+      boolean printSqlLog) {
     if (config.getCacheKeyType().isUseCache()) {
       String key = getCacheKeyValue(config, paramValues);
       DistributedCache cache = getDistributedCache();
       ResultEntity result = cache.get(key, ResultEntity.class);
       if (null == result) {
-        result = doExecute(getDataSourceEntity(config), config, paramValues);
+        result = doExecute(getDataSourceEntity(config), config, paramValues, printSqlLog);
         cache.put(key, result, config.getCacheExpireSeconds(), TimeUnit.SECONDS);
       } else {
         String resourceName = Constants.getResourceName(config.getMethod().name(), config.getPath());
@@ -108,7 +109,7 @@ public class ApiExecuteService {
       }
       return result;
     } else {
-      return doExecute(getDataSourceEntity(config), config, paramValues);
+      return doExecute(getDataSourceEntity(config), config, paramValues, printSqlLog);
     }
   }
 
@@ -123,11 +124,11 @@ public class ApiExecuteService {
   }
 
   private ResultEntity doExecute(DataSourceEntity dsEntity, ApiAssignmentEntity config,
-      Map<String, Object> paramValues) {
+      Map<String, Object> paramValues, boolean printSqlLog) {
     File driverPath = driverLoadService.getVersionDriverFile(dsEntity.getType(), dsEntity.getVersion());
     HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dsEntity, driverPath.getAbsolutePath());
     List<Object> results = ApiExecutorEngineFactory
-        .getExecutor(config.getEngine(), dataSource, dsEntity.getType())
+        .getExecutor(config.getEngine(), dataSource, dsEntity.getType(), printSqlLog)
         .execute(config.getContextList(), paramValues, config.getNamingStrategy());
     return ResultEntity.success(results.size() > 1 ? results : results.stream().findAny().orElse(null));
   }

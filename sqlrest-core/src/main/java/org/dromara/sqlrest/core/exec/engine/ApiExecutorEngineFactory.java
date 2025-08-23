@@ -9,14 +9,14 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.exec.engine;
 
-import org.dromara.sqlrest.common.enums.ExecuteEngineEnum;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.core.exec.engine.impl.ScriptExecutorService;
-import org.dromara.sqlrest.core.exec.engine.impl.SqlExecutorService;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import org.dromara.sqlrest.common.enums.ExecuteEngineEnum;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.core.exec.engine.impl.ScriptExecutorService;
+import org.dromara.sqlrest.core.exec.engine.impl.SqlExecutorService;
 
 public class ApiExecutorEngineFactory {
 
@@ -28,12 +28,14 @@ public class ApiExecutorEngineFactory {
   }
 
   public static ApiExecutorEngine getExecutor(ExecuteEngineEnum engine, HikariDataSource dataSource,
-      ProductTypeEnum productType) {
+      ProductTypeEnum productType, boolean printSqlLog) {
     BiFunction<HikariDataSource, ProductTypeEnum, ApiExecutorEngine> creator = engineMap.get(engine);
     if (null == creator) {
       throw new RuntimeException("Unsupported engine :" + engine);
     }
-    return creator.apply(dataSource, productType);
+    ApiExecutorEngine executorEngine = creator.apply(dataSource, productType);
+    executorEngine.setPrintSqlLog(printSqlLog);
+    return executorEngine;
   }
 
 }
