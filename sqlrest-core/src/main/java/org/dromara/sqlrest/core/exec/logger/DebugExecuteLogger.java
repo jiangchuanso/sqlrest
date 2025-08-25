@@ -12,25 +12,34 @@ package org.dromara.sqlrest.core.exec.logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.dromara.sqlrest.common.service.DisplayRecord;
 import org.dromara.sqlrest.core.dto.ExecuteSqlRecord;
+import org.dromara.sqlrest.core.dto.ScripDebugRecord;
 
-public final class SqlExecuteLogger {
+public final class DebugExecuteLogger {
 
-  private static final ThreadLocal<List<ExecuteSqlRecord>> threadLocal = new ThreadLocal<>();
+  private static final ThreadLocal<List<DisplayRecord>> threadLocal = new ThreadLocal<>();
 
   public static void init() {
     threadLocal.set(new ArrayList<>());
   }
 
   public static void add(String sql, List parameters, Long costs) {
-    List<ExecuteSqlRecord> list = threadLocal.get();
+    List<DisplayRecord> list = threadLocal.get();
     if (null != list) {
       list.add(new ExecuteSqlRecord(sql, parameters, costs));
     }
   }
 
-  public static List<ExecuteSqlRecord> get() {
-    List<ExecuteSqlRecord> list = threadLocal.get();
+  public static void add(String text) {
+    List<DisplayRecord> list = threadLocal.get();
+    if (null != list) {
+      list.add(new ScripDebugRecord(text));
+    }
+  }
+
+  public static List<DisplayRecord> get() {
+    List<DisplayRecord> list = threadLocal.get();
     if (null == list) {
       return Collections.emptyList();
     }

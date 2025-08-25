@@ -27,7 +27,7 @@ import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
-import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
+import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
 import org.dromara.sqlrest.core.util.ConvertUtils;
 import org.dromara.sqlrest.core.util.PageSizeUtils;
 import org.dromara.sqlrest.core.util.PageSqlUtils;
@@ -102,7 +102,7 @@ public class DbVarModule implements VarModuleInterface {
     try {
       return build(jdbcTemplate.queryForList(sqlMeta.getSql(), sqlMeta.getParameter().toArray()));
     } finally {
-      SqlExecuteLogger.add(sqlMeta.getSql(), sqlMeta.getParameter(), System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(sqlMeta.getSql(), sqlMeta.getParameter(), System.currentTimeMillis() - start);
     }
   }
 
@@ -118,7 +118,7 @@ public class DbVarModule implements VarModuleInterface {
     try {
       return jdbcTemplate.queryForObject(countSql, Integer.class, sqlMeta.getParameter().toArray());
     } finally {
-      SqlExecuteLogger.add(countSql, sqlMeta.getParameter(), System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(countSql, sqlMeta.getParameter(), System.currentTimeMillis() - start);
     }
   }
 
@@ -145,7 +145,7 @@ public class DbVarModule implements VarModuleInterface {
               },
               sqlMeta.getParameter().toArray()));
     } finally {
-      SqlExecuteLogger.add(sqlMeta.getSql(), sqlMeta.getParameter(), System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(sqlMeta.getSql(), sqlMeta.getParameter(), System.currentTimeMillis() - start);
     }
   }
 
@@ -166,7 +166,7 @@ public class DbVarModule implements VarModuleInterface {
     try {
       return build(jdbcTemplate.queryForList(pageSql, parameters.toArray()));
     } finally {
-      SqlExecuteLogger.add(pageSql, parameters, System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(pageSql, parameters, System.currentTimeMillis() - start);
     }
   }
 
@@ -190,7 +190,7 @@ public class DbVarModule implements VarModuleInterface {
           keyHolder);
       return build(keyHolder.getKeys());
     } finally {
-      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
     }
   }
 
@@ -206,7 +206,7 @@ public class DbVarModule implements VarModuleInterface {
     try {
       return jdbcTemplate.update(sqlMeta.getSql(), parameters.toArray());
     } finally {
-      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
     }
   }
 
@@ -219,7 +219,7 @@ public class DbVarModule implements VarModuleInterface {
     try {
       return Arrays.stream(jdbcTemplate.batchUpdate(sqlList.toArray(new String[0]))).sum();
     } finally {
-      SqlExecuteLogger.add(sqlList.stream().collect(Collectors.joining(";")),
+      DebugExecuteLogger.add(sqlList.stream().collect(Collectors.joining(";")),
           Collections.emptyList(), System.currentTimeMillis() - start);
     }
   }
@@ -236,7 +236,7 @@ public class DbVarModule implements VarModuleInterface {
     try {
       return jdbcTemplate.update(sqlMeta.getSql(), parameters.toArray());
     } finally {
-      SqlExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
     }
   }
 }

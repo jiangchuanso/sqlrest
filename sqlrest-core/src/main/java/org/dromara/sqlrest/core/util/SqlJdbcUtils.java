@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.util.LambdaUtils;
-import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
+import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
 import org.dromara.sqlrest.template.SqlMeta;
 
 @Slf4j
@@ -89,7 +89,7 @@ public class SqlJdbcUtils {
         return "(" + updateCount + ") rows affected";
       }
     } finally {
-      SqlExecuteLogger.add(sql, paramValues, System.currentTimeMillis() - start);
+      DebugExecuteLogger.add(sql, paramValues, System.currentTimeMillis() - start);
     }
   }
 

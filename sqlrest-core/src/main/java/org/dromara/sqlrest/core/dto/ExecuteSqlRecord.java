@@ -18,12 +18,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.reflection.ArrayUtil;
+import org.dromara.sqlrest.common.service.DisplayRecord;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExecuteSqlRecord {
+public class ExecuteSqlRecord implements DisplayRecord {
 
   private String sql;
 
@@ -56,6 +57,7 @@ public class ExecuteSqlRecord {
     return value.toString();
   }
 
+  @Override
   public String getDisplayText() {
     return "==>   Preparing: " + sql.trim() + "\n"
         + "==>  Parameters: " + getParameterValueString() + "\n"

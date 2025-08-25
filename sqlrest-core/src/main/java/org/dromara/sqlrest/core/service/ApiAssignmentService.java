@@ -25,6 +25,7 @@ import org.dromara.sqlrest.common.enums.ParamLocationEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.service.DisplayRecord;
 import org.dromara.sqlrest.core.driver.DriverLoadService;
 import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
 import org.dromara.sqlrest.core.dto.ApiAssignmentDetailResponse;
@@ -32,10 +33,9 @@ import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
 import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
 import org.dromara.sqlrest.core.dto.DataTypeFormatMapValue;
-import org.dromara.sqlrest.core.dto.ExecuteSqlRecord;
 import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
 import org.dromara.sqlrest.core.dto.SqlParamParseResponse;
-import org.dromara.sqlrest.core.exec.logger.SqlExecuteLogger;
+import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import org.dromara.sqlrest.core.exec.engine.impl.ScriptExecutorService;
@@ -321,15 +321,15 @@ public class ApiAssignmentService {
 
     ResultEntity entity;
     try {
-      SqlExecuteLogger.init();
+      DebugExecuteLogger.init();
       HikariDataSource dataSource = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath.getAbsolutePath());
       List<Object> results = ApiExecutorEngineFactory
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType(), true)
           .execute(scripts, params, request.getNamingStrategy());
       Object answer = results.size() > 1 ? results : (1 == results.size()) ? results.get(0) : null;
       List<OutParam> types = JacksonUtils.parseFiledTypesAndFillNullAsString(results);
-      String logs = Optional.ofNullable(SqlExecuteLogger.get())
-          .orElseGet(ArrayList::new).stream().map(ExecuteSqlRecord::getDisplayText)
+      String logs = Optional.ofNullable(DebugExecuteLogger.get())
+          .orElseGet(ArrayList::new).stream().map(DisplayRecord::getDisplayText)
           .collect(Collectors.toList()).stream().collect(Collectors.joining("\n\n"));
       Map<String, Object> respMap = new HashMap<>(4);
       respMap.put("answer", answer);
@@ -340,7 +340,7 @@ public class ApiAssignmentService {
       log.warn("Failed to debug for error:{}", e.getMessage(), e);
       entity = ResultEntity.failed(ExceptionUtil.getMessage(e));
     } finally {
-      SqlExecuteLogger.clear();
+      DebugExecuteLogger.clear();
     }
 
     response.setStatus(HttpServletResponse.SC_OK);
