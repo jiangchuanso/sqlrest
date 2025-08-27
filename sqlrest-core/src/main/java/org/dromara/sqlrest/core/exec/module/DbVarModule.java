@@ -84,6 +84,9 @@ public class DbVarModule implements VarModuleInterface {
   }
 
   private Map<String, Object> build(Map<String, Object> row) {
+    if (null == row) {
+      return null;
+    }
     return ConvertUtils.to(row, converter);
   }
 
@@ -239,5 +242,11 @@ public class DbVarModule implements VarModuleInterface {
       DebugExecuteLogger.add(sqlMeta.getSql(), parameters, System.currentTimeMillis() - start);
     }
   }
+
+  @Comment("开启事务")
+  public TxVarModule beginTx() {
+    return new TxVarModule(dataSource);
+  }
+
 }
 

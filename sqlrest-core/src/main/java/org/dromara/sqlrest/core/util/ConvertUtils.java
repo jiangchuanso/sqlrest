@@ -23,6 +23,9 @@ public class ConvertUtils {
     if (null == converter) {
       return row;
     }
+    if (null == row) {
+      return null;
+    }
     Map<String, Object> ret = new LinkedHashMap<>();
     row.forEach((key, val) -> ret.put(converter.apply(key), val));
     return ret;

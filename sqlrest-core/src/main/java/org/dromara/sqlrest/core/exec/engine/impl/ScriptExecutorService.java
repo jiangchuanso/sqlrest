@@ -26,11 +26,12 @@ import org.dromara.sqlrest.core.exec.annotation.Module;
 import org.dromara.sqlrest.core.exec.engine.AbstractExecutorEngine;
 import org.dromara.sqlrest.core.exec.module.CacheVarModule;
 import org.dromara.sqlrest.core.exec.module.DbVarModule;
-import org.dromara.sqlrest.core.exec.module.LogVarModule;
 import org.dromara.sqlrest.core.exec.module.DsVarModule;
 import org.dromara.sqlrest.core.exec.module.EnvVarModule;
 import org.dromara.sqlrest.core.exec.module.HttpModule;
+import org.dromara.sqlrest.core.exec.module.LogVarModule;
 import org.dromara.sqlrest.core.exec.module.ReqVarModule;
+import org.dromara.sqlrest.core.exec.module.TxVarModule;
 import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
 
 public class ScriptExecutorService extends AbstractExecutorEngine {
@@ -41,6 +42,7 @@ public class ScriptExecutorService extends AbstractExecutorEngine {
       HttpModule.class,
       LogVarModule.class,
       DbVarModule.class,
+      TxVarModule.class,
       DsVarModule.class,
       ReqVarModule.class,
       CacheVarModule.class);
