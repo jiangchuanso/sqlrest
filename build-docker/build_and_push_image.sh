@@ -2,7 +2,7 @@
 
 set -e 
 
-SQLREST_VERSION=1.5.0
+SQLREST_VERSION=1.6.0
 BUILD_DOCKER_DIR="$( cd "$( dirname "$0"  )" && pwd  )"
 PROJECT_ROOT_DIR=$( dirname "$BUILD_DOCKER_DIR")
 DOCKER_SQLREST_DIR=$BUILD_DOCKER_DIR/sqlrest
