@@ -9,12 +9,12 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.exec.module;
 
-import java.text.MessageFormat;
 import lombok.NoArgsConstructor;
 import org.dromara.sqlrest.common.service.VarModuleInterface;
 import org.dromara.sqlrest.core.exec.annotation.Comment;
 import org.dromara.sqlrest.core.exec.annotation.Module;
 import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,6 +31,7 @@ public class LogVarModule implements VarModuleInterface {
 
   @Comment("打印调试日志信息")
   public void print(@Comment("message") String message, Object... arguments) {
-    DebugExecuteLogger.add(MessageFormat.format(message, arguments));
+    // https://blog.csdn.net/weixin_44792849/article/details/131854226
+    DebugExecuteLogger.add(MessageFormatter.arrayFormat(message, arguments).getMessage());
   }
 }

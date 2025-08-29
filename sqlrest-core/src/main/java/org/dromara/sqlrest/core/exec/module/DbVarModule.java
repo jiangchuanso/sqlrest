@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
@@ -59,11 +60,7 @@ public class DbVarModule implements VarModuleInterface {
     this.jdbcTemplate = new JdbcTemplate(dataSource);
     this.productType = productType;
     this.params = params;
-
-    if (null == strategy) {
-      strategy = NamingStrategyEnum.NONE;
-    }
-    this.converter = strategy.getFunction();
+    this.converter = Optional.ofNullable(strategy).orElse(NamingStrategyEnum.NONE).getFunction();
     this.printSqlLog = printSqlLog;
   }
 
@@ -84,10 +81,7 @@ public class DbVarModule implements VarModuleInterface {
   }
 
   private Map<String, Object> build(Map<String, Object> row) {
-    if (null == row) {
-      return null;
-    }
-    return ConvertUtils.to(row, converter);
+    return Optional.ofNullable(row).map(r -> ConvertUtils.to(r, converter)).orElse(null);
   }
 
   private List<Map<String, Object>> build(List<Map<String, Object>> rows) {

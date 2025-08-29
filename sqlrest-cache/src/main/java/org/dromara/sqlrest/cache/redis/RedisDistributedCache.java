@@ -10,15 +10,16 @@
 package org.dromara.sqlrest.cache.redis;
 
 import cn.hutool.json.JSONUtil;
-import org.dromara.sqlrest.cache.DistributedCache;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.dromara.sqlrest.cache.DistributedCache;
 
 public class RedisDistributedCache implements DistributedCache {
 
-  private final String FORMAT = "%s#%s";
+  private static final String FORMAT = "%s#%s";
+
   private final String name;
-  private JedisClient client;
+  private final JedisClient client;
 
   public RedisDistributedCache(String name, JedisClient client) {
     this.name = Objects.requireNonNull(name, "cache name must not be null");
