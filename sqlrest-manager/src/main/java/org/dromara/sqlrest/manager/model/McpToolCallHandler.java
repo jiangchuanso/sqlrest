@@ -70,39 +70,42 @@ public class McpToolCallHandler {
     rootNode.put(FN_ID, FV_ID);
     ObjectNode propertiesNode = objectMapper.createObjectNode();
     ArrayNode rootRequired = objectMapper.createArrayNode();
-    for (ItemParam param : params) {
-      ObjectNode node = objectMapper.createObjectNode();
-      if (param.getIsArray()) {
-        rootRequired.add(param.getName());
-        ObjectNode items = objectMapper.createObjectNode();
-        items.put(FN_TYPE, param.getType().getJsType());
-        node.put(FN_TYPE, FV_ARRAY);
-        node.put(FN_DESCRIPTION, param.getRemark());
-        node.set(FN_ITEMS, items);
-      } else {
-        if (param.getRequired()) {
+    if (CollectionUtils.isNotEmpty(params)) {
+      for (ItemParam param : params) {
+        ObjectNode node = objectMapper.createObjectNode();
+        if (param.getIsArray()) {
           rootRequired.add(param.getName());
-        }
-        node.put(FN_TYPE, param.getType().getJsType());
-        node.put(FN_DESCRIPTION, param.getRemark());
-        if (CollectionUtils.isNotEmpty(param.getChildren())) {
-          ArrayNode subRequired = objectMapper.createArrayNode();
-          ObjectNode properties = objectMapper.createObjectNode();
-          for (BaseParam subParam : param.getChildren()) {
-            if (subParam.getRequired()) {
-              subRequired.add(subParam.getName());
-            }
-            ObjectNode item = objectMapper.createObjectNode();
-            item.put(FN_TYPE, subParam.getType().getJsType());
-            item.put(FN_DESCRIPTION, subParam.getRemark());
-            properties.set(subParam.getName(), item);
+          ObjectNode items = objectMapper.createObjectNode();
+          items.put(FN_TYPE, param.getType().getJsType());
+          node.put(FN_TYPE, FV_ARRAY);
+          node.put(FN_DESCRIPTION, param.getRemark());
+          node.set(FN_ITEMS, items);
+        } else {
+          if (param.getRequired()) {
+            rootRequired.add(param.getName());
           }
-          node.set(FN_PROPERTIES, properties);
-          node.set(FN_REQUIRED, subRequired);
+          node.put(FN_TYPE, param.getType().getJsType());
+          node.put(FN_DESCRIPTION, param.getRemark());
+          if (CollectionUtils.isNotEmpty(param.getChildren())) {
+            ArrayNode subRequired = objectMapper.createArrayNode();
+            ObjectNode properties = objectMapper.createObjectNode();
+            for (BaseParam subParam : param.getChildren()) {
+              if (subParam.getRequired()) {
+                subRequired.add(subParam.getName());
+              }
+              ObjectNode item = objectMapper.createObjectNode();
+              item.put(FN_TYPE, subParam.getType().getJsType());
+              item.put(FN_DESCRIPTION, subParam.getRemark());
+              properties.set(subParam.getName(), item);
+            }
+            node.set(FN_PROPERTIES, properties);
+            node.set(FN_REQUIRED, subRequired);
+          }
         }
+        propertiesNode.set(param.getName(), node);
       }
-      propertiesNode.set(param.getName(), node);
     }
+
     rootNode.set(FN_PROPERTIES, propertiesNode);
     rootNode.set(FN_REQUIRED, rootRequired);
 
