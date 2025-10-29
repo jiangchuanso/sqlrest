@@ -27,6 +27,7 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
         "org.dromara.sqlrest.core.executor",
         "org.dromara.sqlrest.core.service",
         "org.dromara.sqlrest.core.exec",
+        "org.dromara.sqlrest.core.util",
         "org.dromara.sqlrest.cache",
         "org.dromara.sqlrest.manager"
     }

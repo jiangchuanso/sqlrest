@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.sqlrest.core.util.JacksonUtils;
 
 public class TimestampValueSerializer extends StdSerializer<Timestamp> {
 
@@ -34,6 +36,8 @@ public class TimestampValueSerializer extends StdSerializer<Timestamp> {
       throws IOException {
     if (value != null) {
       SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+      // 从配置文件读取时区设置，如果未配置则使用默认值Asia/Shanghai
+      sdf.setTimeZone(TimeZone.getTimeZone(JacksonUtils.getTimezone()));
       jsonGenerator.writeString(sdf.format(value));
     }
   }

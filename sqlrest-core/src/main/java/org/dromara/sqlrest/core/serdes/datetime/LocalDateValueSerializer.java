@@ -14,8 +14,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.StringUtils;
 
 public class LocalDateValueSerializer extends StdSerializer<LocalDate> {
@@ -33,8 +33,9 @@ public class LocalDateValueSerializer extends StdSerializer<LocalDate> {
   public void serialize(LocalDate value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
       throws IOException {
     if (value != null) {
-      SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-      jsonGenerator.writeString(sdf.format(value));
+      // 对于LocalDate，使用DateTimeFormatter而不是SimpleDateFormat
+      // 从配置文件读取时区设置，如果未配置则使用默认值Asia/Shanghai
+      jsonGenerator.writeString(value.format(DateTimeFormatter.ofPattern(pattern)));
     }
   }
 }

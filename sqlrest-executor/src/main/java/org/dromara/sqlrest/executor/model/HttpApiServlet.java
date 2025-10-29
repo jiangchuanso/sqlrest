@@ -19,6 +19,7 @@ import org.dromara.sqlrest.core.exec.ApiAssignmentCache;
 import org.dromara.sqlrest.core.exec.ApiExecuteService;
 import org.dromara.sqlrest.core.util.JacksonUtils;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
+import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
 
 public class HttpApiServlet extends HttpServlet {
 
@@ -33,7 +34,20 @@ public class HttpApiServlet extends HttpServlet {
   private void process(HttpServletRequest request, HttpServletResponse response) throws IOException {
     ApiAssignmentEntity apiConfigEntity = ApiAssignmentCache.get();
     ResultEntity result = apiExecuteService.execute(apiConfigEntity, request, printSqlLog);
-    String json = JacksonUtils.toJsonStr(result, apiConfigEntity.getResponseFormat());
+    
+    // 从responseFormat配置中读取USE_SYSTEM_RESPONSE_FORMAT的值
+    String useSystemResponseFormat = apiConfigEntity.getResponseFormat().get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT);
+    boolean useSystemFormat = !"false".equalsIgnoreCase(useSystemResponseFormat);
+    
+    String json;
+    if (useSystemFormat) {
+      // 返回完整的ResultEntity
+      json = JacksonUtils.toJsonStr(result, apiConfigEntity.getResponseFormat());
+    } else {
+      // 只返回data部分
+      json = JacksonUtils.toJsonStr(result.getData(), apiConfigEntity.getResponseFormat());
+    }
+    
     response.getWriter().append(json);
   }
 

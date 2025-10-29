@@ -21,6 +21,9 @@ public enum DataTypeFormatEnum {
   TIMESTAMP(java.sql.Timestamp.class.getName(), DatePattern.NORM_DATETIME_PATTERN),
 
   BIG_DECIMAL(java.math.BigDecimal.class.getName(), 6),
+  
+  // 系统返回格式配置：true=返回完整ResultEntity，false=只返回data属性
+  USE_SYSTEM_RESPONSE_FORMAT("系统返回格式配置：true=返回完整ResultEntity，false=只返回data属性", "true"),
   ;
 
   private String className;

@@ -26,6 +26,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
         "org.dromara.sqlrest.core.servlet",
         "org.dromara.sqlrest.core.exec",
         "org.dromara.sqlrest.core.executor",
+        "org.dromara.sqlrest.core.util",
         "org.dromara.sqlrest.cache",
         "org.dromara.sqlrest.executor",
     }

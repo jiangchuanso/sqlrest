@@ -870,6 +870,7 @@ export default {
         if (0 === res.data.code) {
           this.showTree = false;
           let detail = res.data.data;
+          let mergedFormatMap = this.mergeFormatMap(detail.formatMap);
           this.createParam = {
             id: detail.id,
             name: detail.name,
@@ -885,7 +886,7 @@ export default {
             sqls: [],
             script: "",
             namingStrategy: detail.namingStrategy,
-            formatMap: detail.formatMap,
+            formatMap: mergedFormatMap,
             flowStatus: detail.flowStatus,
             flowGrade: detail.flowGrade,
             flowCount: detail.flowCount,
@@ -1027,7 +1028,7 @@ export default {
       });
     },
     loadResponseTypeFormat: function () {
-      this.$http.get(
+      return this.$http.get(
         "/sqlrest/manager/api/v1/assignment/response-type-format"
       ).then(res => {
         if (0 === res.data.code) {
@@ -1037,6 +1038,35 @@ export default {
           }
         }
       });
+    },
+    mergeFormatMap: function (existingFormatMap) {
+
+      // 如果没有现有的formatMap，直接返回系统默认的
+      if (!existingFormatMap || existingFormatMap.length === 0) {
+        return this.responseTypeFormat || [];
+      }
+      
+      // 如果还没有加载系统格式，先返回现有的
+      if (!this.responseTypeFormat || this.responseTypeFormat.length === 0) {
+        return existingFormatMap;
+      }
+      
+      // 合并逻辑：以系统格式为基础，用现有配置覆盖相同key的值
+      const merged = [...this.responseTypeFormat];
+      const existingMap = {};
+      
+      // 创建现有配置的映射
+      existingFormatMap.forEach(item => {
+        existingMap[item.key] = item.value;
+      });
+      
+      // 用现有配置覆盖系统默认值
+      merged.forEach(item => {
+        if (existingMap.hasOwnProperty(item.key)) {
+          item.value = existingMap[item.key];
+        } 
+      });
+      return merged;
     },
     loadTreeData: function () {
       if (this.createParam.dataSourceId && this.createParam.dataSourceId > 0 && this.showTree) {
@@ -1790,7 +1820,8 @@ export default {
       }
     },
   },
-  created () {
+  async created () {
+    await this.loadResponseTypeFormat();
     this.loadAssignmentDetail();
     this.loadConnections();
     this.loadGroups();
@@ -1799,7 +1830,6 @@ export default {
     this.loadKeywordHints();
     this.loadTreeData();
     this.loadResponseNamingStrategy();
-    this.loadResponseTypeFormat();
   },
 }
 </script>

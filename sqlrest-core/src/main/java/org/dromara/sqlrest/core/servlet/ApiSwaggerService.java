@@ -13,6 +13,7 @@ import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.BaseParam;
 import org.dromara.sqlrest.common.dto.ItemParam;
 import org.dromara.sqlrest.common.dto.OutParam;
+import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
@@ -249,7 +250,7 @@ public class ApiSwaggerService {
       }
 
       // 响应
-      operation.setResponses(getApiResponses(assignment.getOutputs()));
+      operation.setResponses(getApiResponses(assignment));
       operation.security(Collections.singletonList(new SecurityRequirement().addList(AUTHORIZATION)));
 
       openAPI.path(path, pathItem);
@@ -327,46 +328,99 @@ public class ApiSwaggerService {
     return pathItem;
   }
 
-  private ApiResponses getApiResponses(List<OutParam> outputs) {
-    Schema rootSchema = new ObjectSchema()
-        .addProperties("code", new NumberSchema())
-        .addProperties("message", new StringSchema());
-    if (!CollectionUtils.isEmpty(outputs)) {
-      ObjectSchema objectSchema = new ObjectSchema();
-      for (OutParam param : outputs) {
-        ParamTypeEnum typeItem = param.getType();
-        if (Optional.ofNullable(param.getIsArray()).orElse(false)) {
-          Schema subSchema = new Schema().type(param.getType().getJsType())
-              .description(param.getRemark())
-              .format(getTypeFormat(param.getType()));
-          ArraySchema subArraySchema = new ArraySchema().items(subSchema);
-          objectSchema.addProperties(param.getName(), subArraySchema);
-        } else {
-          Schema propertiesItem;
-          if (Optional.ofNullable(typeItem.isObject()).orElse(false)) {
-            propertiesItem = new ObjectSchema().description(param.getRemark());
-            if (!CollectionUtils.isEmpty(param.getChildren())) {
-              for (OutParam subParam : param.getChildren()) {
-                Schema subSchema = new Schema().type(subParam.getType().getJsType())
-                    .description(subParam.getRemark())
-                    .format(getTypeFormat(subParam.getType()));
-                if (Optional.ofNullable(subParam.getIsArray()).orElse(false)) {
-                  ArraySchema subArraySchema = new ArraySchema().items(subSchema);
-                  propertiesItem.addProperties(subParam.getName(), subArraySchema);
-                } else {
-                  propertiesItem.addProperties(subParam.getName(), subSchema);
+  private ApiResponses getApiResponses(ApiAssignmentEntity assignment) {
+    List<OutParam> outputs = assignment.getOutputs();
+    
+    // 检查USE_SYSTEM_RESPONSE_FORMAT配置
+    Map<DataTypeFormatEnum, String> responseFormat = assignment.getResponseFormat();
+    String useSystemResponseFormatValue = responseFormat != null ? 
+        responseFormat.get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT) : null;
+    boolean useSystemFormat = !"false".equals(useSystemResponseFormatValue);  
+    Schema rootSchema;
+    if (useSystemFormat) {
+      // 使用系统标准格式：包含code、message、data结构
+      rootSchema = new ObjectSchema()
+          .addProperties("code", new NumberSchema())
+          .addProperties("message", new StringSchema());
+      
+      if (!CollectionUtils.isEmpty(outputs)) {
+        ObjectSchema dataSchema = new ObjectSchema();
+        for (OutParam param : outputs) {
+          ParamTypeEnum typeItem = param.getType();
+          if (Optional.ofNullable(param.getIsArray()).orElse(false)) {
+            Schema subSchema = new Schema().type(param.getType().getJsType())
+                .description(param.getRemark())
+                .format(getTypeFormat(param.getType()));
+            ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+            dataSchema.addProperties(param.getName(), subArraySchema);
+          } else {
+            Schema propertiesItem;
+            if (Optional.ofNullable(typeItem.isObject()).orElse(false)) {
+              propertiesItem = new ObjectSchema().description(param.getRemark());
+              if (!CollectionUtils.isEmpty(param.getChildren())) {
+                for (OutParam subParam : param.getChildren()) {
+                  Schema subSchema = new Schema().type(subParam.getType().getJsType())
+                      .description(subParam.getRemark())
+                      .format(getTypeFormat(subParam.getType()));
+                  if (Optional.ofNullable(subParam.getIsArray()).orElse(false)) {
+                    ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+                    propertiesItem.addProperties(subParam.getName(), subArraySchema);
+                  } else {
+                    propertiesItem.addProperties(subParam.getName(), subSchema);
+                  }
                 }
               }
+            } else {
+              propertiesItem = new Schema().type(typeItem.getJsType())
+                  .description(param.getRemark())
+                  .format(getTypeFormat(typeItem));
             }
-          } else {
-            propertiesItem = new Schema().type(typeItem.getJsType())
-                .description(param.getRemark())
-                .format(getTypeFormat(typeItem));
+            dataSchema.addProperties(param.getName(), propertiesItem);
           }
-          objectSchema.addProperties(param.getName(), propertiesItem);
         }
+        rootSchema.addProperties("data", dataSchema);
       }
-      rootSchema.addProperties("data", objectSchema);
+    } else {
+      // 直接返回数据格式：不包含code、message包装
+      if (!CollectionUtils.isEmpty(outputs)) {
+        rootSchema = new ObjectSchema();
+        for (OutParam param : outputs) {
+          ParamTypeEnum typeItem = param.getType();
+          if (Optional.ofNullable(param.getIsArray()).orElse(false)) {
+            Schema subSchema = new Schema().type(param.getType().getJsType())
+                .description(param.getRemark())
+                .format(getTypeFormat(param.getType()));
+            ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+            rootSchema.addProperties(param.getName(), subArraySchema);
+          } else {
+            Schema propertiesItem;
+            if (Optional.ofNullable(typeItem.isObject()).orElse(false)) {
+              propertiesItem = new ObjectSchema().description(param.getRemark());
+              if (!CollectionUtils.isEmpty(param.getChildren())) {
+                for (OutParam subParam : param.getChildren()) {
+                  Schema subSchema = new Schema().type(subParam.getType().getJsType())
+                      .description(subParam.getRemark())
+                      .format(getTypeFormat(subParam.getType()));
+                  if (Optional.ofNullable(subParam.getIsArray()).orElse(false)) {
+                    ArraySchema subArraySchema = new ArraySchema().items(subSchema);
+                    propertiesItem.addProperties(subParam.getName(), subArraySchema);
+                  } else {
+                    propertiesItem.addProperties(subParam.getName(), subSchema);
+                  }
+                }
+              }
+            } else {
+              propertiesItem = new Schema().type(typeItem.getJsType())
+                  .description(param.getRemark())
+                  .format(getTypeFormat(typeItem));
+            }
+            rootSchema.addProperties(param.getName(), propertiesItem);
+          }
+        }
+      } else {
+        // 如果没有输出参数，返回空对象
+        rootSchema = new ObjectSchema();
+      }
     }
 
     ApiResponses apiResponses = new ApiResponses();

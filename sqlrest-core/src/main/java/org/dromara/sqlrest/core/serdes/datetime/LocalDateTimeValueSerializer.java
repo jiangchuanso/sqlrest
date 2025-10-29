@@ -14,9 +14,11 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.sqlrest.core.util.JacksonUtils;
 
 public class LocalDateTimeValueSerializer extends StdSerializer<LocalDateTime> {
 
@@ -33,8 +35,11 @@ public class LocalDateTimeValueSerializer extends StdSerializer<LocalDateTime> {
   public void serialize(LocalDateTime value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
       throws IOException {
     if (value != null) {
-      SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-      jsonGenerator.writeString(sdf.format(value));
+      // 对于LocalDateTime，使用DateTimeFormatter而不是SimpleDateFormat
+      // 从配置文件读取时区设置，如果未配置则使用默认值Asia/Shanghai
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern)
+          .withZone(ZoneId.of(JacksonUtils.getTimezone()));
+      jsonGenerator.writeString(value.format(DateTimeFormatter.ofPattern(pattern)));
     }
   }
 }
