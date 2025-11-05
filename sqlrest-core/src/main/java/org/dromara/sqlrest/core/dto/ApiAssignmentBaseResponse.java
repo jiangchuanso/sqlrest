@@ -10,13 +10,13 @@
 package org.dromara.sqlrest.core.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.dromara.sqlrest.common.enums.ExecuteEngineEnum;
-import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.sqlrest.common.enums.ExecuteEngineEnum;
+import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 
 @Data
 @NoArgsConstructor
@@ -47,8 +47,14 @@ public class ApiAssignmentBaseResponse {
   @ApiModelProperty("请求路径(不带api前缀)")
   private String path;
 
-  @ApiModelProperty("是否发布")
+  @ApiModelProperty("是否上线")
   private Boolean status;
+
+  @ApiModelProperty("commitId")
+  private Long commitId;
+
+  @ApiModelProperty("上线版本")
+  private Integer version;
 
   @ApiModelProperty("是否公开")
   private Boolean open;

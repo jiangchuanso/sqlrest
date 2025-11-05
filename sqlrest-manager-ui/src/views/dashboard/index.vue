@@ -8,7 +8,7 @@
                      :startVal="startVal"
                      :endVal="statistics.totalCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">配置接口数</p>
+            <p class="cardItem_p1">开发接口数</p>
           </div>
           <div class="cardItem_icon">
             <i class="el-icon-s-grid color-green1"></i>
@@ -36,7 +36,7 @@
                      :startVal="startVal"
                      :endVal="statistics.publishCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">发布接口数</p>
+            <p class="cardItem_p1">上线接口数</p>
           </div>
           <div class="cardItem_icon">
             <i class="el-icon-loading color-green2"></i>

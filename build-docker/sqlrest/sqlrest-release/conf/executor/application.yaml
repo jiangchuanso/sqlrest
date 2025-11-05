@@ -11,6 +11,8 @@ spring:
 sqlrest:
   executor:
     print-sql-log: false
+  datasource:
+    encrypt: ${SQLREST_DS_ENCRYPT:false}
   cache:
     hazelcast:
       enabled: true

@@ -21,10 +21,11 @@ SQLREST的功能包括：
 - **参数类型支持**：支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型。
 - **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种请求格式。
 - **身份认证支持**：提供基于 Token 的认证机制，保护 API 安全。
-- **Swagger在线文档**：支持自动生成swagger-ui的在线接口文档。
+- **实时在线文档**：支持自动生成swagger-ui的在线接口文档。
 - **缓存配置支持**：支持 Hazelcast 和 Redis 缓存，提升 API 访问性能。
 - **流控配置管理**：通过 Sentinel 支持流量控制，防止系统过载。
 - **统一告警对接**：支持统一告警系统的对接与触发。
+- **接口版本管理**：支持接口的版本控制管理。
 - **大模型MCP服务**：支持简单配置即可创建MCP的tool。
 
 SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
@@ -186,6 +187,17 @@ PGDB_NAME=sqlrest
 PGDB_USERNAME=postgres
 # pgsql的密码
 PGDB_PASSWORD=123456
+
+
+# JSON序列化时区设置
+JSON_TIMEZONE=Asia/Shanghai
+
+# 数据源账号密码是否加密存储
+SQLREST_DS_ENCRYPT=false
+
+# 外部配置化网关/管理地址，默认为空
+# SQLREST_MANAGER_URL=http://www.example.com:8090
+# SQLREST_GATEWAY_URL=http://www.example.com:8091
 ```
 
 >sqlrest的缓存支持使用分布式的hazelcast或者redis，在conf/{manager,gateway,executor}/目录下的application.yml配

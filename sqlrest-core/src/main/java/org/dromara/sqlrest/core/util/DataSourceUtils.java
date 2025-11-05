@@ -10,10 +10,9 @@
 package org.dromara.sqlrest.core.util;
 
 import cn.hutool.core.util.ClassLoaderUtil;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
-import org.dromara.sqlrest.common.model.JarFileClassLoader;
-import org.dromara.sqlrest.common.model.SimpleDataSource;
-import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.symmetric.AES;
+import cn.hutool.extra.spring.SpringUtil;
 import com.zaxxer.hikari.HikariDataSource;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -28,8 +27,11 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import cn.hutool.crypto.SecureUtil;
-import cn.hutool.crypto.symmetric.AES;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.common.model.JarFileClassLoader;
+import org.dromara.sqlrest.common.model.SimpleDataSource;
+import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
+import org.springframework.core.env.Environment;
 
 @Slf4j
 @UtilityClass
@@ -37,11 +39,13 @@ public final class DataSourceUtils {
 
   public static final int MAX_THREAD_COUNT = 10;
   public static final int MAX_TIMEOUT_MS = 60000;
-
+  private static final byte[] KEY = "6635BC05BC357FEC7A85FDB9C972AD01".getBytes();
+  private static final AES toolAES = SecureUtil.aes(KEY);
   private static final Map<String, URLClassLoader> classLoaderMap = new ConcurrentHashMap<>();
   private static final Map<Long, Pair<DataSourceEntity, HikariDataSource>> datasourceMap = new ConcurrentHashMap<>();
-  private static final byte[] KEY = "6635BC05BC357FEC7A85FDB9C972AD01".getBytes();
+
   public static HikariDataSource getHikariDataSource(DataSourceEntity entity, String driverPath) {
+    decrypt(entity);
     if (!datasourceMap.containsKey(entity.getId())) {
       HikariDataSource ds = createDataSource(entity, driverPath);
       try (Connection connection = ds.getConnection()) {
@@ -107,7 +111,6 @@ public final class DataSourceUtils {
     ds.setMaxLifetime(TimeUnit.MINUTES.toMillis(60));
     ds.setConnectionTimeout(TimeUnit.SECONDS.toMillis(60));
     ds.setIdleTimeout(MAX_TIMEOUT_MS);
-    decrypt(properties);//解密
     SimpleDataSource dataSource = new SimpleDataSource(
         createURLClassLoader(driverPath, properties.getDriver()),
         properties.getUrl(),
@@ -155,37 +158,50 @@ public final class DataSourceUtils {
     return urlClassLoader;
   }
 
-
-  /*
-  加密dataSourceEntity.getUsername()和dataSourceEntity.getPassword()
-   */
-  public void encrypt(DataSourceEntity dataSourceEntity) {
-    try {
-      // 使用hutool的AES加密
-      AES aes = SecureUtil.aes(KEY);
-      dataSourceEntity.setUsername(aes.encryptHex(dataSourceEntity.getUsername()));
-      dataSourceEntity.setPassword(aes.encryptHex(dataSourceEntity.getPassword()));
-    } catch (Exception e) {
-      e.printStackTrace();
-      log.error("encrypt error:", e.getMessage());
-    }
-
+  private static boolean isUseDataSourceUserPassEncrypt() {
+    String KEY = "sqlrest.datasource.encrypt";
+    return "true".equalsIgnoreCase(SpringUtil.getBean(Environment.class).getProperty(KEY));
   }
 
-  /*
-  解密dataSourceEntity.getUsername()和dataSourceEntity.getPassword()
-   */
-  public void decrypt(DataSourceEntity dataSourceEntity) {
-    try {
-      // 使用hutool的AES解密
-      AES aes = SecureUtil.aes(KEY);
-      dataSourceEntity.setUsername(aes.decryptStr(dataSourceEntity.getUsername()));
-      dataSourceEntity.setPassword(aes.decryptStr(dataSourceEntity.getPassword()));
-    } catch (Exception e) {
-      e.printStackTrace();
-      log.error("decrypt error:", e.getMessage());
+  public static void encrypt(DataSourceEntity dataSourceEntity) {
+    if (isUseDataSourceUserPassEncrypt()) {
+      try {
+        String encryptUsername = encryptStr(dataSourceEntity.getUsername());
+        String encryptPassword = encryptStr(dataSourceEntity.getPassword());
+        dataSourceEntity.setUsername(encryptUsername);
+        dataSourceEntity.setPassword(encryptPassword);
+      } catch (Exception e) {
+        // 忽略异常，适配升级问题
+        log.error("Encrypt used by AES error: {}", e.getMessage(), e);
+      }
     }
-
   }
 
+  public static void decrypt(DataSourceEntity dataSourceEntity) {
+    if (isUseDataSourceUserPassEncrypt()) {
+      try {
+        String decryptUsername = decryptStr(dataSourceEntity.getUsername());
+        String decryptPassword = decryptStr(dataSourceEntity.getPassword());
+        dataSourceEntity.setUsername(decryptUsername);
+        dataSourceEntity.setPassword(decryptPassword);
+      } catch (Exception e) {
+        // 忽略异常，适配升级问题
+        log.error("Decrypt used by AES error: {}", e.getMessage(), e);
+      }
+    }
+  }
+
+  private static String encryptStr(String str) {
+    if (null == str) {
+      return null;
+    }
+    return toolAES.encryptHex(str);
+  }
+
+  private static String decryptStr(String str) {
+    if (null == str) {
+      return null;
+    }
+    return toolAES.decryptStr(str);
+  }
 }

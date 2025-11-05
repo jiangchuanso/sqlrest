@@ -386,7 +386,7 @@ export default {
         data: window.JSON.stringify(
           {
             moduleId: value,
-            publish: true,
+            online: true,
             page: 1,
             size: 2147483647
           }

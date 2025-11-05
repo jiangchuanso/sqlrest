@@ -18,6 +18,7 @@ import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.dao.SystemParamDao;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
@@ -75,9 +76,9 @@ public class ApiSwaggerService {
   private static final String TOKEN_MODEL = "TOKEN认证授权";
   private static final String APPLICATION_JSON = "application/json";
   private static final String AUTHORIZATION = "Authorization";
-
+  
   @Resource
-  private ApiAssignmentDao apiAssignmentDao;
+  private ApiOnlineDao apiOnlineDao;
   @Resource
   private ApiModuleDao apiModuleDao;
   @Resource
@@ -121,11 +122,7 @@ public class ApiSwaggerService {
         .collect(Collectors.toMap(ApiModuleEntity::getId,
             Function.identity(), (a, b) -> a));
     String urlPrefix = getApiUrlPrefix();
-    for (ApiAssignmentEntity assignment : apiAssignmentDao.listAll()) {
-      if (!assignment.getStatus()) {
-        // 过滤掉未发布的
-        continue;
-      }
+    for (ApiAssignmentEntity assignment : apiOnlineDao.listAll()) {
       String path = urlPrefix + assignment.getPath();
       HttpMethodEnum method = assignment.getMethod();
 
@@ -330,19 +327,19 @@ public class ApiSwaggerService {
 
   private ApiResponses getApiResponses(ApiAssignmentEntity assignment) {
     List<OutParam> outputs = assignment.getOutputs();
-    
+
     // 检查USE_SYSTEM_RESPONSE_FORMAT配置
     Map<DataTypeFormatEnum, String> responseFormat = assignment.getResponseFormat();
-    String useSystemResponseFormatValue = responseFormat != null ? 
+    String useSystemResponseFormatValue = responseFormat != null ?
         responseFormat.get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT) : null;
-    boolean useSystemFormat = !"false".equals(useSystemResponseFormatValue);  
+    boolean useSystemFormat = !"false".equals(useSystemResponseFormatValue);
     Schema rootSchema;
     if (useSystemFormat) {
       // 使用系统标准格式：包含code、message、data结构
       rootSchema = new ObjectSchema()
           .addProperties("code", new NumberSchema())
           .addProperties("message", new StringSchema());
-      
+
       if (!CollectionUtils.isEmpty(outputs)) {
         ObjectSchema dataSchema = new ObjectSchema();
         for (OutParam param : outputs) {

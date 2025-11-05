@@ -41,7 +41,7 @@ import org.dromara.sqlrest.core.exec.logger.RequestParamLogger;
 import org.dromara.sqlrest.core.executor.UnifyAlarmOpsService;
 import org.dromara.sqlrest.core.util.AlarmModelUtils;
 import org.dromara.sqlrest.core.util.ServletUtils;
-import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.entity.AccessRecordEntity;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.mapper.AccessRecordMapper;
@@ -61,7 +61,7 @@ public class AuthenticationFilter implements Filter {
       .build();
 
   @Resource
-  private ApiAssignmentDao apiAssignmentDao;
+  private ApiOnlineDao apiOnlineDao;
   @Resource
   private FlowControlManger flowControlManger;
   @Resource
@@ -82,8 +82,8 @@ public class AuthenticationFilter implements Filter {
     HttpMethodEnum method = HttpMethodEnum.exists(request.getMethod())
         ? HttpMethodEnum.valueOf(request.getMethod().toUpperCase())
         : HttpMethodEnum.GET;
-    ApiAssignmentEntity apiConfigEntity = apiAssignmentDao.getByUk(method, path);
-    if (null == apiConfigEntity || !apiConfigEntity.getStatus()) {
+    ApiAssignmentEntity apiConfigEntity = apiOnlineDao.getByUk(method, path);
+    if (null == apiConfigEntity) {
       response.setStatus(HttpServletResponse.SC_NOT_FOUND);
       String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
       ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_PATH_NOT_EXISTS, message);

@@ -102,6 +102,10 @@ export default {
     },
     queryContent: function () {
       return [this.editor.getValue()]
+    },
+    resetEditor: function (value) {
+      this.editor.setValue(value);
+      console.log("scriptEditor.reset:"+value)
     }
   },
   mounted () {

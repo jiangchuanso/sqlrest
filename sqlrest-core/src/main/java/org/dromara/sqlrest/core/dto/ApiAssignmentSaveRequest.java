@@ -68,6 +68,10 @@ public class ApiAssignmentSaveRequest {
   @ApiModelProperty("是否公开")
   private Boolean open;
 
+  @NotNull(message = "alarm不能为null")
+  @ApiModelProperty("是否告警")
+  private Boolean alarm;
+
   @NotNull(message = "engine不能为null")
   @ApiModelProperty("执行引擎:SQL, SCRIPT")
   private ExecuteEngineEnum engine;

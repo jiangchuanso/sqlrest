@@ -11,48 +11,6 @@ package org.dromara.sqlrest.core.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
-import org.dromara.sqlrest.common.dto.ItemParam;
-import org.dromara.sqlrest.common.dto.OutParam;
-import org.dromara.sqlrest.common.dto.PageResult;
-import org.dromara.sqlrest.common.dto.ParamValue;
-import org.dromara.sqlrest.common.dto.ParamValue.BaseParamValue;
-import org.dromara.sqlrest.common.dto.ResultEntity;
-import org.dromara.sqlrest.common.enums.CacheKeyTypeEnum;
-import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
-import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
-import org.dromara.sqlrest.common.enums.OnOffEnum;
-import org.dromara.sqlrest.common.enums.ParamLocationEnum;
-import org.dromara.sqlrest.common.enums.ParamTypeEnum;
-import org.dromara.sqlrest.common.exception.CommonException;
-import org.dromara.sqlrest.common.exception.ResponseErrorCode;
-import org.dromara.sqlrest.common.service.DisplayRecord;
-import org.dromara.sqlrest.core.driver.DriverLoadService;
-import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
-import org.dromara.sqlrest.core.dto.ApiAssignmentDetailResponse;
-import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
-import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
-import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
-import org.dromara.sqlrest.core.dto.DataTypeFormatMapValue;
-import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
-import org.dromara.sqlrest.core.dto.SqlParamParseResponse;
-import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
-import org.dromara.sqlrest.core.exec.annotation.Comment;
-import org.dromara.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
-import org.dromara.sqlrest.core.exec.engine.impl.ScriptExecutorService;
-import org.dromara.sqlrest.core.util.ApiPathUtils;
-import org.dromara.sqlrest.core.util.DataSourceUtils;
-import org.dromara.sqlrest.core.util.JacksonUtils;
-import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
-import org.dromara.sqlrest.persistence.dao.ApiGroupDao;
-import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
-import org.dromara.sqlrest.persistence.dao.DataSourceDao;
-import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
-import org.dromara.sqlrest.persistence.entity.ApiGroupEntity;
-import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
-import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
-import org.dromara.sqlrest.persistence.util.PageUtils;
-import org.dromara.sqlrest.template.XmlSqlTemplate;
 import com.google.common.base.Charsets;
 import com.zaxxer.hikari.HikariDataSource;
 import java.io.File;
@@ -64,8 +22,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,6 +33,56 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dromara.sqlrest.common.dto.ApiIdVersion;
+import org.dromara.sqlrest.common.dto.ItemParam;
+import org.dromara.sqlrest.common.dto.OutParam;
+import org.dromara.sqlrest.common.dto.PageResult;
+import org.dromara.sqlrest.common.dto.ParamValue;
+import org.dromara.sqlrest.common.dto.ParamValue.BaseParamValue;
+import org.dromara.sqlrest.common.dto.ResultEntity;
+import org.dromara.sqlrest.common.enums.CacheKeyTypeEnum;
+import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
+import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
+import org.dromara.sqlrest.common.enums.ParamLocationEnum;
+import org.dromara.sqlrest.common.enums.ParamTypeEnum;
+import org.dromara.sqlrest.common.exception.CommonException;
+import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.service.DisplayRecord;
+import org.dromara.sqlrest.core.driver.DriverLoadService;
+import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
+import org.dromara.sqlrest.core.dto.ApiAssignmentDetailResponse;
+import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
+import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
+import org.dromara.sqlrest.core.dto.AssignmentPublishRequest;
+import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
+import org.dromara.sqlrest.core.dto.DataTypeFormatMapValue;
+import org.dromara.sqlrest.core.dto.ScriptEditorCompletion;
+import org.dromara.sqlrest.core.dto.SqlParamParseResponse;
+import org.dromara.sqlrest.core.dto.VersionCommitResponse;
+import org.dromara.sqlrest.core.dto.VersionDetailResponse;
+import org.dromara.sqlrest.core.exec.annotation.Comment;
+import org.dromara.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
+import org.dromara.sqlrest.core.exec.engine.impl.ScriptExecutorService;
+import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
+import org.dromara.sqlrest.core.util.ApiPathUtils;
+import org.dromara.sqlrest.core.util.DataSourceUtils;
+import org.dromara.sqlrest.core.util.JacksonUtils;
+import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.persistence.dao.ApiGroupDao;
+import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
+import org.dromara.sqlrest.persistence.dao.DataSourceDao;
+import org.dromara.sqlrest.persistence.dao.VersionCommitDao;
+import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
+import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
+import org.dromara.sqlrest.persistence.entity.ApiGroupEntity;
+import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
+import org.dromara.sqlrest.persistence.entity.ApiOnlineEntity;
+import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
+import org.dromara.sqlrest.persistence.entity.VersionCommitEntity;
+import org.dromara.sqlrest.persistence.util.JsonUtils;
+import org.dromara.sqlrest.persistence.util.PageUtils;
+import org.dromara.sqlrest.template.XmlSqlTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +95,11 @@ public class ApiAssignmentService {
   private final static Map<String, List<ScriptEditorCompletion>> memCache = new ConcurrentHashMap<>();
 
   @Resource
-  public ApiAssignmentDao apiAssignmentDao;
+  private ApiAssignmentDao apiAssignmentDao;
+  @Resource
+  private ApiOnlineDao apiOnlineDao;
+  @Resource
+  private VersionCommitDao versionCommitDao;
   @Resource
   private DataSourceDao dataSourceDao;
   @Resource
@@ -425,12 +439,12 @@ public class ApiAssignmentService {
     assignmentEntity.setDescription(request.getDescription());
     assignmentEntity.setMethod(request.getMethod());
     assignmentEntity.setPath(request.getPath());
+    assignmentEntity.setOpen(Optional.ofNullable(request.getOpen()).orElse(false));
+    assignmentEntity.setAlarm(Optional.ofNullable(request.getAlarm()).orElse(false));
     assignmentEntity.setContentType(request.getContentType());
     assignmentEntity.setParams(request.getParams());
     assignmentEntity.setOutputs(request.getOutputs());
-    assignmentEntity.setOpen(Optional.ofNullable(request.getOpen()).orElse(false));
     assignmentEntity.setEngine(request.getEngine());
-    assignmentEntity.setStatus(false);
     assignmentEntity.setContextList(contextList);
     assignmentEntity.setResponseFormat(request.getFormatMap().stream()
         .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a)));
@@ -447,6 +461,9 @@ public class ApiAssignmentService {
   }
 
   public void updateAssignment(ApiAssignmentSaveRequest request) {
+    if (StringUtils.isBlank(request.getPath()) || null == request.getMethod()) {
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "path or method");
+    }
     ApiAssignmentEntity exists = apiAssignmentDao.getById(request.getId(), false);
     if (null == exists) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
@@ -456,12 +473,6 @@ public class ApiAssignmentService {
     }
     if (!StringUtils.equals(exists.getPath(), request.getPath())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "can't update path");
-    }
-    if (exists.getStatus()) {
-      throw new CommonException(ResponseErrorCode.ERROR_EDIT_ALREADY_PUBLISHED, "id=" + request.getId());
-    }
-    if (StringUtils.isBlank(request.getPath()) || null == request.getMethod()) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "path or method");
     }
     if (CollectionUtils.isEmpty(request.getContextList())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "sqlTextList");
@@ -521,11 +532,11 @@ public class ApiAssignmentService {
     assignmentEntity.setDescription(request.getDescription());
     //assignmentEntity.setMethod(request.getMethod());
     //assignmentEntity.setPath(request.getPath());
+    assignmentEntity.setOpen(Optional.ofNullable(request.getOpen()).orElse(false));
+    assignmentEntity.setAlarm(Optional.ofNullable(request.getAlarm()).orElse(false));
     assignmentEntity.setContentType(request.getContentType());
     assignmentEntity.setParams(request.getParams());
     assignmentEntity.setOutputs(request.getOutputs());
-    assignmentEntity.setOpen(Optional.ofNullable(request.getOpen()).orElse(false));
-    assignmentEntity.setStatus(false);
     assignmentEntity.setEngine(request.getEngine());
     assignmentEntity.setContextList(contextList);
     assignmentEntity.setResponseFormat(request.getFormatMap().stream()
@@ -546,9 +557,18 @@ public class ApiAssignmentService {
     if (null == assignmentEntity) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
     }
+    return buildAssignmentDetail(assignmentEntity);
+  }
 
+  private ApiAssignmentDetailResponse buildAssignmentDetail(ApiAssignmentEntity assignmentEntity) {
     ApiAssignmentDetailResponse response = new ApiAssignmentDetailResponse();
     BeanUtil.copyProperties(assignmentEntity, response);
+    ApiIdVersion ver = apiOnlineDao.filterOnline(assignmentEntity.getId());
+    response.setStatus(null != ver);
+    if (response.getStatus()) {
+      response.setVersion(ver.getVersion());
+      response.setCommitId(ver.getCommitId());
+    }
     response.setSqlList(assignmentEntity.getContextList());
     List<DataTypeFormatMapValue> formatMap = new ArrayList<>();
 
@@ -567,27 +587,57 @@ public class ApiAssignmentService {
   public void deleteAssignment(Long id) {
     ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(id, false);
     if (null != assignmentEntity) {
-      if (OnOffEnum.ON.equals(assignmentEntity.getStatus())) {
+      if (null != apiOnlineDao.getByApiId(assignmentEntity.getId())) {
         throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "api assignment is online.");
       }
       apiAssignmentDao.deleteById(id);
     }
   }
 
-  public void makeOpen(Long id, Boolean open) {
-    apiAssignmentDao.makeOpen(id, open);
+  public void publish(AssignmentPublishRequest request) {
+    ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(request.getId(), true);
+    if (null == assignmentEntity) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "api assignment is not exists.");
+    }
+    String content = JsonUtils.toJsonString(assignmentEntity);
+    versionCommitDao.createVersion(assignmentEntity.getId(), request.getDescription(), content);
   }
 
-  public void makeAlarm(Long id, Boolean open) {
-    apiAssignmentDao.makeAlarm(id, open);
-  }
-
-  public void deployAssignment(Long id) {
-    apiAssignmentDao.updateStatus(id, true);
+  @Transactional(rollbackFor = Exception.class)
+  public void deployAssignment(Long id, Long commitId) {
+    ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(id, false);
+    if (null == assignmentEntity) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "api assignment is not exists.");
+    }
+    VersionCommitEntity commitEntity =
+        (Optional.ofNullable(commitId).orElse(0L) > 0)
+            ? versionCommitDao.getByCommitId(commitId)
+            : versionCommitDao.getLatestVersion(assignmentEntity.getId());
+    String content = commitEntity.getContent();
+    ApiAssignmentEntity onlineAssignment = JsonUtils.toBeanObject(content, ApiAssignmentEntity.class);
+    ApiOnlineEntity onlineEntity = ApiOnlineEntity.builder()
+        .name(onlineAssignment.getName())
+        .method(onlineAssignment.getMethod())
+        .path(onlineAssignment.getPath())
+        .apiId(assignmentEntity.getId())
+        .groupId(onlineAssignment.getGroupId())
+        .moduleId(onlineAssignment.getModuleId())
+        .datasourceId(onlineAssignment.getDatasourceId())
+        .open(onlineAssignment.getOpen())
+        .alarm(onlineAssignment.getAlarm())
+        .flowStatus(onlineAssignment.getFlowStatus())
+        .commitId(commitEntity.getId())
+        .version(commitEntity.getVersion())
+        .content(commitEntity.getContent())
+        .build();
+    apiOnlineDao.upsert(onlineEntity);
   }
 
   public void retireAssignment(Long id) {
-    apiAssignmentDao.updateStatus(id, false);
+    ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(id, false);
+    if (null != assignmentEntity) {
+      apiOnlineDao.deleteByApiId(id);
+    }
   }
 
   @Transactional(rollbackFor = Exception.class)
@@ -604,24 +654,40 @@ public class ApiAssignmentService {
         .collect(Collectors.toMap(ApiModuleEntity::getId, ApiModuleEntity::getName));
     Map<Long, String> groupIdNameMap = apiGroupDao.listAll().stream()
         .collect(Collectors.toMap(ApiGroupEntity::getId, ApiGroupEntity::getName));
-    Supplier<List<ApiAssignmentBaseResponse>> method = () -> {
-      List<ApiAssignmentEntity> lists = apiAssignmentDao
-          .listAll(request.getGroupId(), request.getModuleId(),
-              request.getPublish(), request.getOpen(),
-              request.getSearchText());
-      return lists.stream()
-          .map(assignmentEntity -> {
-            ApiAssignmentBaseResponse response = new ApiAssignmentBaseResponse();
-            BeanUtil.copyProperties(assignmentEntity, response);
-            response.setModuleName(moduleIdNameMap.get(assignmentEntity.getModuleId()));
-            response.setGroupName(groupIdNameMap.get(assignmentEntity.getGroupId()));
-            response.setPath(ApiPathUtils.getFullPath(response.getPath()));
-            return response;
-          })
-          .collect(Collectors.toList());
-    };
+    Supplier<List<ApiAssignmentEntity>> method = () -> searchAll(request);
+    PageResult pageResult = PageUtils.getPage(method, request.getPage(), request.getSize());
+    if (!CollectionUtils.isEmpty(pageResult.getData())) {
+      List<ApiAssignmentEntity> assignmentEntities = pageResult.getData();
+      List<ApiAssignmentBaseResponse> responseList = new ArrayList<>();
+      List<Long> apiIds = assignmentEntities.stream().map(ApiAssignmentEntity::getId).collect(Collectors.toList());
+      Map<Long, ApiIdVersion> onlineVerMap = apiOnlineDao.filterOnline(apiIds).stream()
+          .collect(Collectors.toMap(ApiIdVersion::getApiId, Function.identity(), (a, b) -> a));
+      for (ApiAssignmentEntity assignmentEntity : assignmentEntities) {
+        ApiAssignmentBaseResponse response = new ApiAssignmentBaseResponse();
+        BeanUtil.copyProperties(assignmentEntity, response);
+        response.setModuleName(moduleIdNameMap.get(assignmentEntity.getModuleId()));
+        response.setGroupName(groupIdNameMap.get(assignmentEntity.getGroupId()));
+        response.setPath(ApiPathUtils.getFullPath(response.getPath()));
+        response.setStatus(onlineVerMap.containsKey(assignmentEntity.getId()));
+        if (response.getStatus()) {
+          response.setCommitId(onlineVerMap.get(assignmentEntity.getId()).getCommitId());
+          response.setVersion(onlineVerMap.get(assignmentEntity.getId()).getVersion());
+        }
 
-    return PageUtils.getPage(method, request.getPage(), request.getSize());
+        responseList.add(response);
+      }
+      pageResult.setData(responseList);
+    }
+    return pageResult;
+  }
+
+  private List<ApiAssignmentEntity> searchAll(AssignmentSearchRequest request) {
+    if (null != request.getOnline() && Boolean.TRUE.equals(request.getOnline())) {
+      return apiOnlineDao.searchAll(request.getGroupId(), request.getModuleId(),
+          request.getOpen(), request.getSearchText());
+    }
+    return apiAssignmentDao.searchAll(request.getGroupId(), request.getModuleId(),
+        request.getOpen(), request.getSearchText(), request.getOnline());
   }
 
   private List<ApiContextEntity> getContextListEntity(List<String> contextList) {
@@ -632,4 +698,40 @@ public class ApiAssignmentService {
     return sqlList;
   }
 
+  private VersionCommitResponse buildVersionCommitResponse(VersionCommitEntity commitEntity, Long currCommitId) {
+    VersionCommitResponse response = new VersionCommitResponse();
+    response.setCommitId(commitEntity.getId());
+    response.setVersion(commitEntity.getVersion());
+    response.setDescription(commitEntity.getDescription());
+    response.setApiId(commitEntity.getBizId());
+    response.setOnline(Objects.equals(commitEntity.getId(), currCommitId));
+    response.setCreateTime(commitEntity.getCreateTime());
+    return response;
+  }
+
+  public List<VersionCommitResponse> listVersions(Long bizId) {
+    ApiAssignmentEntity assignmentEntity = apiAssignmentDao.getById(bizId, false);
+    Long commitId = apiOnlineDao.getCommitIdByUk(assignmentEntity.getMethod(), assignmentEntity.getPath());
+    return versionCommitDao.getVersionList(bizId, false)
+        .stream().map(one -> buildVersionCommitResponse(one, commitId))
+        .collect(Collectors.toList());
+  }
+
+  public VersionDetailResponse showVersion(Long commitId) {
+    VersionCommitEntity commitEntity = versionCommitDao.getByCommitId(commitId);
+    VersionDetailResponse response = new VersionDetailResponse();
+    BeanUtil.copyProperties(buildVersionCommitResponse(commitEntity, 0L), response);
+    String content = commitEntity.getContent();
+    ApiAssignmentEntity assignmentEntity = JsonUtils.toBeanObject(content, ApiAssignmentEntity.class);
+    response.setDetail(buildAssignmentDetail(assignmentEntity));
+    response.setOnline(response.getDetail().getStatus());
+    return response;
+  }
+
+  public void revertVersion(Long bizId, Long commitId) {
+    VersionCommitEntity commitEntity = versionCommitDao.getByCommitId(commitId);
+    String content = commitEntity.getContent();
+    ApiAssignmentEntity assignmentEntity = JsonUtils.toBeanObject(content, ApiAssignmentEntity.class);
+    apiAssignmentDao.update(assignmentEntity);
+  }
 }

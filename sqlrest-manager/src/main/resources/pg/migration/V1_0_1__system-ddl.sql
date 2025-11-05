@@ -76,7 +76,7 @@ CREATE TABLE SQLREST_API_ASSIGNMENT
     foreign key ("module_id") references SQLREST_API_MODULE ("id") on delete cascade on update cascade,
     foreign key ("datasource_id") references SQLREST_DATASOURCE ("id") on delete cascade on update cascade
 );
-CREATE UNIQUE INDEX "SSQLREST_API_ASSIGNMENT_METHOD_PATH_IDX" ON SQLREST_API_ASSIGNMENT("method","path");
+CREATE UNIQUE INDEX "SQLREST_API_ASSIGNMENT_METHOD_PATH_IDX" ON SQLREST_API_ASSIGNMENT("method","path");
 
 CREATE TABLE SQLREST_API_CONTEXT
 (

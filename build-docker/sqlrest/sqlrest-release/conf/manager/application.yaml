@@ -10,6 +10,11 @@ spring:
     static-path-pattern: /**
 
 sqlrest:
+  url:
+    gateway: ${SQLREST_GATEWAY_URL:}
+    manager: ${SQLREST_MANAGER_URL:}
+  datasource:
+    encrypt: ${SQLREST_DS_ENCRYPT:false}
   cache:
     hazelcast:
       enabled: true

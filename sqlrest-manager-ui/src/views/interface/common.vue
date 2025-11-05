@@ -14,6 +14,14 @@
       </el-col>
       <el-col :span="22">
         <div style="float:right">
+          <el-button type="danger"
+                     v-if="showVersionDetail"
+                     size="mini"
+                     @click="handleExitShowVersionDetail">
+            <i class="el-icon-question">
+              退出版本查看</i>
+          </el-button>
+
           <el-button type="warning"
                      size="mini"
                      @click="handleHelp">
@@ -25,6 +33,28 @@
                      @click="handleGoBack">
             <i class="el-icon-d-arrow-left">
               返回</i>
+          </el-button>
+
+          <el-button type="primary"
+                     size="mini"
+                     v-if="!isOnlyShowDetail"
+                     icon="el-icon-arrow-left"
+                     @click="handleDebug">
+            调试
+          </el-button>
+          <el-button type="primary"
+                     size="mini"
+                     v-if="!isOnlyShowDetail"
+                     icon="el-icon-arrow-left"
+                     @click="handleSave">
+            保存
+          </el-button>
+          <el-button type="primary"
+                     size="mini"
+                     v-if="isOnlyShowDetail"
+                     icon="el-icon-top"
+                     @click="handleShowVersionList">
+            版本
           </el-button>
         </div>
       </el-col>
@@ -324,7 +354,7 @@
                                   :required=true
                                   prop="path">
                       <el-input v-model="createParam.path"
-                                :disabled="isOnlyShowDetail">
+                                :disabled="isOnlyShowDetail || $route.query.id>0">
                         <template slot="prepend">{{gatewayApiPrefix}}</template>
                       </el-input>
                     </el-form-item>
@@ -336,7 +366,7 @@
                                   :required=true
                                   prop="method">
                       <el-select v-model="createParam.method"
-                                 :disabled="isOnlyShowDetail">
+                                 :disabled="isOnlyShowDetail || $route.query.id>0">
                         <el-option label="GET"
                                    value="GET"></el-option>
                         <el-option label="PUT"
@@ -515,11 +545,45 @@
                                    step-strictly></el-input-number>
                 </el-form-item>
               </el-tab-pane>
+              <el-tab-pane label="认证配置"
+                           name="authen">
+                <el-row>
+                  <el-col :span="24">
+                    <el-form-item label="是否公开">
+                      <el-switch v-model="createParam.open"
+                                 active-color="#13ce66"
+                                 :active-value="true"
+                                 :inactive-value="false"
+                                 active-text="开启"
+                                 inactive-text="关闭"
+                                 :disabled="isOnlyShowDetail">
+                      </el-switch>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
+              <el-tab-pane label="告警配置"
+                           name="alarm">
+                <el-row>
+                  <el-col :span="24">
+                    <el-form-item label="是否告警">
+                      <el-switch v-model="createParam.alarm"
+                                 active-color="#13ce66"
+                                 :active-value="true"
+                                 :inactive-value="false"
+                                 active-text="开启"
+                                 inactive-text="关闭"
+                                 :disabled="isOnlyShowDetail">
+                      </el-switch>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-tab-pane>
               <el-tab-pane label="流量控制"
                            name="flowControl">
                 <el-row>
                   <el-col :span="24">
-                    <el-form-item label="是否开启">
+                    <el-form-item label="是否控制流量">
                       <el-switch v-model="createParam.flowStatus"
                                  active-color="#13ce66"
                                  :active-value="true"
@@ -555,24 +619,7 @@
         </div>
       </el-col>
     </el-row>
-    <el-row v-if="!isOnlyShowDetail">
-      <el-col>
-        <div style="float: right; padding: 5px">
-          <el-button type="primary"
-                     size="mini"
-                     icon="el-icon-arrow-left"
-                     @click="handleDebug">
-            调试
-          </el-button>
-          <el-button type="primary"
-                     size="mini"
-                     icon="el-icon-arrow-left"
-                     @click="handleSave">
-            保存
-          </el-button>
-        </div>
-      </el-col>
-    </el-row>
+
     <el-drawer title="接口调试"
                :visible.sync="showDebugDrawer"
                direction="ltr"
@@ -701,6 +748,52 @@
         </el-row>
       </el-card>
     </el-drawer>
+
+    <el-drawer title="版本列表"
+               :visible.sync="showVersionDrawer"
+               direction="ltr"
+               size="40%"
+               :with-header="true">
+      <el-card>
+        <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                  :data="versionList"
+                  size="small"
+                  border>
+          <el-table-column label="版本"
+                           min-width="10%">
+            <template slot-scope="scope">
+              V{{ scope.row.version }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="online"
+                           label="在线"
+                           :formatter="boolFormatOnline"
+                           min-width="10%"></el-table-column>
+          <el-table-column prop="createTime"
+                           label="时间"
+                           min-width="30%"> </el-table-column>
+          <el-table-column prop="description"
+                           label="描述"
+                           show-overflow-tooltip
+                           min-width="30%"></el-table-column>
+          <el-table-column label="查看"
+                           min-width="10%">
+            <template slot-scope="scope">
+              <el-link icon="el-icon-view"
+                       @click="handleShowVersionDetail(scope.$index, scope.row)"></el-link>
+            </template>
+          </el-table-column>
+          <el-table-column label="回滚"
+                           min-width="10%">
+            <template slot-scope="scope">
+              <el-link icon="el-icon-male"
+                       @click="handleRevertVersionDetail(scope.$index, scope.row)"></el-link>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+    </el-drawer>
+
   </el-card>
 </template>
 
@@ -753,6 +846,8 @@ export default {
         open: false,
         namingStrategy: 'CAMEL_CASE',
         formatMap: null,
+        open: false,
+        alarm: false,
         flowStatus: false,
         flowGrade: 1,
         flowCount: 5,
@@ -780,6 +875,9 @@ export default {
       outputParams: [],
       responseNamingStrategy: [],
       responseTypeFormat: [],
+      showVersionDrawer: false,
+      versionList: [],
+      showVersionDetail: false,
       rules: {
         name: [
           {
@@ -860,6 +958,58 @@ export default {
       }
       return false;
     },
+    applyAssignmentDetail: function (detail) {
+      let mergedFormatMap = this.mergeFormatMap(detail.formatMap);
+      this.createParam = {
+        id: detail.id,
+        name: detail.name,
+        description: detail.description,
+        method: detail.method,
+        path: detail.path,
+        contentType: detail.contentType,
+        open: detail.open,
+        group: detail.groupId,
+        module: detail.moduleId,
+        dataSourceId: detail.datasourceId,
+        engine: detail.engine,
+        sqls: [],
+        script: "",
+        namingStrategy: detail.namingStrategy,
+        formatMap: mergedFormatMap,
+        open: detail.open,
+        alarm: detail.alarm,
+        flowStatus: detail.flowStatus,
+        flowGrade: detail.flowGrade,
+        flowCount: detail.flowCount,
+        cacheKeyType: detail.cacheKeyType,
+        cacheKeyExpr: detail.cacheKeyExpr,
+        cacheExpireSeconds: detail.cacheExpireSeconds,
+      }
+      this.inputParams = []
+      if (detail.params) {
+        this.inputParams = detail.params
+        for (let item of this.inputParams) {
+          if (!item.id) {
+            Vue.set(item, 'id', this.uuid());
+          }
+        }
+      }
+      this.outputParams = detail.outputs || [];
+
+      if (detail.sqlList && detail.sqlList.length > 0) {
+        if (this.createParam.engine === 'SQL') {
+          if (this.$refs.sqlEditors) {
+            this.$refs.sqlEditors.resetEditor();
+          }
+          this.createParam.sqls = detail.sqlList.map(obj => obj['sqlText'])
+        } else {
+          this.createParam.script = detail.sqlList[0].sqlText
+          if (this.$refs.scriptEditer) {
+            this.$refs.scriptEditer.resetEditor(this.createParam.script)
+          }
+        }
+      }
+    },
     loadAssignmentDetail: function () {
       if (!this.isUpdatePage()) {
         return;
@@ -870,47 +1020,7 @@ export default {
         if (0 === res.data.code) {
           this.showTree = false;
           let detail = res.data.data;
-          let mergedFormatMap = this.mergeFormatMap(detail.formatMap);
-          this.createParam = {
-            id: detail.id,
-            name: detail.name,
-            description: detail.description,
-            method: detail.method,
-            path: detail.path,
-            contentType: detail.contentType,
-            open: detail.open,
-            group: detail.groupId,
-            module: detail.moduleId,
-            dataSourceId: detail.datasourceId,
-            engine: detail.engine,
-            sqls: [],
-            script: "",
-            namingStrategy: detail.namingStrategy,
-            formatMap: mergedFormatMap,
-            flowStatus: detail.flowStatus,
-            flowGrade: detail.flowGrade,
-            flowCount: detail.flowCount,
-            cacheKeyType: detail.cacheKeyType,
-            cacheKeyExpr: detail.cacheKeyExpr,
-            cacheExpireSeconds: detail.cacheExpireSeconds,
-          }
-          this.inputParams = []
-          if (detail.params) {
-            this.inputParams = detail.params
-            for (let item of this.inputParams) {
-              if (!item.id) {
-                Vue.set(item, 'id', this.uuid());
-              }
-            }
-          }
-          this.outputParams = detail.outputs || [];
-          if (detail.sqlList && detail.sqlList.length > 0) {
-            if (this.createParam.engine === 'SQL') {
-              this.createParam.sqls = detail.sqlList.map(obj => obj['sqlText'])
-            } else {
-              this.createParam.script = detail.sqlList[0].sqlText
-            }
-          }
+          this.applyAssignmentDetail(detail);
         } else {
           if (res.data.message) {
             alert("查询失败," + res.data.message);
@@ -1045,26 +1155,26 @@ export default {
       if (!existingFormatMap || existingFormatMap.length === 0) {
         return this.responseTypeFormat || [];
       }
-      
+
       // 如果还没有加载系统格式，先返回现有的
       if (!this.responseTypeFormat || this.responseTypeFormat.length === 0) {
         return existingFormatMap;
       }
-      
+
       // 合并逻辑：以系统格式为基础，用现有配置覆盖相同key的值
       const merged = [...this.responseTypeFormat];
       const existingMap = {};
-      
+
       // 创建现有配置的映射
       existingFormatMap.forEach(item => {
         existingMap[item.key] = item.value;
       });
-      
+
       // 用现有配置覆盖系统默认值
       merged.forEach(item => {
         if (existingMap.hasOwnProperty(item.key)) {
           item.value = existingMap[item.key];
-        } 
+        }
       });
       return merged;
     },
@@ -1523,6 +1633,8 @@ export default {
           open: this.createParam.open,
           namingStrategy: this.createParam.namingStrategy,
           formatMap: this.createParam.formatMap,
+          open: this.createParam.open,
+          alarm: this.createParam.alarm,
           flowStatus: this.createParam.flowStatus,
           flowGrade: this.createParam.flowGrade,
           flowCount: this.createParam.flowCount,
@@ -1572,6 +1684,8 @@ export default {
           open: this.createParam.open,
           namingStrategy: this.createParam.namingStrategy,
           formatMap: this.createParam.formatMap,
+          open: this.createParam.open,
+          alarm: this.createParam.alarm,
           flowStatus: this.createParam.flowStatus,
           flowGrade: this.createParam.flowGrade,
           flowCount: this.createParam.flowCount,
@@ -1819,6 +1933,87 @@ export default {
         }
       }
     },
+    handleShowVersionList: function () {
+      this.$http({
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/version/list/" + + this.$route.query.id,
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.versionList = res.data.data;
+          this.showVersionDrawer = true;
+        } else {
+          if (res.data.message) {
+            alert("获取版本列表失败," + res.data.message);
+          }
+        }
+      });
+    },
+    boolFormatOnline: function (row) {
+      if (row.online === true) {
+        return "是";
+      } else {
+        return "-";
+      }
+    },
+    handleShowVersionDetail: function (index, row) {
+      this.$http({
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/version/show/" + row.commitId,
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.showVersionDrawer = false;
+          this.showTree = false;
+          let detail = res.data.data.detail;
+          this.applyAssignmentDetail(detail);
+          this.showVersionDetail = true
+          this.$message("当前内容已经切换为版本V" + row.version + "了.");
+        } else {
+          if (res.data.message) {
+            alert("查看版本详情失败," + res.data.message);
+          }
+        }
+      });
+    },
+    handleExitShowVersionDetail: function () {
+      this.loadAssignmentDetail();
+      this.showVersionDetail = false;
+      this.$message("当前退出版本详情查看了.");
+    },
+    handleRevertVersionDetail: function (index, row) {
+      this.$confirm(
+        "确定要执行回滚最新可编辑内容到版本V" + row.version + "么, 是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
+      ).then(() => {
+        this.$http({
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          url: "/sqlrest/manager/api/v1/version/revert/" + this.$route.query.id + "?commitId=" + row.commitId,
+        }).then(res => {
+          if (0 === res.data.code) {
+            this.showVersionDrawer = false;
+            this.loadAssignmentDetail();
+            this.$message("版本回退成功");
+          } else {
+            if (res.data.message) {
+              alert("版本回退失败," + res.data.message);
+            }
+          }
+        });
+      });
+    }
   },
   async created () {
     await this.loadResponseTypeFormat();

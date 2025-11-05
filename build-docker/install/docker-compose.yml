@@ -33,6 +33,7 @@ services:
       MANAGER_PORT: 8090
       EXECUTOR_PORT: 8092
       GATEWAY_PORT: 8091
+      SQLREST_DS_ENCRYPT: false
 #      SQLREST_MANAGER_URL: http://localhost:8090
 #      SQLREST_GATEWAY_URL: http://localhost:8091
     volumes:
@@ -57,6 +58,7 @@ services:
       MANAGER_PORT: 8090
       EXECUTOR_PORT: 8092
       GATEWAY_PORT: 8091
+      SQLREST_DS_ENCRYPT: false
     #      SQLREST_MANAGER_URL: http://localhost:8090
     #      SQLREST_GATEWAY_URL: http://localhost:8091
     volumes:
@@ -81,6 +83,7 @@ services:
       MANAGER_PORT: 8090
       EXECUTOR_PORT: 8092
       GATEWAY_PORT: 8091
+      SQLREST_DS_ENCRYPT: false
 #      SQLREST_MANAGER_URL: http://localhost:8090
 #      SQLREST_GATEWAY_URL: http://localhost:8091
     volumes:

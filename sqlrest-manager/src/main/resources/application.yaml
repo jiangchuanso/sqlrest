@@ -10,6 +10,11 @@ spring:
     static-path-pattern: /**
 
 sqlrest:
+  url:
+    gateway: ${SQLREST_GATEWAY_URL:}
+    manager: ${SQLREST_MANAGER_URL:}
+  datasource:
+    encrypt: ${SQLREST_DS_ENCRYPT:false}
   cache:
     hazelcast:
       enabled: true
@@ -19,11 +24,6 @@ sqlrest:
       port: 6379
       password: 123456
       database: 0
-  url:
-    # 外部配置的 sqlrest 网关地址
-    gateway: ${SQLREST_GATEWAY_URL}
-    # 外部配置的 sqlrest 管理地址
-    manager: ${SQLREST_MANAGER_URL}
 
 mybatis:
   configuration:

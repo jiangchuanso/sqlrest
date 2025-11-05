@@ -43,6 +43,7 @@ import org.dromara.sqlrest.core.dto.EntitySearchRequest;
 import org.dromara.sqlrest.core.dto.MetadataColumnResponse;
 import org.dromara.sqlrest.core.util.DataSourceUtils;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.dao.DataSourceDao;
 import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
 import org.dromara.sqlrest.persistence.util.PageUtils;
@@ -74,9 +75,7 @@ public class DataSourceService {
       List<DataSourceEntity> list = dataSourceDao.listAll(request.getSearchText());
       return list.stream().map(dataSourceEntity -> {
         DatasourceDetailResponse response = new DatasourceDetailResponse();
-
-        DataSourceUtils.decrypt(dataSourceEntity);// 解密
-
+        DataSourceUtils.decrypt(dataSourceEntity);
         BeanUtil.copyProperties(dataSourceEntity, response);
         return response;
       }).collect(Collectors.toList());
@@ -88,7 +87,7 @@ public class DataSourceService {
   public DatasourceDetailResponse getDetailById(Long id) {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(id);
     DatasourceDetailResponse response = new DatasourceDetailResponse();
-    DataSourceUtils.decrypt(dataSourceEntity);// 解密
+    DataSourceUtils.decrypt(dataSourceEntity);
     BeanUtil.copyProperties(dataSourceEntity, response);
     return response;
   }
@@ -125,7 +124,6 @@ public class DataSourceService {
         .getVersionDriverFile(dataSourceEntity.getType(),
             dataSourceEntity.getVersion());
     String driverPath = driverPathFile.getAbsolutePath();
-    DataSourceUtils.encrypt(dataSourceEntity);//页面传过来的密码是明文，需要加密
     HikariDataSource ds = DataSourceUtils.createDataSource(dataSourceEntity, driverPath);
     try {
       testConnection(ds, request.getType());
@@ -160,7 +158,7 @@ public class DataSourceService {
     BeanUtil.copyProperties(request, dataSourceEntity);
 
     validJdbcUrlFormat(dataSourceEntity);
-    DataSourceUtils.encrypt(dataSourceEntity);//加密
+    DataSourceUtils.encrypt(dataSourceEntity);
     dataSourceDao.insert(dataSourceEntity);
   }
 
@@ -178,13 +176,16 @@ public class DataSourceService {
     BeanUtil.copyProperties(request, dataSourceEntity);
 
     validJdbcUrlFormat(dataSourceEntity);
-    DataSourceUtils.encrypt(dataSourceEntity);//加密
+    DataSourceUtils.encrypt(dataSourceEntity);
     dataSourceDao.updateById(dataSourceEntity);
     DataSourceUtils.dropHikariDataSource(request.getId());
   }
 
   public void deleteDataSource(Long id) {
     if (SpringUtil.getBean(ApiAssignmentDao.class).existsDataSourceById(id)) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "id=" + id);
+    }
+    if (SpringUtil.getBean(ApiOnlineDao.class).existsDataSourceById(id)) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "id=" + id);
     }
     dataSourceDao.deleteById(id);

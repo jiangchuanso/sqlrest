@@ -12,7 +12,7 @@ package org.dromara.sqlrest.manager.controller;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.core.dto.TopologyNodeResponse;
-import org.dromara.sqlrest.core.service.NodeService;
+import org.dromara.sqlrest.manager.service.NodeService;
 import io.swagger.annotations.Api;
 import javax.annotation.Resource;
 import org.springframework.http.MediaType;

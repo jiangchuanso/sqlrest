@@ -10,10 +10,9 @@
 package org.dromara.sqlrest.persistence.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
@@ -21,7 +20,6 @@ import org.dromara.sqlrest.persistence.mapper.ApiAssignmentMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Repository
 public class ApiAssignmentDao {
@@ -31,10 +29,22 @@ public class ApiAssignmentDao {
   @Resource
   private ApiContextDao apiContextDao;
 
+  public List<Long> getUpgradeOnlineAssignments() {
+    return apiAssignmentMapper.getUpgradeOnlineAssignments();
+  }
+
+  public void resetUpgradeOnlineAssignments(List<Long> ids) {
+    if (CollectionUtils.isEmpty(ids)) {
+      return;
+    }
+    apiAssignmentMapper.resetUpgradeOnlineAssignments(ids);
+  }
+
   @Transactional(rollbackFor = Exception.class)
   public void insert(ApiAssignmentEntity apiConfigEntity) {
     apiAssignmentMapper.insert(apiConfigEntity);
     if (null != apiConfigEntity.getContextList() && apiConfigEntity.getContextList().size() > 0) {
+      apiConfigEntity.getContextList().forEach(i -> i.setId(null));
       apiConfigEntity.getContextList().forEach(i -> i.setApiId(apiConfigEntity.getId()));
       apiContextDao.batchInsert(apiConfigEntity.getContextList());
     }
@@ -45,6 +55,7 @@ public class ApiAssignmentDao {
     apiAssignmentMapper.updateById(apiConfigEntity);
     apiContextDao.deleteByApiConfigId(apiConfigEntity.getId());
     if (null != apiConfigEntity.getContextList() && apiConfigEntity.getContextList().size() > 0) {
+      apiConfigEntity.getContextList().forEach(i -> i.setId(null));
       apiConfigEntity.getContextList().forEach(i -> i.setApiId(apiConfigEntity.getId()));
       apiContextDao.batchInsert(apiConfigEntity.getContextList());
     }
@@ -77,30 +88,6 @@ public class ApiAssignmentDao {
     apiAssignmentMapper.updateGroup(groupId, ids);
   }
 
-  public void updateStatus(Long id, Boolean onOff) {
-    ApiAssignmentEntity assignmentEntity = apiAssignmentMapper.selectById(id);
-    if (null != assignmentEntity) {
-      assignmentEntity.setStatus(onOff);
-      apiAssignmentMapper.updateById(assignmentEntity);
-    }
-  }
-
-  public void makeOpen(Long id, Boolean open) {
-    ApiAssignmentEntity assignmentEntity = apiAssignmentMapper.selectById(id);
-    if (null != assignmentEntity && null != open) {
-      assignmentEntity.setOpen(open);
-      apiAssignmentMapper.updateById(assignmentEntity);
-    }
-  }
-
-  public void makeAlarm(Long id, Boolean alarm) {
-    ApiAssignmentEntity assignmentEntity = apiAssignmentMapper.selectById(id);
-    if (null != assignmentEntity && null != alarm) {
-      assignmentEntity.setAlarm(alarm);
-      apiAssignmentMapper.updateById(assignmentEntity);
-    }
-  }
-
   public ApiAssignmentEntity getByUk(HttpMethodEnum method, String path) {
     QueryWrapper<ApiAssignmentEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(ApiAssignmentEntity::getMethod, method.name())
@@ -112,31 +99,16 @@ public class ApiAssignmentDao {
     return apiConfigEntity;
   }
 
-  public List<ApiAssignmentEntity> listAll(Long groupId, Long moduleId, Boolean publish, Boolean open,
-      String searchText) {
-    return apiAssignmentMapper.selectList(
-        Wrappers.<ApiAssignmentEntity>lambdaQuery()
-            .eq(Objects.nonNull(groupId), ApiAssignmentEntity::getGroupId, groupId)
-            .eq(Objects.nonNull(moduleId), ApiAssignmentEntity::getModuleId, moduleId)
-            .eq(Objects.nonNull(publish), ApiAssignmentEntity::getStatus, publish)
-            .eq(Objects.nonNull(open), ApiAssignmentEntity::getOpen, open)
-            .like(StringUtils.hasText(searchText), ApiAssignmentEntity::getName, searchText)
-            .orderByDesc(ApiAssignmentEntity::getCreateTime)
-    );
+  public List<ApiAssignmentEntity> searchAll(Long groupId, Long moduleId, Boolean open,
+      String searchText, Boolean online) {
+    if (StringUtils.isNotEmpty(searchText)) {
+      searchText = "%" + searchText + "%";
+    }
+    return apiAssignmentMapper.searchAll(groupId, moduleId, open, searchText, online);
   }
 
   public List<ApiAssignmentEntity> listAll() {
     return apiAssignmentMapper.selectList(null);
-  }
-
-  public List<ApiAssignmentEntity> listFlowControlAll() {
-    return apiAssignmentMapper.selectList(
-        Wrappers.<ApiAssignmentEntity>lambdaQuery()
-            .eq(ApiAssignmentEntity::getStatus, true)
-            .eq(ApiAssignmentEntity::getFlowStatus, true)
-            .isNotNull(ApiAssignmentEntity::getFlowGrade)
-            .isNotNull(ApiAssignmentEntity::getFlowCount)
-    );
   }
 
   public boolean existsDataSourceById(Long dataSourceId) {

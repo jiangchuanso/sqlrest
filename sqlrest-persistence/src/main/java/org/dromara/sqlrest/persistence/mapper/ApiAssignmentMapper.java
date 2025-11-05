@@ -10,14 +10,52 @@
 package org.dromara.sqlrest.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
+import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
 
 public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
+
+  @Select("<script>"
+      + "<if test='_databaseId == \"mysql\" '>"
+      + "  SELECT id from SQLREST_API_ASSIGNMENT a  "
+      + "  WHERE status = 1 and NOT EXISTS ( "
+      + "   SELECT 1 from SQLREST_API_ONLINE o "
+      + "   WHERE o.method=a.method and o.path=a.path "
+      + "  )"
+      + "</if>"
+      + "<if test='_databaseId == \"postgresql\" '>"
+      + "  SELECT id from SQLREST_API_ASSIGNMENT a  "
+      + "  WHERE status = true and NOT EXISTS ( "
+      + "   SELECT 1 from SQLREST_API_ONLINE o "
+      + "   WHERE o.method=a.method and o.path=a.path "
+      + "  )"
+      + "</if>"
+      + "</script>")
+  List<Long> getUpgradeOnlineAssignments();
+
+  @Update("<script>"
+      + "<if test='_databaseId == \"mysql\" '>"
+      + " UPDATE SQLREST_API_ASSIGNMENT "
+      + " SET status = 0 "
+      + " WHERE id IN "
+      + "<foreach collection='ids' item='item' open='(' separator=',' close=')'> "
+      + "   #{item} "
+      + "</foreach>"
+      + "</if>"
+      + "<if test='_databaseId == \"postgresql\" '>"
+      + " UPDATE SQLREST_API_ASSIGNMENT "
+      + " SET status = false "
+      + " WHERE id IN "
+      + "<foreach collection='ids' item='item' open='(' separator=',' close=')'> "
+      + "   #{item} "
+      + "</foreach>"
+      + "</if>"
+      + "</script>")
+  void resetUpgradeOnlineAssignments(@Param("ids") List<Long> ids);
 
   @Select("<script>"
       + "SELECT "
@@ -41,4 +79,27 @@ public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
       + "</foreach>"
       + "</script>")
   void updateGroup(@Param("groupId") Long groupId, @Param("ids") List<Long> ids);
+
+  @Select("<script>"
+      + "SELECT * "
+      + "FROM SQLREST_API_ASSIGNMENT a  WHERE 1=1 "
+      + "<if test='groupId != null '>"
+      + " AND a.group_id = #{groupId} "
+      + "</if>"
+      + "<if test='moduleId != null '>"
+      + " AND a.module_id = #{moduleId} "
+      + "</if>"
+      + "<if test='open != null '>"
+      + " AND a.open = #{open} "
+      + "</if>"
+      + "<if test='online != null '>"
+      + " AND not exists (SELECT 1 FROM SQLREST_API_ONLINE o where o.api_id=a.id)"
+      + "</if>"
+      + "<if test='searchText != null and searchText.length()>0 '>"
+      + " AND a.name like #{searchText,jdbcType=VARCHAR} "
+      + "</if>"
+      + " ORDER BY a.create_time desc "
+      + "</script>")
+  List<ApiAssignmentEntity> searchAll(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId,
+      @Param("open") Boolean open, @Param("searchText") String searchText, @Param("online") Boolean online);
 }

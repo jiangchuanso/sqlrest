@@ -127,6 +127,10 @@ export default {
         cm.showHint()
       }
     },
+    resetEditor: function () {
+      this.tabIndex = 0;
+      this.editableTabs = [];
+    },
     addTab: function (sqlContent) {
       if (this.editableTabs.length > 6) {
         alert("开启的SQL窗口个数已达最大个数")

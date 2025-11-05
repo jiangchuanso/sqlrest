@@ -10,27 +10,6 @@
 package org.dromara.sqlrest.manager.service;
 
 import cn.hutool.extra.spring.SpringUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.common.dto.PageResult;
-import org.dromara.sqlrest.common.exception.CommonException;
-import org.dromara.sqlrest.common.exception.ResponseErrorCode;
-import org.dromara.sqlrest.common.util.TokenUtils;
-import org.dromara.sqlrest.core.configuration.SqlrestUrlConfiguration;
-import org.dromara.sqlrest.core.dto.EntitySearchRequest;
-import org.dromara.sqlrest.core.dto.McpToolResponse;
-import org.dromara.sqlrest.core.dto.McpToolSaveRequest;
-import org.dromara.sqlrest.core.util.ApiPathUtils;
-import org.dromara.sqlrest.manager.model.McpToolCallHandler;
-import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
-import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
-import org.dromara.sqlrest.persistence.dao.McpClientDao;
-import org.dromara.sqlrest.persistence.dao.McpToolDao;
-import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
-import org.dromara.sqlrest.persistence.entity.McpClientEntity;
-import org.dromara.sqlrest.persistence.entity.McpToolEntity;
-import org.dromara.sqlrest.persistence.util.PageUtils;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
 import java.util.ArrayList;
@@ -41,6 +20,28 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.PageResult;
+import org.dromara.sqlrest.common.exception.CommonException;
+import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.util.TokenUtils;
+import org.dromara.sqlrest.manager.config.SqlrestUrlConfiguration;
+import org.dromara.sqlrest.core.dto.EntitySearchRequest;
+import org.dromara.sqlrest.core.dto.McpToolResponse;
+import org.dromara.sqlrest.core.dto.McpToolSaveRequest;
+import org.dromara.sqlrest.core.util.ApiPathUtils;
+import org.dromara.sqlrest.manager.model.McpToolCallHandler;
+import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
+import org.dromara.sqlrest.persistence.dao.McpClientDao;
+import org.dromara.sqlrest.persistence.dao.McpToolDao;
+import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
+import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
+import org.dromara.sqlrest.persistence.entity.McpClientEntity;
+import org.dromara.sqlrest.persistence.entity.McpToolEntity;
+import org.dromara.sqlrest.persistence.util.PageUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -62,6 +63,8 @@ public class McpManageService {
   @Resource
   private ApiAssignmentDao apiAssignmentDao;
   @Resource
+  private ApiOnlineDao apiOnlineDao;
+  @Resource
   private McpSyncServer mcpSyncServer;
 
   @EventListener(ApplicationReadyEvent.class)
@@ -82,9 +85,10 @@ public class McpManageService {
     ServiceInstance instance = instances.stream().findAny().orElse(null);
     SqlrestUrlConfiguration sqlrestUrlConfiguration = SpringUtil.getBean(SqlrestUrlConfiguration.class);
     // 有且仅当服务确实存在时，才优先使用外部配置
-    if (StringUtils.isNotBlank(sqlrestUrlConfiguration.getGateway()) && instance != null) {
-      log.info("使用外部配置的管理地址: {},跳过使用服务发现的管理地址",sqlrestUrlConfiguration.getManager());
-      return sqlrestUrlConfiguration.getGateway();
+    if (StringUtils.isNotBlank(sqlrestUrlConfiguration.getManager()) && instance != null) {
+      log.info("Configured Manger Address found :{},Skip auto self discover", sqlrestUrlConfiguration.getManager());
+      return String.format("%s%s?%s=", sqlrestUrlConfiguration.getManager(),
+          Constants.DEFAULT_SSE_ENDPOINT, Constants.DEFAULT_SSE_TOKEN_PRAM_NAME);
     }
     return String.format("http://%s:%d%s?%s=", instance.getHost(), instance.getPort(),
         Constants.DEFAULT_SSE_ENDPOINT, Constants.DEFAULT_SSE_TOKEN_PRAM_NAME);
@@ -131,8 +135,12 @@ public class McpManageService {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "apiId");
     }
     if (null == apiAssignmentDao.getById(request.getApiId(), false)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS,
-          "apiId not exists,id=" + request.getApiId());
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS,
+          "apiId=" + request.getApiId());
+    }
+    if (null == apiOnlineDao.getByApiId(request.getApiId())) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_ONLINE,
+          "apiId=" + request.getApiId());
     }
 
     McpToolEntity toolEntity = McpToolEntity.builder()
@@ -162,7 +170,11 @@ public class McpManageService {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
     }
     if (null == apiAssignmentDao.getById(request.getApiId(), false)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS,
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS,
+          "apiId=" + request.getApiId());
+    }
+    if (null == apiOnlineDao.getByApiId(request.getApiId())) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_ONLINE,
           "apiId=" + request.getApiId());
     }
     McpToolEntity newToolEntity = McpToolEntity.builder()
@@ -228,7 +240,11 @@ public class McpManageService {
   }
 
   private void addMcpTool(McpToolEntity toolEntity) {
-    ApiAssignmentEntity config = apiAssignmentDao.getById(toolEntity.getApiId(), true);
+    ApiAssignmentEntity config = apiOnlineDao.getByApiId(toolEntity.getApiId());
+    if (null == config) {
+      log.warn("Can't find online api assignment failed by id={}, skip add mcp tool.", toolEntity.getApiId());
+      return;
+    }
     McpToolCallHandler toolCallHandler = new McpToolCallHandler(
         toolEntity.getName(),
         toolEntity.getDescription(),

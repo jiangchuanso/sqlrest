@@ -24,7 +24,7 @@
                          :label="item.name"
                          :value="item.id"></el-option>
             </el-select>
-            <el-select v-model="publish"
+            <el-select v-model="online"
                        size="mini"
                        :clearable="true"
                        style="width:10%"
@@ -75,11 +75,11 @@
                    size="mini"
                    :disabled="apiDocStatus==false"
                    icon="el-icon-document-add"
-                   @click="openSwagger">Swagger文档</el-button>
+                   @click="openSwagger">在线文档</el-button>
         <el-button type="primary"
                    size="mini"
                    icon="el-icon-document-add"
-                   @click="handleCreate">添加</el-button>
+                   @click="handleCreate">新建接口</el-button>
       </div>
 
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
@@ -92,18 +92,22 @@
         <el-table-column prop="name"
                          label="名称"
                          show-overflow-tooltip
-                         min-width="30%"></el-table-column>
-        <el-table-column label="方法"
-                         min-width="10%">
+                         min-width="20%">
+          <template slot-scope="scope">
+            <el-link class="btn-text"
+                     type="primary"
+                     @click="handleDetail(scope.$index, scope.row)">{{ scope.row.name }}</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="路径"
+                         show-overflow-tooltip
+                         min-width="20%">
           <template slot-scope="scope">
             <el-tag size="medium"
                     class="name-wrapper-tag">{{ scope.row.method }}</el-tag>
+            {{ scope.row.path }}
           </template>
         </el-table-column>
-        <el-table-column prop="path"
-                         label="接口路径"
-                         show-overflow-tooltip
-                         min-width="15%"></el-table-column>
         <el-table-column prop="moduleName"
                          label="模块"
                          show-overflow-tooltip
@@ -120,63 +124,49 @@
           </template>
         </el-table-column>
         <el-table-column prop="status"
-                         label="已上线"
+                         label="上线"
                          :formatter="boolFormatPublish"
                          show-overflow-tooltip
                          min-width="8%"></el-table-column>
         <el-table-column prop="open"
                          label="公开"
-                         min-width="8%">
-          <template slot-scope="scope">
-            <el-tooltip :content="boolFormatOpen(scope.row)"
-                        placement="top">
-              <el-switch v-model="scope.row.open"
-                         @change="hanldeOpenStateChanged(scope.row)" />
-            </el-tooltip>
-          </template>
-        </el-table-column>
+                         :formatter="boolFormatOpen"
+                         show-overflow-tooltip
+                         min-width="8%"></el-table-column>
         <el-table-column prop="alarm"
                          label="告警"
-                         min-width="8%">
-          <template slot-scope="scope">
-            <el-tooltip :content="boolFormatAlarm(scope.row)"
-                        placement="top">
-              <el-switch v-model="scope.row.alarm"
-                         @change="hanldeAlarmStateChanged(scope.row)" />
-            </el-tooltip>
-          </template>
-        </el-table-column>
+                         :formatter="boolFormatAlarm"
+                         show-overflow-tooltip
+                         min-width="8%"></el-table-column>
         <el-table-column prop="createTime"
                          label="创建时间"
                          min-width="18%"></el-table-column>
         <el-table-column label="操作"
-                         min-width="30%">
+                         min-width="40%">
           <template slot-scope="scope">
             <el-button-group>
               <el-button size="small"
                          type="primary"
                          icon="el-icon-timer"
                          v-if="scope.row.status===false"
-                         @click="handlePublish(scope.$index, scope.row)"
+                         @click="handleOnline(scope.$index, scope.row)"
                          round>上线</el-button>
               <el-button size="small"
                          type="info"
                          icon="el-icon-delete-location"
                          v-if="scope.row.status===true"
-                         @click="handleRetireTask(scope.$index, scope.row)"
+                         @click="handleOffline(scope.$index, scope.row)"
                          round>下线</el-button>
-              <el-button size="small"
-                         type="success"
-                         icon="el-icon-document"
-                         v-if="scope.row.status===true"
-                         @click="handleDetail(scope.$index, scope.row)"
-                         round>详情</el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
-                         v-if="scope.row.status===false"
                          @click="handleUpdate(scope.$index, scope.row)"
                          round>修改</el-button>
+              <el-button size="small"
+                         type="success"
+                         icon="el-icon-position"
+                         @click="handlePublish(scope.$index, scope.row)"
+                         round>发版</el-button>
               <el-button size="small"
                          type="danger"
                          icon="el-icon-delete"
@@ -198,6 +188,68 @@
                        :total="totalCount"></el-pagination>
       </div>
     </el-card>
+
+    <el-dialog title="发布新版本"
+               :visible.sync="publishDialogVisible"
+               :showClose="false"
+               width="40%"
+               :before-close="handleClose">
+      <el-form size="mini"
+               status-icon>
+        <el-form-item label="版本描述"
+                      label-width="120px"
+                      :required=true
+                      style="width:85%">
+          <el-input type="textarea"
+                    :autosize="{ minRows: 4, maxRows: 10 }"
+                    v-model="publishVersionDesc"
+                    auto-complete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="publishDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="handlePublishVersion">发 布</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="选择上线版本"
+               :visible.sync="versionDialogVisible"
+               :showClose="false"
+               width="40%"
+               :before-close="handleClose">
+      <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                :data="versions"
+                highlight-current-row
+                size="mini"
+                border>
+        <template slot="empty">
+          <span>版本内容为空，请点击“发版”按钮发布一个版本来</span>
+        </template>
+        <el-table-column label="选择版本"
+                         min-width="10%">
+          <template slot-scope="scope">
+            <el-radio v-model="selectCommitId"
+                      :label="scope.row.commitId">V{{ scope.row.version }}</el-radio>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime"
+                         label="生成时间"
+                         min-width="15%"> </el-table-column>
+        <el-table-column prop="description"
+                         label="版本描述"
+                         show-overflow-tooltip
+                         min-width="20%"></el-table-column>
+      </el-table>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="versionDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="handleDeploy">上 线</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -213,15 +265,23 @@ export default {
       keyword: null,
       groupId: null,
       moduleId: null,
-      publish: null,
+      online: null,
       open: null,
       apiDocStatus: true,
       groupLists: [],
       moduleLists: [],
       tableData: [],
+      publishDialogVisible: false,
+      publishVersionDesc: '',
+      versionDialogVisible: false,
+      selectRowId: 0,
+      selectCommitId: 0,
+      versions: [],
     };
   },
   methods: {
+    handleClose (done) {
+    },
     loadData: function () {
       this.$http({
         method: "POST",
@@ -233,7 +293,7 @@ export default {
           {
             groupId: this.groupId,
             moduleId: this.moduleId,
-            publish: this.publish,
+            online: this.online,
             open: this.open,
             searchText: this.keyword,
             page: this.currentPage,
@@ -330,23 +390,23 @@ export default {
     },
     boolFormatPublish (row) {
       if (row.status === true) {
-        return "是";
+        return "V" + row.version;
       } else {
         return "否";
       }
     },
     boolFormatOpen (row) {
       if (row.open === true) {
-        return "Token认证";
+        return "是";
       } else {
-        return "无认证";
+        return "否";
       }
     },
     boolFormatAlarm (row) {
       if (row.alarm === true) {
-        return "告警开启";
+        return "开";
       } else {
-        return "告警关闭";
+        return "关";
       }
     },
     hanldeOpenStateChanged (row) {
@@ -438,24 +498,92 @@ export default {
       });
     },
     handlePublish: function (index, row) {
+      this.selectRowId = row.id
+      this.publishDialogVisible = true
+    },
+    handlePublishVersion: function () {
+      if (!this.publishVersionDesc) {
+        this.$alert("版本描述内容不能为空", "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
+        return;
+      }
       this.$http({
         method: "PUT",
         headers: {
           'Content-Type': 'application/json'
         },
-        url: "/sqlrest/manager/api/v1/assignment/deploy/" + row.id,
+        url: "/sqlrest/manager/api/v1/assignment/publish",
+        data: JSON.stringify({
+          id: this.selectRowId,
+          description: this.publishVersionDesc,
+        })
       }).then(res => {
         if (0 === res.data.code) {
-          this.$message("发布成功");
-          this.loadData();
+          this.selectRowId = null;
+          this.publishVersionDesc = null;
+          this.publishDialogVisible = false
+          this.$message("发布版本成功");
         } else {
           if (res.data.message) {
-            alert("发布失败," + res.data.message);
+            alert("发布版本失败," + res.data.message);
           }
         }
       });
     },
-    handleRetireTask: function (index, row) {
+    handleOnline: function (index, row) {
+      this.$http({
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/version/list/" + row.id,
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.versions = res.data.data;
+          this.selectRowId = row.id;
+          this.versionDialogVisible = true;
+        } else {
+          if (res.data.message) {
+            alert("获取版本列表失败," + res.data.message);
+          }
+        }
+      });
+    },
+    handleDeploy: function () {
+      if (!this.selectCommitId || this.selectCommitId <= 0) {
+        this.$alert("请选择一个版本", "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
+        return;
+      }
+      this.$http({
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/assignment/deploy/" + this.selectRowId + "?commitId=" + this.selectCommitId,
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.selectRowId = null;
+          this.selectCommitId = null;
+          this.versionDialogVisible = false;
+          this.$message("上线成功");
+          this.loadData();
+        } else {
+          if (res.data.message) {
+            alert("上线失败," + res.data.message);
+          }
+        }
+      });
+    },
+    handleOffline: function (index, row) {
       this.$http({
         method: "PUT",
         headers: {

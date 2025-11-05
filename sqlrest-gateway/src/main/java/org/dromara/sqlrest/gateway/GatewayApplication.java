@@ -21,7 +21,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
     scanBasePackages = {
         "org.dromara.sqlrest.persistence",
         "org.dromara.sqlrest.core.gateway",
-        "org.dromara.sqlrest.core.util",
         "org.dromara.sqlrest.gateway",
     }
 )

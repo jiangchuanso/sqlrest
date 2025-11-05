@@ -23,6 +23,7 @@ import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.service.FlowControlManger;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class SentinelFlowControlManager implements FlowControlManger {
 
   @Resource
-  private ApiAssignmentDao apiAssignmentDao;
+  private ApiOnlineDao apiOnlineDao;
 
   /*每分钟执行一次*/
   @EventListener(ApplicationReadyEvent.class)
@@ -55,7 +56,7 @@ public class SentinelFlowControlManager implements FlowControlManger {
 
   private void doLoadFlowRules() {
     List<FlowRule> rules = new ArrayList<>();
-    for (ApiAssignmentEntity assignmentEntity : apiAssignmentDao.listFlowControlAll()) {
+    for (ApiAssignmentEntity assignmentEntity : apiOnlineDao.listFlowControlAll()) {
       if (assignmentEntity.getFlowCount() <= 0) {
         continue;
       }

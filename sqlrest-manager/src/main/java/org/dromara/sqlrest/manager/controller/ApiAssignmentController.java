@@ -9,18 +9,6 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.manager.controller;
 
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.common.dto.PageResult;
-import org.dromara.sqlrest.common.dto.ResultEntity;
-import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
-import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
-import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
-import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
-import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
-import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
-import org.dromara.sqlrest.core.dto.NameValueBaseResponse;
-import org.dromara.sqlrest.core.dto.NameValueRemarkResponse;
-import org.dromara.sqlrest.core.service.ApiAssignmentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
@@ -30,6 +18,19 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.PageResult;
+import org.dromara.sqlrest.common.dto.ResultEntity;
+import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
+import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
+import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
+import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
+import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
+import org.dromara.sqlrest.core.dto.AssignmentPublishRequest;
+import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
+import org.dromara.sqlrest.core.dto.NameValueBaseResponse;
+import org.dromara.sqlrest.core.dto.NameValueRemarkResponse;
+import org.dromara.sqlrest.core.service.ApiAssignmentService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -139,24 +140,18 @@ public class ApiAssignmentController {
     return ResultEntity.success();
   }
 
-  @ApiOperation(value = "开放")
-  @PutMapping(value = "/open/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity makeOpen(@PathVariable("id") Long id, @RequestParam("open") Boolean open) {
-    apiAssignmentService.makeOpen(id, open);
+  @ApiOperation(value = "发布版本")
+  @PutMapping(value = "/publish", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity publish(@Valid @RequestBody AssignmentPublishRequest request) {
+    apiAssignmentService.publish(request);
     return ResultEntity.success();
   }
 
-  @ApiOperation(value = "告警")
-  @PutMapping(value = "/alarm/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity makeAlarm(@PathVariable("id") Long id, @RequestParam("open") Boolean open) {
-    apiAssignmentService.makeAlarm(id, open);
-    return ResultEntity.success();
-  }
-
-  @ApiOperation(value = "发布")
+  @ApiOperation(value = "上线")
   @PutMapping(value = "/deploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity deploy(@PathVariable("id") Long id) {
-    apiAssignmentService.deployAssignment(id);
+  public ResultEntity deploy(@PathVariable("id") Long id,
+      @RequestParam(value = "commitId", required = false) Long commitId) {
+    apiAssignmentService.deployAssignment(id, commitId);
     return ResultEntity.success();
   }
 

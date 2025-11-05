@@ -74,6 +74,27 @@
           <el-tab-pane label="接口定义">
             <el-row class="detail-row">
               <el-col :span="4">
+                <i class="el-icon-key">当前版本：</i>
+              </el-col>
+              <el-col :span="20">
+                <el-tag size="small">V{{interfaceDetail.version}}</el-tag>
+                <el-button size="small"
+                           type="danger"
+                           icon="el-icon-timer"
+                           @click="handleSwitchVersion(interfaceDetail)"
+                           round>切换</el-button>
+              </el-col>
+            </el-row>
+            <el-row class="detail-row">
+              <el-col :span="4">
+                <i class="el-icon-mic">CommitId：</i>
+              </el-col>
+              <el-col :span="20">
+                <el-tag size="small">{{interfaceDetail.commitId}}</el-tag>
+              </el-col>
+            </el-row>
+            <el-row class="detail-row">
+              <el-col :span="4">
                 <i class="el-icon-user">接口名称：</i>
               </el-col>
               <el-col :span="20">
@@ -317,6 +338,42 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="切换线上版本"
+               :visible.sync="versionDialogVisible"
+               :showClose="false"
+               width="40%"
+               :before-close="handleClose">
+      <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+                :data="versionList"
+                highlight-current-row
+                size="mini"
+                border>
+        <template slot="empty">
+          <span>版本内容为空，请点击“发版”按钮发布一个版本来</span>
+        </template>
+        <el-table-column label="选择版本"
+                         min-width="10%">
+          <template slot-scope="scope">
+            <el-radio v-model="selectCommitId"
+                      :label="scope.row.commitId">V{{ scope.row.version }}</el-radio>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime"
+                         label="生成时间"
+                         min-width="15%"> </el-table-column>
+        <el-table-column prop="description"
+                         label="版本描述"
+                         show-overflow-tooltip
+                         min-width="20%"></el-table-column>
+      </el-table>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="versionDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="handleDeployVersion">切 换</el-button>
+      </div>
+    </el-dialog>
+
   </el-card>
 </template>
 
@@ -359,6 +416,7 @@ export default {
       interfaceDetail: {},
       gatewayApiPrefix: null,
       currentInterfaceId: 0,
+      currentCommitId: 0,
       accessLogData: [],
       currentAccessPageNum: 1,
       currentAccessPageSize: 10,
@@ -367,6 +425,9 @@ export default {
       requestParameters: null,
       showExceptDialogVisible: false,
       exeptionText: null,
+      versionDialogVisible: false,
+      versionList: [],
+      selectCommitId: null,
     };
   },
   components: { JsonViewer },
@@ -375,6 +436,7 @@ export default {
     this.initResize();
   },
   methods: {
+    handleClose () { },
     initResize () {
       if (this.$refs.box && this.$refs.box.clientWidth) {
         const width = this.$refs.box.clientWidth;
@@ -452,7 +514,7 @@ export default {
         data: window.JSON.stringify(
           {
             moduleId: id,
-            publish: true,
+            online: true,
             page: 1,
             size: 2147483647
           }
@@ -466,6 +528,7 @@ export default {
                 'label': element.name,
                 'parent': id,
                 'value': element.id,
+                'commitId': element.commitId,
                 'leaf': true,
               }
             )
@@ -496,6 +559,7 @@ export default {
     handleTreeNodeClick (data) {
       if (data.parent > 0) {
         this.currentInterfaceId = data.value
+        this.currentCommitId = data.commitId
         this.showDetail = true
         this.reloadIntefaceDetail()
         this.reloadAccessLogList()
@@ -515,7 +579,7 @@ export default {
         data: window.JSON.stringify(
           {
             moduleId: this.currentModuleId,
-            publish: true,
+            online: true,
             page: this.currentPageNum,
             size: this.currentPageSize
           }
@@ -559,12 +623,14 @@ export default {
         this.loadGetwayApiPrefix();
       }
       this.$http.get(
-        "/sqlrest/manager/api/v1/assignment/detail/" + this.currentInterfaceId
+        "/sqlrest/manager/api/v1/version/show/" + this.currentCommitId
       ).then(res => {
         if (0 === res.data.code) {
-          let detail = res.data.data;
+          let detail = res.data.data.detail;
           this.interfaceDetail = {
             id: detail.id,
+            version: detail.version,
+            commitId: detail.commitId,
             name: detail.name,
             description: detail.description,
             method: detail.method,
@@ -641,6 +707,63 @@ export default {
         }
       }
       return this.returnUnknownValue();
+    },
+    handleSwitchVersion (detail) {
+      this.$http({
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/version/list/" + detail.id,
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.versionList = res.data.data;
+          this.versionDialogVisible = true;
+        } else {
+          if (res.data.message) {
+            alert("获取版本列表失败," + res.data.message);
+          }
+        }
+      });
+    },
+    handleDeployVersion () {
+      if (!this.selectCommitId || this.selectCommitId <= 0) {
+        this.$alert("请选择一个版本", "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
+        return;
+      }
+      if (this.selectCommitId === this.currentCommitId) {
+        this.$alert("您选择的版本与当前线上的版本一样,无需进行线上版本切换", "错误信息",
+          {
+            confirmButtonText: "确定",
+            type: "error"
+          }
+        );
+        return;
+      }
+      this.$http({
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/assignment/deploy/" + this.interfaceDetail.id + "?commitId=" + this.selectCommitId,
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.currentCommitId = this.selectCommitId
+          this.selectCommitId = null;
+          this.versionDialogVisible = false;
+          this.$message("线上版本切换成功");
+          this.reloadIntefaceDetail();
+        } else {
+          if (res.data.message) {
+            alert("上线失败," + res.data.message);
+          }
+        }
+      });
     }
   },
 };

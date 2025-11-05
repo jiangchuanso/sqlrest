@@ -42,6 +42,8 @@ spring:
             allowed-headers: "*"
 
 sqlrest:
+  datasource:
+    encrypt: ${SQLREST_DS_ENCRYPT:false}
   cache:
     hazelcast:
       enabled: true

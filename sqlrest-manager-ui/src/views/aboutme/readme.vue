@@ -92,6 +92,8 @@
                 </li>
                 <li>Apache Hive
                 </li>
+                <li>Cloudera Impala
+                </li>
                 <li>Apache Doris
                 </li>
                 <li>SQLite3

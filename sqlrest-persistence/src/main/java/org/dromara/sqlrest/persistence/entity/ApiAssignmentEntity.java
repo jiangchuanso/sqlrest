@@ -14,6 +14,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.EnumTypeHandler;
 import org.dromara.sqlrest.common.dto.ItemParam;
 import org.dromara.sqlrest.common.dto.OutParam;
 import org.dromara.sqlrest.common.enums.CacheKeyTypeEnum;
@@ -24,14 +33,6 @@ import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.persistence.handler.FormatMapHandler;
 import org.dromara.sqlrest.persistence.handler.ListOutputHandler;
 import org.dromara.sqlrest.persistence.handler.ListParamHandler;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.ibatis.type.EnumTypeHandler;
 
 @Data
 @Builder
@@ -70,9 +71,6 @@ public class ApiAssignmentEntity {
   @TableField(value = "outputs", typeHandler = ListOutputHandler.class)
   private List<OutParam> outputs;
 
-  @TableField("status")
-  private Boolean status;
-
   @TableField("open")
   private Boolean open;
 
@@ -109,9 +107,11 @@ public class ApiAssignmentEntity {
   @TableField("cache_expire_seconds")
   private Long cacheExpireSeconds;
 
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   @TableField(value = "create_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp createTime;
 
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   @TableField(value = "update_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp updateTime;
 

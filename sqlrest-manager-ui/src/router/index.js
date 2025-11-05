@@ -108,7 +108,7 @@ const constantRouter = new Router({
           children: [
             {
               path: '/service/interface',
-              name: '服务接口',
+              name: '在线接口',
               icon: "el-icon-lightning",
               component: () => import('@/views/service/interface'),
             }

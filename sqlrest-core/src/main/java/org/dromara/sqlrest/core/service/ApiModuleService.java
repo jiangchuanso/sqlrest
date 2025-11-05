@@ -9,6 +9,12 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.service;
 
+import cn.hutool.extra.spring.SpringUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
@@ -17,14 +23,10 @@ import org.dromara.sqlrest.core.dto.EntitySearchRequest;
 import org.dromara.sqlrest.core.dto.SelectedEntityIdName;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
 import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
 import org.dromara.sqlrest.persistence.util.PageUtils;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +60,9 @@ public class ApiModuleService {
   @Transactional(rollbackFor = Exception.class)
   public void deleteModule(Long id) {
     if (apiAssignmentDao.existsModuleById(id)) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
+    }
+    if (SpringUtil.getBean(ApiOnlineDao.class).existsModuleById(id)) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
     }
     apiModuleDao.deleteById(id);

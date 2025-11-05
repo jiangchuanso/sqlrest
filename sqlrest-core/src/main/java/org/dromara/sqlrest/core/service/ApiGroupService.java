@@ -9,16 +9,18 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.service;
 
+import cn.hutool.extra.spring.SpringUtil;
+import javax.annotation.Resource;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.core.dto.EntitySearchRequest;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiGroupDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.dao.AppClientDao;
 import org.dromara.sqlrest.persistence.entity.ApiGroupEntity;
 import org.dromara.sqlrest.persistence.util.PageUtils;
-import javax.annotation.Resource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +59,9 @@ public class ApiGroupService {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "forbid delete group which id is 1");
     }
     if (apiAssignmentDao.existsGroupById(id)) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
+    }
+    if (SpringUtil.getBean(ApiOnlineDao.class).existsGroupById(id)) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
     }
     apiGroupDao.deleteById(id);

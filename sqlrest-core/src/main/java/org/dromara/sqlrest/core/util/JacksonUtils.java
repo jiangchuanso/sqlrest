@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.util;
 
+import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.Module;
@@ -28,77 +29,43 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.sqlrest.common.dto.OutParam;
 import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
 import org.dromara.sqlrest.common.util.UuidUtils;
 import org.dromara.sqlrest.core.serdes.DateTimeSerDesFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
 public final class JacksonUtils {
 
+  private static final String DEFAULT_TIME_ZONE = "Asia/Shanghai";
+  private static final String JSON_TIMEZONE = "JSON_TIMEZONE";
+  private static Map<String, String> timeZoneMap = new ConcurrentHashMap<>();
   private static final ObjectMapper objectMapper = new ObjectMapper();
-  private static Environment environment;
-  
-  // 日志控制标志，避免频繁打印相同日志
-  private static boolean hasLoggedEnvironmentWarning = false;
-  private static boolean hasLoggedConfigRead = false;
-
-  @Autowired
-  public void setEnvironment(Environment env) {
-    environment = env;
-    log.info("Spring Environment已注入，重新初始化ObjectMapper时区设置");
-    // 重置日志标志，允许记录新的配置读取日志
-    hasLoggedConfigRead = false;
-    initializeObjectMapper();
-  }
-
-  /**
-   * 初始化ObjectMapper的时区设置
-   */
-  public static void initializeObjectMapper() {
-    String timezone = getTimezone();
-    objectMapper.setTimeZone(TimeZone.getTimeZone(timezone));
-  }
 
   static {
     objectMapper.disable(MapperFeature.IGNORE_DUPLICATE_MODULE_REGISTRATIONS);
-    // 静态初始化时使用默认时区，等Spring容器启动后再重新设置
-    objectMapper.setTimeZone(TimeZone.getTimeZone("Asia/Shanghai"));
-    log.info("JacksonUtils静态初始化完成，使用默认时区: Asia/Shanghai");
+    objectMapper.setTimeZone(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
   }
 
-  /**
-   * 获取配置的时区，如果未配置则返回默认时区
-   */
   public static String getTimezone() {
-    String timezone;
-    if (environment != null) {
-      timezone = environment.getProperty("JSON_TIMEZONE", "Asia/Shanghai");
-      // 只在第一次成功读取配置时记录日志，避免频繁打印
-      if (!timezone.equals("Asia/Shanghai") || !hasLoggedConfigRead) {
-        log.info("从配置文件读取时区设置: JSON_TIMEZONE={}", timezone);
-        hasLoggedConfigRead = true;
-      }
-    } else {
-      timezone = "Asia/Shanghai";
-      // 只在第一次警告时记录日志，避免频繁打印
-      if (!hasLoggedEnvironmentWarning) {
-        log.warn("Spring Environment未初始化，使用默认时区: {}。请检查启动脚本是否正确设置了JSON_TIMEZONE环境变量", timezone);
-        hasLoggedEnvironmentWarning = true;
-      }
-    }
-    return timezone;
+    return timeZoneMap.computeIfAbsent(JSON_TIMEZONE,
+        key -> {
+          Environment env = SpringUtil.getBean(Environment.class);
+          return env.getProperty(JSON_TIMEZONE, DEFAULT_TIME_ZONE);
+        });
   }
 
   public static String toJsonStr(Object obj, Map<DataTypeFormatEnum, String> formatMap) {
     ObjectMapper mapper = objectMapper.copy();
+    String currentTimeZone = getTimezone();
+    if (!DEFAULT_TIME_ZONE.equals(currentTimeZone)) {
+      mapper.setTimeZone(TimeZone.getTimeZone(currentTimeZone));
+    }
     mapper.registerModule(createSerializeModule(formatMap));
     try {
       return mapper.writeValueAsString(obj);

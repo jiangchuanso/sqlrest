@@ -22,6 +22,7 @@ public enum ResponseErrorCode {
   ERROR_RESOURCE_NOT_EXISTS(3, "resource not exists"),
   ERROR_RESOURCE_ALREADY_EXISTS(4, "resource already exists"),
   ERROR_RESOURCE_ALREADY_USED(5, "resource already been used"),
+  ERROR_RESOURCE_NOT_ONLINE(6, "resource not online"),
   ERROR_USER_NOT_EXISTS(7, "user not exists"),
   ERROR_USER_PASSWORD_WRONG(8, "invalid password"),
   ERROR_INVALID_JDBC_URL(9, "invalid jdbc url format"),
