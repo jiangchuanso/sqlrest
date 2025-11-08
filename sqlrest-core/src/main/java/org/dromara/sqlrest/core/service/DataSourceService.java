@@ -74,6 +74,9 @@ public class DataSourceService {
       List<DataSourceEntity> list = dataSourceDao.listAll(request.getSearchText());
       return list.stream().map(dataSourceEntity -> {
         DatasourceDetailResponse response = new DatasourceDetailResponse();
+
+        DataSourceUtils.decrypt(dataSourceEntity);// 解密
+
         BeanUtil.copyProperties(dataSourceEntity, response);
         return response;
       }).collect(Collectors.toList());
@@ -85,6 +88,7 @@ public class DataSourceService {
   public DatasourceDetailResponse getDetailById(Long id) {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(id);
     DatasourceDetailResponse response = new DatasourceDetailResponse();
+    DataSourceUtils.decrypt(dataSourceEntity);// 解密
     BeanUtil.copyProperties(dataSourceEntity, response);
     return response;
   }
@@ -121,6 +125,7 @@ public class DataSourceService {
         .getVersionDriverFile(dataSourceEntity.getType(),
             dataSourceEntity.getVersion());
     String driverPath = driverPathFile.getAbsolutePath();
+    DataSourceUtils.encrypt(dataSourceEntity);//页面传过来的密码是明文，需要加密
     HikariDataSource ds = DataSourceUtils.createDataSource(dataSourceEntity, driverPath);
     try {
       testConnection(ds, request.getType());
@@ -155,6 +160,7 @@ public class DataSourceService {
     BeanUtil.copyProperties(request, dataSourceEntity);
 
     validJdbcUrlFormat(dataSourceEntity);
+    DataSourceUtils.encrypt(dataSourceEntity);//加密
     dataSourceDao.insert(dataSourceEntity);
   }
 
@@ -172,6 +178,7 @@ public class DataSourceService {
     BeanUtil.copyProperties(request, dataSourceEntity);
 
     validJdbcUrlFormat(dataSourceEntity);
+    DataSourceUtils.encrypt(dataSourceEntity);//加密
     dataSourceDao.updateById(dataSourceEntity);
     DataSourceUtils.dropHikariDataSource(request.getId());
   }
@@ -409,4 +416,5 @@ public class DataSourceService {
       throw new RuntimeException("Detect has schema layer failed:" + e.getMessage());
     }
   }
+
 }

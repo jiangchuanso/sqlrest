@@ -28,6 +28,8 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.symmetric.AES;
 
 @Slf4j
 @UtilityClass
@@ -38,7 +40,7 @@ public final class DataSourceUtils {
 
   private static final Map<String, URLClassLoader> classLoaderMap = new ConcurrentHashMap<>();
   private static final Map<Long, Pair<DataSourceEntity, HikariDataSource>> datasourceMap = new ConcurrentHashMap<>();
-
+  private static final byte[] KEY = "6635BC05BC357FEC7A85FDB9C972AD01".getBytes();
   public static HikariDataSource getHikariDataSource(DataSourceEntity entity, String driverPath) {
     if (!datasourceMap.containsKey(entity.getId())) {
       HikariDataSource ds = createDataSource(entity, driverPath);
@@ -105,7 +107,7 @@ public final class DataSourceUtils {
     ds.setMaxLifetime(TimeUnit.MINUTES.toMillis(60));
     ds.setConnectionTimeout(TimeUnit.SECONDS.toMillis(60));
     ds.setIdleTimeout(MAX_TIMEOUT_MS);
-
+    decrypt(properties);//解密
     SimpleDataSource dataSource = new SimpleDataSource(
         createURLClassLoader(driverPath, properties.getDriver()),
         properties.getUrl(),
@@ -151,6 +153,39 @@ public final class DataSourceUtils {
       }
     }
     return urlClassLoader;
+  }
+
+
+  /*
+  加密dataSourceEntity.getUsername()和dataSourceEntity.getPassword()
+   */
+  public void encrypt(DataSourceEntity dataSourceEntity) {
+    try {
+      // 使用hutool的AES加密
+      AES aes = SecureUtil.aes(KEY);
+      dataSourceEntity.setUsername(aes.encryptHex(dataSourceEntity.getUsername()));
+      dataSourceEntity.setPassword(aes.encryptHex(dataSourceEntity.getPassword()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.error("encrypt error:", e.getMessage());
+    }
+
+  }
+
+  /*
+  解密dataSourceEntity.getUsername()和dataSourceEntity.getPassword()
+   */
+  public void decrypt(DataSourceEntity dataSourceEntity) {
+    try {
+      // 使用hutool的AES解密
+      AES aes = SecureUtil.aes(KEY);
+      dataSourceEntity.setUsername(aes.decryptStr(dataSourceEntity.getUsername()));
+      dataSourceEntity.setPassword(aes.decryptStr(dataSourceEntity.getPassword()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      log.error("decrypt error:", e.getMessage());
+    }
+
   }
 
 }
