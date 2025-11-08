@@ -10,11 +10,13 @@
 package org.dromara.sqlrest.manager.service;
 
 import cn.hutool.extra.spring.SpringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.util.TokenUtils;
+import org.dromara.sqlrest.core.configuration.SqlrestUrlConfiguration;
 import org.dromara.sqlrest.core.dto.EntitySearchRequest;
 import org.dromara.sqlrest.core.dto.McpToolResponse;
 import org.dromara.sqlrest.core.dto.McpToolSaveRequest;
@@ -78,6 +80,12 @@ public class McpManageService {
     DiscoveryClient discoveryClient = SpringUtil.getBean(DiscoveryClient.class);
     List<ServiceInstance> instances = discoveryClient.getInstances(Constants.MANAGER_APPLICATION_NAME);
     ServiceInstance instance = instances.stream().findAny().orElse(null);
+    SqlrestUrlConfiguration sqlrestUrlConfiguration = SpringUtil.getBean(SqlrestUrlConfiguration.class);
+    // 有且仅当服务确实存在时，才优先使用外部配置
+    if (StringUtils.isNotBlank(sqlrestUrlConfiguration.getGateway()) && instance != null) {
+      log.info("使用外部配置的管理地址: {},跳过使用服务发现的管理地址",sqlrestUrlConfiguration.getManager());
+      return sqlrestUrlConfiguration.getGateway();
+    }
     return String.format("http://%s:%d%s?%s=", instance.getHost(), instance.getPort(),
         Constants.DEFAULT_SSE_ENDPOINT, Constants.DEFAULT_SSE_TOKEN_PRAM_NAME);
   }

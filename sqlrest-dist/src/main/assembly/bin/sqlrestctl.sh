@@ -51,6 +51,8 @@ export PGDB_NAME=$(grep -oP '(?<=^PGDB_NAME=).*' ${APP_CONF_PATH}/config.ini)
 export PGDB_USERNAME=$(grep -oP '(?<=^PGDB_USERNAME=).*' ${APP_CONF_PATH}/config.ini)
 export PGDB_PASSWORD=$(grep -oP '(?<=^PGDB_PASSWORD=).*' ${APP_CONF_PATH}/config.ini)
 export JSON_TIMEZONE=$(grep -oP '(?<=^JSON_TIMEZONE=).*' ${APP_CONF_PATH}/config.ini)
+export SQLREST_MANAGER_URL=$(grep -oP '(?<=^SQLREST_MANAGER_URL=).*' ${APP_CONF_PATH}/config.ini)
+export SQLREST_GATEWAY_URL=$(grep -oP '(?<=^SQLREST_GATEWAY_URL=).*' ${APP_CONF_PATH}/config.ini)
 
 # JVM参数可以在这里设置
 JVMFLAGS="-server -Xms1024m -Xmx1024m -Xmn1024m -XX:+DisableExplicitGC -Djava.awt.headless=true -Dfile.encoding=UTF-8 "
