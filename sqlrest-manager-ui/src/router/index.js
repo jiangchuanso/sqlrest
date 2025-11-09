@@ -107,10 +107,10 @@ const constantRouter = new Router({
           component: () => import('@/views/service/index'),
           children: [
             {
-              path: '/service/interface',
+              path: '/service/search',
               name: '在线接口',
               icon: "el-icon-lightning",
-              component: () => import('@/views/service/interface'),
+              component: () => import('@/views/service/search'),
             }
           ]
         },
@@ -148,21 +148,27 @@ const constantRouter = new Router({
         },
         {
           path: '/interface/create',
-          name: '创建任务',
+          name: '创建接口',
           hidden: true,
           component: () => import('@/views/interface/create')
         },
         {
           path: '/interface/update',
-          name: '修改任务',
+          name: '修改接口',
           hidden: true,
           component: () => import('@/views/interface/update')
         },
         {
           path: '/interface/detail',
-          name: '查看任务',
+          name: '查看接口',
           hidden: true,
           component: () => import('@/views/interface/detail')
+        },
+        {
+          path: '/service/detail',
+          name: '接口详情',
+          hidden: true,
+          component: () => import('@/views/service/detail')
         }
       ],
     },

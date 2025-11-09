@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.persistence.dao;
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import java.util.Collections;
@@ -32,6 +33,36 @@ public class ApiOnlineDao {
   @Resource
   private ApiOnlineMapper apiOnlineMapper;
 
+  private ApiAssignmentEntity buildAssignmentEntity(ApiOnlineEntity entity) {
+    if (null == entity) {
+      return null;
+    }
+    String content = entity.getContent();
+    Class<ApiAssignmentEntity> clazz = ApiAssignmentEntity.class;
+    ApiAssignmentEntity assignmentEntity = JsonUtils.toBeanObject(content, clazz);
+    assignmentEntity.setGroupId(entity.getGroupId());
+    assignmentEntity.setModuleId(entity.getModuleId());
+    assignmentEntity.setDatasourceId(entity.getDatasourceId());
+    assignmentEntity.setOpen(entity.getOpen());
+    assignmentEntity.setAlarm(entity.getAlarm());
+    assignmentEntity.setFlowStatus(entity.getFlowStatus());
+    assignmentEntity.setUpdateTime(entity.getUpdateTime());
+    return assignmentEntity;
+  }
+
+  private Long getIdByUniqueKey(HttpMethodEnum method, String path) {
+    QueryWrapper<ApiOnlineEntity> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda()
+        .select(ApiOnlineEntity::getId)
+        .eq(ApiOnlineEntity::getMethod, method)
+        .eq(ApiOnlineEntity::getPath, path);
+    ApiOnlineEntity entity = apiOnlineMapper.selectOne(queryWrapper);
+    if (null != entity) {
+      return entity.getId();
+    }
+    return null;
+  }
+  
   public void upsert(ApiOnlineEntity entity) {
     Long id = getIdByUniqueKey(entity.getMethod(), entity.getPath());
     if (null == id) {
@@ -50,12 +81,10 @@ public class ApiOnlineDao {
 
   public ApiAssignmentEntity getByApiId(Long apiId) {
     QueryWrapper<ApiOnlineEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.lambda()
-        .select(ApiOnlineEntity::getContent)
-        .eq(ApiOnlineEntity::getApiId, apiId);
+    queryWrapper.lambda().eq(ApiOnlineEntity::getApiId, apiId);
     ApiOnlineEntity entity = apiOnlineMapper.selectOne(queryWrapper);
     if (null != entity) {
-      return JsonUtils.toBeanObject(entity.getContent(), ApiAssignmentEntity.class);
+      return buildAssignmentEntity(entity);
     }
     return null;
   }
@@ -78,28 +107,28 @@ public class ApiOnlineDao {
         .collect(Collectors.toList());
   }
 
-  public List<ApiAssignmentEntity> searchAll(Long groupId, Long moduleId, Boolean open, String searchText) {
+  public List<ApiAssignmentEntity> searchAll(List<Long> groupIds, List<Long> moduleIds, Boolean open,
+      String searchText) {
     return apiOnlineMapper.selectList(
         Wrappers.<ApiOnlineEntity>lambdaQuery()
-            .select(ApiOnlineEntity::getContent)
             .eq(Objects.nonNull(open), ApiOnlineEntity::getOpen, open)
-            .eq(Objects.nonNull(groupId), ApiOnlineEntity::getGroupId, groupId)
-            .eq(Objects.nonNull(moduleId), ApiOnlineEntity::getModuleId, moduleId)
+            .in(CollUtil.isNotEmpty(groupIds), ApiOnlineEntity::getGroupId, groupIds)
+            .in(CollUtil.isNotEmpty(moduleIds), ApiOnlineEntity::getModuleId, moduleIds)
             .like(StringUtils.hasText(searchText), ApiOnlineEntity::getName, searchText)
             .orderByDesc(ApiOnlineEntity::getCreateTime)
-    ).stream().map(entity -> JsonUtils.toBeanObject(entity.getContent(), ApiAssignmentEntity.class))
+    ).stream()
+        .map(entity -> buildAssignmentEntity(entity))
         .collect(Collectors.toList());
   }
 
   public ApiAssignmentEntity getByUk(HttpMethodEnum method, String path) {
     QueryWrapper<ApiOnlineEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda()
-        .select(ApiOnlineEntity::getContent)
         .eq(ApiOnlineEntity::getMethod, method)
         .eq(ApiOnlineEntity::getPath, path);
     ApiOnlineEntity entity = apiOnlineMapper.selectOne(queryWrapper);
     if (null != entity) {
-      return JsonUtils.toBeanObject(entity.getContent(), ApiAssignmentEntity.class);
+      return buildAssignmentEntity(entity);
     }
     return null;
   }
@@ -119,19 +148,6 @@ public class ApiOnlineDao {
 
   public boolean existsByUniqueKey(HttpMethodEnum method, String path) {
     return null != getIdByUniqueKey(method, path);
-  }
-
-  private Long getIdByUniqueKey(HttpMethodEnum method, String path) {
-    QueryWrapper<ApiOnlineEntity> queryWrapper = new QueryWrapper<>();
-    queryWrapper.lambda()
-        .select(ApiOnlineEntity::getId)
-        .eq(ApiOnlineEntity::getMethod, method)
-        .eq(ApiOnlineEntity::getPath, path);
-    ApiOnlineEntity entity = apiOnlineMapper.selectOne(queryWrapper);
-    if (null != entity) {
-      return entity.getId();
-    }
-    return null;
   }
 
   public List<ApiAssignmentEntity> listFlowControlAll() {
@@ -160,5 +176,16 @@ public class ApiOnlineDao {
     QueryWrapper<ApiOnlineEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(ApiOnlineEntity::getModuleId, moduleId);
     return apiOnlineMapper.selectCount(queryWrapper) > 0;
+  }
+
+  public void resetGroupByGroupId(Long groupId) {
+    apiOnlineMapper.resetGroup(groupId);
+  }
+
+  public void updateGroup(Long groupId, List<Long> ids) {
+    if (CollectionUtils.isEmpty(ids)) {
+      return;
+    }
+    apiOnlineMapper.updateGroup(groupId, ids);
   }
 }

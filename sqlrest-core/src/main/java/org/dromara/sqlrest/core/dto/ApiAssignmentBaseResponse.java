@@ -29,6 +29,9 @@ public class ApiAssignmentBaseResponse {
   @ApiModelProperty("API配置名称")
   private String name;
 
+  @ApiModelProperty("描述信息")
+  private String description;
+
   @ApiModelProperty("模块ID")
   private Long moduleId;
 

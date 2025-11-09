@@ -53,6 +53,7 @@ import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
 import org.dromara.sqlrest.core.dto.ApiAssignmentDetailResponse;
 import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
+import org.dromara.sqlrest.core.dto.ApiOnlineSearchRequest;
 import org.dromara.sqlrest.core.dto.AssignmentPublishRequest;
 import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
 import org.dromara.sqlrest.core.dto.DataTypeFormatMapValue;
@@ -646,7 +647,9 @@ public class ApiAssignmentService {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "groupId=" + groupId);
     }
     apiAssignmentDao.resetGroupByGroupId(groupId);
+    apiOnlineDao.resetGroupByGroupId(groupId);
     apiAssignmentDao.updateGroup(groupId, ids);
+    apiOnlineDao.updateGroup(groupId, ids);
   }
 
   public PageResult<ApiAssignmentBaseResponse> listAll(AssignmentSearchRequest request) {
@@ -681,9 +684,44 @@ public class ApiAssignmentService {
     return pageResult;
   }
 
+  public PageResult<ApiAssignmentBaseResponse> search(ApiOnlineSearchRequest request) {
+    Map<Long, String> moduleIdNameMap = apiModuleDao.listAll().stream()
+        .collect(Collectors.toMap(ApiModuleEntity::getId, ApiModuleEntity::getName));
+    Map<Long, String> groupIdNameMap = apiGroupDao.listAll().stream()
+        .collect(Collectors.toMap(ApiGroupEntity::getId, ApiGroupEntity::getName));
+    Supplier<List<ApiAssignmentEntity>> method = () ->
+        apiOnlineDao.searchAll(null, request.getModuleIds(),
+            null, request.getSearchText());
+    PageResult pageResult = PageUtils.getPage(method, request.getPage(), request.getSize());
+    if (!CollectionUtils.isEmpty(pageResult.getData())) {
+      List<ApiAssignmentEntity> assignmentEntities = pageResult.getData();
+      List<ApiAssignmentBaseResponse> responseList = new ArrayList<>();
+      List<Long> apiIds = assignmentEntities.stream().map(ApiAssignmentEntity::getId).collect(Collectors.toList());
+      Map<Long, ApiIdVersion> onlineVerMap = apiOnlineDao.filterOnline(apiIds).stream()
+          .collect(Collectors.toMap(ApiIdVersion::getApiId, Function.identity(), (a, b) -> a));
+      for (ApiAssignmentEntity assignmentEntity : assignmentEntities) {
+        ApiAssignmentBaseResponse response = new ApiAssignmentBaseResponse();
+        BeanUtil.copyProperties(assignmentEntity, response);
+        response.setModuleName(moduleIdNameMap.get(assignmentEntity.getModuleId()));
+        response.setGroupName(groupIdNameMap.get(assignmentEntity.getGroupId()));
+        response.setPath(ApiPathUtils.getFullPath(response.getPath()));
+        response.setStatus(onlineVerMap.containsKey(assignmentEntity.getId()));
+        if (response.getStatus()) {
+          response.setCommitId(onlineVerMap.get(assignmentEntity.getId()).getCommitId());
+          response.setVersion(onlineVerMap.get(assignmentEntity.getId()).getVersion());
+        }
+
+        responseList.add(response);
+      }
+      pageResult.setData(responseList);
+    }
+    return pageResult;
+  }
+
   private List<ApiAssignmentEntity> searchAll(AssignmentSearchRequest request) {
     if (null != request.getOnline() && Boolean.TRUE.equals(request.getOnline())) {
-      return apiOnlineDao.searchAll(request.getGroupId(), request.getModuleId(),
+      return apiOnlineDao.searchAll(Collections.singletonList(request.getGroupId()),
+          Collections.singletonList(request.getModuleId()),
           request.getOpen(), request.getSearchText());
     }
     return apiAssignmentDao.searchAll(request.getGroupId(), request.getModuleId(),

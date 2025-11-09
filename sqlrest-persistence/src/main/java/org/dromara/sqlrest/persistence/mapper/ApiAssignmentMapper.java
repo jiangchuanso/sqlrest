@@ -73,7 +73,7 @@ public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
   void resetGroup(@Param("groupId") Long groupId);
 
   @Update("<script>"
-      + "UPDATE SQLREST_API_ASSIGNMENT SET group_id = #{groupId} WHERE id in "
+      + "UPDATE SQLREST_API_ASSIGNMENT SET group_id = #{groupId} WHERE id IN "
       + "<foreach collection='ids' item='item' open='(' separator=',' close=')'> "
       + "   #{item} "
       + "</foreach>"

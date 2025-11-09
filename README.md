@@ -52,6 +52,7 @@ SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 - 国产神通数据库Oscar
 - 国产南大通用数据库GBase8a
 - Apache Hive
+- Cloudera Impala
 - SQLite3
 - OpenGauss
 - ClickHouse
@@ -81,7 +82,6 @@ SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 
 ### 4、正在规划中的功能
 
-- **接口检索功能**: 支持类似百度搜索的接口搜索功能，方便接口查找。
 - **接口详情功能**:支持接口的详细定义、数据来源、访问分析等功能。
 - **前端界面美化**: 美化界面的交互展示，尤其是“拓扑结构”页面。
 - **增强SQ语法自动提示**: 在实现的库名表名提示的基础上，基于数据库元信息的增强智能提示，强化用户体验。
@@ -302,7 +302,7 @@ sqlrest:
 
 <div>
 	<a href="https://dromara.org.cn/zh/projects/" target="_blank">
-        <img src="https://dromara.org.cn/logo.svg" alt="dromara" title="让每一位开源爱好者，体会到开源的快乐。">
+        <img src="https://dromara.org/logo.svg" alt="dromara" title="让每一位开源爱好者，体会到开源的快乐。">
     </a>
 </div>
 

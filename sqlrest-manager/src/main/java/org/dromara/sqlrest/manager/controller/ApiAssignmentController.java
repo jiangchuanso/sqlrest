@@ -26,6 +26,7 @@ import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
 import org.dromara.sqlrest.core.dto.ApiAssignmentSaveRequest;
 import org.dromara.sqlrest.core.dto.ApiDebugExecuteRequest;
+import org.dromara.sqlrest.core.dto.ApiOnlineSearchRequest;
 import org.dromara.sqlrest.core.dto.AssignmentPublishRequest;
 import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
 import org.dromara.sqlrest.core.dto.NameValueBaseResponse;
@@ -131,6 +132,12 @@ public class ApiAssignmentController {
   @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
   public PageResult<ApiAssignmentBaseResponse> listAll(@RequestBody AssignmentSearchRequest request) {
     return apiAssignmentService.listAll(request);
+  }
+
+  @ApiOperation(value = "上线接口搜索")
+  @PostMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE)
+  public PageResult<ApiAssignmentBaseResponse> search(@RequestBody ApiOnlineSearchRequest request) {
+    return apiAssignmentService.search(request);
   }
 
   @ApiOperation(value = "批量更新授权组")

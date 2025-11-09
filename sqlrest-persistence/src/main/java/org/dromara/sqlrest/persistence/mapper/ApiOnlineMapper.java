@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.dromara.sqlrest.common.dto.ApiIdVersion;
 import org.dromara.sqlrest.persistence.entity.ApiOnlineEntity;
 
@@ -26,4 +27,15 @@ public interface ApiOnlineMapper extends BaseMapper<ApiOnlineEntity> {
       + "</foreach>"
       + "</script>")
   List<ApiIdVersion> filterOnline(@Param("apiIds") List<Long> apiIds);
+
+  @Update("UPDATE SQLREST_API_ONLINE SET group_id = 1 WHERE group_id=#{groupId}")
+  void resetGroup(@Param("groupId") Long groupId);
+
+  @Update("<script>"
+      + "UPDATE SQLREST_API_ONLINE SET group_id = #{groupId} WHERE api_id IN "
+      + "<foreach collection='apiIds' item='item' open='(' separator=',' close=')'> "
+      + "   #{item} "
+      + "</foreach>"
+      + "</script>")
+  void updateGroup(@Param("groupId") Long groupId, @Param("apiIds") List<Long> apiIds);
 }
