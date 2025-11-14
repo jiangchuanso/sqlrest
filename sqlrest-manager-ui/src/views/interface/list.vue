@@ -4,6 +4,12 @@
       <div class="assignment-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
+            <el-radio-group v-model="online"
+                            @change="handleSearch"
+                            size="small">
+              <el-radio-button :label="false">开发中</el-radio-button>
+              <el-radio-button :label="true">已上线</el-radio-button>
+            </el-radio-group>
             <el-select v-model="groupId"
                        size="mini"
                        :clearable="true"
@@ -23,18 +29,6 @@
                          :key="index"
                          :label="item.name"
                          :value="item.id"></el-option>
-            </el-select>
-            <el-select v-model="online"
-                       size="mini"
-                       :clearable="true"
-                       style="width:10%"
-                       placeholder="已上线">
-              <el-option :key=true
-                         label="是"
-                         :value=true></el-option>
-              <el-option :key=false
-                         label="否"
-                         :value=false></el-option>
             </el-select>
             <el-select v-model="open"
                        size="mini"
@@ -65,6 +59,7 @@
                        inactive-color="#ff4949"
                        :active-value=true
                        :inactive-value=false
+                       v-if="online"
                        active-text="文档开"
                        inactive-text="文档关"
                        @change="hanldeSwitchApiDoc()">
@@ -74,10 +69,12 @@
         <el-button type="warning"
                    size="mini"
                    :disabled="apiDocStatus==false"
+                   v-if="online"
                    icon="el-icon-document-add"
                    @click="openSwagger">在线文档</el-button>
         <el-button type="primary"
                    size="mini"
+                   v-if="!online"
                    icon="el-icon-document-add"
                    @click="handleCreate">新建接口</el-button>
       </div>
@@ -127,15 +124,18 @@
                          label="上线"
                          :formatter="boolFormatPublish"
                          show-overflow-tooltip
+                         v-if="online"
                          min-width="8%"></el-table-column>
         <el-table-column prop="open"
                          label="公开"
                          :formatter="boolFormatOpen"
+                         v-if="online"
                          show-overflow-tooltip
                          min-width="8%"></el-table-column>
         <el-table-column prop="alarm"
                          label="告警"
                          :formatter="boolFormatAlarm"
+                         v-if="online"
                          show-overflow-tooltip
                          min-width="8%"></el-table-column>
         <el-table-column prop="createTime"
@@ -265,7 +265,7 @@ export default {
       keyword: null,
       groupId: null,
       moduleId: null,
-      online: null,
+      online: false,
       open: null,
       apiDocStatus: true,
       groupLists: [],
@@ -409,40 +409,6 @@ export default {
         return "关";
       }
     },
-    hanldeOpenStateChanged (row) {
-      var open = true;
-      if (true === row.open) {
-        open = false
-      }
-      this.$http.put(
-        "/sqlrest/manager/api/v1/assignment/open/" + row.id + "?open=" + !open
-      ).then(res => {
-        if (0 === res.data.code) {
-          this.loadData();
-        } else {
-          if (res.data.message) {
-            alert("操作失败:" + res.data.message);
-          }
-        }
-      });
-    },
-    hanldeAlarmStateChanged (row) {
-      var open = true;
-      if (true === row.alarm) {
-        open = false
-      }
-      this.$http.put(
-        "/sqlrest/manager/api/v1/assignment/alarm/" + row.id + "?open=" + !open
-      ).then(res => {
-        if (0 === res.data.code) {
-          this.loadData();
-        } else {
-          if (res.data.message) {
-            alert("操作失败:" + res.data.message);
-          }
-        }
-      });
-    },
     handleSearch: function () {
       this.loadData();
     },
@@ -457,7 +423,7 @@ export default {
         res => {
           if (0 === res.data.code) {
             if (res.data.data && typeof res.data.data === 'string') {
-              var url = res.data.data + '/apidoc/index.html';
+              var url = res.data.data + '/apidoc/swagger/index.html';
               window.open(url, '_blank');
             }
           } else {

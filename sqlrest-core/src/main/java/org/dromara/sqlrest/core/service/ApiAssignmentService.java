@@ -720,9 +720,15 @@ public class ApiAssignmentService {
 
   private List<ApiAssignmentEntity> searchAll(AssignmentSearchRequest request) {
     if (null != request.getOnline() && Boolean.TRUE.equals(request.getOnline())) {
-      return apiOnlineDao.searchAll(Collections.singletonList(request.getGroupId()),
-          Collections.singletonList(request.getModuleId()),
-          request.getOpen(), request.getSearchText());
+      List<Long> groupIds = Objects.isNull(request.getGroupId())
+          ? Collections.emptyList()
+          : Collections.singletonList(request.getGroupId());
+      List<Long> moduleIds = Objects.isNull(request.getModuleId())
+          ? Collections.emptyList()
+          : Collections.singletonList(request.getModuleId());
+      String searchText = StringUtils.isBlank(request.getSearchText())
+          ? null : request.getSearchText();
+      return apiOnlineDao.searchAll(groupIds, moduleIds, request.getOpen(), searchText);
     }
     return apiAssignmentDao.searchAll(request.getGroupId(), request.getModuleId(),
         request.getOpen(), request.getSearchText(), request.getOnline());

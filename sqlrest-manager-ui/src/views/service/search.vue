@@ -30,6 +30,7 @@
               <el-checkbox v-for="item in moduleItemList"
                            :key="item.id"
                            :label="item.id"
+                           @change="handleSearch"
                            class="filter-checkbox">
                 {{ item.name }}
               </el-checkbox>
