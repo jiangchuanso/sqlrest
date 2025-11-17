@@ -1,113 +1,134 @@
+```vue
 <template>
   <div class="login-container">
-    <el-form :model="ruleForm2"
-             :rules="rules2"
-             status-icon
-             ref="ruleForm2"
-             label-position="left"
-             label-width="0px"
-             class="demo-ruleForm login-page">
-      <h3 class="title"
-          align="center">系统登录</h3>
-      <el-form-item prop="username">
-        <el-input type="text"
-                  v-model="ruleForm2.username"
-                  auto-complete="off"
-                  placeholder="用户名"></el-input>
-      </el-form-item>
-      <el-form-item prop="password">
-        <el-input type="password"
-                  v-model="ruleForm2.password"
-                  auto-complete="off"
-                  placeholder="密码"></el-input>
-      </el-form-item>
-      <el-form-item style="width:100%;">
-        <el-button type="primary"
-                   style="width:100%;"
-                   @click="handleSubmit"
-                   :loading="logining"
-                   @keyup.enter="handleSubmit">登录</el-button>
-      </el-form-item>
-    </el-form>
+    <div class="login-form">
+      <div class="logo-section">
+        <h1 class="system-title">系统登录</h1>
+        <p class="system-subtitle">欢迎使用SQLREST</p>
+      </div>
+
+      <form @submit.prevent="handleLogin"
+            class="form-content">
+        <div class="input-group">
+          <label for="username"
+                 class="input-label">用户名</label>
+          <input type="text"
+                 id="username"
+                 v-model="loginForm.username"
+                 placeholder="请输入用户名"
+                 class="input-field"
+                 :class="{ 'input-error': errors.username }">
+          <span class="error-message"
+                v-if="errors.username">{{ errors.username }}</span>
+        </div>
+
+        <div class="input-group">
+          <label for="password"
+                 class="input-label">密码</label>
+          <input type="password"
+                 id="password"
+                 v-model="loginForm.password"
+                 placeholder="请输入密码"
+                 class="input-field"
+                 :class="{ 'input-error': errors.password }">
+          <span class="error-message"
+                v-if="errors.password">{{ errors.password }}</span>
+        </div>
+
+        <button type="submit"
+                class="login-button"
+                :disabled="loading">
+          <span v-if="!loading">登录</span>
+          <span v-if="loading"
+                class="loading-text">登录中...</span>
+        </button>
+      </form>
+
+      <div class="footer-links">
+        <p class="copyright">© {{ currentYear }} https://gitee.com/inrgihc/sqlrest</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import qs from "qs";
-
 export default {
+  name: 'LoginPage',
   data () {
     return {
-      logining: false,
-      ruleForm2: {
-        username: "",
-        password: ""
+      loginForm: {
+        username: '',
+        password: ''
       },
-      rules2: {
-        username: [
-          {
-            required: true,
-            message: "请输入用户名",
-            trigger: "blur"
-          }
-        ],
-        password: [
-          {
-            required: true,
-            message: "请输入密码",
-            trigger: "blur"
-          }
-        ]
-      },
-      checked: false
-    };
+      errors: {},
+      loading: false
+    }
   },
-  created () {
-    //按enter键提交功能参考：https://www.cnblogs.com/cristina-guan/p/9440035.html
-    var lett = this;
-    document.onkeydown = function (e) {
-      var key = window.event.keyCode;
-      if (key == 13) {
-        lett.handleSubmit(e);
-      }
-    };
+  computed: {
+    currentYear() {
+      return new Date().getFullYear();
+    }
   },
   methods: {
-    handleSubmit () {
-      this.$refs.ruleForm2.validate(valid => {
-        if (valid) {
-          this.$http({
-            method: 'POST',
-            url: '/user/login',
-            data: {
-              username: this.ruleForm2.username,
-              password: this.ruleForm2.password
-            },
-          }).then(res => {
-            if (0 === res.data.code) {
-              this.logining = true;
-              window.sessionStorage.setItem('token', res.data.data.accessToken);
-              window.sessionStorage.setItem('username', this.ruleForm2.username);
-              window.sessionStorage.setItem('realname', res.data.data.realName);
+    validateForm () {
+      this.errors = {}
 
-              this.$http.get("/sqlrest/manager/api/v1/health/version").then(
-                res => {
-                  if (0 === res.data.code) {
-                    window.sessionStorage.setItem('version', res.data.data);
-                  }
-                }
-              );
+      if (!this.loginForm.username.trim()) {
+        this.errors.username = '请输入用户名'
+      }
 
-              this.$router.push({
-                path: '/dashboard'
-              });
-            } else {
-              this.logining = false;
-              this.$message(res.data.message);
-            }
-          });
-        }
+      if (!this.loginForm.password) {
+        this.errors.password = '请输入密码'
+      }
+
+      return Object.keys(this.errors).length === 0
+    },
+    resetLoading () {
+      this.loading = false;
+    },
+    showMessageBox (msg) {
+      this.$alert(msg, '异常提示', {
+        type: 'error',
+        confirmButtonText: '确定'
       });
+    },
+    handleLogin () {
+      if (!this.validateForm()) {
+        return
+      }
+      this.loading = true
+      this.$http({
+        method: 'POST',
+        url: '/user/login',
+        data: {
+          username: this.loginForm.username,
+          password: this.loginForm.password
+        },
+      }).then(res => {
+        if (0 === res.data.code) {
+          window.sessionStorage.setItem('token', res.data.data.accessToken);
+          window.sessionStorage.setItem('username', this.loginForm.username);
+          window.sessionStorage.setItem('realname', res.data.data.realName);
+          this.$http.get("/sqlrest/manager/api/v1/health/version").then(
+            res => {
+              if (0 === res.data.code) {
+                window.sessionStorage.setItem('version', res.data.data);
+                this.$message("登录成功！");
+                this.$router.push({ path: '/dashboard' });
+              } else {
+                this.$message(res.data.message);
+              }
+              this.resetLoading();
+            }
+          );
+        } else {
+          this.showMessageBox("系统登录异常," + res.data.message);
+          this.resetLoading();
+        }
+      }).catch(error => {
+        this.resetLoading();
+        this.showMessageBox("系统登录异常," + (error || "地址无法联通"));
+      })
     }
   }
 }
@@ -115,23 +136,253 @@ export default {
 
 <style scoped>
 .login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-form {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
   width: 100%;
-  height: 100%;
+  max-width: 420px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.login-page {
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  margin: 180px auto;
-  width: 350px;
-  padding: 35px 35px 15px;
-  background: #fff;
-  border: 1px solid #eaeaea;
-  box-shadow: 0 0 25px #cac6c6;
+.login-form::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  z-index: 0;
 }
 
-label.el-checkbox.rememberme {
-  margin: 0px 0px 15px;
-  text-align: left;
+.form-content {
+  position: relative;
+  z-index: 1;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.system-title {
+  color: #e2e8f0;
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.system-subtitle {
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #e2e8f0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.input-field {
+  width: 90%;
+  padding: 12px 16px;
+  border: 2px solid #334155;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #1e293b;
+  outline: none;
+  color: #f1f5f9;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  background: #0f172a;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.input-field:hover {
+  border-color: #475569;
+}
+
+.input-field::placeholder {
+  color: #64748b;
+}
+
+.input-error {
+  border-color: #ef4444 !important;
+  background: #1a0f0f;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #94a3b8;
+}
+
+.checkbox-input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #475569;
+  border-radius: 4px;
+  margin-right: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+  background: #1e293b;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.forgot-link {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.login-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-text {
+  display: inline-block;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.footer-links {
+  text-align: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #334155;
+}
+
+.copyright {
+  color: #64748b;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .login-form {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+
+  .system-title {
+    font-size: 24px;
+  }
+
+  .remember-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .forgot-link {
+    margin-left: 0;
+  }
+}
+
+/* 深色模式适配（保持一致） */
+@media (prefers-color-scheme: dark) {
+  .login-container {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  }
+
+  .login-form {
+    background: rgba(15, 23, 42, 0.95);
+  }
 }
 </style>

@@ -302,7 +302,7 @@ public enum ProductTypeEnum {
           .defaultPort(10000)
           .testSql("SELECT 1")
           .urlPrefix("jdbc:hive2://")
-          .tplUrls(new String[]{"jdbc:hive2://{host}[:{port}]/[{database}][\\?{params}]"})
+          .tplUrls(new String[]{"jdbc:hive2://{host}[:{port}]/[{database}][;{params}]"})
           .urlSample("jdbc:hive2://172.17.2.12:10000/default")
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
@@ -324,7 +324,7 @@ public enum ProductTypeEnum {
           ).build()),
 
   /**
-   * Hive 数据库类型
+   * Impala 数据库类型
    */
   IMPALA(
       ProductContext.builder()
@@ -335,7 +335,7 @@ public enum ProductTypeEnum {
           .defaultPort(10000)
           .testSql("SELECT 1")
           .urlPrefix("jdbc:impala://")
-          .tplUrls(new String[]{"jdbc:impala://{host}[:{port}]/[{database}][\\?{params}]"})
+          .tplUrls(new String[]{"jdbc:impala://{host}[:{port}]/[{database}][;{params}]"})
           .urlSample("jdbc:impala://172.17.2.12:10000/default")
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
@@ -355,13 +355,47 @@ public enum ProductTypeEnum {
                 }
               }
           ).build()),
+
+  /**
+   * Inceptor 数据库类型
+   */
+  INCEPTOR(
+      ProductContext.builder()
+          .id(14)
+          .quote("`")
+          .name("inceptor")
+          .driver("org.apache.hive.jdbc.HiveDriver")
+          .defaultPort(10000)
+          .testSql("SELECT 1")
+          .urlPrefix("jdbc:hive2://")
+          .tplUrls(new String[]{"jdbc:hive2://{host}[:{port}]/[{database}][;{params}]"})
+          .urlSample("jdbc:hive2://172.17.2.12:10000/default;escape=false")
+          .sqlSchemaList("SHOW DATABASES")
+          .adapter(database -> Pair.of(null, database))
+          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageConsumer(
+              (page, size, parameters) -> {
+                parameters.add(size);
+                parameters.add((page - 1) * size);
+              }
+          )
+          .executeBeforeQuery(
+              connection -> {
+                try (Statement statement = connection.createStatement()) {
+                  statement.execute("set hive.resultset.use.unique.column.names=false");
+                } catch (SQLException e) {
+                  throw new RuntimeException(e);
+                }
+              }
+          ).build()),
+
   /**
    * Sqlite v3数据库类型
    */
   // 参考文章：https://blog.csdn.net/wank1259162/article/details/104946744
   SQLITE3(
       ProductContext.builder()
-          .id(14)
+          .id(15)
           .quote("\"")
           .name("sqlite3")
           .driver("org.sqlite.JDBC")
@@ -386,7 +420,7 @@ public enum ProductTypeEnum {
    */
   OPENGAUSS(
       ProductContext.builder()
-          .id(15)
+          .id(16)
           .quote("\"")
           .name("opengauss")
           .driver("org.opengauss.Driver")
@@ -410,7 +444,7 @@ public enum ProductTypeEnum {
    */
   CLICKHOUSE(
       ProductContext.builder()
-          .id(16)
+          .id(17)
           .quote("`")
           .name("clickhouse")
           .driver("com.clickhouse.jdbc.ClickHouseDriver")
@@ -434,7 +468,7 @@ public enum ProductTypeEnum {
    */
   DORIS(
       ProductContext.builder()
-          .id(17)
+          .id(18)
           .quote("`")
           .name("doris")
           .driver("com.mysql.jdbc.Driver")
@@ -459,7 +493,7 @@ public enum ProductTypeEnum {
    */
   STARROCKS(
       ProductContext.builder()
-          .id(18)
+          .id(19)
           .quote("`")
           .name("starrocks")
           .driver("com.mysql.jdbc.Driver")
@@ -484,7 +518,7 @@ public enum ProductTypeEnum {
    */
   OCEANBASE(
       ProductContext.builder()
-          .id(19)
+          .id(20)
           .quote("")
           .name("oceanbase")
           .driver("com.oceanbase.jdbc.Driver")
@@ -509,7 +543,7 @@ public enum ProductTypeEnum {
    */
   TDENGINE(
       ProductContext.builder()
-          .id(20)
+          .id(21)
           .quote("`")
           .name("TDengine")
           .driver("com.taosdata.jdbc.rs.RestfulDriver")

@@ -71,7 +71,7 @@
                    :disabled="apiDocStatus==false"
                    v-if="online"
                    icon="el-icon-document-add"
-                   @click="openSwagger">在线文档</el-button>
+                   @click="openOnlineApiDoc">在线文档</el-button>
         <el-button type="primary"
                    size="mini"
                    v-if="!online"
@@ -250,6 +250,28 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="请选择打开的在线文档类型"
+               :visible.sync="selectOpenApiDocsDialogVisible"
+               :showClose="false"
+               width="20%"
+               :before-close="handleClose">
+      <el-select v-model="selectedOpenApiDocType"
+                 size="mini"
+                 style="width:95%"
+                 placeholder="请选择文档类型">
+        <el-option v-for="(item,index) in openApiDocs"
+                   :key="index"
+                   :label="item.key"
+                   :value="item.key"></el-option>
+      </el-select>
+      <div slot="footer"
+           class="dialog-footer">
+        <el-button @click="selectOpenApiDocsDialogVisible = false">取 消</el-button>
+        <el-button type="primary"
+                   @click="handleOpenApiDoc">打 开</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -277,6 +299,9 @@ export default {
       selectRowId: 0,
       selectCommitId: 0,
       versions: [],
+      openApiDocs: [{ key: "swagger" }, { key: "knife4j" }],
+      selectOpenApiDocsDialogVisible: false,
+      selectedOpenApiDocType: "swagger",
     };
   },
   methods: {
@@ -415,7 +440,11 @@ export default {
     handleCreate: function () {
       this.$router.push('/interface/create')
     },
-    openSwagger: function () {
+    openOnlineApiDoc: function () {
+      this.selectedOpenApiDocType = this.openApiDocs[0].key;
+      this.selectOpenApiDocsDialogVisible = true;
+    },
+    handleOpenApiDoc: function () {
       this.$http({
         method: "GET",
         url: "/sqlrest/manager/api/v1/node/gateway"
@@ -423,7 +452,7 @@ export default {
         res => {
           if (0 === res.data.code) {
             if (res.data.data && typeof res.data.data === 'string') {
-              var url = res.data.data + '/apidoc/swagger/index.html';
+              var url = res.data.data + '/apidoc/' + this.selectedOpenApiDocType + '/index.html';
               window.open(url, '_blank');
             }
           } else {
@@ -431,6 +460,7 @@ export default {
               alert("操作失败:" + res.data.message);
             }
           }
+          this.selectOpenApiDocsDialogVisible = false;
         }
       );
     },

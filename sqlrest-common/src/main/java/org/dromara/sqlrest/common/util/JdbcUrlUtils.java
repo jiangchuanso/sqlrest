@@ -276,17 +276,17 @@ public final class JdbcUrlUtils {
     }
 
     // 10、Hive数据库
-    // jdbc:hive2://172.17.2.10:10000/test?useUnicode=true&useSSL=false
+    // jdbc:hive2://172.17.2.10:10000/test;a=b;c=d?useUnicode=true&useSSL=false
     final Matcher matcher9 = JdbcUrlUtils
-        .getPattern("jdbc:hive2://{host}[:{port}]/[{database}][\\?{params}]")
-        .matcher("jdbc:hive2://127.0.0.1:10000/default?useUnicode=true&useSSL=false");
+        .getPattern("jdbc:hive2://{host}[:{port}]/[{database}][;{params}]")
+        .matcher("jdbc:hive2://127.0.0.1:10000/default;a=b;c=d?useUnicode=true&useSSL=false");
     if (matcher9.matches()) {
-      System.out.println("hive host:" + matcher3.group("host"));
-      System.out.println("hive port:" + matcher3.group("port"));
-      System.out.println("hive database:" + matcher3.group("database"));
+      System.out.println("hive host:" + matcher9.group("host"));
+      System.out.println("hive port:" + matcher9.group("port"));
+      System.out.println("hive database:" + matcher9.group("database"));
       String params = matcher9.group("params");
       if (null != params) {
-        String[] pairs = params.split("&");
+        String[] pairs = params.split(";|&|\\?");
         for (String pair : pairs) {
           System.out.println("mysql params:" + pair);
         }

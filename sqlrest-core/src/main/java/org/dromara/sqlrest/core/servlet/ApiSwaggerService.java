@@ -9,20 +9,6 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.servlet;
 
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.common.dto.BaseParam;
-import org.dromara.sqlrest.common.dto.ItemParam;
-import org.dromara.sqlrest.common.dto.OutParam;
-import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
-import org.dromara.sqlrest.common.enums.HttpMethodEnum;
-import org.dromara.sqlrest.common.enums.ParamTypeEnum;
-import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
-import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
-import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
-import org.dromara.sqlrest.persistence.dao.SystemParamDao;
-import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
-import org.dromara.sqlrest.persistence.entity.SystemParamEntity;
 import com.google.common.collect.ImmutableMap;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -57,6 +43,19 @@ import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.BaseParam;
+import org.dromara.sqlrest.common.dto.ItemParam;
+import org.dromara.sqlrest.common.dto.OutParam;
+import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
+import org.dromara.sqlrest.common.enums.HttpMethodEnum;
+import org.dromara.sqlrest.common.enums.ParamTypeEnum;
+import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
+import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
+import org.dromara.sqlrest.persistence.dao.SystemParamDao;
+import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
+import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
+import org.dromara.sqlrest.persistence.entity.SystemParamEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -76,7 +75,9 @@ public class ApiSwaggerService {
   private static final String TOKEN_MODEL = "TOKEN认证授权";
   private static final String APPLICATION_JSON = "application/json";
   private static final String AUTHORIZATION = "Authorization";
-  
+
+  private static final ThreadLocal<Integer> THREAD_LOCAL = new ThreadLocal<>();
+
   @Resource
   private ApiOnlineDao apiOnlineDao;
   @Resource
@@ -86,6 +87,17 @@ public class ApiSwaggerService {
 
   private String getApiUrlPrefix() {
     return String.format("/%s/", Constants.API_PATH_PREFIX);
+  }
+
+  private void clearThreadLocal() {
+    THREAD_LOCAL.remove();
+  }
+
+  private String genParamEntityName() {
+    Integer oldIdx = Optional.ofNullable(THREAD_LOCAL.get()).orElse(0);
+    Integer newIdx = oldIdx + 1;
+    THREAD_LOCAL.set(newIdx);
+    return "BeanEntity" + String.format("%05d", newIdx);
   }
 
   private Triple<String, String, String> getOpenApiInfo() {
@@ -100,6 +112,8 @@ public class ApiSwaggerService {
   }
 
   public OpenAPI getSwaggerJson(HttpServletRequest request) {
+    clearThreadLocal();
+
     Triple<String, String, String> entity = getOpenApiInfo();
     Info info = new Info().title(entity.getLeft())
         .version(entity.getMiddle())
@@ -107,6 +121,7 @@ public class ApiSwaggerService {
 
     OpenAPI openAPI = new OpenAPI();
     openAPI.info(info);
+    openAPI.setComponents(new Components());
 
     // 模块
     List<ApiModuleEntity> moduleEntities = apiModuleDao.listAll();
@@ -115,7 +130,7 @@ public class ApiSwaggerService {
     }
 
     //token获取接口
-    openAPI.path("/token/generate", getTokenGeneratePathItem());
+    openAPI.path("/token/generate", getTokenGeneratePathItem(openAPI));
 
     // 自定义的接口
     Map<Long, ApiModuleEntity> moduleIdMap = moduleEntities.stream()
@@ -223,9 +238,13 @@ public class ApiSwaggerService {
           }
 
           Content content = new Content();
+          Schema inputSchema = new Schema();
+          String inputEntityName = genParamEntityName();
+          openAPI.getComponents().addSchemas(inputEntityName, objectSchema);
+          inputSchema.set$ref("#/components/schemas/" + inputEntityName);
           content.addMediaType(
               assignment.getContentType(),
-              new MediaType().schema(objectSchema)
+              new MediaType().schema(inputSchema)
           );
           requestBody.setContent(content);
           operation.setRequestBody(requestBody);
@@ -247,7 +266,7 @@ public class ApiSwaggerService {
       }
 
       // 响应
-      operation.setResponses(getApiResponses(assignment));
+      operation.setResponses(getApiResponses(assignment, openAPI));
       operation.security(Collections.singletonList(new SecurityRequirement().addList(AUTHORIZATION)));
 
       openAPI.path(path, pathItem);
@@ -260,12 +279,12 @@ public class ApiSwaggerService {
             .scheme("bearer")
             .bearerFormat("JWT")
     );
-    openAPI.setComponents(new Components().securitySchemes(securitySchemes));
+    openAPI.getComponents().securitySchemes(securitySchemes);
 
     return openAPI;
   }
 
-  private PathItem getTokenGeneratePathItem() {
+  private PathItem getTokenGeneratePathItem(OpenAPI openAPI) {
     PathItem pathItem = new PathItem();
     pathItem.setSummary(TOKEN_MODEL);
     pathItem.setDescription(TOKEN_MODEL);
@@ -274,12 +293,15 @@ public class ApiSwaggerService {
     requestBody.setRequired(true);
     requestBody.setDescription(TOKEN_MODEL);
     Content content = new Content();
+    Schema requestSchema = new ObjectSchema().name("type")
+        .addProperties("clientId", new StringSchema())
+        .addProperties("secret", new StringSchema());
+    Schema inputSchema = new Schema();
+    String inputEntityName = genParamEntityName();
+    inputSchema.set$ref("#/components/schemas/" + inputEntityName);
+    openAPI.getComponents().addSchemas(inputEntityName, requestSchema);
     content.addMediaType(APPLICATION_JSON,
-        new MediaType().schema(
-            new ObjectSchema().name("type")
-                .addProperties("clientId", new StringSchema())
-                .addProperties("secret", new StringSchema())
-        )
+        new MediaType().schema(inputSchema)
     );
     requestBody.setContent(content);
 
@@ -291,18 +313,22 @@ public class ApiSwaggerService {
     operation.setSummary(TOKEN_MODEL);
     operation.setDescription(TOKEN_MODEL);
 
+    Schema rootSchema = new Schema().name("type")
+        .type("object")
+        .addProperties("accessToken", new StringSchema())
+        .addProperties("expireSeconds", new NumberSchema());
+
     ApiResponses apiResponses = new ApiResponses();
+    Schema outputSchema = new Schema();
+    String outputEntityName = genParamEntityName();
+    outputSchema.set$ref("#/components/schemas/" + outputEntityName);
+    openAPI.getComponents().addSchemas(outputEntityName, rootSchema);
     apiResponses.addApiResponse("200",
         new ApiResponse().description("OK")
             .content(
                 new Content().addMediaType(
                     "application/json",
-                    new MediaType().schema(
-                        new Schema().name("type")
-                            .type("object")
-                            .addProperties("accessToken", new StringSchema())
-                            .addProperties("expireSeconds", new NumberSchema())
-                    )
+                    new MediaType().schema(outputSchema)
                 )
             )
     );
@@ -325,7 +351,7 @@ public class ApiSwaggerService {
     return pathItem;
   }
 
-  private ApiResponses getApiResponses(ApiAssignmentEntity assignment) {
+  private ApiResponses getApiResponses(ApiAssignmentEntity assignment, OpenAPI openAPI) {
     List<OutParam> outputs = assignment.getOutputs();
 
     // 检查USE_SYSTEM_RESPONSE_FORMAT配置
@@ -421,11 +447,15 @@ public class ApiSwaggerService {
     }
 
     ApiResponses apiResponses = new ApiResponses();
+    Schema outputSchema = new Schema();
+    String outputEntityName = genParamEntityName();
+    outputSchema.set$ref("#/components/schemas/" + outputEntityName);
+    openAPI.getComponents().addSchemas(outputEntityName, rootSchema);
     apiResponses.addApiResponse("200",
         new ApiResponse().description("OK").content(
             new Content().addMediaType(
-                "*/*",
-                new MediaType().schema(rootSchema)
+                "application/json",
+                new MediaType().schema(outputSchema)
             )
         )
     );
