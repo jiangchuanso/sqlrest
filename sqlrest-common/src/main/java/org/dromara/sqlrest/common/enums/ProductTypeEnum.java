@@ -39,7 +39,7 @@ public enum ProductTypeEnum {
               "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -63,7 +63,7 @@ public enum ProductTypeEnum {
               "jdbc:mariadb://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -136,7 +136,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:postgresql://172.17.2.10:5432/test")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -182,11 +182,11 @@ public enum ProductTypeEnum {
           .defaultPort(5236)
           .testSql("SELECT 'Hello' from DUAL")
           .urlPrefix("jdbc:dm://")
-          .tplUrls(new String[]{"jdbc:dm://{host}:{port}[/{database}][\\\\?{params}]"})
+          .tplUrls(new String[]{"jdbc:dm://{host}:{port}[/{database}][\\?{params}]"})
           .urlSample("jdbc:dm://172.17.2.10:5236")
           .sqlSchemaList("SELECT DISTINCT object_name FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'SCH'")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -210,7 +210,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:kingbase8://172.17.2.10:54321/test")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -234,7 +234,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:oscar://172.17.2.10:2003/OSCRDB")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -258,7 +258,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:gbase://172.17.2.10:5258/test")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -282,7 +282,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:sybase:Tds:172.17.2.10:5000/test?charset=cp936")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("SELECT * FROM (%s) ALIAS OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
+          .pageSql("%s OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add((page - 1) * size);
@@ -306,7 +306,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:hive2://172.17.2.12:10000/default")
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -339,7 +339,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:impala://172.17.2.12:10000/default")
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -366,13 +366,13 @@ public enum ProductTypeEnum {
           .name("inceptor")
           .driver("org.apache.hive.jdbc.HiveDriver")
           .defaultPort(10000)
-          .testSql("SELECT 1")
+          .testSql(null)
           .urlPrefix("jdbc:hive2://")
           .tplUrls(new String[]{"jdbc:hive2://{host}[:{port}]/[{database}][;{params}]"})
           .urlSample("jdbc:hive2://172.17.2.12:10000/default;escape=false")
           .sqlSchemaList("SHOW DATABASES")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -407,7 +407,7 @@ public enum ProductTypeEnum {
           .sqlSchemaList(null)
           .retSchemaList(Collections.singletonList("sqlite_master"))
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -431,7 +431,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:opengauss://172.17.2.10:5432/test")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? offset ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -455,7 +455,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:clickhouse://172.17.2.10:8123/default")
           .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
           .adapter(database -> Pair.of(null, database))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -480,7 +480,7 @@ public enum ProductTypeEnum {
               "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -505,7 +505,7 @@ public enum ProductTypeEnum {
               "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -530,7 +530,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:oceanbase://127.0.0.1:2881/test")
           .sqlSchemaList(null)
           .adapter(null)
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
@@ -554,7 +554,7 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:TAOS-RS://172.17.2.10:6041/test")
           .sqlSchemaList("SELECT name FROM `information_schema`.`ins_databases`")
           .adapter(database -> Pair.of(database, null))
-          .pageSql("select * from (%s) alias limit ? OFFSET ? ")
+          .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add(size);
