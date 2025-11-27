@@ -14,7 +14,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import java.sql.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.EnumTypeHandler;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 
 @Data
 @Builder

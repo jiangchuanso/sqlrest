@@ -68,6 +68,25 @@
         </div>
         <el-button type="warning"
                    size="mini"
+                   :disabled="isSelected"
+                   plain
+                   icon="el-icon-download"
+                   @click="handleBatchExport">导出接口</el-button>
+        <el-upload :action="uploadAssignmentPath"
+                   accept="application/json"
+                   :http-request="handleFileUpload"
+                   v-if="!online"
+                   :multiple="false"
+                   :show-file-list="false"
+                   :auto-upload="true">
+          <el-button type="warning"
+                     size="mini"
+                     plain
+                     v-if="!online"
+                     icon="el-icon-upload2">导入接口</el-button>
+        </el-upload>
+        <el-button type="warning"
+                   size="mini"
                    :disabled="apiDocStatus==false"
                    v-if="online"
                    icon="el-icon-document-add"
@@ -82,7 +101,11 @@
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                 :data="tableData"
                 size="small"
+                @selection-change="handleSelectionChange"
                 border>
+        <el-table-column prop="id"
+                         type="selection"
+                         min-width="8%"></el-table-column>
         <el-table-column prop="id"
                          label="编号"
                          min-width="8%"></el-table-column>
@@ -302,6 +325,9 @@ export default {
       openApiDocs: [{ key: "swagger" }, { key: "knife4j" }],
       selectOpenApiDocsDialogVisible: false,
       selectedOpenApiDocType: "swagger",
+      isSelected: true,
+      idsSelected: [],
+      uploadAssignmentPath: process.env.API_ROOT + '/sqlrest/manager/api/v1/assignment/import',
     };
   },
   methods: {
@@ -596,6 +622,85 @@ export default {
           }
         }
       });
+    },
+    handleSelectionChange (arr) {
+      if (arr.length > 0) {
+        this.isSelected = false;
+        for (var item of arr) {
+          if (!this.idsSelected.includes(item.id)) {
+            this.idsSelected.push(item.id);
+          }
+        }
+      } else {
+        this.isSelected = true;
+        this.idsSelected = []
+      }
+    },
+    handleBatchExport: function () {
+      this.$http({
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/assignment/export",
+        data: JSON.stringify(this.idsSelected),
+        responseType: 'blob',
+      }).then(resp => {
+        const headers = resp.headers;
+        const contentType = headers['content-type'];
+        if (!resp.data) {
+          console.error('响应异常：', resp);
+          return false;
+        } else {
+          const blob = new Blob([resp.data], { type: contentType });
+          this.downloadFile(blob, "sqlrest_interfaces.json");
+        }
+      });
+    },
+    downloadFile: function (blob, fileName) {
+      if ('download' in document.createElement('a')) {
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob); // 创建下载的链接
+        link.download = fileName; // 下载后文件名
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click(); // 点击下载
+        window.URL.revokeObjectURL(link.href); // 释放掉blob对象
+        document.body.removeChild(link); // 下载完成移除元素
+      } else {
+        // IE10+下载
+        window.navigator.msSaveBlob(blob, fileName);
+      }
+    },
+    handleFileUpload: function (options) {
+      const formData = new FormData();
+      formData.append("file", options.file);
+      this.$http({
+        method: "POST",
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        url: "/sqlrest/manager/api/v1/assignment/import",
+        data: formData,
+      })
+        .then(res => {
+          if (0 === res.data.code) {
+            this.$message.success("导入成功");
+            this.loadData();
+          } else {
+            if (res.data.message) {
+              this.$alert("导入失败," + res.data.message, "错误信息",
+                {
+                  confirmButtonText: "确定",
+                  type: "error"
+                }
+              );
+            }
+          }
+        })
+        .catch(err => {
+          this.$message.error("导入失败," + err);
+        });
     },
     handleSizeChange: function (pageSize) {
       this.loading = true;

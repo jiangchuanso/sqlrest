@@ -10,6 +10,9 @@ spring:
     static-path-pattern: /**
 
 sqlrest:
+  manager:
+    swagger:
+      enable: false
   url:
     gateway: ${SQLREST_GATEWAY_URL:}
     manager: ${SQLREST_MANAGER_URL:}

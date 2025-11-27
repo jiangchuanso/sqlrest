@@ -50,7 +50,7 @@ public class SwaggerConfiguration {
         .enable(enable)
         .groupName("Manager的接口")
         .apiInfo(new ApiInfoBuilder()
-            .title("Manager服务API文档")
+            .title("SQLREST管理服务API文档")
             .description("在线API文档")
             .version("1.0")
             .build())

@@ -12,12 +12,12 @@ package org.dromara.sqlrest.persistence.dao;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
-import org.dromara.sqlrest.persistence.mapper.DataSourceMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
+import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
+import org.dromara.sqlrest.persistence.mapper.DataSourceMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -47,6 +47,10 @@ public class DataSourceDao {
             .like(StringUtils.hasText(searchText), DataSourceEntity::getName, searchText)
             .orderByDesc(DataSourceEntity::getCreateTime)
     );
+  }
+
+  public List<DataSourceEntity> listAll() {
+    return listAll(null);
   }
 
   public Set<Long> getAllIdList() {

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AliveHealthController {
 
   @GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity<String> queryFirewallRules() {
+  public ResultEntity<String> getProjectVersion() {
     return ResultEntity.success(PomVersionUtils.getCachedProjectVersion());
   }
 }

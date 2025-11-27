@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.dto.ResultEntity;
@@ -32,6 +33,7 @@ import org.dromara.sqlrest.core.dto.AssignmentSearchRequest;
 import org.dromara.sqlrest.core.dto.NameValueBaseResponse;
 import org.dromara.sqlrest.core.dto.NameValueRemarkResponse;
 import org.dromara.sqlrest.core.service.ApiAssignmentService;
+import org.dromara.sqlrest.core.service.ExportImportService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +43,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = {"API配置接口"})
 @RestController
@@ -50,6 +54,8 @@ public class ApiAssignmentController {
 
   @Resource
   private ApiAssignmentService apiAssignmentService;
+  @Resource
+  private ExportImportService exportImportService;
 
   @ApiOperation(value = "获取自动提示列表")
   @GetMapping(value = "/completions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -166,6 +172,19 @@ public class ApiAssignmentController {
   @PutMapping(value = "/retire/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity retire(@PathVariable("id") Long id) {
     apiAssignmentService.retireAssignment(id);
+    return ResultEntity.success();
+  }
+
+  @ApiOperation(value = "批量导出API配置")
+  @PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void exportAssignments(@Valid @NotEmpty @RequestBody List<Long> ids, HttpServletResponse response) {
+    exportImportService.exportAssignments(ids, response);
+  }
+
+  @ApiOperation(value = "批量导入API配置")
+  @PostMapping(value = "/import", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<String> importAssignments(@RequestPart(value = "file") MultipartFile file) throws IOException {
+    exportImportService.importAssignments(file);
     return ResultEntity.success();
   }
 }

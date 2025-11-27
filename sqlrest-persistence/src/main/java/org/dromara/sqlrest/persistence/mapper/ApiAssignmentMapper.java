@@ -98,7 +98,7 @@ public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
       + "<if test='searchText != null and searchText.length()>0 '>"
       + " AND a.name like #{searchText,jdbcType=VARCHAR} "
       + "</if>"
-      + " ORDER BY a.create_time desc "
+      + " ORDER BY a.id desc "
       + "</script>")
   List<ApiAssignmentEntity> searchAll(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId,
       @Param("open") Boolean open, @Param("searchText") String searchText, @Param("online") Boolean online);

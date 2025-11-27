@@ -115,7 +115,7 @@ public class ApiOnlineDao {
             .in(CollUtil.isNotEmpty(groupIds), ApiOnlineEntity::getGroupId, groupIds)
             .in(CollUtil.isNotEmpty(moduleIds), ApiOnlineEntity::getModuleId, moduleIds)
             .like(StringUtils.hasText(searchText), ApiOnlineEntity::getName, searchText)
-            .orderByDesc(ApiOnlineEntity::getCreateTime)
+            .orderByDesc(ApiOnlineEntity::getApiId)
     ).stream()
         .map(entity -> buildAssignmentEntity(entity))
         .collect(Collectors.toList());
