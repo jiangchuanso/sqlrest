@@ -49,7 +49,8 @@ public abstract class Constants {
 
   public static final String SYS_PARAM_KEY_MCP_TOOL_LIST_PAGE_SIZE = "mcpToolListPageSize";
 
-  public static final String DEFAULT_SSE_TOKEN_PRAM_NAME = "token";
+  public static final String DEFAULT_MCP_TOKEN_PRAM_NAME = "token";
+  public static final String DEFAULT_STREAM_ENDPOINT = "/mcp";
   public static final String DEFAULT_SSE_ENDPOINT = "/mcp/sse";
   public static final String MESSAGE_ENDPOINT = "/mcp/message";
   public static final String MCP_SERVER_NAME = "sqlrest-mcp-server";

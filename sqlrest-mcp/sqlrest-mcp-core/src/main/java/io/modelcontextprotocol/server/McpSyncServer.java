@@ -9,6 +9,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.ClientCapabilities;
 import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import io.modelcontextprotocol.util.Assert;
+import java.util.List;
 
 /**
  * A synchronous implementation of the Model Context Protocol (MCP) server that wraps
@@ -105,6 +106,10 @@ public class McpSyncServer {
 	 */
 	public void addTool(McpServerFeatures.SyncToolSpecification toolHandler) {
 		this.asyncServer.addTool(McpServerFeatures.AsyncToolSpecification.fromSync(toolHandler)).block();
+	}
+
+	public List<McpServerFeatures.AsyncToolSpecification> listTool(){
+		return this.asyncServer.listTool().block();
 	}
 
 	/**

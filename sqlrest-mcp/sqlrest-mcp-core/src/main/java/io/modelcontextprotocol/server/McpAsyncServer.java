@@ -209,6 +209,10 @@ public class McpAsyncServer {
 		return this.delegate.addTool(toolSpecification);
 	}
 
+	public Mono<List<McpServerFeatures.AsyncToolSpecification>> listTool() {
+		return this.delegate.listTool();
+	}
+
 	/**
 	 * Remove a tool handler at runtime.
 	 * @param toolName The name of the tool handler to remove
@@ -574,6 +578,11 @@ public class McpAsyncServer {
 		@Override
 		public Mono<Void> addTool(McpServerFeatures.AsyncToolRegistration toolRegistration) {
 			return this.addTool(toolRegistration.toSpecification());
+		}
+
+		@Override
+		public Mono<List<McpServerFeatures.AsyncToolSpecification>> listTool() {
+			return Mono.just(new ArrayList<>(this.tools));
 		}
 
 		@Override

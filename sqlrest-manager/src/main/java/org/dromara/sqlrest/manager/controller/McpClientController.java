@@ -9,17 +9,18 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.manager.controller;
 
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.common.dto.PageResult;
-import org.dromara.sqlrest.common.dto.ResultEntity;
-import org.dromara.sqlrest.core.dto.EntitySearchRequest;
-import org.dromara.sqlrest.manager.service.McpManageService;
-import org.dromara.sqlrest.persistence.entity.McpClientEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.PageResult;
+import org.dromara.sqlrest.common.dto.ResultEntity;
+import org.dromara.sqlrest.core.dto.EntitySearchRequest;
+import org.dromara.sqlrest.core.dto.McpServerAddrResponse;
+import org.dromara.sqlrest.manager.service.McpManageService;
+import org.dromara.sqlrest.persistence.entity.McpClientEntity;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,8 +41,8 @@ public class McpClientController {
 
   @ApiOperation(value = "获取MCP服务地址")
   @GetMapping(value = "/endpoint", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResultEntity<String> getMcpSseEndpoint() {
-    return ResultEntity.success(mcpManageService.getMcpSseEndpoint());
+  public ResultEntity<McpServerAddrResponse> getMcpServerEndpoint() {
+    return ResultEntity.success(mcpManageService.getMcpServerEndpoint());
   }
 
   @ApiOperation(value = "添加令牌")

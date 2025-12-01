@@ -19,13 +19,14 @@ SQLREST的功能包括：
 - **MyBatis语法支持**：支持MyBatis的动态SQL语法。
 - **Groovy脚本支持**：支持groovy语法构建复杂场景下的接口。
 - **参数类型支持**：支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型。
-- **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种请求格式。
-- **身份认证支持**：提供基于 Token 的认证机制，保护 API 安全。
+- **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种入参请求格式。
+- **身份认证支持**：提供基于Token的认证机制，保护API安全。
 - **在线接口文档**：支持自动生成swagger和knife4j等在线接口文档。
-- **缓存配置支持**：支持 Hazelcast 和 Redis 缓存，提升 API 访问性能。
-- **流控配置管理**：通过 Sentinel 支持流量控制，防止系统过载。
+- **缓存配置支持**：支持Hazelcast或Redis缓存，提升API访问性能。
+- **流控配置管理**：通过Sentinel支持流量控制，防止系统过载。
 - **统一告警对接**：支持统一告警系统的对接与触发。
-- **接口版本管理**：支持接口的版本控制管理。
+- **接口版本管理**：支持接口的版本控制管理功能。
+- **批量导入导出**：支持接口的批量导入导出功能。
 - **大模型MCP服务**：支持简单配置即可创建MCP的tool。
 
 SQLREST作为微服务架构下的数据访问中间件，适合以下场景：

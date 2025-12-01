@@ -51,6 +51,7 @@ public final class DataSourceUtils {
       try (Connection connection = ds.getConnection()) {
         if (StringUtils.isNotBlank(entity.getType().getSql())) {
           try (Statement statement = connection.createStatement()) {
+            statement.setQueryTimeout(2);
             statement.execute(entity.getType().getSql());
           }
         } else {

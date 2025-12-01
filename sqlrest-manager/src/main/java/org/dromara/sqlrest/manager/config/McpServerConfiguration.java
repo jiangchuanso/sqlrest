@@ -11,16 +11,17 @@ package org.dromara.sqlrest.manager.config;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.dromara.sqlrest.common.consts.Constants;
-import org.dromara.sqlrest.common.util.PomVersionUtils;
-import org.dromara.sqlrest.persistence.dao.McpClientDao;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerAuthChecker;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
+import io.modelcontextprotocol.server.transport.WebMvcStreamHttpServerProvider;
 import io.modelcontextprotocol.spec.McpSchema.LoggingLevel;
 import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
+import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.util.PomVersionUtils;
+import org.dromara.sqlrest.persistence.dao.McpClientDao;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -37,7 +38,7 @@ public class McpServerConfiguration {
 
       @Override
       public String getTokenParamName() {
-        return Constants.DEFAULT_SSE_TOKEN_PRAM_NAME;
+        return Constants.DEFAULT_MCP_TOKEN_PRAM_NAME;
       }
 
       @Override
@@ -50,13 +51,8 @@ public class McpServerConfiguration {
 
   @Bean
   public WebMvcSseServerTransportProvider webMvcSseServerTransportProvider(WebMvcSseServerAuthChecker checker) {
-    return new WebMvcSseServerTransportProvider(new ObjectMapper(), checker, Constants.MESSAGE_ENDPOINT,
-        Constants.DEFAULT_SSE_ENDPOINT);
-  }
-
-  @Bean
-  public RouterFunction<ServerResponse> routerFunction(WebMvcSseServerTransportProvider transportProvider) {
-    return transportProvider.getRouterFunction();
+    String sseEndpoint = Constants.DEFAULT_SSE_ENDPOINT;
+    return new WebMvcSseServerTransportProvider(new ObjectMapper(), checker, Constants.MESSAGE_ENDPOINT, sseEndpoint);
   }
 
   @Bean
@@ -80,4 +76,16 @@ public class McpServerConfiguration {
     return syncServer;
   }
 
+  @Bean
+  public WebMvcStreamHttpServerProvider webMvcStreamHttpServerProvider(WebMvcSseServerAuthChecker checker,
+      McpSyncServer mcpSyncServer) {
+    String mcpEndpoint = Constants.DEFAULT_STREAM_ENDPOINT;
+    return new WebMvcStreamHttpServerProvider(new ObjectMapper(), checker, mcpEndpoint, mcpSyncServer);
+  }
+  
+  @Bean
+  public RouterFunction<ServerResponse> routerFunction(WebMvcSseServerTransportProvider transportProvider,
+      WebMvcStreamHttpServerProvider streamHttpServerProvider) {
+    return transportProvider.getRouterFunction().and(streamHttpServerProvider.getRouterFunction());
+  }
 }

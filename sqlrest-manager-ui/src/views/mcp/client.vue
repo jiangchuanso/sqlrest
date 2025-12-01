@@ -75,9 +75,8 @@
 
       <el-dialog title="查看"
                  :visible.sync="ShowTokenDialog">
-        <el-form size="mini"
-                 status-icon>
-          <el-form-item label="MCP令牌"
+        <el-form size="mini">
+          <el-form-item label="MCP访问令牌"
                         label-width="100px"
                         style="width:100%">
             <el-input type="input"
@@ -87,16 +86,37 @@
                       v-model="clientTokenValue"></el-input>
             <el-button @click="handleCopyTokenText">点击复制</el-button>
           </el-form-item>
-          <el-form-item label="MCP地址"
+          <el-form-item label="SSE服务地址"
                         label-width="100px"
                         style="width:100%">
+            <el-tooltip effect="dark"
+                        content="服务器发送事件(SSE)"
+                        placement="bottom">
+              <i class='el-icon-question' />
+            </el-tooltip>
             <el-input type="input"
                       style="width:80%"
                       :spellcheck="false"
-                      id="addressTextInput"
+                      id="sseAddressTextInput"
                       v-model="serverSseUrlAddress"></el-input>
             <el-button style="width:10%"
-                       @click="handleCopyAddressText">点击复制</el-button>
+                       @click="handleCopySseAddressText">点击复制</el-button>
+          </el-form-item>
+          <el-form-item label="流式Http地址"
+                        label-width="100px"
+                        style="width:100%">
+            <el-tooltip effect="dark"
+                        content="可流式传输的HTTP(StreamableHttp)"
+                        placement="bottom">
+              <i class='el-icon-question' />
+            </el-tooltip>
+            <el-input type="input"
+                      style="width:80%"
+                      :spellcheck="false"
+                      id="streamAddressTextInput"
+                      v-model="serverStreamUrlAddress"></el-input>
+            <el-button style="width:10%"
+                       @click="handleCopyStreamAddressText">点击复制</el-button>
           </el-form-item>
         </el-form>
         <span slot="footer">
@@ -179,6 +199,7 @@ export default {
       ShowTokenDialog: false,
       clientTokenValue: '',
       serverSseUrlAddress: '',
+      serverStreamUrlAddress: '',
       createform: {
         name: "",
       },
@@ -229,10 +250,10 @@ export default {
       }).then(
         res => {
           this.serverSseUrlAddress = '';
+          this.serverStreamUrlAddress = '';
           if (0 === res.data.code) {
-            if (res.data.data && typeof res.data.data === 'string') {
-              this.serverSseUrlAddress = res.data.data + token;
-            }
+            this.serverSseUrlAddress = res.data.data.sseAddrPrefix + token;
+            this.serverStreamUrlAddress = res.data.data.streamAddrPrefix + token;
           } else {
             if (res.data.message) {
               alert("加载数据失败:" + res.data.message);
@@ -301,16 +322,19 @@ export default {
       this.ShowTokenDialog = true
     },
     handleCopyTokenText: function () {
-      var d = document.getElementById("tokenTextInput")
-      d.select() //选中
+      document.getElementById("tokenTextInput").select()
       document.execCommand("copy")
       this.$message.success("复制令牌成功")
     },
-    handleCopyAddressText: function () {
-      var d = document.getElementById("addressTextInput")
-      d.select() //选中
+    handleCopySseAddressText: function () {
+      document.getElementById("sseAddressTextInput").select()
       document.execCommand("copy")
-      this.$message.success("复制URL成功")
+      this.$message.success("复制SSE地址成功")
+    },
+    handleCopyStreamAddressText: function () {
+      document.getElementById("streamAddressTextInput").select()
+      document.execCommand("copy")
+      this.$message.success("复制StreamableHttp地址成功")
     },
     handleUpdate: function (index, row) {
       this.updateform = JSON.parse(JSON.stringify(row));

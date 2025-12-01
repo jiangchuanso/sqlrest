@@ -26,11 +26,12 @@ import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.util.TokenUtils;
-import org.dromara.sqlrest.manager.config.SqlrestUrlConfiguration;
 import org.dromara.sqlrest.core.dto.EntitySearchRequest;
+import org.dromara.sqlrest.core.dto.McpServerAddrResponse;
 import org.dromara.sqlrest.core.dto.McpToolResponse;
 import org.dromara.sqlrest.core.dto.McpToolSaveRequest;
 import org.dromara.sqlrest.core.util.ApiPathUtils;
+import org.dromara.sqlrest.manager.config.SqlrestUrlConfiguration;
 import org.dromara.sqlrest.manager.model.McpToolCallHandler;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
@@ -79,19 +80,28 @@ public class McpManageService {
     }
   }
 
-  public String getMcpSseEndpoint() {
+  private String getManagerServerAddress() {
     DiscoveryClient discoveryClient = SpringUtil.getBean(DiscoveryClient.class);
     List<ServiceInstance> instances = discoveryClient.getInstances(Constants.MANAGER_APPLICATION_NAME);
     ServiceInstance instance = instances.stream().findAny().orElse(null);
     SqlrestUrlConfiguration sqlrestUrlConfiguration = SpringUtil.getBean(SqlrestUrlConfiguration.class);
     // 有且仅当服务确实存在时，才优先使用外部配置
-    if (StringUtils.isNotBlank(sqlrestUrlConfiguration.getManager()) && instance != null) {
+    if (StringUtils.isNotBlank(sqlrestUrlConfiguration.getManager())) {
       log.info("Configured Manger Address found :{},Skip auto self discover", sqlrestUrlConfiguration.getManager());
-      return String.format("%s%s?%s=", sqlrestUrlConfiguration.getManager(),
-          Constants.DEFAULT_SSE_ENDPOINT, Constants.DEFAULT_SSE_TOKEN_PRAM_NAME);
+      return sqlrestUrlConfiguration.getManager();
     }
-    return String.format("http://%s:%d%s?%s=", instance.getHost(), instance.getPort(),
-        Constants.DEFAULT_SSE_ENDPOINT, Constants.DEFAULT_SSE_TOKEN_PRAM_NAME);
+    return String.format("http://%s:%d", instance.getHost(), instance.getPort());
+  }
+
+  public McpServerAddrResponse getMcpServerEndpoint() {
+    String managerAddress = getManagerServerAddress();
+    String tokenParamName = Constants.DEFAULT_MCP_TOKEN_PRAM_NAME;
+    return McpServerAddrResponse.builder()
+        .sseAddrPrefix(String.format("%s%s?%s=", managerAddress,
+            Constants.DEFAULT_SSE_ENDPOINT, tokenParamName))
+        .streamAddrPrefix(String.format("%s%s?%s=", managerAddress,
+            Constants.DEFAULT_STREAM_ENDPOINT, tokenParamName))
+        .build();
   }
 
   public void createClient(String name) {
