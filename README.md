@@ -106,7 +106,7 @@ SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
  双击build.cmd脚本文件即可编译打包
 ```
 
-**(2) Linux下：**
+**(2) Linux/MacOS下：**
 
 ```
 git clone https://gitee.com/inrgihc/sqlrest.git
@@ -241,7 +241,7 @@ sqlrest:
 
 启动gateway服务：bin/gateway_startup.cmd
 
-> linux下，需按照如下顺序执行脚本启动对应的服务
+> linux/macos下，需按照如下顺序执行脚本启动对应的服务
 
 启动manager服务：sh bin/sqlrestctl.sh start manager
 

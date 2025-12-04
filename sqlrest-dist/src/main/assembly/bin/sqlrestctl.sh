@@ -32,27 +32,33 @@ APP_LIB_MANAGER_PATH=$APP_HOME/lib/manager
 APP_PID_FILE="${APP_HOME}/run/${module}.pid"
 APP_RUN_LOG="${APP_HOME}/run/run_${module}.log"
 
-#echo "Base Directory:${APP_HOME}"
+# 定义配置读取函数（兼容 macOS / Linux）
+get_config_value() {
+    local key=$1
+    local file=$2
+    grep "^${key}=" "$file" | cut -d'=' -f2- | tr -d '\r'
+}
 
+# 读取配置项
 export APP_DRIVERS_PATH=$APP_HOME/drivers
-export MANAGER_HOST=$(grep -oP '(?<=^MANAGER_HOST=).*' ${APP_CONF_PATH}/config.ini)
-export MANAGER_PORT=$(grep -oP '(?<=^MANAGER_PORT=).*' ${APP_CONF_PATH}/config.ini)
-export EXECUTOR_PORT=$(grep -oP '(?<=^EXECUTOR_PORT=).*' ${APP_CONF_PATH}/config.ini)
-export GATEWAY_PORT=$(grep -oP '(?<=^GATEWAY_PORT=).*' ${APP_CONF_PATH}/config.ini)
-export DB_TYPE=$(grep -oP '(?<=^DB_TYPE=).*' ${APP_CONF_PATH}/config.ini)
-export MYSQLDB_HOST=$(grep -oP '(?<=^MYSQLDB_HOST=).*' ${APP_CONF_PATH}/config.ini)
-export MYSQLDB_PORT=$(grep -oP '(?<=^MYSQLDB_PORT=).*' ${APP_CONF_PATH}/config.ini)
-export MYSQLDB_NAME=$(grep -oP '(?<=^MYSQLDB_NAME=).*' ${APP_CONF_PATH}/config.ini)
-export MYSQLDB_USERNAME=$(grep -oP '(?<=^MYSQLDB_USERNAME=).*' ${APP_CONF_PATH}/config.ini)
-export MYSQLDB_PASSWORD=$(grep -oP '(?<=^MYSQLDB_PASSWORD=).*' ${APP_CONF_PATH}/config.ini)
-export PGDB_HOST=$(grep -oP '(?<=^PGDB_HOST=).*' ${APP_CONF_PATH}/config.ini)
-export PGDB_PORT=$(grep -oP '(?<=^PGDB_PORT=).*' ${APP_CONF_PATH}/config.ini)
-export PGDB_NAME=$(grep -oP '(?<=^PGDB_NAME=).*' ${APP_CONF_PATH}/config.ini)
-export PGDB_USERNAME=$(grep -oP '(?<=^PGDB_USERNAME=).*' ${APP_CONF_PATH}/config.ini)
-export PGDB_PASSWORD=$(grep -oP '(?<=^PGDB_PASSWORD=).*' ${APP_CONF_PATH}/config.ini)
-export JSON_TIMEZONE=$(grep -oP '(?<=^JSON_TIMEZONE=).*' ${APP_CONF_PATH}/config.ini)
-export SQLREST_MANAGER_URL=$(grep -oP '(?<=^SQLREST_MANAGER_URL=).*' ${APP_CONF_PATH}/config.ini)
-export SQLREST_GATEWAY_URL=$(grep -oP '(?<=^SQLREST_GATEWAY_URL=).*' ${APP_CONF_PATH}/config.ini)
+export MANAGER_HOST=$(get_config_value "MANAGER_HOST" "${APP_CONF_PATH}/config.ini")
+export MANAGER_PORT=$(get_config_value "MANAGER_PORT" "${APP_CONF_PATH}/config.ini")
+export EXECUTOR_PORT=$(get_config_value "EXECUTOR_PORT" "${APP_CONF_PATH}/config.ini")
+export GATEWAY_PORT=$(get_config_value "GATEWAY_PORT" "${APP_CONF_PATH}/config.ini")
+export DB_TYPE=$(get_config_value "DB_TYPE" "${APP_CONF_PATH}/config.ini")
+export MYSQLDB_HOST=$(get_config_value "MYSQLDB_HOST" "${APP_CONF_PATH}/config.ini")
+export MYSQLDB_PORT=$(get_config_value "MYSQLDB_PORT" "${APP_CONF_PATH}/config.ini")
+export MYSQLDB_NAME=$(get_config_value "MYSQLDB_NAME" "${APP_CONF_PATH}/config.ini")
+export MYSQLDB_USERNAME=$(get_config_value "MYSQLDB_USERNAME" "${APP_CONF_PATH}/config.ini")
+export MYSQLDB_PASSWORD=$(get_config_value "MYSQLDB_PASSWORD" "${APP_CONF_PATH}/config.ini")
+export PGDB_HOST=$(get_config_value "PGDB_HOST" "${APP_CONF_PATH}/config.ini")
+export PGDB_PORT=$(get_config_value "PGDB_PORT" "${APP_CONF_PATH}/config.ini")
+export PGDB_NAME=$(get_config_value "PGDB_NAME" "${APP_CONF_PATH}/config.ini")
+export PGDB_USERNAME=$(get_config_value "PGDB_USERNAME" "${APP_CONF_PATH}/config.ini")
+export PGDB_PASSWORD=$(get_config_value "PGDB_PASSWORD" "${APP_CONF_PATH}/config.ini")
+export JSON_TIMEZONE=$(get_config_value "JSON_TIMEZONE" "${APP_CONF_PATH}/config.ini")
+export SQLREST_MANAGER_URL=$(get_config_value "SQLREST_MANAGER_URL" "${APP_CONF_PATH}/config.ini")
+export SQLREST_GATEWAY_URL=$(get_config_value "SQLREST_GATEWAY_URL" "${APP_CONF_PATH}/config.ini")
 
 # JVM参数可以在这里设置
 JVMFLAGS="-server -Xms1024m -Xmx1024m -Xmn1024m -XX:+DisableExplicitGC -Djava.awt.headless=true -Dfile.encoding=UTF-8 "
@@ -102,14 +108,14 @@ case $operator in
       echo "ERROR: The module server does not started!"
       exit 1
     fi
-    echo -e "Stopping the module server ...\c"
+    printf "Stopping the module server ..."
     for PID in $PID_LIST ; do
       kill $PID > /dev/null 2>&1
     done
 
     COUNT=0
     while [ $COUNT -lt 1 ]; do
-        echo -e ".\c"
+        printf "."
         sleep 1
         COUNT=1
         for PID in $PID_LIST ; do
@@ -120,7 +126,7 @@ case $operator in
           fi
         done
     done
-    echo "Stop OK, and PID: $PIDS"
+    echo "Stop OK, and PID: $PID_LIST"
     ;;
 
   (status)
@@ -133,7 +139,7 @@ case $operator in
       # font color - green
       state="[ \033[1;32m $state \033[0m ]"
     fi
-    echo -e "$module  $state"
+    printf "$module  $state\n"
     ;;
 
   (*)
