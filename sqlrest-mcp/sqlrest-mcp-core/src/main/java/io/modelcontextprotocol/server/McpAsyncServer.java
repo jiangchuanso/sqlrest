@@ -851,12 +851,12 @@ public class McpAsyncServer {
 			return this.mcpTransportProvider.notifyClients(McpSchema.METHOD_NOTIFICATION_MESSAGE, params);
 		}
 
-		private McpServerSession.RequestHandler<Void> setLoggerRequestHandler() {
+		private McpServerSession.RequestHandler<McpSchema.EmptyResult> setLoggerRequestHandler() {
 			return (exchange, params) -> {
-				this.minLoggingLevel = objectMapper.convertValue(params, new TypeReference<LoggingLevel>() {
-				});
+				this.minLoggingLevel = objectMapper.convertValue(params, new TypeReference<McpSchema.SettingLoggingLevelRequest>() {
+				}).getLevel();
 
-				return Mono.empty();
+				return Mono.just(new McpSchema.EmptyResult());
 			};
 		}
 
@@ -1456,12 +1456,12 @@ public class McpAsyncServer {
 		 * will not be sent.
 		 * @return A handler that processes logging level change requests
 		 */
-		private McpClientSession.RequestHandler<Void> setLoggerRequestHandler() {
+		private McpClientSession.RequestHandler<McpSchema.EmptyResult> setLoggerRequestHandler() {
 			return params -> {
-				this.minLoggingLevel = transport.unmarshalFrom(params, new TypeReference<LoggingLevel>() {
-				});
+				this.minLoggingLevel = transport.unmarshalFrom(params, new TypeReference<McpSchema.SettingLoggingLevelRequest>() {
+				}).getLevel();
 
-				return Mono.empty();
+				return Mono.just(new McpSchema.EmptyResult());
 			};
 		}
 

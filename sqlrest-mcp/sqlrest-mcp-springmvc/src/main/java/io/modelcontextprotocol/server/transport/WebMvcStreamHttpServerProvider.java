@@ -103,9 +103,11 @@ public class WebMvcStreamHttpServerProvider {
         case McpSchema.METHOD_TOOLS_LIST:
           return handleListTools(root.get("id").asText());
         case McpSchema.METHOD_PING:
-          return handlePing();
+          return handlePing(root.get("id").asText());
         case McpSchema.METHOD_TOOLS_CALL:
           return handleCallTool(root.get("id").asText(), root.get("params"));
+        case McpSchema.METHOD_LOGGING_SET_LEVEL:
+          return handleSettingLoggingLevel(root.get("id").asText(), root.get("params"));
         default:
           return handleUnsupportedMethod(root.get("id").asText(), method);
       }
@@ -118,7 +120,9 @@ public class WebMvcStreamHttpServerProvider {
   private ServerResponse handleInitialize(String id) {
     Map<String, Object> initMap = new HashMap<>(2);
     initMap.put("protocolVersion", McpSchema.LATEST_PROTOCOL_VERSION);
-    initMap.put("capabilities", new HashMap<>(2));
+    initMap.put("capabilities", McpSchema.ServerCapabilities.builder()
+            .tools(true)
+            .build());
     initMap.put("serverInfo", mcpSyncServer.getServerInfo());
 
     JSONRPCResponse jsonrpcResponse = new JSONRPCResponse();
@@ -148,8 +152,12 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.badRequest().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handlePing() {
-    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(Collections.emptyMap());
+  private ServerResponse handlePing(String id) {
+    JSONRPCResponse jsonrpcResponse = new JSONRPCResponse();
+    jsonrpcResponse.setId(id);
+    jsonrpcResponse.setJsonrpc(McpSchema.JSONRPC_VERSION);
+    jsonrpcResponse.setResult(Collections.emptyMap());
+    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
   private ServerResponse handleListTools(String id) {
@@ -194,6 +202,18 @@ public class WebMvcStreamHttpServerProvider {
     jsonrpcResponse.setId(id);
     jsonrpcResponse.setJsonrpc(McpSchema.JSONRPC_VERSION);
     jsonrpcResponse.setResult(tool.getCall().apply(null, callToolRequest.getArguments()).block());
+    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
+  }
+
+  private ServerResponse handleSettingLoggingLevel(String id, JsonNode params) {
+    McpSchema.SettingLoggingLevelRequest settingLoggingLevelRequest = objectMapper.convertValue(params,
+        new TypeReference<McpSchema.SettingLoggingLevelRequest>() {
+        });
+
+    JSONRPCResponse jsonrpcResponse = new JSONRPCResponse();
+    jsonrpcResponse.setId(id);
+    jsonrpcResponse.setJsonrpc(McpSchema.JSONRPC_VERSION);
+    jsonrpcResponse.setResult(Collections.emptyMap());
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 }

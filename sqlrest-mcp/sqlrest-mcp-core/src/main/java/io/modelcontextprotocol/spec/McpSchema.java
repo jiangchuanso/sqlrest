@@ -1118,16 +1118,31 @@ public final class McpSchema {
 		@JsonProperty("total") Double total;
 	}// @formatter:on
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class SettingLoggingLevelRequest {
+		@JsonProperty("level")
+		LoggingLevel level;
+	}
+
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	@Data
+	@NoArgsConstructor
+	public static class EmptyResult {
+	}
+
 	/**
 	 * The Model Context Protocol (MCP) provides a standardized way for servers to send
-	 * structured log messages to clients. Clients can control logging verbosity by
-	 * setting minimum log levels, with servers sending notifications containing severity
-	 * levels, optional logger names, and arbitrary JSON-serializable data.
-	 *
-	 * @param level The severity levels. The mimimum log level is set by the client.
-	 * @param logger The logger that generated the message.
-	 * @param data JSON-serializable logging data.
-	 */
+     * structured log messages to clients. Clients can control logging verbosity by
+     * setting minimum log levels, with servers sending notifications containing severity
+     * levels, optional logger names, and arbitrary JSON-serializable data.
+     *
+     * @param level  The severity levels. The mimimum log level is set by the client.
+     * @param logger The logger that generated the message.
+     * @param data   JSON-serializable logging data.
+     */
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	@Data
 	@AllArgsConstructor
