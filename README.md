@@ -17,7 +17,7 @@ SQLREST的功能包括：
 - **SQL直接构建API**：通过配置增删改查SQL和参数即可生成 RESTful API。
 - **多数据库支持**：支持常见的20+种数据库，其中包含多款国产数据库。
 - **MyBatis语法支持**：支持MyBatis的动态SQL语法。
-- **Groovy脚本支持**：支持groovy语法构建复杂场景下的接口。
+- **Groovy脚本支持**：支持groovy语法构建复杂场景下的接口逻辑。
 - **参数类型支持**：支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型。
 - **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种入参请求格式。
 - **身份认证支持**：提供基于Token的认证机制，保护API安全。

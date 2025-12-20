@@ -701,7 +701,7 @@ public class McpAsyncServer {
 
 		private McpServerSession.RequestHandler<McpSchema.ListResourcesResult> resourcesListRequestHandler() {
 			return (exchange, params) -> {
-				var resourceList = this.resources.values()
+				List<McpSchema.Resource> resourceList = this.resources.values()
 					.stream()
 					.map(McpServerFeatures.AsyncResourceSpecification::getResource)
 					.collect(Collectors.toList());
@@ -720,7 +720,7 @@ public class McpAsyncServer {
 				McpSchema.ReadResourceRequest resourceRequest = objectMapper.convertValue(params,
 						new TypeReference<McpSchema.ReadResourceRequest>() {
 						});
-				var resourceUri = resourceRequest.getUri();
+				String resourceUri = resourceRequest.getUri();
 				McpServerFeatures.AsyncResourceSpecification specification = this.resources.get(resourceUri);
 				if (specification != null) {
 					return specification.getReadHandler().apply(exchange, resourceRequest);
@@ -804,7 +804,7 @@ public class McpAsyncServer {
 				// new TypeReference<McpSchema.PaginatedRequest>() {
 				// });
 
-				var promptList = this.prompts.values()
+				List<McpSchema.Prompt> promptList = this.prompts.values()
 					.stream()
 					.map(McpServerFeatures.AsyncPromptSpecification::getPrompt)
 					.collect(Collectors.toList());
@@ -1284,13 +1284,14 @@ public class McpAsyncServer {
 		 * Notifies clients that the list of available resources has changed.
 		 * @return A Mono that completes when all clients have been notified
 		 */
+		@Override
 		public Mono<Void> notifyResourcesListChanged() {
 			return this.mcpSession.sendNotification(McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED, null);
 		}
 
 		private McpClientSession.RequestHandler<McpSchema.ListResourcesResult> resourcesListRequestHandler() {
 			return params -> {
-				var resourceList = this.resources.values()
+				List<McpSchema.Resource> resourceList = this.resources.values()
 						.stream()
 						.map(McpServerFeatures.AsyncResourceSpecification::getResource)
 						.collect(Collectors.toList());
@@ -1308,7 +1309,7 @@ public class McpAsyncServer {
 				McpSchema.ReadResourceRequest resourceRequest = transport.unmarshalFrom(params,
 						new TypeReference<McpSchema.ReadResourceRequest>() {
 						});
-				var resourceUri = resourceRequest.getUri();
+				String resourceUri = resourceRequest.getUri();
 				McpServerFeatures.AsyncResourceSpecification registration = this.resources.get(resourceUri);
 				if (registration != null) {
 					return registration.getReadHandler().apply(null, resourceRequest);
@@ -1399,7 +1400,7 @@ public class McpAsyncServer {
 				// new TypeReference<McpSchema.PaginatedRequest>() {
 				// });
 
-				var promptList = this.prompts.values()
+				List<McpSchema.Prompt> promptList = this.prompts.values()
 					.stream()
 					.map(McpServerFeatures.AsyncPromptSpecification::getPrompt)
 					.collect(Collectors.toList());

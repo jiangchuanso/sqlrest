@@ -4,10 +4,11 @@
 package io.modelcontextprotocol.client.transport;
 
 import io.modelcontextprotocol.util.Utils;
+import java.util.concurrent.Future;
+import java.util.regex.Matcher;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.var;
 import org.apache.hc.client5.http.async.methods.AbstractCharResponseConsumer;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleRequestProducer;
@@ -121,7 +122,7 @@ public class FlowSseClient {
 	 * @throws RuntimeException if the connection fails with a non-200 status code
 	 */
 	public void subscribe(String url, SseEventHandler eventHandler) {
-		var request = SimpleHttpRequest.create(Method.GET, URI.create(url));
+		SimpleHttpRequest request = SimpleHttpRequest.create(Method.GET, URI.create(url));
 		request.setHeader("Accept", "text/event-stream");
 		request.setHeader("Cache-Control", "no-cache");
 
@@ -129,10 +130,7 @@ public class FlowSseClient {
 		AtomicReference<String> currentEventId = new AtomicReference<>();
 		AtomicReference<String> currentEventType = new AtomicReference<>("message");
 
-//		Function<Flow.Subscriber<String>, HttpResponse.BodySubscriber<Void>> subscriberFactory = subscriber -> HttpResponse.BodySubscribers
-//			.fromLineSubscriber(subscriber);
-
-		var future = this.httpClient.execute(SimpleRequestProducer.create(request), new AbstractCharResponseConsumer<HttpResponse>() {
+		Future<HttpResponse> future = this.httpClient.execute(SimpleRequestProducer.create(request), new AbstractCharResponseConsumer<HttpResponse>() {
 			final StringBuilder builder = new StringBuilder();
 			HttpResponse httpResponse;
 
@@ -172,19 +170,19 @@ public class FlowSseClient {
 					}
 				} else {
 					if (line.startsWith("data:")) {
-						var matcher = EVENT_DATA_PATTERN.matcher(line);
+						Matcher matcher = EVENT_DATA_PATTERN.matcher(line);
 						if (matcher.find()) {
 							eventBuilder.append(matcher.group(1).trim()).append("\n");
 						}
 					}
 					else if (line.startsWith("id:")) {
-						var matcher = EVENT_ID_PATTERN.matcher(line);
+						Matcher matcher = EVENT_ID_PATTERN.matcher(line);
 						if (matcher.find()) {
 							currentEventId.set(matcher.group(1).trim());
 						}
 					}
 					else if (line.startsWith("event:")) {
-						var matcher = EVENT_TYPE_PATTERN.matcher(line);
+						Matcher matcher = EVENT_TYPE_PATTERN.matcher(line);
 						if (matcher.find()) {
 							currentEventType.set(matcher.group(1).trim());
 						}

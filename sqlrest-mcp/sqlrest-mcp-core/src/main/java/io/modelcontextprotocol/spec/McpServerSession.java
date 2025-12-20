@@ -13,7 +13,6 @@ import io.modelcontextprotocol.server.McpAsyncServerExchange;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -162,9 +161,9 @@ public class McpServerSession implements McpSession {
 			// TODO handle errors for communication to without initialization happening
 			// first
 			if (message instanceof McpSchema.JSONRPCResponse) {
-				var response = (McpSchema.JSONRPCResponse) message;
+				McpSchema.JSONRPCResponse response = (McpSchema.JSONRPCResponse) message;
 				logger.debug("Received Response: {}", response);
-				var sink = pendingResponses.remove(response.getId());
+				MonoSink<McpSchema.JSONRPCResponse> sink = pendingResponses.remove(response.getId());
 				if (sink == null) {
 					logger.warn("Unexpected response for unknown id {}", response.getId());
 				}
@@ -174,10 +173,10 @@ public class McpServerSession implements McpSession {
 				return Mono.empty();
 			}
 			else if (message instanceof McpSchema.JSONRPCRequest) {
-				var request = (McpSchema.JSONRPCRequest) message;
+				McpSchema.JSONRPCRequest request = (McpSchema.JSONRPCRequest) message;
 				logger.debug("Received request: {}", request);
 				return handleIncomingRequest(request).onErrorResume(error -> {
-					var errorResponse = new McpSchema.JSONRPCResponse(McpSchema.JSONRPC_VERSION, request.getId(), null,
+					McpSchema.JSONRPCResponse errorResponse = new McpSchema.JSONRPCResponse(McpSchema.JSONRPC_VERSION, request.getId(), null,
 							new McpSchema.JSONRPCResponse.JSONRPCError(McpSchema.ErrorCodes.INTERNAL_ERROR,
 									error.getMessage(), null));
 					// TODO: Should the error go to SSE or back as POST return?
@@ -185,7 +184,7 @@ public class McpServerSession implements McpSession {
 				}).flatMap(this.transport::sendMessage);
 			}
 			else if (message instanceof McpSchema.JSONRPCNotification) {
-				var notification = (McpSchema.JSONRPCNotification) message;
+				McpSchema.JSONRPCNotification notification = (McpSchema.JSONRPCNotification) message;
 				// TODO handle errors for communication to without initialization
 				// happening first
 				logger.debug("Received notification: {}", notification);
@@ -221,7 +220,7 @@ public class McpServerSession implements McpSession {
 			else {
 				// TODO handle errors for communication to this session without
 				// initialization happening first
-				var handler = this.requestHandlers.get(request.getMethod());
+				RequestHandler handler = this.requestHandlers.get(request.getMethod());
 				if (handler == null) {
 					MethodNotFoundError error = getMethodNotFoundError(request.getMethod());
 					return Mono.just(new McpSchema.JSONRPCResponse(McpSchema.JSONRPC_VERSION, request.getId(), null,
@@ -253,7 +252,7 @@ public class McpServerSession implements McpSession {
 				return this.initNotificationHandler.handle();
 			}
 
-			var handler = notificationHandlers.get(notification.getMethod());
+			NotificationHandler handler = notificationHandlers.get(notification.getMethod());
 			if (handler == null) {
 				logger.error("No handler registered for notification method: {}", notification.getMethod());
 				return Mono.empty();

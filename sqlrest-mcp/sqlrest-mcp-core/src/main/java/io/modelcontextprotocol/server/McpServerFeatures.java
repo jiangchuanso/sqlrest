@@ -15,7 +15,6 @@ import io.modelcontextprotocol.util.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.var;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -87,7 +86,7 @@ public class McpServerFeatures {
 		 */
 		static Async fromSync(Sync syncSpec) {
 			List<McpServerFeatures.AsyncToolSpecification> tools = new ArrayList<>();
-			for (var tool : syncSpec.getTools()) {
+			for (McpServerFeatures.SyncToolSpecification tool : syncSpec.getTools()) {
 				tools.add(AsyncToolSpecification.fromSync(tool));
 			}
 
@@ -103,7 +102,7 @@ public class McpServerFeatures {
 
 			List<BiFunction<McpAsyncServerExchange, List<McpSchema.Root>, Mono<Void>>> rootChangeConsumers = new ArrayList<>();
 
-			for (var rootChangeConsumer : syncSpec.getRootsChangeConsumers()) {
+			for (BiConsumer<McpSyncServerExchange, List<McpSchema.Root>> rootChangeConsumer : syncSpec.getRootsChangeConsumers()) {
 				rootChangeConsumers.add((exchange, list) -> Mono
 					.<Void>fromRunnable(() -> rootChangeConsumer.accept(new McpSyncServerExchange(exchange), list))
 					.subscribeOn(Schedulers.boundedElastic()));

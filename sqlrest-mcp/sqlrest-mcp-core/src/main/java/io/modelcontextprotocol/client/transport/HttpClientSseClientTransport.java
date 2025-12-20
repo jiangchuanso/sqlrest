@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -124,7 +125,7 @@ public class HttpClientSseClientTransport implements McpClientTransport {
 		Assert.notNull(clientBuilder, "clientBuilder must not be null");
 		this.baseUri = baseUri;
 		this.objectMapper = objectMapper;
-		var globalConfig = RequestConfig.custom().setConnectTimeout(Timeout.ofSeconds(10)).build();
+		RequestConfig globalConfig = RequestConfig.custom().setConnectTimeout(Timeout.ofSeconds(10)).build();
 		clientBuilder.setDefaultRequestConfig(globalConfig);
 		this.httpClient = clientBuilder.build();
 		this.httpClient.start();
@@ -221,10 +222,10 @@ public class HttpClientSseClientTransport implements McpClientTransport {
 
 		try {
 			String jsonText = this.objectMapper.writeValueAsString(message);
-			var request = SimpleHttpRequest.create(Method.POST, URI.create(this.baseUri + endpoint));
+			SimpleHttpRequest request = SimpleHttpRequest.create(Method.POST, URI.create(this.baseUri + endpoint));
 			request.setBody(jsonText, ContentType.APPLICATION_JSON);
 
-			var future = httpClient.execute(request, new FutureCallback<SimpleHttpResponse>() {
+			Future future = httpClient.execute(request, new FutureCallback<SimpleHttpResponse>() {
 				@Override
 				public void completed(SimpleHttpResponse response) {
 				}

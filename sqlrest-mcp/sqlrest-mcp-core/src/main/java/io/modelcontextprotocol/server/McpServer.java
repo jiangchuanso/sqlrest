@@ -4,14 +4,14 @@
 
 package io.modelcontextprotocol.server;
 
+import io.modelcontextprotocol.server.McpServerFeatures.AsyncResourceSpecification;
+import io.modelcontextprotocol.server.McpServerFeatures.AsyncToolSpecification;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import lombok.var;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
@@ -579,9 +579,9 @@ public interface McpServer {
 		 * settings.
 		 */
 		public McpAsyncServer build() {
-			var features = new McpServerFeatures.Async(this.serverInfo, this.serverCapabilities, this.tools,
+			McpServerFeatures.Async features = new McpServerFeatures.Async(this.serverInfo, this.serverCapabilities, this.tools,
 					this.resources, this.resourceTemplates, this.prompts, this.rootsChangeHandlers);
-			var mapper = this.objectMapper != null ? this.objectMapper : new ObjectMapper();
+			ObjectMapper mapper = this.objectMapper != null ? this.objectMapper : new ObjectMapper();
 			return new McpAsyncServer(this.transportProvider, mapper, features);
 		}
 
@@ -993,8 +993,8 @@ public interface McpServer {
 			McpServerFeatures.Sync syncFeatures = new McpServerFeatures.Sync(this.serverInfo, this.serverCapabilities,
 					this.tools, this.resources, this.resourceTemplates, this.prompts, this.rootsChangeHandlers);
 			McpServerFeatures.Async asyncFeatures = McpServerFeatures.Async.fromSync(syncFeatures);
-			var mapper = this.objectMapper != null ? this.objectMapper : new ObjectMapper();
-			var asyncServer = new McpAsyncServer(this.transportProvider, mapper, asyncFeatures);
+			ObjectMapper mapper = this.objectMapper != null ? this.objectMapper : new ObjectMapper();
+			McpAsyncServer asyncServer = new McpAsyncServer(this.transportProvider, mapper, asyncFeatures);
 
 			return new McpSyncServer(asyncServer);
 		}
@@ -1377,24 +1377,24 @@ public interface McpServer {
 		 * settings
 		 */
 		public McpAsyncServer build() {
-			var tools = this.tools.stream().map(McpServerFeatures.AsyncToolRegistration::toSpecification).collect(Collectors.toList());
+			List<AsyncToolSpecification> tools = this.tools.stream().map(McpServerFeatures.AsyncToolRegistration::toSpecification).collect(Collectors.toList());
 
-			var resources = this.resources.entrySet()
+			Map<String, AsyncResourceSpecification> resources = this.resources.entrySet()
 				.stream()
 				.map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().toSpecification()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-			var prompts = this.prompts.entrySet()
+			Map<String, McpServerFeatures.AsyncPromptSpecification> prompts = this.prompts.entrySet()
 				.stream()
 				.map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().toSpecification()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-			var rootsChangeHandlers = this.rootsChangeConsumers.stream()
+			List<BiFunction<McpAsyncServerExchange, List<McpSchema.Root>, Mono<Void>>> rootsChangeHandlers = this.rootsChangeConsumers.stream()
 				.map(consumer -> (BiFunction<McpAsyncServerExchange, List<McpSchema.Root>, Mono<Void>>) (exchange,
 						roots) -> consumer.apply(roots))
 					.collect(Collectors.toList());
 
-			var features = new McpServerFeatures.Async(this.serverInfo, this.serverCapabilities, tools, resources,
+			McpServerFeatures.Async features = new McpServerFeatures.Async(this.serverInfo, this.serverCapabilities, tools, resources,
 					this.resourceTemplates, prompts, rootsChangeHandlers);
 
 			return new McpAsyncServer(this.transport, features);
@@ -1788,19 +1788,19 @@ public interface McpServer {
 		 * settings
 		 */
 		public McpSyncServer build() {
-			var tools = this.tools.stream().map(McpServerFeatures.SyncToolRegistration::toSpecification).collect(Collectors.toList());
+			List<McpServerFeatures.SyncToolSpecification> tools = this.tools.stream().map(McpServerFeatures.SyncToolRegistration::toSpecification).collect(Collectors.toList());
 
-			var resources = this.resources.entrySet()
+			Map<String, McpServerFeatures.SyncResourceSpecification> resources = this.resources.entrySet()
 				.stream()
 				.map(entry -> new AbstractMap.SimpleEntry<String, McpServerFeatures.SyncResourceSpecification>(entry.getKey(), entry.getValue().toSpecification()) {})
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-			var prompts = this.prompts.entrySet()
+			Map<String, McpServerFeatures.SyncPromptSpecification> prompts = this.prompts.entrySet()
 				.stream()
 				.map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().toSpecification()))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-			var rootsChangeHandlers = this.rootsChangeConsumers.stream()
+			List<BiConsumer<McpSyncServerExchange, List<McpSchema.Root>>> rootsChangeHandlers = this.rootsChangeConsumers.stream()
 				.map(consumer -> (BiConsumer<McpSyncServerExchange, List<McpSchema.Root>>) (exchange, roots) -> consumer
 					.accept(roots))
 					.collect(Collectors.toList());
@@ -1809,7 +1809,7 @@ public interface McpServer {
 					tools, resources, this.resourceTemplates, prompts, rootsChangeHandlers);
 
 			McpServerFeatures.Async asyncFeatures = McpServerFeatures.Async.fromSync(syncFeatures);
-			var asyncServer = new McpAsyncServer(this.transport, asyncFeatures);
+			McpAsyncServer asyncServer = new McpAsyncServer(this.transport, asyncFeatures);
 
 			return new McpSyncServer(asyncServer);
 		}
