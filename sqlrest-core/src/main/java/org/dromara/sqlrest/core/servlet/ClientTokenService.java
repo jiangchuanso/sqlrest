@@ -20,7 +20,9 @@ import org.dromara.sqlrest.common.util.TokenUtils;
 import org.dromara.sqlrest.persistence.dao.AppClientDao;
 import org.dromara.sqlrest.persistence.entity.AppClientEntity;
 import org.dromara.sqlrest.persistence.util.JsonUtils;
+import java.sql.Timestamp;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,36 +43,25 @@ public class ClientTokenService {
   @EventListener(ApplicationReadyEvent.class)
   public void init() {
     long currentTimestamp = getCurrentTimestamp();
+    Map<String, AccessToken> tokenClientMap = cacheFactory
+        .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
     try {
       for (AppClientEntity appClient : appClientDao.listAll()) {
         appClient.setAppSecret("******");
         if (StringUtils.isNotBlank(appClient.getAccessToken())) {
-          AccessToken clientToken = AccessToken.builder()
-              .realName(appClient.getName())
-              .appKey(appClient.getAppKey())
-              .accessToken(appClient.getAccessToken())
-              .createTimestamp(appClient.getUpdateTime().getTime() / 1000)
-              .expireSeconds(appClient.getTokenAlive().getValue())
-              .build();
-
-          if (appClient.getExpireAt() > 0) {
-            long expireSeconds = appClient.getExpireAt() - currentTimestamp;
-            if (expireSeconds <= 0) {
-              // 已经过期的无需再加载到缓存中了
-              continue;
-            }
-            if (expireSeconds >= appClient.getTokenAlive().getValue()) {
-              clientToken.setExpireSeconds(appClient.getTokenAlive().getValue());
-            } else {
-              clientToken.setExpireSeconds(expireSeconds);
-            }
+          if (isTokenExpired(appClient, currentTimestamp)) {
+            log.info("Remove expired client token from persistence, appKey:{}", appClient.getAppKey());
+            appClientDao.clearTokenByAppKey(appClient.getAppKey());
+            continue;
           }
 
-          // TODO: 暂时也将一次性token也加载进缓存中，缺少判断是否过期的逻辑
-          log.info("Load client app token from persistence :{}", JsonUtils.toJsonString(appClient));
+          if (isOneTimeToken(appClient)) {
+            log.debug("Skip restoring one-time token for appKey:{}", appClient.getAppKey());
+            continue;
+          }
 
-          Map<String, AccessToken> tokenClientMap = cacheFactory
-              .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
+          AccessToken clientToken = buildAccessTokenFromPersistence(appClient, currentTimestamp);
+          log.info("Load client app token from persistence :{}", JsonUtils.toJsonString(appClient));
           tokenClientMap.put(appClient.getAccessToken(), clientToken);
         }
       }
@@ -106,7 +97,7 @@ public class ClientTokenService {
     if (AliveTimeEnum.LONGEVITY.equals(appClient.getTokenAlive())
         && StringUtils.isNotBlank(appClient.getAccessToken())) {
       token = appClient.getAccessToken();
-      createTimestamp = appClient.getUpdateTime().getTime();
+      createTimestamp = toEpochSeconds(appClient.getUpdateTime());
     }
 
     AccessToken clientToken = AccessToken.builder()
@@ -115,28 +106,10 @@ public class ClientTokenService {
         .accessToken(token)
         .createTimestamp(createTimestamp)
         .build();
-    if (appClient.getExpireAt() > 0) {
-      long expireSeconds = appClient.getExpireAt() - getCurrentTimestamp();
-      if (expireSeconds <= 0) {
-        throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "app key is expired");
-      }
-      if (AliveTimeEnum.LONGEVITY.equals(appClient.getTokenAlive())) {
-        clientToken.setExpireSeconds(appClient.getExpireAt() - createTimestamp);
-      } else {
-        if (expireSeconds > appClient.getTokenAlive().getValue()) {
-          clientToken.setExpireSeconds(appClient.getTokenAlive().getValue());
-        } else {
-          clientToken.setExpireSeconds(expireSeconds);
-        }
-      }
-    } else if (appClient.getExpireAt() == 0) {
-      clientToken.setExpireSeconds(0L);
-    } else {
-      if (AliveTimeEnum.LONGEVITY.equals(appClient.getTokenAlive())) {
-        clientToken.setExpireSeconds(-1L);
-      } else {
-        clientToken.setExpireSeconds(Constants.CLIENT_TOKEN_DURATION_SECONDS);
-      }
+    clientToken.setExpireSeconds(resolveExpireSeconds(appClient, createTimestamp, getCurrentTimestamp()));
+    if (clientToken.getExpireSeconds() == 0L && DurationTimeEnum.ONLY_ONCE != appClient.getExpireDuration()) {
+      // 防止自定义配置导致0秒，至少兜底一段时间
+      clientToken.setExpireSeconds(Constants.CLIENT_TOKEN_DURATION_SECONDS);
     }
 
     // 将token持久化到数据库中，以备重启服务器后原token继续可用
@@ -146,7 +119,11 @@ public class ClientTokenService {
 
     Map<String, AccessToken> tokenClientMap = cacheFactory
         .getCacheMap(Constants.CACHE_KEY_TOKEN_CLIENT, AccessToken.class);
-    tokenClientMap.put(token, clientToken);
+    if (clientToken.getExpireSeconds() == 0L) {
+      tokenClientMap.remove(token);
+    } else {
+      tokenClientMap.put(token, clientToken);
+    }
 
     return clientToken;
   }
@@ -165,18 +142,16 @@ public class ClientTokenService {
         if (null == appClient) {
           return null;
         }
-        if ((AliveTimeEnum.LONGEVITY == appClient.getTokenAlive() & appClient.getExpireAt() < 0)
-            || (appClient.getExpireAt() > currentTimestamp)) {
-          clientToken = AccessToken.builder()
-              .realName(appClient.getName())
-              .appKey(appClient.getAppKey())
-              .accessToken(tokenStr)
-              .createTimestamp(appClient.getUpdateTime().getTime())
-              .expireSeconds(appClient.getTokenAlive().getValue())
-              .build();
-          tokenClientMap.put(tokenStr, clientToken);
-          return clientToken.getAppKey();
+        if (isTokenExpired(appClient, currentTimestamp)) {
+          appClientDao.clearTokenByAppKey(appClient.getAppKey());
+          return null;
         }
+
+        clientToken = buildAccessTokenFromPersistence(appClient, currentTimestamp);
+        if (!isOneTimeToken(appClient)) {
+          tokenClientMap.put(tokenStr, clientToken);
+        }
+        return clientToken.getAppKey();
       }
       return null;
     }
@@ -186,6 +161,7 @@ public class ClientTokenService {
       if (0 == expireTimestamp) {
         // 一次性的应用客户端
         tokenClientMap.remove(tokenStr);
+        appClientDao.clearTokenByAppKey(clientToken.getAppKey());
         log.warn("token [{}] only can use once, clientId: {}", tokenStr, clientToken.getAppKey());
       } else {
         // 长期性的应用客户端，使用长期的token情况
@@ -204,5 +180,64 @@ public class ClientTokenService {
 
   private long getCurrentTimestamp() {
     return System.currentTimeMillis() / 1000L;
+  }
+
+  private boolean isTokenExpired(AppClientEntity appClient, long currentTimestamp) {
+    Long expireAt = appClient.getExpireAt();
+    if (Objects.nonNull(expireAt) && expireAt > 0) {
+      return expireAt <= currentTimestamp;
+    }
+    if (DurationTimeEnum.TIME_VALUE == appClient.getExpireDuration()) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isOneTimeToken(AppClientEntity appClient) {
+    return DurationTimeEnum.ONLY_ONCE == appClient.getExpireDuration();
+  }
+
+  private AccessToken buildAccessTokenFromPersistence(AppClientEntity appClient, long currentTimestamp) {
+    long createTimestamp = toEpochSeconds(appClient.getUpdateTime());
+    long expireSeconds = resolveExpireSeconds(appClient, createTimestamp, currentTimestamp);
+    return AccessToken.builder()
+        .realName(appClient.getName())
+        .appKey(appClient.getAppKey())
+        .accessToken(appClient.getAccessToken())
+        .createTimestamp(createTimestamp)
+        .expireSeconds(expireSeconds)
+        .build();
+  }
+
+  private long resolveExpireSeconds(AppClientEntity appClient, long createTimestamp, long currentTimestamp) {
+    Long expireAt = appClient.getExpireAt();
+    if (Objects.nonNull(expireAt)) {
+      if (expireAt > 0) {
+        long secondsLeft = expireAt - currentTimestamp;
+        if (secondsLeft <= 0) {
+          return 0L;
+        }
+        if (AliveTimeEnum.LONGEVITY.equals(appClient.getTokenAlive())) {
+          long basedOnCreate = expireAt - createTimestamp;
+          return Math.max(basedOnCreate, 0L);
+        }
+        return Math.min(secondsLeft, appClient.getTokenAlive().getValue());
+      }
+      if (expireAt == 0) {
+        return 0L;
+      }
+    }
+
+    if (AliveTimeEnum.LONGEVITY.equals(appClient.getTokenAlive())) {
+      return -1L;
+    }
+    return appClient.getTokenAlive().getValue();
+  }
+
+  private long toEpochSeconds(Timestamp timestamp) {
+    if (timestamp == null) {
+      return getCurrentTimestamp();
+    }
+    return timestamp.getTime() / 1000;
   }
 }

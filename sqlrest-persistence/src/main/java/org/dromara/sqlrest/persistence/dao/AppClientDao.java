@@ -11,14 +11,16 @@ package org.dromara.sqlrest.persistence.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.dto.IdWithName;
 import org.dromara.sqlrest.persistence.entity.AppClientEntity;
 import org.dromara.sqlrest.persistence.entity.ClientGroupEntity;
 import org.dromara.sqlrest.persistence.mapper.AppClientMapper;
 import org.dromara.sqlrest.persistence.mapper.ClientGroupMapper;
-import java.util.List;
-import javax.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,6 +103,13 @@ public class AppClientDao {
     appClientMapper.update(updateEntity, queryWrapper);
   }
 
+  public void clearTokenByAppKey(String appKey) {
+    appClientMapper.update(null,
+        Wrappers.<AppClientEntity>lambdaUpdate()
+            .eq(AppClientEntity::getAppKey, appKey)
+            .set(AppClientEntity::getAccessToken, null));
+  }
+
   public void deleteClientAuthByGroupId(Long groupId) {
     QueryWrapper<ClientGroupEntity> queryWrapper = new QueryWrapper<>();
     queryWrapper.lambda().eq(ClientGroupEntity::getGroupId, groupId);
@@ -123,11 +132,11 @@ public class AppClientDao {
     clientAuthMapper.delete(queryWrapper);
 
     if (null != groupIds && groupIds.size() > 0) {
-      groupIds.forEach(gid -> {
-        clientAuthMapper.insert(
-            ClientGroupEntity.builder().clientId(id).groupId(gid).build()
-        );
-      });
+      List<ClientGroupEntity> insertLists = new ArrayList<>();
+      for (Long groupId : groupIds.stream().distinct().collect(Collectors.toList())) {
+        insertLists.add(ClientGroupEntity.builder().clientId(id).groupId(groupId).build());
+      }
+      clientAuthMapper.insertList(insertLists);
     }
   }
 

@@ -180,10 +180,7 @@ public class ApiAssignmentService {
     if (null == dataSourceEntity) {
       String message = "datasource[id=" + request.getDataSourceId() + " not exist!";
       log.warn("Error for debug, information:{}", message);
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, message);
-    }
-    if (CollectionUtils.isEmpty(request.getContextList())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "contextList invalid argument");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, message);
     }
     List<ApiContextEntity> scripts = request.getContextList().stream()
         .map(str -> ApiContextEntity.builder().sqlText(str).build())
@@ -195,12 +192,12 @@ public class ApiAssignmentService {
         if (StringUtils.isBlank(paramValue.getName())) {
           throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
         }
+        if (Objects.isNull(paramValue.getType())) {
+          throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter type must is not null");
+        }
         if (paramValue.getType().isObject()) {
           if (null != paramValue.getChildren()) {
             for (BaseParamValue subParamValue : paramValue.getChildren()) {
-              if (StringUtils.isBlank(subParamValue.getName())) {
-                throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
-              }
               if (subParamValue.getRequired()) {
                 if (subParamValue.getIsArray()) {
                   if (CollectionUtils.isEmpty(subParamValue.getArrayValues())) {

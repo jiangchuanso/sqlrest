@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -74,7 +75,7 @@ public class ApiExecuteService {
   private String getCacheKeyValue(ApiAssignmentEntity config, Map<String, Object> paramValues) {
     String key = CacheKeyTypeEnum.SPEL == config.getCacheKeyType()
         ? SpelUtils.getExpressionValue(config.getCacheKeyExpr(), paramValues)
-        : DigestUtil.sha256Hex(JsonUtils.toJsonString(paramValues));
+        : DigestUtil.sha256Hex(JsonUtils.toJsonString(new TreeMap<>(paramValues)));
     return Constants.getResourceName(config.getMethod().name(), config.getPath()) + ":" + key;
   }
 

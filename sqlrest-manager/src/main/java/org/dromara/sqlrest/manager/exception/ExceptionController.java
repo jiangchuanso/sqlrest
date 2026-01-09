@@ -9,10 +9,12 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.manager.exception;
 
+import java.util.stream.Collectors;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,7 +27,12 @@ public class ExceptionController {
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
   public ResultEntity argumentValidException(MethodArgumentNotValidException e) {
     log.error("Invalid arguments error:", e);
-    return ResultEntity.failed(ResponseErrorCode.ERROR_INVALID_ARGUMENT, e.getMessage());
+
+    String errorMessage = e.getBindingResult().getFieldErrors().stream()
+        .map(error -> error.getField() + ": " + error.getDefaultMessage())
+        .collect(Collectors.joining("; "));
+    
+    return ResultEntity.failed(ResponseErrorCode.ERROR_INVALID_ARGUMENT, errorMessage);
   }
 
   @ResponseBody

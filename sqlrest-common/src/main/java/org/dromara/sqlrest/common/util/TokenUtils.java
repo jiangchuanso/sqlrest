@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.common.util;
 
+import cn.hutool.core.util.HexUtil;
 import java.security.MessageDigest;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
@@ -20,8 +21,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Slf4j
 public final class TokenUtils {
-
-  private static final char[] hexCode = "0123456789abcdefgh".toCharArray();
 
   public static String getRequestToken(HttpServletRequest httpRequest) {
     // 从header中获取token
@@ -49,20 +48,15 @@ public final class TokenUtils {
     return "9097ac1ab13198dfa4ddb2ecc1079693".length();
   }
 
-  protected static String generateValue(String param) {
+  private static String generateValue(String param) {
     try {
       MessageDigest algorithm = MessageDigest.getInstance("MD5");
       algorithm.reset();
       algorithm.update(param.getBytes());
       byte[] messageDigest = algorithm.digest();
-      StringBuilder r = new StringBuilder(messageDigest.length * 2);
-      for (byte b : messageDigest) {
-        r.append(hexCode[(b >> 4) & 0xF]);
-        r.append(hexCode[(b & 0xF)]);
-      }
-      return r.toString();
+      return HexUtil.encodeHexStr(messageDigest);
     } catch (Exception e) {
-      throw new RuntimeException("Generate Token String failed: " + e.toString());
+      throw new RuntimeException("Generate Token String failed: " + e.getMessage());
     }
   }
 

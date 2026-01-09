@@ -146,9 +146,6 @@ public class DataSourceService {
   }
 
   public void createDataSource(DataSourceSaveRequest request) {
-    if (StringUtils.isBlank(request.getName())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "name is empty");
-    }
     if (Objects.nonNull(dataSourceDao.getByName(request.getName()))) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS,
           "name [" + request.getName() + "] already exists");
