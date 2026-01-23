@@ -12,6 +12,7 @@ package org.dromara.sqlrest.core.exec.engine.impl;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
           int page = PageSizeUtils.getPageFromParams(params);
           int size = PageSizeUtils.getSizeFromParams(params);
           Object result = SqlJdbcUtils.execute(productType, connection, sqlMeta, strategy, page, size, printSqlLog);
-          if (sqlMeta.isQuerySQL()) {
+          if (result instanceof Collection) {
             dataList.add(result);
           }
         }

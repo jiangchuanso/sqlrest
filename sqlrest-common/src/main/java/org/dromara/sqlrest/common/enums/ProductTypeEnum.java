@@ -83,6 +83,7 @@ public enum ProductTypeEnum {
           .testSql("SELECT 'Hello' from DUAL")
           .urlPrefix("jdbc:oracle:thin:@")
           .tplUrls(new String[]{"jdbc:oracle:thin:@{host}:{port}:{database}",
+              "jdbc:oracle:thin:@{host}:{port}/{database}",
               "jdbc:oracle:thin:@//{host}[:{port}]/{database}"})
           .urlSample("jdbc:oracle:thin:@172.17.2.10:1521:ORCL")
           .sqlSchemaList("SELECT USERNAME FROM SYS.ALL_USERS")
