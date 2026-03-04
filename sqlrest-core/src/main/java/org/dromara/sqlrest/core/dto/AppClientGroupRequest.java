@@ -26,7 +26,6 @@ public class AppClientGroupRequest {
   @ApiModelProperty("客户端应用ID")
   private Long id;
 
-  @NotEmpty(message = "groupIds不能为空列表")
   @ApiModelProperty("分组ID列表")
   private List<Long> groupIds;
 }

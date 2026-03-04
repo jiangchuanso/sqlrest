@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 public class ExceptionController {
 
+  @ResponseBody
   @ExceptionHandler(value = {MethodArgumentNotValidException.class})
   public ResultEntity argumentValidException(MethodArgumentNotValidException e) {
     log.error("Invalid arguments error:", e);

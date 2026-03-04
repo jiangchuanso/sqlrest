@@ -23,7 +23,7 @@ public interface ClientGroupMapper extends BaseMapper<ClientGroupEntity> {
   List<IdWithName> getGroupAuth(@Param("id") Long id);
 
   @Insert("<script>"
-      + "INSERT SQLREST_CLIENT_GROUP(client_id,group_id) VALUES "
+      + "INSERT INTO SQLREST_CLIENT_GROUP(client_id,group_id) VALUES "
       + "<foreach collection='entities' item='item' separator=',' > "
       + "  ( #{item.clientId} ,#{item.groupId} ) "
       + "</foreach>"

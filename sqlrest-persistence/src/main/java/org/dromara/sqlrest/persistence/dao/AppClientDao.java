@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.dto.IdWithName;
 import org.dromara.sqlrest.persistence.entity.AppClientEntity;
@@ -131,7 +132,7 @@ public class AppClientDao {
     queryWrapper.lambda().eq(ClientGroupEntity::getClientId, id);
     clientAuthMapper.delete(queryWrapper);
 
-    if (null != groupIds && groupIds.size() > 0) {
+    if (CollectionUtils.isNotEmpty(groupIds)) {
       List<ClientGroupEntity> insertLists = new ArrayList<>();
       for (Long groupId : groupIds.stream().distinct().collect(Collectors.toList())) {
         insertLists.add(ClientGroupEntity.builder().clientId(id).groupId(groupId).build());
