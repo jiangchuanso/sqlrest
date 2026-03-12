@@ -125,9 +125,9 @@ sh ./docker-maven-build.sh
 
 ### 2、安装部署
 
-(1) 当编译打包完成后，会在sqlrest/target/目录下生成sqlrest-relase-x.x.x.tar.gz的打包文件，将文件拷贝到已安装JRE的部署机器上解压即可。
+(1) 当编译打包完成后，会在sqlrest/target/目录下生成sqlrest-release-x.x.x.tar.gz的打包文件，将文件拷贝到已安装JRE的部署机器上解压即可。
 
-(2) 基于docker-compose提供linux联网环境下的一键安装，x86的CentOS系统下安装命令如下：
+(2) 基于docker-compose提供linux联网环境下的一键安装，x86(arm下需自行制作docker镜像)的CentOS系统下安装命令如下：
 
 ```
 curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2241027/download -o /tmp/sr.sh && systemctl stop firewalld && bash /tmp/sr.sh && rm -f /tmp/sr.sh
@@ -143,7 +143,7 @@ curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2241027/download -o 
 > 
 > 当使用PostgreSQL数据库时，config.ini里的DB_TYPE配置postgres,并需要配置 PGDB_ 前缀的参数
 
-- 步骤2：修改sqlrest-relase-x.x.x/conf/config.ini配置文件
+- 步骤2：修改sqlrest-release-x.x.x/conf/config.ini配置文件
 
 ```
 # manager节点的host地址，如果gateway与executor节点
@@ -299,8 +299,8 @@ sqlrest:
 ## 六、社区推荐
 
 <div>
-	<a href="https://dromara.org.cn/zh/projects/" target="_blank">
-        <img src="https://dromara.org/logo.svg" alt="dromara" title="让每一位开源爱好者，体会到开源的快乐。">
+	<a href="https://dromara.org/zh/projects/" target="_blank">
+        <img src="https://foruda.gitee.com/avatar/1664439580221599999/5162368_dromara_1664439580.png" alt="dromara" title="让每一位开源爱好者，体会到开源的快乐。">
     </a>
 </div>
 

@@ -39,6 +39,8 @@ public final class JdbcUrlUtils {
       case PROP_FILE:
       case PROP_PARAMS:
         return ".+?";
+      case PROP_DATABASE:
+        return "[^;?/:]+";
       default:
         return "[\\\\w\\\\-_.~]+";
     }
@@ -201,7 +203,7 @@ public final class JdbcUrlUtils {
     // jdbc:sqlserver://localhost:1433;DatabaseName=AdventureWorks;user=MyUserName;password=123456;
     final Matcher matcher5 = JdbcUrlUtils
         .getPattern("jdbc:sqlserver://{host}[:{port}][;DatabaseName={database}][;{params}]")
-        .matcher("jdbc:sqlserver://localhost:1433;DatabaseName=master;user=MyUserName");
+        .matcher("jdbc:sqlserver://localhost:1433;DatabaseName=中文;user=MyUserName");
     if (matcher5.matches()) {
       System.out.println("sqlserver host:" + matcher5.group("host"));
       System.out.println("sqlserver port:" + matcher5.group("port"));
