@@ -341,6 +341,9 @@ public class DataSourceService {
     if (!conn.getUrl().startsWith(supportDbType.getUrlPrefix())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_JDBC_URL, conn.getUrl());
     }
+    if (ProductTypeEnum.HTTP == supportDbType) {
+      return;
+    }
 
     for (int i = 0; i < supportDbType.getUrl().length; ++i) {
       String pattern = supportDbType.getUrl()[i];

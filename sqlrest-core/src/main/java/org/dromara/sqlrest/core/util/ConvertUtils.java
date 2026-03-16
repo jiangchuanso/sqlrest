@@ -27,7 +27,14 @@ public class ConvertUtils {
       return null;
     }
     Map<String, Object> ret = new LinkedHashMap<>();
-    row.forEach((key, val) -> ret.put(converter.apply(key), val));
+    for (Map.Entry<String, Object> entry : row.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      if (value instanceof Map) {
+        value = to((Map<String, Object>) value, converter);
+      }
+      ret.put(converter.apply(key), value);
+    }
     return ret;
   }
 

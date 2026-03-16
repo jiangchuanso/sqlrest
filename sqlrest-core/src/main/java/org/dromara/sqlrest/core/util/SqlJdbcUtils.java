@@ -26,6 +26,7 @@ import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.util.LambdaUtils;
 import org.dromara.sqlrest.core.exec.logger.DebugExecuteLogger;
+import org.dromara.sqlrest.persistence.util.JsonUtils;
 import org.dromara.sqlrest.template.SqlMeta;
 
 @Slf4j
@@ -74,7 +75,15 @@ public class SqlJdbcUtils {
             Map<String, Object> row = new LinkedHashMap<>();
             for (String column : columns) {
               try {
-                row.put(column, rs.getObject(column));
+                Object value = rs.getObject(column);
+                if (ProductTypeEnum.HTTP == productType) {
+                  if (value instanceof java.sql.Array) {
+                    value = convertArray((java.sql.Array) value);
+                  } else if (value instanceof java.sql.Struct) {
+                    value = convertStruct((java.sql.Struct) value);
+                  }
+                }
+                row.put(column, value);
               } catch (SQLException se) {
                 log.warn("Failed to call jdbc ResultSet::getObject(): {}", se.getMessage(), se);
                 row.put(column, null);
@@ -90,6 +99,22 @@ public class SqlJdbcUtils {
       }
     } finally {
       DebugExecuteLogger.add(sql, paramValues, System.currentTimeMillis() - start);
+    }
+  }
+
+  private Object convertArray(java.sql.Array array) {
+    try {
+      return JsonUtils.toBeanList(array.toString(), Object.class);
+    } catch (Exception e) {
+      return array;
+    }
+  }
+
+  private Object convertStruct(java.sql.Struct struct) {
+    try {
+      return JsonUtils.toBeanObject(struct.toString(), Map.class);
+    } catch (Exception e) {
+      return struct;
     }
   }
 

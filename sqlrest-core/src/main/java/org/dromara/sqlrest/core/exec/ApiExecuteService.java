@@ -40,6 +40,7 @@ import org.dromara.sqlrest.common.enums.CacheKeyTypeEnum;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.enums.ParamLocationEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.core.driver.DriverLoadService;
@@ -131,7 +132,11 @@ public class ApiExecuteService {
     List<Object> results = ApiExecutorEngineFactory
         .getExecutor(config.getEngine(), dataSource, dsEntity.getType(), printSqlLog)
         .execute(config.getContextList(), paramValues, config.getNamingStrategy());
-    return ResultEntity.success(results.size() > 1 ? results : results.stream().findAny().orElse(null));
+    Object answer = results.size() > 1 ? results : results.stream().findAny().orElse(null);
+    if (ProductTypeEnum.HTTP == dsEntity.getType() && answer instanceof List) {
+      answer = ((List) answer).get(0);
+    }
+    return ResultEntity.success(answer);
   }
 
   private String convertInvalidArgs(List<ItemParam> invalidArgs) {

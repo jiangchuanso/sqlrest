@@ -25,6 +25,7 @@ SQLREST的功能包括：
 - **缓存配置支持**：支持Hazelcast或Redis缓存，提升API访问性能。
 - **流控配置管理**：通过Sentinel支持流量控制，防止系统过载。
 - **统一告警对接**：支持统一告警系统的对接与触发。
+- **RESTful接口转发**：支持基于HTTP数据源的RESTful接口转发功能。
 - **接口版本管理**：支持接口的版本控制管理功能。
 - **批量导入导出**：支持接口的批量导入导出功能。
 - **大模型MCP服务**：支持简单配置即可创建MCP的tool。
@@ -59,6 +60,8 @@ SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 - StarRocks
 - OceanBase
 - TDengine
+- ElasticSearch
+- Http(RESTful)
 
 ### 3、模块结构功能
 
@@ -308,4 +311,4 @@ sqlrest:
 
 如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。也可扫描下方二维码入群讨论：（加好友请注明："SQLREST交流"）
 
-![structure](https://gitee.com/inrgihc/dbswitch/raw/master/images/weixin.PNG)
+![structure](https://gitee.com/inrgihc/dbswitch/raw/master/docs/images/weixin.PNG)

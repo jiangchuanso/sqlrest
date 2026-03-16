@@ -45,6 +45,7 @@ import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
 import org.dromara.sqlrest.common.enums.NamingStrategyEnum;
 import org.dromara.sqlrest.common.enums.ParamLocationEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
+import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.service.DisplayRecord;
@@ -339,6 +340,9 @@ public class ApiAssignmentService {
           .getExecutor(request.getEngine(), dataSource, dataSourceEntity.getType(), true)
           .execute(scripts, params, request.getNamingStrategy());
       Object answer = results.size() > 1 ? results : (1 == results.size()) ? results.get(0) : null;
+      if (ProductTypeEnum.HTTP == dataSourceEntity.getType() && answer instanceof List) {
+        answer = ((List) answer).get(0);
+      }
       List<OutParam> types = JacksonUtils.parseFiledTypesAndFillNullAsString(results);
       String logs = Optional.ofNullable(DebugExecuteLogger.get())
           .orElseGet(ArrayList::new).stream().map(DisplayRecord::getDisplayText)

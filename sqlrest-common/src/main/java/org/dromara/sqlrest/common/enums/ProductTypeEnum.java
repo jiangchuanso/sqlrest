@@ -281,7 +281,7 @@ public enum ProductTypeEnum {
           .urlPrefix("jdbc:sybase:Tds:")
           .tplUrls(new String[]{"jdbc:sybase:Tds:{host}[:{port}][/{database}][\\?{params}]"})
           .urlSample("jdbc:sybase:Tds:172.17.2.10:5000/test?charset=cp936")
-          .sqlSchemaList("SELECT schema_name FROM information_schema.schemata ")
+          .sqlSchemaList(null)
           .adapter(database -> Pair.of(null, database))
           .pageSql("%s OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
           .pageConsumer(
@@ -562,6 +562,38 @@ public enum ProductTypeEnum {
                 parameters.add((page - 1) * size);
               }
           ).build()),
+
+  ELASTICSEARCH(
+      ProductContext.builder()
+          .id(22)
+          .quote("\"")
+          .name("ElasticSearch")
+          .driver("com.gitee.esdriver.driver.EsDriver")
+          .defaultPort(9200)
+          .testSql("GET /")
+          .urlPrefix("jdbc:esdriver:")
+          .tplUrls(new String[]{"jdbc:esdriver://{host}:{port}"})
+          .urlSample("jdbc:esdriver://172.17.2.10:9200")
+          .sqlSchemaList(null)
+          .retSchemaList(Collections.singletonList("elasticsearch"))
+          .adapter(database -> Pair.of(null, database)
+          ).build()),
+
+  HTTP(
+      ProductContext.builder()
+          .id(99)
+          .quote(null)
+          .name("Http")
+          .driver("com.gitee.restfuldriver.driver.RestfulDriver")
+          .defaultPort(80)
+          .testSql("GET /")
+          .urlPrefix("jdbc:restful:")
+          .tplUrls(new String[]{"jdbc:restful://{host}:{port}"})
+          .urlSample("jdbc:restful://http://172.17.2.10:8080")
+          .sqlSchemaList(null)
+          .retSchemaList(Collections.singletonList("http"))
+          .adapter(database -> Pair.of(null, database)
+          ).build()),
   ;
 
   private ProductContext context;
@@ -611,7 +643,7 @@ public enum ProductTypeEnum {
   }
 
   public boolean hasDatabaseName() {
-    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A).contains(this);
+    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A, ELASTICSEARCH, HTTP).contains(this);
   }
 
   public boolean hasFilePath() {
@@ -632,6 +664,9 @@ public enum ProductTypeEnum {
 //  }
 
   public String getPageSql(String sql, int page, int size) {
+    if (StringUtils.isBlank(context.getPageSql())) {
+      return sql;
+    }
     String pageSql = String.format(context.getPageSql(), sql);
     return pageSql.replace("<LIMIT>", String.valueOf(size));
   }
