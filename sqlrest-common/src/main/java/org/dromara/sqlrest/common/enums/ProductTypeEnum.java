@@ -563,22 +563,46 @@ public enum ProductTypeEnum {
               }
           ).build()),
 
-  ELASTICSEARCH(
+  /**
+   * MongoDB数据库类型
+   */
+  MONGODB(
       ProductContext.builder()
           .id(22)
+          .quote("")
+          .name("MongoDB")
+          .driver("com.gitee.jdbc.mongodb.JdbcDriver")
+          .defaultPort(27017)
+          .testSql("use admin;")
+          .urlPrefix("jdbc:mongodb://")
+          .tplUrls(new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"})
+          .urlSample("jdbc:mongodb://172.17.2.12:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1")
+          .sqlSchemaList(null)
+          .adapter(database -> Pair.of(database, null)
+          ).build()),
+
+  /**
+   * ElasticSearch数据库类型
+   */
+  ELASTICSEARCH(
+      ProductContext.builder()
+          .id(23)
           .quote("\"")
           .name("ElasticSearch")
           .driver("com.gitee.esdriver.driver.EsDriver")
           .defaultPort(9200)
           .testSql("GET /")
           .urlPrefix("jdbc:esdriver:")
-          .tplUrls(new String[]{"jdbc:esdriver://{host}:{port}"})
+          .tplUrls(new String[]{"jdbc:esdriver://{host}:{port}[\\?{params}]"})
           .urlSample("jdbc:esdriver://172.17.2.10:9200")
           .sqlSchemaList(null)
           .retSchemaList(Collections.singletonList("elasticsearch"))
           .adapter(database -> Pair.of(null, database)
           ).build()),
 
+  /**
+   * RESTful的http类型
+   */
   HTTP(
       ProductContext.builder()
           .id(99)
@@ -588,7 +612,7 @@ public enum ProductTypeEnum {
           .defaultPort(80)
           .testSql("GET /")
           .urlPrefix("jdbc:restful:")
-          .tplUrls(new String[]{"jdbc:restful://{host}:{port}"})
+          .tplUrls(new String[]{"jdbc:restful://{host}:{port}[\\?{params}]"})
           .urlSample("jdbc:restful://http://172.17.2.10:8080")
           .sqlSchemaList(null)
           .retSchemaList(Collections.singletonList("http"))
@@ -643,7 +667,7 @@ public enum ProductTypeEnum {
   }
 
   public boolean hasDatabaseName() {
-    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A, ELASTICSEARCH, HTTP).contains(this);
+    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A, MONGODB, ELASTICSEARCH, HTTP).contains(this);
   }
 
   public boolean hasFilePath() {
