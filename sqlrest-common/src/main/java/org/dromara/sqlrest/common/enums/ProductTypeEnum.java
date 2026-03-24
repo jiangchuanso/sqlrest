@@ -576,7 +576,7 @@ public enum ProductTypeEnum {
           .testSql("use admin;")
           .urlPrefix("jdbc:mongodb://")
           .tplUrls(new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"})
-          .urlSample("jdbc:mongodb://172.17.2.12:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1")
+          .urlSample("jdbc:mongodb://172.17.2.12:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1&expand=false")
           .sqlSchemaList(null)
           .adapter(database -> Pair.of(database, null)
           ).build()),
