@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -282,8 +283,8 @@ public class DataSourceService {
             dataSourceEntity.getVersion());
     String driverPath = driverPathFile.getAbsolutePath();
     ProductTypeEnum productType = dataSourceEntity.getType();
-    if (StringUtils.isBlank(productType.getContext().getSqlSchemaList())) {
-      return productType.getContext().getRetSchemaList();
+    if (productType.isNoViewTables()) {
+      return Collections.emptyList();
     }
     List<String> result = new ArrayList<>();
     HikariDataSource ds = DataSourceUtils.getHikariDataSource(dataSourceEntity, driverPath);

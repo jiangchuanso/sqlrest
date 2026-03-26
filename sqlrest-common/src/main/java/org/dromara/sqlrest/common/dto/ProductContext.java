@@ -39,6 +39,7 @@ public class ProductContext implements Serializable {
   private String sqlSchemaList;
   private List<String> retSchemaList;
   private boolean hasCatalogAndSchema;
+  private boolean noViewTables;
   private Function<String, Pair<String, String>> adapter;
   private String pageSql;
   private ThreeConsumer<Integer, Integer, List<Object>> pageConsumer;

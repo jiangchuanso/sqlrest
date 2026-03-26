@@ -283,7 +283,11 @@ public enum ProductTypeEnum {
           .urlSample("jdbc:sybase:Tds:172.17.2.10:5000/test?charset=cp936")
           .sqlSchemaList(null)
           .adapter(database -> Pair.of(null, database))
-          .pageSql("%s OFFSET ? ROWS FETCH NEXT ? ROWS ONLY")
+          .hasCatalogAndSchema(true)
+          .pageSql("select * , row_num=identity(10) into #delTmpTb from ( \n"
+              + " %s  \n"
+              + ") t  select * from #delTmpTb where row_num > ? and row_num<= ? order by row_num ASC \n"
+              + "DROP TABLE #delTmpTb ")
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add((page - 1) * size);
@@ -554,6 +558,7 @@ public enum ProductTypeEnum {
           .tplUrls(new String[]{"jdbc:TAOS-RS://{host}[:{port}]/[{database}][\\?{params}]"})
           .urlSample("jdbc:TAOS-RS://172.17.2.10:6041/test")
           .sqlSchemaList("SELECT name FROM `information_schema`.`ins_databases`")
+          .noViewTables(true)
           .adapter(database -> Pair.of(database, null))
           .pageSql("%s LIMIT ? OFFSET ? ")
           .pageConsumer(
@@ -578,6 +583,7 @@ public enum ProductTypeEnum {
           .tplUrls(new String[]{"jdbc:mongodb://{host}[:{port}]/[{database}][\\?{params}]"})
           .urlSample("jdbc:mongodb://172.17.2.12:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-1&expand=false")
           .sqlSchemaList(null)
+          .noViewTables(true)
           .adapter(database -> Pair.of(database, null)
           ).build()),
 
@@ -596,6 +602,7 @@ public enum ProductTypeEnum {
           .tplUrls(new String[]{"jdbc:esdriver://{host}:{port}[\\?{params}]"})
           .urlSample("jdbc:esdriver://172.17.2.10:9200")
           .sqlSchemaList(null)
+          .noViewTables(true)
           .retSchemaList(Collections.singletonList("elasticsearch"))
           .adapter(database -> Pair.of(null, database)
           ).build()),
@@ -615,6 +622,7 @@ public enum ProductTypeEnum {
           .tplUrls(new String[]{"jdbc:restful://{host}:{port}[\\?{params}]"})
           .urlSample("jdbc:restful://http://172.17.2.10:8080")
           .sqlSchemaList(null)
+          .noViewTables(true)
           .retSchemaList(Collections.singletonList("http"))
           .adapter(database -> Pair.of(null, database)
           ).build()),
@@ -668,6 +676,10 @@ public enum ProductTypeEnum {
 
   public boolean hasDatabaseName() {
     return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A, MONGODB, ELASTICSEARCH, HTTP).contains(this);
+  }
+
+  public boolean isNoViewTables(){
+    return this.context.isNoViewTables();
   }
 
   public boolean hasFilePath() {
