@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.BiFunction;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -291,9 +292,23 @@ public enum ProductTypeEnum {
           .pageConsumer(
               (page, size, parameters) -> {
                 parameters.add((page - 1) * size);
-                parameters.add(size);
+                parameters.add(page * size);
               }
-          ).build()),
+          )
+          .resultSetFunc((hasResult, statement) -> {
+            try {
+              while (hasResult || statement.getUpdateCount() != -1) {
+                if (hasResult) {
+                  return true;
+                }
+                hasResult = statement.getMoreResults();
+              }
+              return false;
+            } catch (SQLException e) {
+              throw new RuntimeException(e);
+            }
+          })
+          .build()),
 
   /**
    * Hive 数据库类型
@@ -690,6 +705,10 @@ public enum ProductTypeEnum {
     return this != SQLITE3;
   }
 
+  public boolean offTransactional() {
+    return this == SYBASE || this == HIVE || this == INCEPTOR || this == IMPALA;
+  }
+
 //  public String quoteName(String name) {
 //    return String.format("%s%s%s", context.getQuote(), name, context.getQuote());
 //  }
@@ -705,6 +724,10 @@ public enum ProductTypeEnum {
     }
     String pageSql = String.format(context.getPageSql(), sql);
     return pageSql.replace("<LIMIT>", String.valueOf(size));
+  }
+
+  public BiFunction<Boolean, Statement, Boolean> getResultSetFunc() {
+    return context.getResultSetFunc();
   }
 
   /**

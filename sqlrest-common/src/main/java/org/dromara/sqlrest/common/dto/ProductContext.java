@@ -11,7 +11,9 @@ package org.dromara.sqlrest.common.dto;
 
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.Statement;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.AllArgsConstructor;
@@ -44,4 +46,5 @@ public class ProductContext implements Serializable {
   private String pageSql;
   private ThreeConsumer<Integer, Integer, List<Object>> pageConsumer;
   private Consumer<Connection> executeBeforeQuery;
+  private BiFunction<Boolean, Statement, Boolean> resultSetFunc;
 }

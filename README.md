@@ -7,7 +7,7 @@
 
 ## 一、工具介绍
 
-SQLREST 是一个开源项目，旨在提供一种简单而强大的方式来将 SQL 操作转化为 RESTful API。它支持多种数据库，允许用户通过配置 SQL 语句来创建 API，
+SQLREST ( 简称: SR ) 是一个完全开源的项目，旨在提供一种简单而强大的方式来将 SQL( 或SQL-Like，即: DSL ) 操作转化为 RESTful API。它支持多种数据库，允许用户通过配置 SQL(或DSL) 语句来创建 API，
 无需编写复杂的后端逻辑，用户只需选择数据源、输入SQL或脚本、简单path配置即可快速生成API接口。
 
 ### 1、功能介绍
@@ -25,15 +25,15 @@ SQLREST的功能包括：
 - **缓存配置支持**：支持Hazelcast或Redis缓存，提升API访问性能。
 - **流控配置管理**：通过Sentinel支持流量控制，防止系统过载。
 - **统一告警对接**：支持统一告警系统的对接与触发。
-- **RESTful接口转发**：支持HTTP数据源的RESTful接口转发功能。
-- **文档数据库支持**：支持MongoDB和ElasticSearch等文档数据库开发接口。
+- **RESTful接口转发**：支持通过DSL进行HTTP数据源的RESTful接口转发功能。
+- **文档数据库支持**：支持通过DSL进行MongoDB和ElasticSearch等文档数据库开发接口。
 - **接口版本管理**：支持接口的版本控制管理功能。
 - **批量导入导出**：支持接口的批量导入导出功能。
 - **大模型MCP服务**：支持简单配置即可创建MCP的tool。
 
 SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 
-- **快速将 SQL 转换为 API**
+- **快速将 SQL(或DSL) 转换为 API**
 - **适用于数据中台、BI 工具、低代码平台等**
 
 ### 2、数据库清单
@@ -60,7 +60,7 @@ SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 - Apache Doris
 - StarRocks
 - OceanBase
-- TDengine
+- TDEngine
 - MongoDB
 - ElasticSearch
 - Http(RESTful)

@@ -13,11 +13,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import lombok.experimental.UtilityClass;
@@ -63,7 +65,7 @@ public class SqlJdbcUtils {
     long start = System.currentTimeMillis();
     try {
       Function<String, String> converter = getConverter(strategy);
-      if (statement.execute()) {
+      if (execute(productType, statement)) {
         try (ResultSet rs = statement.getResultSet()) {
           List<String> columns = new ArrayList<>();
           for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
@@ -100,6 +102,14 @@ public class SqlJdbcUtils {
     } finally {
       DebugExecuteLogger.add(sql, paramValues, System.currentTimeMillis() - start);
     }
+  }
+
+  private boolean execute(ProductTypeEnum product, PreparedStatement statement) throws SQLException {
+    boolean hasResult = statement.execute();
+    if (null == product.getResultSetFunc()) {
+      return hasResult;
+    }
+    return product.getResultSetFunc().apply(hasResult, statement);
   }
 
   private Object convertArray(java.sql.Array array) {

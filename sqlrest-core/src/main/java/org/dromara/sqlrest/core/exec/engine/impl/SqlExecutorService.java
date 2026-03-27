@@ -37,7 +37,7 @@ public class SqlExecutorService extends AbstractExecutorEngine {
   public List<Object> execute(List<ApiContextEntity> scripts, Map<String, Object> params, NamingStrategyEnum strategy) {
     List<Object> dataList = new ArrayList<>();
     try (Connection connection = this.dataSource.getConnection()) {
-      boolean supportsTx = connection.getMetaData().supportsTransactions();
+      boolean supportsTx = (!productType.offTransactional()) && connection.getMetaData().supportsTransactions();
       try {
         LambdaUtils.ifDo(supportsTx, () -> connection.setAutoCommit(false));
         for (ApiContextEntity sql : scripts) {
