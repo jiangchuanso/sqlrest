@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.model.JarFileClassLoader;
 import org.dromara.sqlrest.common.model.SimpleDataSource;
 import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
+import org.dromara.sqlrest.persistence.entity.PoolConfig;
 import org.springframework.core.env.Environment;
 
 @Slf4j
@@ -39,6 +41,8 @@ public final class DataSourceUtils {
 
   public static final int MAX_THREAD_COUNT = 10;
   public static final int MAX_TIMEOUT_MS = 60000;
+  public static final long MAX_LIFE_TIME_MS = TimeUnit.MINUTES.toMillis(60);
+  public static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toMillis(60);
   private static final byte[] KEY = "6635BC05BC357FEC7A85FDB9C972AD01".getBytes();
   private static final AES toolAES = SecureUtil.aes(KEY);
   private static final Map<String, URLClassLoader> classLoaderMap = new ConcurrentHashMap<>();
@@ -96,7 +100,7 @@ public final class DataSourceUtils {
   public static HikariDataSource createDataSource(DataSourceEntity properties, String driverPath) {
     Properties parameters = new Properties();
     HikariDataSource ds = new HikariDataSource();
-    ds.setPoolName("The_JDBC_Connection");
+    ds.setPoolName("The_JDBC_Connection_" + properties.getType() + "_" + properties.getName());
     ds.setJdbcUrl(properties.getUrl());
     if (ProductTypeEnum.ORACLE == properties.getType()) {
       ds.setConnectionTestQuery(properties.getType().getTestSql());
@@ -107,11 +111,11 @@ public final class DataSourceUtils {
     } else if (StringUtils.isNotBlank(properties.getType().getTestSql())) {
       ds.setConnectionTestQuery(properties.getType().getTestSql());
     }
-    ds.setMaximumPoolSize(MAX_THREAD_COUNT);
-    ds.setMinimumIdle(MAX_THREAD_COUNT);
-    ds.setMaxLifetime(TimeUnit.MINUTES.toMillis(60));
-    ds.setConnectionTimeout(TimeUnit.SECONDS.toMillis(60));
-    ds.setIdleTimeout(MAX_TIMEOUT_MS);
+    ds.setMaximumPoolSize(getPoolConfigValue(properties, PoolConfig::getMaximumPoolSize, MAX_THREAD_COUNT));
+    ds.setMinimumIdle(getPoolConfigValue(properties, PoolConfig::getMinimumIdle, MAX_THREAD_COUNT));
+    ds.setMaxLifetime(getPoolConfigValue(properties, PoolConfig::getMaxLifetime, MAX_LIFE_TIME_MS));
+    ds.setConnectionTimeout(getPoolConfigValue(properties, PoolConfig::getConnectionTimeout, CONNECTION_TIMEOUT));
+    ds.setIdleTimeout(getPoolConfigValue(properties, PoolConfig::getIdleTimeout, MAX_TIMEOUT_MS));
     SimpleDataSource dataSource = new SimpleDataSource(
         createURLClassLoader(driverPath, properties.getDriver()),
         properties.getUrl(),
@@ -122,6 +126,7 @@ public final class DataSourceUtils {
     );
     ds.setDataSource(dataSource);
 
+    log.info("Create HikariDataSource for {} with pool config: {}", ds.getPoolName(), properties.getPoolConfig());
     return ds;
   }
 
@@ -204,5 +209,13 @@ public final class DataSourceUtils {
       return null;
     }
     return toolAES.decryptStr(str);
+  }
+
+  private static <T> T getPoolConfigValue(DataSourceEntity entity, Function<PoolConfig, T> getter, T defaultValue) {
+    if (entity.getPoolConfig() == null) {
+      return defaultValue;
+    }
+    T value = getter.apply(entity.getPoolConfig());
+    return value != null ? value : defaultValue;
   }
 }

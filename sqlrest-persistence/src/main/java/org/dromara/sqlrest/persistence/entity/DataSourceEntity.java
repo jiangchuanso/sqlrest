@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.type.EnumTypeHandler;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.persistence.handler.PoolConfigHandler;
 
 @Data
 @Builder
@@ -60,6 +61,9 @@ public class DataSourceEntity {
   @TableField(value = "update_time", insertStrategy = FieldStrategy.NEVER, updateStrategy = FieldStrategy.NEVER)
   private Timestamp updateTime;
 
+  @TableField(value = "pool_config", typeHandler = PoolConfigHandler.class)
+  private PoolConfig poolConfig;
+
   public static boolean isSame(DataSourceEntity lhs, DataSourceEntity rhs) {
     if (null == lhs || null == rhs) {
       return false;
@@ -68,6 +72,7 @@ public class DataSourceEntity {
         && StringUtils.equals(lhs.driver, rhs.driver)
         && StringUtils.equals(lhs.url, rhs.url)
         && StringUtils.equals(lhs.username, rhs.username)
-        && StringUtils.equals(lhs.password, rhs.password);
+        && StringUtils.equals(lhs.password, rhs.password)
+        && java.util.Objects.equals(lhs.poolConfig, rhs.poolConfig);
   }
 }

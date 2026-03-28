@@ -6,14 +6,14 @@
       <el-tab-pane label="系统功能"
                    name="first">
         <div class="content_tag">
-          <el-tag type="danger">SQL接口</el-tag>
+          <el-tag type="danger">SQL/DSL接口</el-tag>
           <el-tag type="success">脚本接口</el-tag>
         </div>
         <div class="content_card">
           <el-card class="box-card">
             <div class="text item">
               <p>
-                一句话，sqlrest工具提供快速构建RESTful的<B>API接口</B>工具，包括SQl方式和脚本方式。功能包括：
+                一句话，sqlrest工具提供快速构建RESTful的<B>API接口</B>工具，包括SQl(或DSL)方式和脚本方式。功能包括：
               </p>
               <ul>
                 <li>项目托管</li>
@@ -44,9 +44,25 @@
                 <p>
                   执行器支持哈希及SpEL表达式方式配置缓存功能。
                 </p>
+                <li>统一告警对接</li>
+                <p>
+                  支持统一告警系统的对接与触发。
+                </p>
+                <li>RESTful接口转发</li>
+                <p>
+                  支持通过DSL进行HTTP数据源的RESTful接口转发功能。
+                </p>
+                <li>文档数据库支持</li>
+                <p>
+                  支持通过DSL进行MongoDB和ElasticSearch等文档数据库开发接口。
+                </p>
                 <li>支持接口的版本控制管理</li>
                 <p>
                   开发的接口支持版本控制管理、线上版本切换等功能。
+                </p>
+                <li>支持批量导入导出</li>
+                <p>
+                  支持接口的批量导入导出功能。
                 </p>
                 <li>支持将接口转换为MCP工具功能</li>
                 <p>
@@ -57,7 +73,7 @@
           </el-card>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="关系数据库"
+      <el-tab-pane label="支持的数据源"
                    name="second">
         <div class="content_tag">
           <el-tag type="success">JDBC</el-tag>
@@ -67,7 +83,7 @@
           <el-card class="box-card">
             <div class="text item">
               <p>
-                sqlrest配置支持的常规关系数据库有20+，包括：
+                sqlrest配置支持的常规的数据源有20+，包括：
               </p>
               <ul>
                 <li>甲骨文的Oracle
@@ -111,6 +127,12 @@
                 <li>OceanBase
                 </li>
                 <li>TDengine
+                </li>
+                <li>MongoDB
+                </li>
+                <li>ElasticSearch
+                </li>
+                <li>Http(RESTful)
                 </li>
               </ul>
             </div>

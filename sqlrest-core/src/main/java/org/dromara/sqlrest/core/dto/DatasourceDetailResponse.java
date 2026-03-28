@@ -11,6 +11,7 @@ package org.dromara.sqlrest.core.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.persistence.entity.PoolConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.sql.Timestamp;
@@ -45,6 +46,9 @@ public class DatasourceDetailResponse {
 
   @ApiModelProperty("密码")
   private String password;
+
+  @ApiModelProperty("连接池配置")
+  private PoolConfig poolConfig;
 
   @ApiModelProperty("创建时间")
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

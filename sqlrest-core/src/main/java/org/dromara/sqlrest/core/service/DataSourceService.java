@@ -120,6 +120,7 @@ public class DataSourceService {
         .url(request.getUrl())
         .username(request.getUsername())
         .password(request.getPassword())
+        .poolConfig(request.getPoolConfig())
         .build();
     File driverPathFile = SpringUtil.getBean(DriverLoadService.class)
         .getVersionDriverFile(dataSourceEntity.getType(),

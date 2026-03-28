@@ -10,6 +10,7 @@
 package org.dromara.sqlrest.core.dto;
 
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
+import org.dromara.sqlrest.persistence.entity.PoolConfig;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -46,4 +47,7 @@ public class DataSourceBaseRequest {
 
   @ApiModelProperty("密码")
   private String password;
+
+  @ApiModelProperty("连接池配置")
+  private PoolConfig poolConfig;
 }

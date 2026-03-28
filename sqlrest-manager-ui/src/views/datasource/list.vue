@@ -148,6 +148,38 @@
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
+          <el-divider content-position="center">数据源连接池参数配置</el-divider>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="最大连接数" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.maximumPoolSize" :readonly=true placeholder="默认: 10"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="最小空闲数" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.minimumIdle" :readonly=true placeholder="默认: 10"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="最大存活(ms)" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.maxLifetime" :readonly=true placeholder="默认: 3600000"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="连接超时(ms)" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.connectionTimeout" :readonly=true placeholder="默认: 60000"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="空闲超时(ms)" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.idleTimeout" :readonly=true placeholder="默认: 60000"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
         <div slot="footer"
              class="dialog-footer">
@@ -232,6 +264,38 @@
                       v-model="createform.password"
                       auto-complete="off"></el-input>
           </el-form-item>
+          <el-divider content-position="center">数据源连接池参数配置</el-divider>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="最大连接数" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.maximumPoolSize" placeholder="默认: 10" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="最小空闲数" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.minimumIdle" placeholder="默认: 10" clearable></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="最大存活(ms)" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.maxLifetime" placeholder="默认: 3600000" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="连接超时(ms)" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.connectionTimeout" placeholder="默认: 60000" clearable></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="空闲超时(ms)" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.idleTimeout" placeholder="默认: 60000" clearable></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
         <div slot="footer"
              class="dialog-footer">
@@ -312,6 +376,38 @@
                       v-model="updateform.password"
                       auto-complete="off"></el-input>
           </el-form-item>
+          <el-divider content-position="center">数据源连接池参数配置</el-divider>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="最大连接数" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.maximumPoolSize" placeholder="默认: 10" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="最小空闲数" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.minimumIdle" placeholder="默认: 10" clearable></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="最大存活(ms)" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.maxLifetime" placeholder="默认: 3600000" clearable></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="连接超时(ms)" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.connectionTimeout" placeholder="默认: 60000" clearable></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="空闲超时(ms)" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.idleTimeout" placeholder="默认: 60000" clearable></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
         </el-form>
         <div slot="footer"
              class="dialog-footer">
@@ -336,6 +432,15 @@ export default {
     databaseIcon
   },
   data () {
+    // 连接池参数的默认值，与后端DataSourceUtils中的常量保持一致
+    const POOL_CONFIG_DEFAULTS = {
+      maximumPoolSize: 10,
+      minimumIdle: 10,
+      maxLifetime: 3600000,
+      connectionTimeout: 60000,
+      idleTimeout: 60000
+    };
+
     return {
       loading: true,
       keyword: null,
@@ -347,6 +452,16 @@ export default {
       connectionDriver: [],
       tableData: [
       ],
+      defaultForm: {
+        id: 0,
+        title: "",
+        type: "",
+        diver: "",
+        version: "",
+        username: "",
+        password: "",
+        poolConfig: POOL_CONFIG_DEFAULTS
+      },
       queryForm: {
         title: "",
         type: "",
@@ -354,7 +469,8 @@ export default {
         diver: "",
         version: "",
         username: "",
-        password: ""
+        password: "",
+        poolConfig: POOL_CONFIG_DEFAULTS
       },
       createform: {
         title: "",
@@ -364,7 +480,8 @@ export default {
         url: "",
         version: "",
         username: "",
-        password: ""
+        password: "",
+        poolConfig: POOL_CONFIG_DEFAULTS
       },
       updateform: {
         id: 0,
@@ -373,8 +490,10 @@ export default {
         diver: "",
         version: "",
         username: "",
-        password: ""
+        password: "",
+        poolConfig: POOL_CONFIG_DEFAULTS
       },
+      poolConfigDefaults: POOL_CONFIG_DEFAULTS,
       rules: {
         name: [
           {
@@ -486,7 +605,7 @@ export default {
     },
     handleMore: function (index, row) {
       this.dialogFormVisible = true;
-      this.queryForm = row;
+      this.queryForm = JSON.parse(JSON.stringify(row));
     },
     handleTest: function (index, row) {
       this.$http.get(
@@ -511,7 +630,9 @@ export default {
     },
     addConnection: function () {
       this.createFormVisible = true;
-      this.createform = {};
+      this.createform = {
+        poolConfig: { ...this.poolConfigDefaults}
+      };
     },
     handlePreTest: function (form, refName,) {
       let driverClass = "";
@@ -526,21 +647,24 @@ export default {
 
       this.$refs[refName].validate(valid => {
         if (valid) {
+          const requestData = {
+            name: form.name,
+            type: form.type,
+            version: form.version,
+            driver: driverClass,
+            url: form.url,
+            username: form.username,
+            password: form.password,
+            poolConfig : form.poolConfig,
+          };
+
           this.$http({
             method: "POST",
             headers: {
               'Content-Type': 'application/json'
             },
             url: "/sqlrest/manager/api/v1/datasource/preTest",
-            data: JSON.stringify({
-              name: form.name,
-              type: form.type,
-              version: form.version,
-              driver: driverClass,
-              url: form.url,
-              username: form.username,
-              password: form.password
-            })
+            data: JSON.stringify(requestData)
           }).then(res => {
             if (0 === res.data.code) {
               this.$alert("测试连接信息成功", "测试操作成功",
@@ -581,26 +705,29 @@ export default {
 
       this.$refs['createform'].validate(valid => {
         if (valid) {
+          const requestData = {
+            name: this.createform.name,
+            type: this.createform.type,
+            version: this.createform.version,
+            driver: driverClass,
+            url: this.createform.url,
+            username: this.createform.username,
+            password: this.createform.password,
+            poolConfig : this.createform.poolConfig,
+          };
+
           this.$http({
             method: "POST",
             headers: {
               'Content-Type': 'application/json'
             },
             url: "/sqlrest/manager/api/v1/datasource/create",
-            data: JSON.stringify({
-              name: this.createform.name,
-              type: this.createform.type,
-              version: this.createform.version,
-              driver: driverClass,
-              url: this.createform.url,
-              username: this.createform.username,
-              password: this.createform.password
-            })
+            data: JSON.stringify(requestData)
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
               this.$message("添加连接信息成功");
-              this.createform = {};
+              this.createform = JSON.parse(JSON.stringify(this.defaultForm));
               this.loadData();
             } else {
               this.$alert(res.data.message, "添加连接信息失败",
@@ -668,28 +795,30 @@ export default {
 
       this.$refs['updateform'].validate(valid => {
         if (valid) {
+          const requestData = {
+            id: this.updateform.id,
+            name: this.updateform.name,
+            type: this.updateform.type,
+            version: this.updateform.version,
+            driver: driverClass,
+            url: this.updateform.url,
+            username: this.updateform.username,
+            password: this.updateform.password,
+            poolConfig : this.updateform.poolConfig,
+          };
           this.$http({
             method: "POST",
             headers: {
               'Content-Type': 'application/json'
             },
             url: "/sqlrest/manager/api/v1/datasource/update",
-            data: JSON.stringify({
-              id: this.updateform.id,
-              name: this.updateform.name,
-              type: this.updateform.type,
-              version: this.updateform.version,
-              driver: driverClass,
-              url: this.updateform.url,
-              username: this.updateform.username,
-              password: this.updateform.password
-            })
+            data: JSON.stringify(requestData)
           }).then(res => {
             if (0 === res.data.code) {
               this.updateFormVisible = false;
               this.$message("修改连接信息成功");
+              this.updateform = JSON.parse(JSON.stringify(this.defaultForm));
               this.loadData();
-              this.updateform = {};
             } else {
               this.$alert(res.data.message, "修改连接信息失败",
                 {
