@@ -210,12 +210,20 @@
                         prop="type"
                         style="width:85%">
             <el-select v-model="createform.type"
+                       class="db-type-select"
                        @change="selectChangedDriverVersion"
                        placeholder="请选择数据库">
+              <template slot="prefix" v-if="createform.type">
+                <databaseIcon :type="createform.type" style="line-height:32px;margin-left:4px;"></databaseIcon>
+              </template>
               <el-option v-for="(item,index) in databaseType"
                          :key="index"
                          :label="item.type"
                          :value="item.type">
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                  <databaseIcon :type="item.type"></databaseIcon>
+                  <span>{{ item.type }}</span>
+                </span>
               </el-option>
             </el-select>
           </el-form-item>
@@ -331,12 +339,21 @@
                         prop="type"
                         style="width:85%">
             <el-select v-model="updateform.type"
+                       class="db-type-select"
                        @change="selectChangedDriverVersion"
-                       placeholder="请选择数据库">
+                       placeholder="请选择数据库" disabled>
+              <template slot="prefix" v-if="updateform.type">
+                <databaseIcon :type="updateform.type" style="line-height:32px;margin-left:4px;"></databaseIcon>
+              </template>
               <el-option v-for="(item,index) in databaseType"
                          :key="index"
                          :label="item.type"
-                         :value="item.type"></el-option>
+                         :value="item.type">
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                  <databaseIcon :type="item.type"></databaseIcon>
+                  <span>{{ item.type }}</span>
+                </span>
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="驱动版本"
@@ -889,5 +906,14 @@ export default {
   width: 100px;
   margin-left: auto;
   margin: 10px 5px;
+}
+
+/* 数据库类型选择器 - 已选中时在前缀显示图标 */
+/deep/ .db-type-select .el-input__inner {
+  padding-left: 36px;
+}
+/deep/ .db-type-select .el-input__prefix {
+  display: flex;
+  align-items: center;
 }
 </style>

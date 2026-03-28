@@ -37,7 +37,7 @@ public enum ProductTypeEnum {
           .urlPrefix("jdbc:mysql://")
           .tplUrls(new String[]{"jdbc:mysql://{host}[:{port}]/[{database}][\\?{params}]"})
           .urlSample(
-              "jdbc:mysql://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
+              "jdbc:mysql://172.17.2.10:3306/mysql?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("%s LIMIT ? OFFSET ? ")
@@ -61,7 +61,7 @@ public enum ProductTypeEnum {
           .urlPrefix("jdbc:mariadb://")
           .tplUrls(new String[]{"jdbc:mariadb://{host}[:{port}]/[{database}][\\?{params}]"})
           .urlSample(
-              "jdbc:mariadb://172.17.2.10:3306/test?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
+              "jdbc:mariadb://172.17.2.10:3306/mysql?useUnicode=true&characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&rewriteBatchedStatements=true&useCompression=true")
           .sqlSchemaList("SELECT `SCHEMA_NAME` FROM `information_schema`.`SCHEMATA`")
           .adapter(database -> Pair.of(database, null))
           .pageSql("%s LIMIT ? OFFSET ? ")
@@ -110,7 +110,7 @@ public enum ProductTypeEnum {
           .testSql("SELECT 1+2 as a")
           .urlPrefix("jdbc:sqlserver://")
           .tplUrls(new String[]{"jdbc:sqlserver://{host}[:{port}][;DatabaseName={database}][;{params}]"})
-          .urlSample("jdbc:sqlserver://172.17.2.10:1433;DatabaseName=test")
+          .urlSample("jdbc:sqlserver://172.17.2.10:1433;DatabaseName=master")
           .sqlSchemaList("select schema_name from INFORMATION_SCHEMA.SCHEMATA")
           .hasCatalogAndSchema(true)
           .adapter(database -> Pair.of(null, database))

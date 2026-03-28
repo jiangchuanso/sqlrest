@@ -270,6 +270,111 @@
       "font_class": "Off-line",
       "unicode": "e7c2",
       "unicode_decimal": 59330
+    },
+    {
+      "icon_id": "90000001",
+      "name": "达梦DM数据库",
+      "font_class": "dm",
+      "unicode": "e900",
+      "unicode_decimal": 59648
+    },
+    {
+      "icon_id": "90000002",
+      "name": "金仓Kingbase数据库",
+      "font_class": "kingbase",
+      "unicode": "e901",
+      "unicode_decimal": 59649
+    },
+    {
+      "icon_id": "90000003",
+      "name": "神通Oscar数据库",
+      "font_class": "oscar",
+      "unicode": "e902",
+      "unicode_decimal": 59650
+    },
+    {
+      "icon_id": "90000004",
+      "name": "南大通用GBase8A数据库",
+      "font_class": "gbase8a",
+      "unicode": "e903",
+      "unicode_decimal": 59651
+    },
+    {
+      "icon_id": "90000005",
+      "name": "Sybase数据库",
+      "font_class": "sybase",
+      "unicode": "e904",
+      "unicode_decimal": 59652
+    },
+    {
+      "icon_id": "90000006",
+      "name": "Impala数据库",
+      "font_class": "impala",
+      "unicode": "e905",
+      "unicode_decimal": 59653
+    },
+    {
+      "icon_id": "90000007",
+      "name": "Inceptor星环数据库",
+      "font_class": "inceptor",
+      "unicode": "e906",
+      "unicode_decimal": 59654
+    },
+    {
+      "icon_id": "90000008",
+      "name": "SQLite3数据库",
+      "font_class": "sqlite3",
+      "unicode": "e907",
+      "unicode_decimal": 59655
+    },
+    {
+      "icon_id": "90000009",
+      "name": "OpenGauss数据库",
+      "font_class": "opengauss",
+      "unicode": "e908",
+      "unicode_decimal": 59656
+    },
+    {
+      "icon_id": "90000010",
+      "name": "Apache Doris数据库",
+      "font_class": "doris",
+      "unicode": "e909",
+      "unicode_decimal": 59657
+    },
+    {
+      "icon_id": "90000011",
+      "name": "StarRocks数据库",
+      "font_class": "starrocks",
+      "unicode": "e90a",
+      "unicode_decimal": 59658
+    },
+    {
+      "icon_id": "90000012",
+      "name": "OceanBase数据库",
+      "font_class": "oceanbase",
+      "unicode": "e90b",
+      "unicode_decimal": 59659
+    },
+    {
+      "icon_id": "90000013",
+      "name": "TDengine时序数据库",
+      "font_class": "tdengine",
+      "unicode": "e90c",
+      "unicode_decimal": 59660
+    },
+    {
+      "icon_id": "90000014",
+      "name": "MongoDB数据库",
+      "font_class": "mongodb",
+      "unicode": "e90d",
+      "unicode_decimal": 59661
+    },
+    {
+      "icon_id": "90000015",
+      "name": "ElasticSearch数据库",
+      "font_class": "elasticsearch",
+      "unicode": "e90e",
+      "unicode_decimal": 59662
     }
   ]
 }

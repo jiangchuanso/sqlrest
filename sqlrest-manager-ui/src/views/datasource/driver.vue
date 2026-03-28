@@ -42,7 +42,7 @@
                              min-width="20%"></el-table-column>
             <el-table-column property="driverClass"
                              label="驱动类名"
-                             min-width="30%"></el-table-column>
+                             min-width="40%"></el-table-column>
             <el-table-column property="jarFiles"
                              :formatter="formatJarFileList"
                              label="驱动JAR名称"
@@ -176,7 +176,7 @@ export default {
 }
 
 .container .el-card {
-  width: 20%;
+  width: 35%;
   height: 100%;
   overflow: auto;
 }

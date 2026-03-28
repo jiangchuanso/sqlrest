@@ -52,6 +52,12 @@ eureka:
     service-url:
       defaultZone: http://${MANAGER_HOST}:${MANAGER_PORT}/eureka/
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 springfox:
   documentation:
     enabled: true

@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dromara.sqlrest.common.enums.NodeStatusEnum;
 
 @Data
 @Builder
@@ -34,4 +35,17 @@ public class TopologyNodeResponse {
 
   @ApiModelProperty("端口号")
   private Integer port;
+
+
+  @ApiModelProperty("内存使用")
+  private Integer memory;
+
+  @ApiModelProperty("CPU使用")
+  private Integer cpu;
+
+  @ApiModelProperty("存储使用")
+  private Integer disk;
+
+  @ApiModelProperty("节点状态")
+  private NodeStatusEnum status;
 }

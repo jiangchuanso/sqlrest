@@ -1,35 +1,72 @@
-```vue
 <template>
-  <div class="topology-container"
-       :style="{ backgroundColor: backgroundColor }">
-    <div class="header">
-      <div class="legend-item">
-        <div class="legend-color manager-color"></div>
-        <div class="legend-info">
-          <span class="legend-text">Manager</span>
-          <span class="legend-desc">接口管理节点</span>
-        </div>
+  <div class="topology-container">
+    <!-- 顶部标题栏 -->
+    <div class="top-bar">
+      <div class="title-area">
+        <span class="title-icon">🗂️</span>
+        <span class="title-text">集群拓扑结构</span>
+        <span v-if="lastRefreshTime" class="last-refresh">上次刷新: {{ lastRefreshTime }}</span>
       </div>
-      <div class="legend-item">
-        <div class="legend-color gateway-color"></div>
-        <div class="legend-info">
-          <span class="legend-text">Gateway</span>
-          <span class="legend-desc">接口网关节点</span>
+      <div class="legend-area">
+        <div class="legend-item">
+          <span class="legend-dot manager-dot"></span>
+          <div class="legend-info">
+            <span class="legend-label">Manager</span>
+            <span class="legend-desc">接口管理节点</span>
+          </div>
         </div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color executor-color"></div>
-        <div class="legend-info">
-          <span class="legend-text">Executor</span>
-          <span class="legend-desc">接口执行节点</span>
+        <div class="legend-item">
+          <span class="legend-dot gateway-dot"></span>
+          <div class="legend-info">
+            <span class="legend-label">Gateway</span>
+            <span class="legend-desc">接口网关节点</span>
+          </div>
         </div>
+        <div class="legend-item">
+          <span class="legend-dot executor-dot"></span>
+          <div class="legend-info">
+            <span class="legend-label">Executor</span>
+            <span class="legend-desc">接口执行节点</span>
+          </div>
+        </div>
+        <button class="refresh-btn" :class="{ spinning: isLoading }" @click="refreshData">
+          <span class="btn-icon">↻</span> 刷新
+        </button>
       </div>
-      <button class="refresh-btn"
-              @click="refreshData">点击刷新</button>
     </div>
-    <div class="topology-content">
-      <div id="topology-chart"
-           ref="topologyChart"></div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-bar">
+      <div class="stat-card manager-card">
+        <span class="stat-num">{{ managerCount }}</span>
+        <span class="stat-label">Manager 节点</span>
+      </div>
+      <div class="stat-card gateway-card">
+        <span class="stat-num">{{ gatewayCount }}</span>
+        <span class="stat-label">Gateway 节点</span>
+      </div>
+      <div class="stat-card executor-card">
+        <span class="stat-num">{{ executorCount }}</span>
+        <span class="stat-label">Executor 节点</span>
+      </div>
+      <div class="stat-card total-card">
+        <span class="stat-num">{{ totalCount }}</span>
+        <span class="stat-label">节点总数</span>
+      </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="chart-wrapper">
+      <div v-if="isLoading" class="loading-mask">
+        <div class="spinner"></div>
+        <span class="loading-text">正在加载拓扑数据...</span>
+      </div>
+      <div v-if="isEmpty && !isLoading" class="empty-state">
+        <div class="empty-icon">📡</div>
+        <div class="empty-text">暂无节点数据</div>
+        <div class="empty-sub">请确认服务正常运行后点击刷新</div>
+      </div>
+      <div id="topology-chart" ref="topologyChart"></div>
     </div>
   </div>
 </template>
@@ -41,165 +78,293 @@ export default {
   name: 'TopologyView',
   data () {
     return {
-      backgroundColor: '#b2c8e2',
       chart: null,
       nodes: [],
       links: [],
-      option: {}
+      isLoading: false,
+      isEmpty: false,
+      lastRefreshTime: null
     };
   },
-  mounted () {
-    this.initTopology();
-    this.renderChart();
+  computed: {
+    managerCount () {
+      return this.nodes.filter(n => n.role === 'Manager').length;
+    },
+    gatewayCount () {
+      return this.nodes.filter(n => n.role === 'Gateway').length;
+    },
+    executorCount () {
+      return this.nodes.filter(n => n.role === 'Executor').length;
+    },
+    totalCount () {
+      return this.nodes.length;
+    }
   },
-  created () {
-    this.loadNodeData();
+  mounted () {
+    this.initChart();
+    // 数据加载完成后再渲染
+    this.loadNodeData().then(() => {
+      this.renderChart();
+    });
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.handleResize);
+    if (this.chart) {
+      this.chart.dispose();
+    }
   },
   methods: {
-    initTopology () {
+    initChart () {
       if (this.chart) {
         this.chart.dispose();
       }
-      this.chart = echarts.init(this.$refs.topologyChart);
+      this.chart = echarts.init(this.$refs.topologyChart, null, { renderer: 'canvas' });
     },
+
     loadNodeData () {
-      this.$http.get("/sqlrest/manager/api/v1/node/topology").then(res => {
+      this.isLoading = true;
+      this.isEmpty = false;
+      return this.$http.get('/sqlrest/manager/api/v1/node/topology').then(res => {
         if (0 === res.data.code) {
-          var managerNodes = []
-          var gatewayNodes = []
-          var executorNodes = []
-          for (let node of res.data.data) {
+          const managerNodes = [];
+          const gatewayNodes = [];
+          const executorNodes = [];
+
+          for (const node of res.data.data) {
+            const base = {
+              id: node.instanceId,
+              name: node.host + ':' + node.port,
+              address: node.host,
+              port: node.port,
+              memory: node.memory || 0,
+              cpu: node.cpu || 0,
+              disk: node.disk || 0,
+              status: node.status || 'normal'
+            };
             if (node.serviceId.includes('MANAGER')) {
-              managerNodes.push({
-                id: node.instanceId,
-                name: node.host + ":" + node.port,
-                role: 'Manager',
-                address: node.host,
-                port: node.port,
-                memory: node.memory | 65,
-                cpu: node.cpu | 33,
-                disk: node.disk | 20,
-                status: node.status | 'normal'
-              })
+              managerNodes.push({ ...base, role: 'Manager' });
             } else if (node.serviceId.includes('GATEWAY')) {
-              gatewayNodes.push(
-                {
-                  id: node.instanceId,
-                  name: node.host + ":" + node.port,
-                  role: 'Gateway',
-                  address: node.host,
-                  port: node.port,
-                  memory: node.memory | 35,
-                  cpu: node.cpu | 53,
-                  disk: node.disk | 30,
-                  status: node.status | 'normal'
-                }
-              )
+              gatewayNodes.push({ ...base, role: 'Gateway' });
             } else if (node.serviceId.includes('EXECUTOR')) {
-              executorNodes.push(
-                {
-                  id: node.instanceId,
-                  name: node.host + ":" + node.port,
-                  role: 'Executor',
-                  address: node.host,
-                  port: node.port,
-                  memory: node.memory | 25,
-                  cpu: node.cpu | 13,
-                  disk: node.disk | 20,
-                  status: node.status | 'normal'
-                }
-              )
+              executorNodes.push({ ...base, role: 'Executor' });
             }
           }
 
-          // 构建节点数组
           this.nodes = [...managerNodes, ...gatewayNodes, ...executorNodes];
-          // 构建连接关系
+
+          // 构建连接：Manager → Gateway → Executor
           this.links = [];
-          // Gateway连接到所有Executor
-          gatewayNodes.forEach(gateway => {
-            executorNodes.forEach(executor => {
-              this.links.push({
-                source: gateway.id,
-                target: executor.id
-              });
+          managerNodes.forEach(manager => {
+            gatewayNodes.forEach(gateway => {
+              this.links.push({ source: manager.id, target: gateway.id, type: 'mg' });
             });
           });
+          gatewayNodes.forEach(gateway => {
+            executorNodes.forEach(executor => {
+              this.links.push({ source: gateway.id, target: executor.id, type: 'ge' });
+            });
+          });
+
+          this.isEmpty = this.nodes.length === 0;
+          this.lastRefreshTime = new Date().toLocaleTimeString();
         } else {
-          alert("加载数据失败:" + res.data.message);
-          return
+          this.$message({ message: '加载节点数据失败：' + res.data.message, type: 'error' });
         }
+      }).catch(() => {
+        this.$message({ message: '网络请求失败，请稍后重试', type: 'error' });
+      }).finally(() => {
+        this.isLoading = false;
       });
     },
+
+    calculatePositions () {
+      const positions = {};
+      const el = this.$refs.topologyChart;
+      const width = (el && el.clientWidth) || 900;
+      const height = (el && el.clientHeight) || 600;
+
+      const managerNodes = this.nodes.filter(n => n.role === 'Manager');
+      const gatewayNodes = this.nodes.filter(n => n.role === 'Gateway');
+      const executorNodes = this.nodes.filter(n => n.role === 'Executor');
+
+      const rowY = {
+        manager: height * 0.15,
+        gateway: height * 0.45,
+        executor: height * 0.78
+      };
+
+      const placeRow = (arr, y) => {
+        const total = arr.length;
+        arr.forEach((node, i) => {
+          const spacing = width / (total + 1);
+          positions[node.id] = { x: spacing * (i + 1), y };
+        });
+      };
+
+      placeRow(managerNodes, rowY.manager);
+      placeRow(gatewayNodes, rowY.gateway);
+      placeRow(executorNodes, rowY.executor);
+
+      return positions;
+    },
+
     renderChart () {
-      // 计算节点位置
+      if (!this.chart) return;
+      if (this.nodes.length === 0) return;
+
       const positions = this.calculatePositions();
 
-      // 为每个节点创建配置
+      // 角色配色
+      const roleStyle = {
+        Manager: {
+          color: 'rgba(59, 130, 246, 0.92)',
+          border: '#93c5fd',
+          shadow: 'rgba(59,130,246,0.5)',
+          size: 90
+        },
+        Gateway: {
+          color: 'rgba(16, 185, 129, 0.92)',
+          border: '#6ee7b7',
+          shadow: 'rgba(16,185,129,0.5)',
+          size: 80
+        },
+        Executor: {
+          color: 'rgba(245, 158, 11, 0.92)',
+          border: '#fcd34d',
+          shadow: 'rgba(245,158,11,0.5)',
+          size: 75
+        }
+      };
+
       const seriesData = this.nodes.map(node => {
-        let nodeColor = '#409EFF';
-        if (node.role === 'Gateway') nodeColor = '#10b981';
-        if (node.role === 'Executor') nodeColor = '#f59e0b';
-        if (node.role === 'Manager') nodeColor = '#3b82f6';
+        const style = roleStyle[node.role];
+        const pos = positions[node.id] || { x: 0, y: 0 };
+
+        let fillColor = style.color;
+        if (node.status === 'warning') fillColor = 'rgba(239,68,68,0.88)';
 
         return {
           id: node.id,
-          name: `${node.name}\n${node.address}\nMem: ${node.memory}% | CPU: ${node.cpu}% | Disk: ${node.disk}%`,
-          x: positions[node.id].x,
-          y: positions[node.id].y,
-          value: `${node.address}`,
-          port: `${node.port}`,
-          symbolSize: node.role === 'Manager' ? 100 : 90,
+          name: node.name,
+          x: pos.x,
+          y: pos.y,
+          role: node.role,
+          address: node.address,
+          port: node.port,
+          memVal: node.memory,
+          cpuVal: node.cpu,
+          diskVal: node.disk,
+          status: node.status,
+          symbolSize: style.size,
+          symbol: 'roundRect',
           itemStyle: {
-            color: nodeColor,
-            borderColor: '#fff',
-            borderWidth: 2
+            color: fillColor,
+            borderColor: style.border,
+            borderWidth: 3,
+            shadowBlur: 18,
+            shadowColor: style.shadow,
+            shadowOffsetX: 0,
+            shadowOffsetY: 4
           },
           label: {
             show: true,
             position: 'inside',
             formatter: node.name,
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: 'bold',
-            color: '#fff'
+            color: '#fff',
+            textShadowColor: 'rgba(0,0,0,0.3)',
+            textShadowBlur: 3
           },
           emphasis: {
             itemStyle: {
-              borderWidth: 4,
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowOffsetY: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.3)'
+              borderWidth: 5,
+              shadowBlur: 28,
+              shadowColor: style.shadow
+            },
+            label: {
+              fontSize: 12
             }
           }
         };
       });
 
-      this.option = {
-        backgroundColor: this.backgroundColor,
-        title: {
-          text: '',
-          subtext: '',
-          top: '10',
-          left: 'center'
+      // 层级标签（虚拟节点，不连线，放在图左侧）
+      const el = this.$refs.topologyChart;
+      const width = (el && el.clientWidth) || 900;
+      const height = (el && el.clientHeight) || 600;
+
+      const layerLabels = [
+        { x: 18, y: height * 0.15, text: '管理层', color: '#3b82f6' },
+        { x: 18, y: height * 0.45, text: '网关层', color: '#10b981' },
+        { x: 18, y: height * 0.78, text: '执行层', color: '#f59e0b' }
+      ].map((l, idx) => ({
+        id: '__layer_' + idx,
+        name: l.text,
+        x: l.x,
+        y: l.y,
+        symbolSize: 1,
+        symbol: 'none',
+        label: {
+          show: true,
+          position: 'right',
+          formatter: l.text,
+          fontSize: 13,
+          fontWeight: 'bold',
+          color: l.color,
+          backgroundColor: 'rgba(255,255,255,0.15)',
+          borderRadius: 4,
+          padding: [3, 8]
+        },
+        itemStyle: { opacity: 0 },
+        emphasis: { disabled: true }
+      }));
+
+      const option = {
+        backgroundColor: {
+          type: 'linear',
+          x: 0, y: 0, x2: 1, y2: 1,
+          colorStops: [
+            { offset: 0, color: '#0f1e3a' },
+            { offset: 0.5, color: '#142850' },
+            { offset: 1, color: '#0d2137' }
+          ]
         },
         tooltip: {
           trigger: 'item',
+          backgroundColor: 'rgba(15,30,58,0.95)',
+          borderColor: 'rgba(100,160,255,0.3)',
+          borderWidth: 1,
+          textStyle: { color: '#e2e8f0', fontSize: 13 },
           formatter: function (params) {
             if (params.dataType === 'edge') {
-              return `${params.data.source} → ${params.data.target}`;
+              return '<span style="color:#94a3b8">' + params.data.source + '</span>' +
+                     '<span style="color:#60a5fa"> → </span>' +
+                     '<span style="color:#94a3b8">' + params.data.target + '</span>';
             }
-            const node = params.data;
-            return `
-              <div style="padding: 10px;">
-                <div><strong>${node.name.split('\n')[0]}</strong></div>
-                <div>地址: ${node.value}</div>
-                <div>端口: ${node.port}</div>
-                <div>内存使用率: ${node.name.split('Mem: ')[1].split(' | ')[0]}</div>
-                <div>CPU使用率: ${node.name.split('CPU: ')[1].split(' | ')[0]}</div>
-                <div>磁盘使用率: ${node.name.split('Disk: ')[1].split('%')[0]}%</div>
-              </div>
-            `;
+            var d = params.data;
+            if (!d.role) return '';
+            var roleColors = { Manager: '#60a5fa', Gateway: '#34d399', Executor: '#fbbf24' };
+            var color = roleColors[d.role] || '#fff';
+            var statusText = d.status === 'warning' ? '⚠️ 告警' : '✅ 正常';
+            return '<div style="min-width:200px;padding:4px 0">' +
+              '<div style="font-size:15px;font-weight:bold;color:' + color + ';margin-bottom:8px">' + d.role + ' · ' + d.name + '</div>' +
+              '<div style="color:#94a3b8;margin-bottom:6px">状态：' + statusText + '</div>' +
+              '<div style="display:flex;gap:12px;margin-top:6px">' +
+                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">内存</div>' +
+                '<div style="color:#f1f5f9;font-size:14px;font-weight:600">' + d.memVal + '%</div>' +
+                '<div style="height:4px;background:#1e3a5f;border-radius:2px;margin-top:3px">' +
+                '<div style="height:4px;width:' + d.memVal + '%;background:#60a5fa;border-radius:2px"></div></div></div>' +
+                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">CPU</div>' +
+                '<div style="color:#f1f5f9;font-size:14px;font-weight:600">' + d.cpuVal + '%</div>' +
+                '<div style="height:4px;background:#1e3a5f;border-radius:2px;margin-top:3px">' +
+                '<div style="height:4px;width:' + d.cpuVal + '%;background:#34d399;border-radius:2px"></div></div></div>' +
+                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">磁盘</div>' +
+                '<div style="color:#f1f5f9;font-size:14px;font-weight:600">' + d.diskVal + '%</div>' +
+                '<div style="height:4px;background:#1e3a5f;border-radius:2px;margin-top:3px">' +
+                '<div style="height:4px;width:' + d.diskVal + '%;background:#fbbf24;border-radius:2px"></div></div></div>' +
+              '</div></div>';
           }
         },
         series: [
@@ -208,110 +373,68 @@ export default {
             layout: 'none',
             symbol: 'roundRect',
             roam: true,
+            zoom: 0.9,
             edgeSymbol: ['none', 'arrow'],
-            edgeSymbolSize: [80, 45],
-            edgeLabel: {
-              show: true
-            },
-            data: seriesData,
-            links: this.links,
+            edgeSymbolSize: [4, 10],
+            data: seriesData.concat(layerLabels),
+            links: this.links.map(function (link) {
+              return {
+                source: link.source,
+                target: link.target,
+                lineStyle: {
+                  color: link.type === 'mg'
+                    ? new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                      { offset: 0, color: 'rgba(59,130,246,0.8)' },
+                      { offset: 1, color: 'rgba(16,185,129,0.8)' }
+                    ])
+                    : new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                      { offset: 0, color: 'rgba(16,185,129,0.8)' },
+                      { offset: 1, color: 'rgba(245,158,11,0.8)' }
+                    ]),
+                  width: 2.5,
+                  opacity: 0.75,
+                  curveness: 0.05,
+                  shadowBlur: 6,
+                  shadowColor: link.type === 'mg'
+                    ? 'rgba(59,130,246,0.4)'
+                    : 'rgba(245,158,11,0.3)'
+                }
+              };
+            }),
             lineStyle: {
-              color: '#999',
+              color: '#4b78c8',
               opacity: 0.6,
-              width: 3,
-              curveness: 0
+              width: 2,
+              curveness: 0.05
             },
             emphasis: {
               focus: 'adjacency',
               lineStyle: {
-                width: 5,
-                color: '#333'
+                width: 4,
+                opacity: 1
               }
-            }
+            },
+            animationDuration: 1200,
+            animationEasingUpdate: 'elasticOut'
           }
         ]
       };
 
-      this.chart.setOption(this.option);
-      window.addEventListener('resize', () => {
+      this.chart.setOption(option, true);
+    },
+
+    handleResize () {
+      if (this.chart) {
         this.chart.resize();
-      });
-    },
-    calculatePositions () {
-      const positions = {};
-      const width = this.$refs.topologyChart.clientWidth || 800;
-      const height = this.$refs.topologyChart.clientHeight || 300;
-
-      // 找到各角色节点
-      const managerNode = this.nodes.find(node => node.role === 'Manager');
-      const gatewayNodes = this.nodes.filter(node => node.role === 'Gateway');
-      const executorNodes = this.nodes.filter(node => node.role === 'Executor');
-
-      // 设置Manager位置在顶部中央
-      if (managerNode) {
-        positions[managerNode.id] = {
-          x: (width / 2),
-          y: height * 0.01
-        };
+        this.renderChart();
       }
-
-      // 设置Gateway位置在中间层，平均分布
-      if (gatewayNodes.length > 0) {
-        const gatewaySpacing = width / (gatewayNodes.length + 1);
-        gatewayNodes.forEach((node, index) => {
-          positions[node.id] = {
-            x: gatewaySpacing * (index + 1),
-            y: height * 0.10
-          };
-        });
-      }
-
-      // 设置Executor位置在底部层，平均分布
-      if (executorNodes.length > 0) {
-        const executorSpacing = width / (executorNodes.length + 1);
-        executorNodes.forEach((node, index) => {
-          positions[node.id] = {
-            x: executorSpacing * (index + 1),
-            y: height * 0.25
-          };
-        });
-      }
-
-      return positions;
     },
-    updateNodeData () {
-      this.loadNodeData();
-      // 模拟实时数据更新
-      this.nodes.forEach(node => {
-        // 随机更新资源使用率
-        node.memory = Math.min(100, Math.max(0, node.memory + (Math.random() - 0.5) * 10));
-        node.cpu = Math.min(100, Math.max(0, node.cpu + (Math.random() - 0.5) * 10));
-        node.disk = Math.min(100, Math.max(0, node.disk + (Math.random() - 0.5) * 2));
 
-        // 随机改变状态
-        if (Math.random() > 0.8) {
-          node.status = Math.random() > 0.2 ? 'normal' : 'warning';
-        }
-      });
-
-      // 更新图表
-      this.renderChart();
-    },
     refreshData () {
-      // 模拟数据刷新
-      this.updateNodeData();
-
-      // 显示刷新提示
-      this.$message({
-        message: '数据已刷新',
-        type: 'success',
-        duration: 1000
+      this.loadNodeData().then(() => {
+        this.renderChart();
+        this.$message({ message: '拓扑数据已刷新', type: 'success', duration: 1500 });
       });
-    }
-  },
-  beforeDestroy () {
-    if (this.chart) {
-      this.chart.dispose();
     }
   }
 };
@@ -323,101 +446,271 @@ export default {
   height: 88vh;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(135deg, #0f1e3a 0%, #142850 50%, #0d2137 100%);
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-.header {
-  padding: 20px;
-  background-color: #b2c8e2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* ===== 顶部标题栏 ===== */
+.top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 10;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
 }
 
-.refresh-btn {
-  padding: 10px 20px;
-  background-color: #409eff;
-  color: rgb(23, 14, 109);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.refresh-btn:hover {
-  background-color: #66b1ff;
-}
-
-.topology-content {
-  flex: 1;
-  padding: 5px;
+.title-area {
   display: flex;
-  justify-content: center;
   align-items: center;
+  gap: 10px;
 }
 
-#topology-chart {
-  width: 100%;
-  height: 100%;
-  min-height: 400px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.title-icon {
+  font-size: 20px;
 }
 
-.legend {
+.title-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 1px;
+}
+
+.last-refresh {
+  font-size: 12px;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.legend-area {
   display: flex;
-  gap: 6px;
-  padding: 5px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(226, 232, 240, 0.5);
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
-.legend-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
   flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
 }
 
-.manager-color {
-  background-color: #3b82f6;
+.manager-dot {
+  background: #3b82f6;
+  color: #3b82f6;
 }
 
-.gateway-color {
-  background-color: #10b981;
+.gateway-dot {
+  background: #10b981;
+  color: #10b981;
 }
 
-.executor-color {
-  background-color: #f59e0b;
+.executor-dot {
+  background: #f59e0b;
+  color: #f59e0b;
 }
 
 .legend-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
-.legend-text {
-  color: #1e293b;
-  font-size: 14px;
+.legend-label {
+  color: #cbd5e1;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .legend-desc {
   color: #64748b;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 11px;
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
+}
+
+.refresh-btn:hover {
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.6);
+  transform: translateY(-1px);
+}
+
+.refresh-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 16px;
+  display: inline-block;
+  transition: transform 0.5s;
+}
+
+.refresh-btn.spinning .btn-icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 统计卡片栏 ===== */
+.stats-bar {
+  display: flex;
+  gap: 12px;
+  padding: 10px 24px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(100, 160, 255, 0.08);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 20px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  min-width: 90px;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-num {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 11px;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.manager-card {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.manager-card .stat-num { color: #60a5fa; }
+.manager-card .stat-label { color: #93c5fd; }
+
+.gateway-card {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+.gateway-card .stat-num { color: #34d399; }
+.gateway-card .stat-label { color: #6ee7b7; }
+
+.executor-card {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.executor-card .stat-num { color: #fbbf24; }
+.executor-card .stat-label { color: #fcd34d; }
+
+.total-card {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+.total-card .stat-num { color: #e2e8f0; }
+.total-card .stat-label { color: #94a3b8; }
+
+/* ===== 图表区域 ===== */
+.chart-wrapper {
+  flex: 1;
+  position: relative;
+  padding: 8px;
+  overflow: hidden;
+}
+
+#topology-chart {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+/* ===== 加载蒙层 ===== */
+.loading-mask {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 20, 40, 0.6);
+  border-radius: 12px;
+  z-index: 10;
+  gap: 16px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* ===== 空数据提示 ===== */
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 5;
+}
+
+.empty-icon {
+  font-size: 56px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 18px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.empty-sub {
+  font-size: 13px;
+  color: #475569;
 }
 </style>
