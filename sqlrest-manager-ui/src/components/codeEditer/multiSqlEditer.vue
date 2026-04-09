@@ -210,6 +210,23 @@ export default {
       return sqls
     },
     handleClickTab (tab, event) {
+      // el-tabs 内部通过 display:none 切换面板，CodeMirror 在从隐藏状态恢复后
+      // 需要重新计算布局才能正确渲染内容和获取焦点。
+      // $nextTick 只保证 DOM 更新，不等浏览器完成 reflow，
+      // 所以需要 setTimeout 推到下一个宏任务（浏览器绘制完成后执行）
+      setTimeout(() => {
+        // 优先从 cmMapper 取实例
+        var cm = this.cmMapper.get(this.currentTabName)
+        // fallback：如果 mapper 中没有，尝试从 $refs 获取
+        if (!cm && this.$refs[this.currentTabName]) {
+          var ref = this.$refs[this.currentTabName]
+          cm = Array.isArray(ref) ? ref[0].codemirror : ref.codemirror
+        }
+        if (cm) {
+          cm.refresh()
+          cm.focus()
+        }
+      }, 50)
     }
   },
   mounted () {
