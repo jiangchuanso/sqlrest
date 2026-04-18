@@ -98,21 +98,23 @@
                    @click="handleCreate">新建接口</el-button>
       </div>
 
-      <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
+      <el-table :header-cell-style="{background:'#eef1f6',color:'#606266',whiteSpace:'nowrap'}"
                 :data="tableData"
                 size="small"
                 @selection-change="handleSelectionChange"
+                style="width:100%"
+                table-layout="fixed"
                 border>
         <el-table-column prop="id"
                          type="selection"
-                         min-width="8%"></el-table-column>
+                         width="60"></el-table-column>
         <el-table-column prop="id"
                          label="编号"
-                         min-width="8%"></el-table-column>
+                         width="80"></el-table-column>
         <el-table-column prop="name"
                          label="名称"
                          show-overflow-tooltip
-                         min-width="20%">
+                         min-width="200">
           <template slot-scope="scope">
             <el-link class="btn-text"
                      type="primary"
@@ -121,7 +123,7 @@
         </el-table-column>
         <el-table-column label="路径"
                          show-overflow-tooltip
-                         min-width="20%">
+                         min-width="300">
           <template slot-scope="scope">
             <el-tag size="medium"
                     class="name-wrapper-tag">{{ scope.row.method }}</el-tag>
@@ -131,13 +133,13 @@
         <el-table-column prop="moduleName"
                          label="模块"
                          show-overflow-tooltip
-                         min-width="10%"></el-table-column>
+                         min-width="120"></el-table-column>
         <el-table-column prop="groupName"
                          label="授权分组"
                          show-overflow-tooltip
-                         min-width="10%"></el-table-column>
+                         min-width="120"></el-table-column>
         <el-table-column label="引擎"
-                         min-width="10%">
+                         min-width="100">
           <template slot-scope="scope">
             <el-tag size="medium"
                     class="name-wrapper-tag">{{ scope.row.engine }}</el-tag>
@@ -148,24 +150,25 @@
                          :formatter="boolFormatPublish"
                          show-overflow-tooltip
                          v-if="online"
-                         min-width="8%"></el-table-column>
+                         min-width="80"></el-table-column>
         <el-table-column prop="open"
                          label="公开"
                          :formatter="boolFormatOpen"
                          v-if="online"
                          show-overflow-tooltip
-                         min-width="8%"></el-table-column>
+                         min-width="80"></el-table-column>
         <el-table-column prop="alarm"
                          label="告警"
                          :formatter="boolFormatAlarm"
                          v-if="online"
                          show-overflow-tooltip
-                         min-width="8%"></el-table-column>
+                         min-width="80"></el-table-column>
         <el-table-column prop="createTime"
                          label="创建时间"
-                         min-width="18%"></el-table-column>
+                         min-width="180"></el-table-column>
         <el-table-column label="操作"
-                         min-width="40%">
+                         fixed="right"
+                         min-width="320">
           <template slot-scope="scope">
             <el-button-group>
               <el-button size="small"
@@ -251,7 +254,7 @@
           <span>版本内容为空，请点击“发版”按钮发布一个版本来</span>
         </template>
         <el-table-column label="选择版本"
-                         min-width="10%">
+                         min-width="120">
           <template slot-scope="scope">
             <el-radio v-model="selectCommitId"
                       :label="scope.row.commitId">V{{ scope.row.version }}</el-radio>
@@ -259,11 +262,11 @@
         </el-table-column>
         <el-table-column prop="createTime"
                          label="生成时间"
-                         min-width="15%"> </el-table-column>
+                         min-width="180"> </el-table-column>
         <el-table-column prop="description"
                          label="版本描述"
                          show-overflow-tooltip
-                         min-width="20%"></el-table-column>
+                         min-width="200"></el-table-column>
       </el-table>
       <div slot="footer"
            class="dialog-footer">
@@ -731,9 +734,12 @@ export default {
   overflow: auto;
 }
 
-.el-table {
-  width: 100%;
-  height: 100%;
+.el-table ::v-deep .el-table__body-wrapper {
+  overflow-x: auto;
+}
+
+.el-table ::v-deep .el-table__body {
+  min-width: 1500px;
 }
 
 .demo-table-expand {

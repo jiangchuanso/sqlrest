@@ -20,6 +20,25 @@
         </div>
       </div>
 
+      <el-dialog title="选择数据库类型"
+                 :visible.sync="dbTypeDialogVisible"
+                 width="800px"
+                 center>
+        <div class="db-type-grid">
+          <div v-for="item in databaseType"
+               :key="item.type"
+               class="db-type-item"
+               :class="{'db-type-item-selected': selectedDbType === item.type}"
+               @click="selectDbType(item.type)">
+            <databaseIcon :type="item.type"></databaseIcon>
+            <span>{{ item.type }}</span>
+          </div>
+        </div>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" :disabled="!selectedDbType" @click="goToForm">下一步</el-button>
+        </div>
+      </el-dialog>
+
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                 :data="tableData"
                 size="small"
@@ -209,23 +228,13 @@
                         :required=true
                         prop="type"
                         style="width:85%">
-            <el-select v-model="createform.type"
-                       class="db-type-select"
-                       @change="selectChangedDriverVersion"
-                       placeholder="请选择数据库">
-              <template slot="prefix" v-if="createform.type">
+            <el-input v-model="createform.type"
+                       readonly
+                       class="db-type-input">
+              <template slot="prefix">
                 <databaseIcon :type="createform.type" style="line-height:32px;margin-left:4px;"></databaseIcon>
               </template>
-              <el-option v-for="(item,index) in databaseType"
-                         :key="index"
-                         :label="item.type"
-                         :value="item.type">
-                <span style="display:inline-flex;align-items:center;gap:6px;">
-                  <databaseIcon :type="item.type"></databaseIcon>
-                  <span>{{ item.type }}</span>
-                </span>
-              </el-option>
-            </el-select>
+            </el-input>
           </el-form-item>
           <el-form-item label="驱动版本"
                         label-width="120px"
@@ -307,6 +316,7 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
+          <el-button @click="goBackToDbType">上一步</el-button>
           <el-button type="success"
                      @click="handlePreTest(createform,'createform')">测试</el-button>
           <el-button type="primary"
@@ -543,7 +553,9 @@ export default {
       },
       dialogFormVisible: false,
       createFormVisible: false,
-      updateFormVisible: false
+      updateFormVisible: false,
+      dbTypeDialogVisible: false,
+      selectedDbType: null
     }
   },
   methods: {
@@ -646,10 +658,25 @@ export default {
       });
     },
     addConnection: function () {
-      this.createFormVisible = true;
+      this.selectedDbType = null;
+      this.dbTypeDialogVisible = true;
+    },
+    selectDbType: function (type) {
+      this.selectedDbType = type;
+    },
+    goToForm: function () {
+      if (!this.selectedDbType) return;
+      this.dbTypeDialogVisible = false;
       this.createform = {
+        type: this.selectedDbType,
         poolConfig: { ...this.poolConfigDefaults}
       };
+      this.selectChangedDriverVersion(this.selectedDbType);
+      this.createFormVisible = true;
+    },
+    goBackToDbType: function () {
+      this.createFormVisible = false;
+      this.dbTypeDialogVisible = true;
     },
     handlePreTest: function (form, refName,) {
       let driverClass = "";
@@ -915,5 +942,42 @@ export default {
 /deep/ .db-type-select .el-input__prefix {
   display: flex;
   align-items: center;
+}
+
+/* 数据库类型选择对话框样式 */
+.db-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.db-type-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.db-type-item:hover {
+  border-color: #409eff;
+  background-color: #f5f7fa;
+  transform: scale(1.05);
+}
+
+.db-type-item-selected {
+  border-color: #409eff;
+  background-color: #ecf5ff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.db-type-item span {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #606266;
 }
 </style>
