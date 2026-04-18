@@ -4,7 +4,7 @@
     <el-submenu :index="router.path" v-if="hasChildrenAndShow(router)">
       <template slot="title">
       <i :class="router.icon"></i>
-      <span slot="title">{{router.name}}</span>
+      <span slot="title">{{ $t(router.name) }}</span>
       </template>
       <!--递归子孙导航-->
       <asideBarItem v-for="(child, childKey) in router.children" :key="child.path" :router="child"></asideBarItem>
@@ -12,7 +12,7 @@
     <!-- 如果没有 就展示一级导航 -->
     <el-menu-item v-else :key="router.path" :index="router.path" @click="saveActivePath(router.path)">
        <i :class="router.icon"></i>
-       <span>{{router.name}}</span>
+       <span>{{ $t(router.name) }}</span>
     </el-menu-item>
   </div>
 </template>

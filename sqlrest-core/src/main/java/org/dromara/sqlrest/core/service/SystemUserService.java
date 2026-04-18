@@ -34,12 +34,12 @@ public class SystemUserService {
   public AccessToken login(String username, String password) {
     SystemUserEntity user = systemUserDao.findByUsername(username);
     if (Objects.isNull(user)) {
-      throw new CommonException(ResponseErrorCode.ERROR_USER_NOT_EXISTS, username);
+      throw new CommonException(ResponseErrorCode.ERROR_USER_NOT_EXISTS, "common.id.not.found", username);
     }
 
     String encryptPassword = PasswordUtils.encryptPassword(password, user.getSalt());
     if (!encryptPassword.equals(user.getPassword())) {
-      throw new CommonException(ResponseErrorCode.ERROR_USER_PASSWORD_WRONG, username);
+      throw new CommonException(ResponseErrorCode.ERROR_USER_PASSWORD_WRONG, "common.id.not.found", username);
     }
 
     String token = TokenUtils.generateValue();

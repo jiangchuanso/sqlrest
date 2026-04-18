@@ -1,79 +1,78 @@
 <template>
   <div>
-    <h3>关于SQLREST工具</h3>
-    <el-tabs v-model="activeName"
-             @tab-click="handleClick()">
-      <el-tab-pane label="系统功能"
+    <h3>{{ $t('about.title') }}</h3>
+    <el-tabs v-model="activeName">
+      <el-tab-pane :label="$t('about.systemFunction')"
                    name="first">
         <div class="content_tag">
-          <el-tag type="danger">SQL/DSL接口</el-tag>
-          <el-tag type="success">脚本接口</el-tag>
+          <el-tag type="danger">{{ $t('about.sqlInterface') }}</el-tag>
+          <el-tag type="success">{{ $t('about.scriptInterface') }}</el-tag>
         </div>
         <div class="content_card">
           <el-card class="box-card">
             <div class="text item">
               <p>
-                一句话，sqlrest工具提供快速构建RESTful的<B>API接口</B>工具，包括SQl(或DSL)方式和脚本方式。功能包括：
+                {{ $t('about.subtitle') }}
               </p>
               <ul>
-                <li>项目托管</li>
+                <li>{{ $t('about.projectHosting') }}</li>
                 <p>
-                  Gitee地址：<a href="https://gitee.com/inrgihc/sqlrest">https://gitee.com/inrgihc/sqlrest</a>
+                  {{ $t('about.gitee') }}：<a href="https://gitee.com/inrgihc/sqlrest">https://gitee.com/inrgihc/sqlrest</a>
                 </p>
-                <li>SQL方式构建RESTful接口</li>
+                <li>{{ $t('about.buildRestfulSql') }}</li>
                 <p>
-                  提供类似mybatis的动态SQL语法方式构建接口。
+                  {{ $t('about.buildRestfulSqlDetail') }}
                 </p>
-                <li>脚本方式构建RESTful接口</li>
+                <li>{{ $t('about.buildRestfulScript') }}</li>
                 <p>
-                  基于groovy脚本的语法方式构建复杂场景下的接口。
+                  {{ $t('about.buildRestfulScriptDetail') }}
                 </p>
-                <li>支持接口的token安全认证功能</li>
+                <li>{{ $t('about.tokenAuth') }}</li>
                 <p>
-                  执行器支持生成token及token认证。
+                  {{ $t('about.tokenAuthDetail') }}
                 </p>
-                <li>支持生成在线接口文档功能</li>
+                <li>{{ $t('about.onlineDoc') }}</li>
                 <p>
-                  基于swagger-ui提供生成在线接口文档功能。
+                  {{ $t('about.onlineDocDetail') }}
                 </p>
-                <li>支持接口的流量控制功能</li>
+                <li>{{ $t('about.flowControl') }}</li>
                 <p>
-                  执行器基于sentinel支持接口的流量控制功能。
+                  {{ $t('about.flowControlDetail') }}
                 </p>
-                <li>支持接口的缓存配置功能</li>
+                <li>{{ $t('about.cacheConfig') }}</li>
                 <p>
-                  执行器支持哈希及SpEL表达式方式配置缓存功能。
+                  {{ $t('about.cacheConfigDetail') }}
                 </p>
-                <li>统一告警对接</li>
+                <li>{{ $t('about.alarmIntegration') }}</li>
                 <p>
-                  支持统一告警系统的对接与触发。
+                  {{ $t('about.alarmIntegrationDetail') }}
                 </p>
-                <li>RESTful接口转发</li>
+                <li>{{ $t('about.restfulForward') }}</li>
                 <p>
-                  支持通过DSL进行HTTP数据源的RESTful接口转发功能。
+                  {{ $t('about.restfulForwardDetail') }}
                 </p>
-                <li>文档数据库支持</li>
+                <li>{{ $t('about.docDatabase') }}</li>
                 <p>
-                  支持通过DSL进行MongoDB和ElasticSearch等文档数据库开发接口。
+                  {{ $t('about.docDatabaseDetail') }}
                 </p>
-                <li>支持接口的版本控制管理</li>
+                <li>{{ $t('about.versionControl') }}</li>
                 <p>
-                  开发的接口支持版本控制管理、线上版本切换等功能。
+                  {{ $t('about.versionControlDetail') }}
                 </p>
-                <li>支持批量导入导出</li>
+                <li>{{ $t('about.batchImportExport') }}</li>
                 <p>
-                  支持接口的批量导入导出功能。
+                  {{ $t('about.batchImportExportDetail') }}
                 </p>
-                <li>支持将接口转换为MCP工具功能</li>
+                <li>{{ $t('about.mcpTool') }}</li>
                 <p>
-                  Manager支持作为MCP服务端提供Tool功能。
+                  {{ $t('about.mcpToolDetail') }}
                 </p>
               </ul>
             </div>
           </el-card>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="支持的数据源"
+      <el-tab-pane :label="$t('about.supportedDatasource')"
                    name="second">
         <div class="content_tag">
           <el-tag type="success">JDBC</el-tag>
@@ -83,63 +82,63 @@
           <el-card class="box-card">
             <div class="text item">
               <p>
-                sqlrest配置支持的常规的数据源有20+，包括：
+                {{ $t('about.supported20plus') }}
               </p>
               <ul>
-                <li>甲骨文的Oracle
+                <li>{{ $t('about.oracle') }}
                 </li>
-                <li>MySQL
+                <li>{{ $t('about.mysql') }}
                 </li>
-                <li>MariaDB
+                <li>{{ $t('about.mariadb') }}
                 </li>
-                <li>微软的Microsoft SQLServer
+                <li>{{ $t('about.sqlserver') }}
                 </li>
-                <li>PostgreSQL/Greenplum
+                <li>{{ $t('about.postgresql') }}
                 </li>
-                <li>IBM的DB2
+                <li>{{ $t('about.db2') }}
                 </li>
-                <li>Sybase数据库
+                <li>{{ $t('about.sybase') }}
                 </li>
-                <li>国产达梦数据库DMDB
+                <li>{{ $t('about.dameng') }}
                 </li>
-                <li>国产人大金仓数据库Kingbase8
+                <li>{{ $t('about.kingbase') }}
                 </li>
-                <li>国产翰高数据库HighGo
+                <li>{{ $t('about.highgo') }}
                 </li>
-                <li>国产神通数据库Oscar
+                <li>{{ $t('about.shentong') }}
                 </li>
-                <li>国产南大通用数据库GBase8a
+                <li>{{ $t('about.gbase') }}
                 </li>
-                <li>Apache Hive
+                <li>{{ $t('about.hive') }}
                 </li>
-                <li>Cloudera Impala
+                <li>{{ $t('about.impala') }}
                 </li>
-                <li>Apache Doris
+                <li>{{ $t('about.doris') }}
                 </li>
-                <li>SQLite3
+                <li>{{ $t('about.sqlite') }}
                 </li>
-                <li>OpenGuass
+                <li>{{ $t('about.opengauss') }}
                 </li>
-                <li>ClickHouse
+                <li>{{ $t('about.clickhouse') }}
                 </li>
-                <li>StarRocks
+                <li>{{ $t('about.starrocks') }}
                 </li>
-                <li>OceanBase
+                <li>{{ $t('about.oceanbase') }}
                 </li>
-                <li>TDengine
+                <li>{{ $t('about.tdengine') }}
                 </li>
-                <li>MongoDB
+                <li>{{ $t('about.mongodb') }}
                 </li>
-                <li>ElasticSearch
+                <li>{{ $t('about.elasticsearch') }}
                 </li>
-                <li>Http(RESTful)
+                <li>{{ $t('about.httpRestful') }}
                 </li>
               </ul>
             </div>
           </el-card>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="开发技术栈"
+      <el-tab-pane :label="$t('about.devTechStack')"
                    name="third">
         <div class="content_tag">
           <el-tag type="success">SpringBoot</el-tag>
@@ -151,41 +150,44 @@
           <el-card class="box-card">
             <div class="text item">
               <p>
-                sqlrest基于Springboot脚手架进行的后端模块开发，模块组成结构如下：
+                sqlrest
               <pre>
             └── sqlrest
-                ├── sqlrest-common                     // sqlrest通用定义模块
-                ├── sqlrest-mcp                        // sqlrest的MCP协议模块
-                ├── sqlrest-template                   // sqlrest的SQL内容模板模块
-                ├── sqlrest-persistence                // sqlrest的数据库持久化模块
-                ├── sqlrest-core                       // sqlrest-core的接口实现模块
-                ├── sqlrest-gateway                    // Gateway网关节点
-                ├── sqlrest-executor                   // Executor接口执行节点
-                ├── sqlrest-manager                    // Manager管理节点
-                ├── sqlrest-manager-ui                 // 基于Vue2的Manager前段WEB交互页面
-                ├── sqlrest-dist                       // 基于maven-assembly-plugin插件的项目打包模块
+                ├── sqlrest-common                     // {{ $t('about.moduleCommon') }}
+                ├── sqlrest-mcp                        // {{ $t('about.moduleMcp') }}
+                ├── sqlrest-template                   // {{ $t('about.moduleTemplate') }}
+                ├── sqlrest-cache                      // {{ $t('about.moduleCache') }}
+                ├── sqlrest-persistence                // {{ $t('about.modulePersistence') }}
+                ├── sqlrest-core                       // {{ $t('about.moduleCore') }}
+                ├── sqlrest-gateway                    // {{ $t('about.moduleGateway') }}
+                ├── sqlrest-executor                   // {{ $t('about.moduleExecutor') }}
+                ├── sqlrest-manager                    // {{ $t('about.moduleManager') }}
+                ├── sqlrest-manager-ui                 // {{ $t('about.moduleUi') }}
+                ├── sqlrest-dist                       // {{ $t('about.moduleDist') }}
                 </pre>
               </p>
               <ul>
-                <li>SpringBoot</li>
+                <li>{{ $t('about.springboot') }}</li>
                 <p>
-                  sqlrest基于SpringBoot作为项目的基础脚手架。
+                  {{ $t('about.springbootDetail') }}
+                </p>
+                <li>{{ $t('about.springcloud') }}</li>
+                <p>
+                  {{ $t('about.springcloudDetail') }}
+                </p>
+                <li>{{ $t('about.mybatis') }}</li>
+                <p>
+                  {{ $t('about.mybatisDetail') }}
                 </p>
                 <p>
-                  sqlrest-gateway/sqlrest-executor/sqlrest-manager基于SpringCloud的微服务架构提供接口配置与访问功能。
+                  {{ $t('about.persistenceDetail') }}
                 </p>
-                <li>MyBatis</li>
+                <li>{{ $t('about.vueElement') }}</li>
                 <p>
-                  MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过程以及高级映射。
-                <p>
-                  sqlrest-persistence模块基于Mybatis/Mybatis-plus提供配置数据的持久化。
-                </p>
-                <li>Vue/ElementUI</li>
-                <p>
-                  Vue是一套用于构建用户界面的渐进式JavaScript框架。 Element是饿了么团队基于MVVM框架Vue开源出来的一套前端基于Vue 2.0的桌面端组件库。
+                  {{ $t('about.vueDetail') }}
                 </p>
                 <p>
-                  sqlrest-manager-ui模块基于Vue和ElementUI提供可视化的操作WEB界面。
+                  {{ $t('about.uiDetail') }}
                 </p>
               </ul>
             </div>
@@ -198,18 +200,11 @@
 </template>
 
 <script>
-import layout from '../layout.vue';
 export default {
-  components: { layout },
   data () {
     return {
       activeName: 'first'
     };
-  },
-  methods: {
-    handleClick (tab, event) {
-      //console.log(tab, event);
-    }
   }
 }
 </script>

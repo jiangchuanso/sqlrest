@@ -28,7 +28,7 @@ public class SystemParamService {
   public Object getByParamKey(String key) {
     SystemParamEntity entity = systemParamDao.getByParamKey(key);
     if (null == entity) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "NO KEY:" + key);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.no.key", key);
     }
     Class clazz = entity.getParamType().getClazz();
     String paramValue = entity.getParamValue();
@@ -38,12 +38,12 @@ public class SystemParamService {
   public void updateByParamKey(String key, String value) {
     SystemParamEntity entity = systemParamDao.getByParamKey(key);
     if (null == entity) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "NO KEY:" + key);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.no.key", key);
     }
     Class clazz = entity.getParamType().getClazz();
     Object paramValue = clazz.cast(entity.getParamType().getConverter().apply(value));
     if (null == paramValue) {
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "Invalid param value:[" + value + "]");
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.invalid.param.value", value);
     }
     systemParamDao.updateByParamKey(key, String.valueOf(paramValue));
   }

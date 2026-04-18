@@ -6,14 +6,14 @@
         <div class="header-content">
           <div class="search-box">
             <el-input v-model="searchKeyword"
-                      placeholder="请输入接口名称关键词搜索"
+                      :placeholder="$t('service.searchPlaceholder')"
                       class="search-input"
                       @keyup.enter="handleSearch">
             </el-input>
             <el-button type="primary"
                        class="search-btn"
                        @click="handleSearch">
-              搜索
+              {{ $t('common.search') }}
             </el-button>
           </div>
         </div>
@@ -24,7 +24,7 @@
         <el-aside width="280px"
                   class="app-aside">
           <div class="filter-section">
-            <h3 class="filter-title">模块筛选</h3>
+            <h3 class="filter-title">{{ $t('service.moduleFilter') }}</h3>
             <el-checkbox-group v-model="selectedModuleList"
                                class="checkbox-group">
               <el-checkbox v-for="item in moduleItemList"
@@ -51,22 +51,22 @@
                 <h4 class="card-title">【{{item.id}}】{{ item.name }}</h4>
                 <el-tooltip class="item"
                             effect="dark"
-                            content="需要认证"
+                            :content="$t('service.requireAuth')"
                             placement="top-end">
                   <i v-if="!item.open"
                      class="el-icon-user operator-icon"
                      style="float: right;"></i></el-tooltip>
                 <div class="card-meta">
-                  <span class="card-date">上线时间：{{ item.createTime }}</span>
+                  <span class="card-date">{{ $t('service.onlineTime') }}{{ item.createTime }}</span>
                 </div>
                 <el-tag>{{ item.method }}</el-tag><span>{{ item.path }}</span>
                 <div class="card-meta">
-                  <span class="card-tag">上线版本：<el-tag>V{{ item.version }}</el-tag></span>
+                  <span class="card-tag">{{ $t('service.onlineVersion') }}<el-tag>V{{ item.version }}</el-tag></span>
                 </div>
                 <p class="card-desc">{{ item.description }}</p>
                 <div class="card-meta">
-                  <span class="card-tag">模块名称：{{ item.moduleName }}</span>
-                  <span class="card-tag">授权分组：{{ item.groupName }}</span>
+                  <span class="card-tag">{{ $t('service.moduleName') }}{{ item.moduleName }}</span>
+                  <span class="card-tag">{{ $t('service.authGroup') }}{{ item.groupName }}</span>
                 </div>
               </div>
             </el-card>
@@ -125,7 +125,7 @@ export default {
           } else {
             this.moduleItemList = [];
             if (res.data.message) {
-              alert("加载模块列表失败:" + res.data.message);
+              alert(this.$t('service.loadModuleListFailed') + res.data.message);
             }
           }
         }
@@ -153,7 +153,7 @@ export default {
           this.totalCount = res.data.pagination.total;
           this.allData = res.data.data;
         } else {
-          alert("加载列表失败:" + res.data.message);
+          alert(this.$t('interface.loadFailed') + res.data.message);
         }
       }
       );

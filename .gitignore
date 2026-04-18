@@ -44,5 +44,6 @@ yarn-error.log*
 
 ### AI Code Editors
 .workbuddy
+.codebuddy
 .trae
 .opencode

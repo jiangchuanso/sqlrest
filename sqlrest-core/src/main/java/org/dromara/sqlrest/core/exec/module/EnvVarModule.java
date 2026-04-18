@@ -32,14 +32,14 @@ public class EnvVarModule implements VarModuleInterface {
     return VAR_NAME;
   }
 
-  @Comment("获取配置")
-  public String get(@Comment("key") String key) {
+  @Comment("comment.env.get")
+  public String get(@Comment("comment.param.key") String key) {
     return environment.getProperty(key);
   }
 
-  @Comment("获取配置")
-  public String get(@Comment("key") String key,
-      @Comment("defaultValue") String defaultValue) {
+  @Comment("comment.env.get")
+  public String get(@Comment("comment.param.key") String key,
+      @Comment("comment.param.defaultValue") String defaultValue) {
     return environment.getProperty(key, defaultValue);
   }
 

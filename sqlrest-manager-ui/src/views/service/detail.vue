@@ -6,14 +6,14 @@
                    size="mini"
                    @click="handleGoBack">
           <i class="el-icon-d-arrow-left">
-            返回</i>
+            {{ $t('common2.back') }}</i>
         </el-button>
       </div>
       <el-tabs type="border-card">
-        <el-tab-pane label="接口定义">
+        <el-tab-pane :label="$t('service.interfaceDefinition')">
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-key">当前版本：</i>
+              <i class="el-icon-key">{{ $t('service.currentVersion') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small">V{{interfaceDetail.version}}</el-tag>
@@ -21,12 +21,12 @@
                          type="danger"
                          icon="el-icon-timer"
                          @click="handleSwitchVersion(interfaceDetail)"
-                         round>切换</el-button>
+                         round>{{ $t('service.switchVersion') }}</el-button>
             </el-col>
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-mic">CommitId：</i>
+              <i class="el-icon-mic">{{ $t('service.commitId') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small">{{interfaceDetail.commitId}}</el-tag>
@@ -34,7 +34,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-user">接口名称：</i>
+              <i class="el-icon-user">{{ $t('service.interfaceNameLabel') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small">{{interfaceDetail.name}}</el-tag>
@@ -42,7 +42,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-attract">接口路径：</i>
+              <i class="el-icon-attract">{{ $t('service.interfacePathLabel') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small"
@@ -53,7 +53,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-tickets">请求类型：</i>
+              <i class="el-icon-tickets">{{ $t('service.requestType') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small"
@@ -62,7 +62,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-s-check">访问认证：</i>
+              <i class="el-icon-s-check">{{ $t('service.accessAuth') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small"
@@ -71,7 +71,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-help">接口说明：</i>
+              <i class="el-icon-help">{{ $t('service.interfaceDesc') }}</i>
             </el-col>
             <el-col :span="20">
               <el-tag size="small"
@@ -80,7 +80,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-postcard">请求参数：</i>
+              <i class="el-icon-postcard">{{ $t('service.requestParams') }}</i>
             </el-col>
             <el-col :span="20">
               <el-table :data="interfaceDetail.inputParams"
@@ -91,46 +91,46 @@
                         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                         border>
                 <template slot="empty">
-                  <span>请求参数为空</span>
+                  <span>{{ $t('service.requestParamsEmpty') }}</span>
                 </template>
-                <el-table-column label="参数名"
+                <el-table-column :label="$t('service.paramName')"
                                  prop="name"
                                  min-width="40%">
                 </el-table-column>
-                <el-table-column label="参数位置"
+                <el-table-column :label="$t('service.paramLocation')"
                                  prop="location"
                                  min-width="15%">
                   <template slot-scope="scope">
                     {{enumTypeLocationFormat(scope.row.location)}}
                   </template>
                 </el-table-column>
-                <el-table-column label="参数类型"
+                <el-table-column :label="$t('service.paramType')"
                                  prop="type"
                                  min-width="15%">
                   <template slot-scope="scope">
                     {{enumTypeValueFormat(scope.row.type)}}
                   </template>
                 </el-table-column>
-                <el-table-column label="数组"
+                <el-table-column :label="$t('service.isArray')"
                                  min-width="15%">
                   <template slot-scope="scope">
                     {{boolTypeFormat(scope.row.isArray)}}
                   </template>
                 </el-table-column>
-                <el-table-column label="必填"
+                <el-table-column :label="$t('service.required')"
                                  min-width="15%">
                   <template slot-scope="scope">
                     {{boolTypeFormat(scope.row.required)}}
                   </template>
                 </el-table-column>
-                <el-table-column label="默认值"
+                <el-table-column :label="$t('service.defaultValue')"
                                  prop="defaultValue"
                                  min-width="20%">
                   <template slot-scope="scope">
                     {{scope.row.defaultValue}}
                   </template>
                 </el-table-column>
-                <el-table-column label="描述"
+                <el-table-column :label="$t('service.description')"
                                  prop="remark"
                                  min-width="25%">
                   <template slot-scope="scope">
@@ -142,7 +142,7 @@
           </el-row>
           <el-row class="detail-row">
             <el-col :span="4">
-              <i class="el-icon-chat-line-round">响应参数：</i>
+              <i class="el-icon-chat-line-round">{{ $t('service.responseParams') }}</i>
             </el-col>
             <el-col :span="20">
               <el-table :data="interfaceDetail.outputParams"
@@ -153,19 +153,19 @@
                         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                         border>
                 <template slot="empty">
-                  <span>响应参数为空</span>
+                  <span>{{ $t('service.responseParamsEmpty') }}</span>
                 </template>
-                <el-table-column label="参数名"
+                <el-table-column :label="$t('service.paramName')"
                                  prop="name"
                                  min-width="25%">
                 </el-table-column>
-                <el-table-column label="参数类型"
+                <el-table-column :label="$t('service.paramType')"
                                  min-width="25%">
                   <template slot-scope="scope">
                     {{enumTypeValueFormat(scope.row.type)}}
                   </template>
                 </el-table-column>
-                <el-table-column label="描述"
+                <el-table-column :label="$t('service.description')"
                                  min-width="25%">
                   <template slot-scope="scope">
                     {{scope.row.remark}}
@@ -175,61 +175,61 @@
             </el-col>
           </el-row>
         </el-tab-pane>
-        <el-tab-pane label="访问日志">
+          <el-tab-pane :label="$t('service.accessLog')">
           <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                     :data="accessLogData"
                     size="small"
                     border>
             <el-table-column prop="createTime"
-                             label="时间"
+                             :label="$t('service.time')"
                              min-width="20%"></el-table-column>
-            <el-table-column label="客户端地址"
+            <el-table-column :label="$t('service.clientAddress')"
                              prop="ipAddr"
                              :show-overflow-tooltip="true"
                              min-width="15%">
             </el-table-column>
-            <el-table-column label="执行器地址"
+            <el-table-column :label="$t('service.executorAddress')"
                              prop="executorAddr"
                              :show-overflow-tooltip="true"
                              min-width="15%">
             </el-table-column>
-            <el-table-column label="网关地址"
+            <el-table-column :label="$t('service.gatewayAddress')"
                              prop="gatewayAddr"
                              :show-overflow-tooltip="true"
                              min-width="15%">
             </el-table-column>
-            <el-table-column label="状态码"
+            <el-table-column :label="$t('service.statusCode')"
                              prop="status"
                              :show-overflow-tooltip="true"
                              min-width="12%">
             </el-table-column>
-            <el-table-column label="耗时(ms)"
+            <el-table-column :label="$t('service.duration')"
                              prop="duration"
                              :show-overflow-tooltip="true"
                              min-width="12%">
             </el-table-column>
-            <el-table-column label="调用方"
+            <el-table-column :label="$t('service.caller')"
                              prop="clientApp"
                              :show-overflow-tooltip="true"
                              min-width="15%">
             </el-table-column>
-            <el-table-column label="UserAgent"
-                             prop="userAgent"
+            <el-table-column prop="userAgent"
+                             :label="'UserAgent'"
                              :show-overflow-tooltip="true"
                              min-width="15%">
             </el-table-column>
-            <el-table-column label="查看"
+            <el-table-column :label="$t('service.operation')"
                              min-width="20%">
               <template slot-scope="scope">
                 <el-link class="btn-text"
                          type="primary"
-                         @click="handleShowParam(scope.$index, scope.row)">入参</el-link>
+                         @click="handleShowParam(scope.$index, scope.row)">{{ $t('service.inputParams') }}</el-link>
                 <label v-if="scope.row.exception"
                        class="btn-style">&nbsp;|&nbsp;</label>
                 <el-link class="btn-text"
                          v-if="scope.row.exception"
                          type="primary"
-                         @click="handleShowException(scope.$index, scope.row)">异常</el-link>
+                         @click="handleShowException(scope.$index, scope.row)">{{ $t('service.exception') }}</el-link>
               </template>
             </el-table-column>
           </el-table>
@@ -247,7 +247,7 @@
       </el-tabs>
     </div>
 
-    <el-dialog title="接口请求入参"
+    <el-dialog :title="$t('service.requestParamsDialog')"
                :visible.sync="showParamDialogVisible"
                :showClose="false">
       <json-viewer :value="requestParameters"
@@ -258,11 +258,11 @@
       <div slot="footer"
            class="dialog-footer">
         <el-button type="info"
-                   @click="showParamDialogVisible = false">关 闭</el-button>
+                   @click="showParamDialogVisible = false">{{ $t('service.close') }}</el-button>
       </div>
     </el-dialog>
 
-    <el-dialog title="接口异常信息"
+    <el-dialog :title="$t('service.exceptionDialog')"
                :visible.sync="showExceptDialogVisible"
                :showClose="false">
       <el-input type="textarea"
@@ -272,11 +272,11 @@
       <div slot="footer"
            class="dialog-footer">
         <el-button type="info"
-                   @click="showExceptDialogVisible = false">关 闭</el-button>
+                   @click="showExceptDialogVisible = false">{{ $t('service.close') }}</el-button>
       </div>
     </el-dialog>
 
-    <el-dialog title="切换线上版本"
+    <el-dialog :title="$t('service.switchOnlineVersion')"
                :visible.sync="versionDialogVisible"
                :showClose="false"
                width="40%"
@@ -287,9 +287,9 @@
                 size="mini"
                 border>
         <template slot="empty">
-          <span>版本内容为空，请点击“发版”按钮发布一个版本来</span>
+          <span>{{ $t('service.versionEmptyTip') }}</span>
         </template>
-        <el-table-column label="选择版本"
+        <el-table-column :label="$t('service.selectVersion')"
                          min-width="10%">
           <template slot-scope="scope">
             <el-radio v-model="selectCommitId"
@@ -297,18 +297,18 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime"
-                         label="生成时间"
+                         :label="$t('service.generateTime')"
                          min-width="15%"> </el-table-column>
         <el-table-column prop="description"
-                         label="版本描述"
+                         :label="$t('service.versionDesc')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
       </el-table>
       <div slot="footer"
            class="dialog-footer">
-        <el-button @click="versionDialogVisible = false">取 消</el-button>
+        <el-button @click="versionDialogVisible = false">{{ $t('service.close') }}</el-button>
         <el-button type="primary"
-                   @click="handleDeployVersion">切 换</el-button>
+                   @click="handleDeployVersion">{{ $t('service.switch') }}</el-button>
       </div>
     </el-dialog>
 
@@ -323,17 +323,17 @@ export default {
   data () {
     return {
       paramLocation: [
-        { name: "Query", value: "REQUEST_FORM" },
-        { name: "Body", value: "REQUEST_BODY" },
-        { name: "Header", value: "REQUEST_HEADER" }
+        { name: this.$t('service.query'), value: "REQUEST_FORM" },
+        { name: this.$t('service.body'), value: "REQUEST_BODY" },
+        { name: this.$t('service.header'), value: "REQUEST_HEADER" }
       ],
       paramTypeList: [
-        { name: "整型", value: "LONG" },
-        { name: "浮点型", value: "DOUBLE" },
-        { name: "字符串", value: "STRING" },
-        { name: "日期", value: "DATE" },
-        { name: "时间", value: "TIME" },
-        { name: "对象", value: "OBJECT" }
+        { name: this.$t('service.integer'), value: "LONG" },
+        { name: this.$t('service.float'), value: "DOUBLE" },
+        { name: this.$t('service.string'), value: "STRING" },
+        { name: this.$t('service.date'), value: "DATE" },
+        { name: this.$t('service.timeType'), value: "TIME" },
+        { name: this.$t('service.object'), value: "OBJECT" }
       ],
       showDetail: false,
       tableData: [],
@@ -444,13 +444,13 @@ export default {
     },
     boolTypeFormat (value) {
       if (value === true) {
-        return "是";
+        return this.$t('service.yes');
       } else {
-        return "否";
+        return this.$t('service.no');
       }
     },
     returnUnknownValue () {
-      return "未知";
+      return this.$t('service.unknown');
     },
     enumTypeLocationFormat (value) {
       for (const item of this.paramLocation) {
@@ -481,25 +481,25 @@ export default {
           this.versionDialogVisible = true;
         } else {
           if (res.data.message) {
-            alert("获取版本列表失败," + res.data.message);
+            alert(this.$t('service.getVersionListFailed') + res.data.message);
           }
         }
       });
     },
     handleDeployVersion () {
       if (!this.selectCommitId || this.selectCommitId <= 0) {
-        this.$alert("请选择一个版本", "错误信息",
+        this.$alert(this.$t('service.selectVersionFirst'), this.$t('service.parseError'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('service.confirm'),
             type: "error"
           }
         );
         return;
       }
       if (this.selectCommitId == this.currentCommitId) {
-        this.$alert("您选择的版本与当前线上的版本一样,无需进行线上版本切换", "错误信息",
+        this.$alert(this.$t('service.sameVersionWarning'), this.$t('service.parseError'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('service.confirm'),
             type: "error"
           }
         );
@@ -518,10 +518,10 @@ export default {
           this.selectCommitId = null;
           this.versionDialogVisible = false;
           this.reloadIntefaceDetail();
-          this.$message("线上版本切换成功");
+          this.$message(this.$t('service.switchSuccess'));
         } else {
           if (res.data.message) {
-            alert("上线失败," + res.data.message);
+            alert(this.$t('service.onlineFailed') + res.data.message);
           }
         }
       });

@@ -3,19 +3,19 @@
   <div class="login-container">
     <div class="login-form">
       <div class="logo-section">
-        <h1 class="system-title">系统登录</h1>
-        <p class="system-subtitle">欢迎使用SQLREST</p>
+        <h1 class="system-title">{{ $t('login.title') }}</h1>
+        <p class="system-subtitle">{{ $t('system.welcome') }} SQLREST</p>
       </div>
 
       <form @submit.prevent="handleLogin"
             class="form-content">
         <div class="input-group">
           <label for="username"
-                 class="input-label">用户名</label>
+                 class="input-label">{{ $t('login.username') }}</label>
           <input type="text"
                  id="username"
                  v-model="loginForm.username"
-                 placeholder="请输入用户名"
+                 :placeholder="$t('login.usernamePlaceholder')"
                  class="input-field"
                  :class="{ 'input-error': errors.username }">
           <span class="error-message"
@@ -24,11 +24,11 @@
 
         <div class="input-group">
           <label for="password"
-                 class="input-label">密码</label>
+                 class="input-label">{{ $t('login.password') }}</label>
           <input type="password"
                  id="password"
                  v-model="loginForm.password"
-                 placeholder="请输入密码"
+                 :placeholder="$t('login.passwordPlaceholder')"
                  class="input-field"
                  :class="{ 'input-error': errors.password }">
           <span class="error-message"
@@ -38,9 +38,9 @@
         <button type="submit"
                 class="login-button"
                 :disabled="loading">
-          <span v-if="!loading">登录</span>
+          <span v-if="!loading">{{ $t('login.loginBtn') }}</span>
           <span v-if="loading"
-                class="loading-text">登录中...</span>
+                class="loading-text">{{ $t('login.loggingIn') }}</span>
         </button>
       </form>
 
@@ -69,16 +69,30 @@ export default {
       return new Date().getFullYear();
     }
   },
+  created() {
+    this.initLocale();
+  },
   methods: {
+    initLocale() {
+      const savedLocale = localStorage.getItem('locale');
+      if (savedLocale) {
+        this.$i18n.locale = savedLocale;
+      } else {
+        const browserLang = navigator.language || 'zh-CN';
+        const defaultLocale = browserLang.startsWith('en') ? 'en-US' : 'zh-CN';
+        this.$i18n.locale = defaultLocale;
+        localStorage.setItem('locale', defaultLocale);
+      }
+    },
     validateForm () {
       this.errors = {}
 
       if (!this.loginForm.username.trim()) {
-        this.errors.username = '请输入用户名'
+        this.errors.username = this.$t('login.usernameRequired')
       }
 
       if (!this.loginForm.password) {
-        this.errors.password = '请输入密码'
+        this.errors.password = this.$t('login.passwordRequired')
       }
 
       return Object.keys(this.errors).length === 0
@@ -87,9 +101,9 @@ export default {
       this.loading = false;
     },
     showMessageBox (msg) {
-      this.$alert(msg, '异常提示', {
+      this.$alert(msg, this.$t('common.error'), {
         type: 'error',
-        confirmButtonText: '确定'
+        confirmButtonText: this.$t('common.confirm')
       });
     },
     handleLogin () {
@@ -113,7 +127,7 @@ export default {
             res => {
               if (0 === res.data.code) {
                 window.sessionStorage.setItem('version', res.data.data);
-                this.$message("登录成功！");
+                this.$message(this.$t('login.loginSuccess'));
                 this.$router.push({ path: '/dashboard' });
               } else {
                 this.$message(res.data.message);
@@ -122,12 +136,12 @@ export default {
             }
           );
         } else {
-          this.showMessageBox("系统登录异常," + res.data.message);
+          this.showMessageBox(this.$t('login.loginError') + res.data.message);
           this.resetLoading();
         }
       }).catch(error => {
         this.resetLoading();
-        this.showMessageBox("系统登录异常," + (error || "地址无法联通"));
+        this.showMessageBox(this.$t('login.loginError') + (error || this.$t('login.connectionFailed')));
       })
     }
   }

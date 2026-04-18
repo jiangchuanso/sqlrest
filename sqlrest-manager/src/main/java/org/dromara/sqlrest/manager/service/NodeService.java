@@ -57,7 +57,7 @@ public class NodeService {
     if (null != instance) {
       return String.format("http://%s:%d", instance.getHost(), instance.getPort());
     }
-    throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "No Gateway is founded");
+    throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "gateway.not.found");
   }
 
   public String getApiPrefix() {
@@ -71,7 +71,7 @@ public class NodeService {
     if (null != instance) {
       return String.format("http://%s:%d/%s/", instance.getHost(), instance.getPort(), Constants.API_PATH_PREFIX);
     }
-    throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "No Gateway is founded");
+    throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "gateway.not.found");
   }
 
   public List<TopologyNodeResponse> getNodesTopology() {

@@ -41,7 +41,7 @@ export default {
             }
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('common2.loadDataFailed') + res.data.message);
             }
           }
         }

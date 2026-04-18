@@ -43,7 +43,7 @@ public class ApiModuleService {
     try {
       apiModuleDao.insert(ApiModuleEntity.builder().name(name).build());
     } catch (DuplicateKeyException e) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "module name already exists");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "module.name.already.exists");
     }
   }
 
@@ -53,17 +53,17 @@ public class ApiModuleService {
     try {
       apiModuleDao.updateById(moduleEntity);
     } catch (DuplicateKeyException e) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "module name already exists");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "module.name.already.exists");
     }
   }
 
   @Transactional(rollbackFor = Exception.class)
   public void deleteModule(Long id) {
     if (apiAssignmentDao.existsModuleById(id)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "module.used.by.api");
     }
     if (SpringUtil.getBean(ApiOnlineDao.class).existsModuleById(id)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "module.used.by.api");
     }
     apiModuleDao.deleteById(id);
   }

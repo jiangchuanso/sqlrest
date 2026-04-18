@@ -23,7 +23,11 @@
 
         <!-- 面包屑导航 -->
         <breadcrumb></breadcrumb>
-        <userDropdown></userDropdown>
+        <!-- 右侧组件区域 -->
+        <div class="header-right">
+          <languageSwitch></languageSwitch>
+          <userDropdown></userDropdown>
+        </div>
       </el-header>
 
       <!-- 右侧显示区域 -->
@@ -37,6 +41,7 @@ import asideBar from "@/components/asideBar/asideBar";
 import breadcrumb from "@/components/breadcrumb/index";
 import userDropdown from "@/components/userDropdown/index"
 import viewMain from "@/views/viewer";
+import languageSwitch from "@/components/languageSwitch/index";
 
 export default {
   name: "home",
@@ -44,7 +49,8 @@ export default {
     asideBar,
     breadcrumb,
     userDropdown,
-    viewMain
+    viewMain,
+    languageSwitch
   },
   data () {
     return {
@@ -104,15 +110,31 @@ export default {
   padding: 0px;
   color: #ffffff;
   width: 100%;
+  height: 60px;
   background: #fff;
+  display: flex;
+  align-items: center;
+  line-height: 60px;
+}
+
+.el-header .header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding-right: 20px;
+}
+
+.el-header .header-right > * {
+  vertical-align: middle;
 }
 
 .el-header .collapse {
-  float: left;
+  display: flex;
+  align-items: center;
+  height: 100%;
   padding-left: 2px;
   font-size: 22px;
   color: #838383;
-  margin-top: 10px;
   margin-right: 20px;
   cursor: pointer;
 }

@@ -3,40 +3,39 @@ import Router from 'vue-router'
 
 Vue.use(Router);
 
-///////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 // 路由配置
-// 参考教程：https://blog.csdn.net/weixin_38404899/article/details/90229805
-//
-///////////////////////////////////////////////////////////////////////////
+// 菜单名称使用 menu.xxx key，在 layout.vue 中通过 $t() 翻译
+/////////////////////////////////////////////////////////////////////////
 const constantRouter = new Router({
   routes: [
     {
       path: '/',
-      name: '首页',
+      name: 'menu.dashboard',
       component: () => import('@/views/layout'),
       redirect: '/dashboard',
       children: [
         {
           path: '/dashboard',
-          name: '概览',
+          name: 'menu.overview',
           icon: "el-icon-menu",
           component: () => import('@/views/dashboard/index')
         },
         {
           path: '/datasource',
-          name: '连接配置',
+          name: 'menu.datasource',
           icon: "el-icon-coin",
           component: () => import('@/views/datasource/index'),
           children: [
             {
               path: '/datasource/driver',
-              name: '驱动配置',
+              name: 'menu.driverConfig',
               icon: "el-icon-help",
               component: () => import('@/views/datasource/driver'),
             },
             {
               path: '/datasource/list',
-              name: '连接管理',
+              name: 'menu.connectionManage',
               icon: "el-icon-bank-card",
               component: () => import('@/views/datasource/list')
             }
@@ -44,37 +43,37 @@ const constantRouter = new Router({
         },
         {
           path: '/setting',
-          name: '系统设置',
+          name: 'menu.setting',
           icon: "el-icon-s-tools",
           component: () => import('@/views/setting/index'),
           children: [
             {
               path: '/setting/group',
-              name: '授权分组',
+              name: 'menu.authGroup',
               icon: "el-icon-tickets",
               component: () => import('@/views/setting/group'),
             },
             {
               path: '/setting/client',
-              name: '客户应用',
+              name: 'menu.clientApp',
               icon: "el-icon-pie-chart",
               component: () => import('@/views/setting/client')
             },
             {
               path: '/setting/firewall',
-              name: '访问控制',
+              name: 'menu.accessControl',
               icon: "el-icon-notebook-2",
               component: () => import('@/views/setting/firewall')
             },
             {
               path: '/setting/alarm',
-              name: '告警配置',
+              name: 'menu.alarmConfig',
               icon: "el-icon-message-solid",
               component: () => import('@/views/setting/alarm')
             },
             {
               path: '/setting/topology',
-              name: '拓扑结构',
+              name: 'menu.topology',
               icon: "el-icon-link",
               component: () => import('@/views/setting/topology')
             }
@@ -82,19 +81,19 @@ const constantRouter = new Router({
         },
         {
           path: '/interface',
-          name: '接口开发',
+          name: 'menu.interface',
           icon: "el-icon-edit-outline",
           component: () => import('@/views/interface/index'),
           children: [
             {
               path: '/interface/module',
-              name: '模块配置',
+              name: 'menu.moduleConfig',
               icon: "el-icon-folder",
               component: () => import('@/views/interface/module'),
             },
             {
               path: '/interface/list',
-              name: '接口配置',
+              name: 'menu.interfaceConfig',
               icon: "el-icon-refrigerator",
               component: () => import('@/views/interface/list'),
             }
@@ -102,13 +101,13 @@ const constantRouter = new Router({
         },
         {
           path: '/service',
-          name: '接口仓库',
+          name: 'menu.service',
           icon: "el-icon-school",
           component: () => import('@/views/service/index'),
           children: [
             {
               path: '/service/search',
-              name: '在线接口',
+              name: 'menu.onlineInterface',
               icon: "el-icon-lightning",
               component: () => import('@/views/service/search'),
             }
@@ -116,19 +115,19 @@ const constantRouter = new Router({
         },
         {
           path: '/mcp',
-          name: 'MCP服务',
+          name: 'menu.mcp',
           icon: "el-icon-s-promotion",
           component: () => import('@/views/mcp/index'),
           children: [
             {
               path: '/mcp/client',
-              name: '令牌配置',
+              name: 'menu.tokenConfig',
               icon: "el-icon-s-platform",
               component: () => import('@/views/mcp/client'),
             },
             {
               path: '/mcp/tool',
-              name: '工具配置',
+              name: 'menu.toolConfig',
               icon: "el-icon-setting",
               component: () => import('@/views/mcp/tool'),
             }
@@ -136,37 +135,37 @@ const constantRouter = new Router({
         },
         {
           path: '/aboutme',
-          name: '关于系统',
+          name: 'menu.about',
           icon: "el-icon-s-custom",
           component: () => import('@/views/aboutme/readme')
         },
         {
           path: '/user/self',
-          name: '个人中心',
+          name: 'menu.personal',
           hidden: true,
           component: () => import('@/views/user/self')
         },
         {
           path: '/interface/create',
-          name: '创建接口',
+          name: 'menu.createInterface',
           hidden: true,
           component: () => import('@/views/interface/create')
         },
         {
           path: '/interface/update',
-          name: '修改接口',
+          name: 'menu.updateInterface',
           hidden: true,
           component: () => import('@/views/interface/update')
         },
         {
           path: '/interface/detail',
-          name: '查看接口',
+          name: 'menu.viewInterface',
           hidden: true,
           component: () => import('@/views/interface/detail')
         },
         {
           path: '/service/detail',
-          name: '接口详情',
+          name: 'menu.interfaceDetail',
           hidden: true,
           component: () => import('@/views/service/detail')
         }
@@ -175,7 +174,7 @@ const constantRouter = new Router({
 
     {
       path: '/login',
-      name: '登录',
+      name: 'menu.login',
       component: () => import('@/views/login')
     }
   ]

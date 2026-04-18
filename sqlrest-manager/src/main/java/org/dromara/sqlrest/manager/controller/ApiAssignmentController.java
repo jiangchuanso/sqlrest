@@ -88,7 +88,7 @@ public class ApiAssignmentController {
                     NameValueRemarkResponse.builder()
                         .key(e.name())
                         .value(e.getDefault())
-                        .remark(e.getClassName())
+                        .remark(e.getRemark())
                         .build()
             ).collect(Collectors.toList())
     );

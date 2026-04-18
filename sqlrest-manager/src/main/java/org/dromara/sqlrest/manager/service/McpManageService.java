@@ -197,7 +197,7 @@ public class McpManageService {
       mcpToolDao.updateById(newToolEntity);
       updateMcpTool(exists.getName(), newToolEntity);
     } catch (DuplicateKeyException e) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "tool name already exists");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "mcp.tool.name.exists");
     }
   }
 
@@ -205,7 +205,7 @@ public class McpManageService {
   public void deleteTool(Long id) {
     McpToolEntity toolEntity = mcpToolDao.getById(id);
     if (null == toolEntity) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.id.not.found", id);
     }
 
     mcpToolDao.deleteById(id);

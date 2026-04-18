@@ -76,19 +76,19 @@ public class ClientTokenService {
   public AccessToken generateToken(String clientId, String clientSecret) {
     AppClientEntity appClient = appClientDao.getByAppKey(clientId);
     if (null == appClient) {
-      throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "clientId invalid");
+      throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "client.id.invalid");
     }
     if (!StringUtils.equals(appClient.getAppSecret(), clientSecret)) {
-      throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "secret invalid");
+      throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "client.secret.invalid");
     }
     if (DurationTimeEnum.TIME_VALUE == appClient.getExpireDuration()) {
       Boolean isExpired = getCurrentTimestamp() > appClient.getExpireAt();
       if (isExpired) {
-        throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "clientId is expired");
+        throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "client.id.expired");
       }
     } else if (DurationTimeEnum.ONLY_ONCE == appClient.getExpireDuration()) {
       if (!appClient.getCreateTime().equals(appClient.getUpdateTime())) {
-        throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "clientId is expired");
+        throw new CommonException(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, "client.id.expired");
       }
     }
 

@@ -4,12 +4,12 @@
       <div class="group-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input placeholder="名称搜索"
+            <el-input :placeholder="$t('module.searchPlaceholder')"
                       size="mini"
                       v-model="searchText"
+                      @change="searchByKeyword"
                       :clearable=true
-                      style="width:300px"
-                      @change="searchByKeyword">
+                      style="width:300px">
             </el-input>
           </div>
         </div>
@@ -17,7 +17,7 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="addGroup">添加</el-button>
+                     @click="addGroup">{{ $t('module.add') }}</el-button>
         </div>
       </div>
 
@@ -26,20 +26,20 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('module.id')"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="模块名称"
+                         :label="$t('module.moduleName')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('module.createTime')"
                          min-width="20%"></el-table-column>
         <el-table-column prop="updateTime"
-                         label="更新时间"
+                         :label="$t('module.updateTime')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('module.operation')"
                          min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
@@ -47,12 +47,12 @@
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>编辑</el-button>
+                         round>{{ $t('module.edit') }}</el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('module.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -68,7 +68,7 @@
                        :total="totalItemCount"></el-pagination>
       </div>
 
-      <el-dialog title="添加信息"
+      <el-dialog :title="$t('module.addInfo')"
                  :visible.sync="createFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -77,7 +77,7 @@
                  status-icon
                  :rules="rules"
                  ref="createform">
-          <el-form-item label="模块名称"
+          <el-form-item :label="$t('module.moduleName')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -88,13 +88,13 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="createFormVisible = false">取 消</el-button>
+          <el-button @click="createFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="修改信息"
+      <el-dialog :title="$t('module.updateInfo')"
                  :visible.sync="updateFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -103,7 +103,7 @@
                  status-icon
                  :rules="rules"
                  ref="updateform">
-          <el-form-item label="模块名称"
+          <el-form-item :label="$t('module.moduleName')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -114,9 +114,9 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="updateFormVisible = false">取 消</el-button>
+          <el-button @click="updateFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleSave">确 定</el-button>
+                     @click="handleSave">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -151,7 +151,7 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('module.nameRequired'),
             trigger: "blur"
           }
         ]
@@ -178,7 +178,7 @@ export default {
           this.totalItemCount = res.data.pagination.total
           this.tableData = res.data.data;
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('module.loadFailed') + res.data.message);
         }
       }
       );
@@ -187,11 +187,11 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此分组ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('module.confirmDelete') + row.id + this.$t('common2.toVersion'),
+        this.$t('common.warning'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -201,7 +201,7 @@ export default {
           if (0 === res.data.code) {
             this.loadData();
           } else {
-            alert("删除失败:" + res.data.message);
+            alert(this.$t('module.deleteFailed') + res.data.message);
           }
         });
       });
@@ -225,15 +225,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
-              this.$message("添加成功");
+              this.$message(this.$t('module.addSuccess'));
               this.createform = {};
               this.loadData();
             } else {
-              alert("添加失败:" + res.data.message);
+              alert(this.$t('module.addFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },
@@ -256,15 +256,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.updateFormVisible = false;
-              this.$message("修改成功");
+              this.$message(this.$t('module.updateSuccess'));
               this.loadData();
               this.updateform = {};
             } else {
-              alert("修改失败:" + res.data.message);
+              alert(this.$t('module.updateFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },

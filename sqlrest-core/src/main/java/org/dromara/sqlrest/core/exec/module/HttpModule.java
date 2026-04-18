@@ -56,13 +56,13 @@ public class HttpModule implements VarModuleInterface {
     return VAR_NAME;
   }
 
-  @Comment("创建连接")
-  public HttpModule connect(@Comment("目标URL") String url) {
+  @Comment("comment.http.connect")
+  public HttpModule connect(@Comment("comment.param.targetUrl") String url) {
     return new HttpModule(url);
   }
 
-  @Comment("设置URL参数")
-  public HttpModule param(@Comment("参数名") String key, @Comment("参数值") Object... values) {
+  @Comment("comment.http.param")
+  public HttpModule param(@Comment("comment.param.paramName") String key, @Comment("comment.param.paramValue") Object... values) {
     if (values != null) {
       for (Object value : values) {
         this.params.add(key, value);
@@ -71,14 +71,14 @@ public class HttpModule implements VarModuleInterface {
     return this;
   }
 
-  @Comment("批量设置URL参数")
-  public HttpModule param(@Comment("参数值") Map<String, Object> values) {
+  @Comment("comment.http.paramBatch")
+  public HttpModule param(@Comment("comment.param.paramValue") Map<String, Object> values) {
     values.forEach((key, value) -> param(key, Objects.toString(value, "")));
     return this;
   }
 
-  @Comment("设置form参数")
-  public HttpModule data(@Comment("参数名") String key, @Comment("参数值") Object... values) {
+  @Comment("comment.http.data")
+  public HttpModule data(@Comment("comment.param.paramName") String key, @Comment("comment.param.paramValue") Object... values) {
     if (values != null) {
       for (Object value : values) {
         this.data.add(key, value);
@@ -87,20 +87,20 @@ public class HttpModule implements VarModuleInterface {
     return this;
   }
 
-  @Comment("批量设置form参数")
-  public HttpModule data(@Comment("参数值") Map<String, Object> values) {
+  @Comment("comment.http.dataBatch")
+  public HttpModule data(@Comment("comment.param.paramValue") Map<String, Object> values) {
     values.forEach((key, value) -> data(key, Objects.toString(value, "")));
     return this;
   }
 
-  @Comment("设置header")
-  public HttpModule header(@Comment("header键") String key, @Comment("header值") String value) {
+  @Comment("comment.http.header")
+  public HttpModule header(@Comment("comment.param.headerKey") String key, @Comment("comment.param.headerValue") String value) {
     httpHeaders.add(key, value);
     return this;
   }
 
-  @Comment("批量设置header")
-  public HttpModule header(@Comment("header值") Map<String, Object> values) {
+  @Comment("comment.http.headerBatch")
+  public HttpModule header(@Comment("comment.param.headerValue") Map<String, Object> values) {
     values.entrySet()
         .stream()
         .filter(it -> it.getValue() != null)
@@ -108,67 +108,67 @@ public class HttpModule implements VarModuleInterface {
     return this;
   }
 
-  @Comment("设置请求方法，默认GET")
-  public HttpModule method(@Comment("请求方法") HttpMethod method) {
+  @Comment("comment.http.method")
+  public HttpModule method(@Comment("comment.param.httpMethod") HttpMethod method) {
     this.method = method;
     return this;
   }
 
-  @Comment("设置`RequestBody`")
-  public HttpModule body(@Comment("body值") Object requestBody) {
+  @Comment("comment.http.body")
+  public HttpModule body(@Comment("comment.param.bodyValue") Object requestBody) {
     this.requestBody = requestBody;
     this.contentType(MediaType.APPLICATION_JSON);
     return this;
   }
 
-  @Comment("设置`ContentType`")
-  public HttpModule contentType(@Comment("Content-Type值") String contentType) {
+  @Comment("comment.http.contentType")
+  public HttpModule contentType(@Comment("comment.param.contentType") String contentType) {
     return contentType(MediaType.parseMediaType(contentType));
   }
 
-  @Comment("设置`ContentType`")
-  public HttpModule contentType(@Comment("Content-Type值") MediaType mediaType) {
+  @Comment("comment.http.contentType")
+  public HttpModule contentType(@Comment("comment.param.contentType") MediaType mediaType) {
     this.httpHeaders.setContentType(mediaType);
     return this;
   }
 
-  @Comment("设置返回值为`byte[]`")
+  @Comment("comment.http.expectBytes")
   public HttpModule expectBytes() {
     this.responseType = byte[].class;
     return this;
   }
 
-  @Comment("设置返回值为`String`")
+  @Comment("comment.http.expectString")
   public HttpModule expectString() {
     this.responseType = String.class;
     return this;
   }
 
-  @Comment("发送`GET`请求")
+  @Comment("comment.http.get")
   public ResponseEntity<?> get() {
     this.method(HttpMethod.GET);
     return this.execute();
   }
 
-  @Comment("发送`POST`请求")
+  @Comment("comment.http.post")
   public ResponseEntity<?> post() {
     this.method(HttpMethod.POST);
     return this.execute();
   }
 
-  @Comment("发送`PUT`请求")
+  @Comment("comment.http.put")
   public ResponseEntity<?> put() {
     this.method(HttpMethod.PUT);
     return this.execute();
   }
 
-  @Comment("发送`DELETE`请求")
+  @Comment("comment.http.delete")
   public ResponseEntity<?> delete() {
     this.method(HttpMethod.DELETE);
     return this.execute();
   }
 
-  @Comment("执行请求")
+  @Comment("comment.http.execute")
   public ResponseEntity<?> execute() {
     if (!this.params.isEmpty()) {
       String queryString = this.params.entrySet().stream()

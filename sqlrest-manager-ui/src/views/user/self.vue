@@ -5,41 +5,41 @@
                @tab-click="handleClick">
         <image style="width: 100px; height: 100px"
                src="../../assets/logo.png" />
-        <el-tab-pane label="账号信息"
+        <el-tab-pane :label="$t('user.accountInfo')"
                      name="userinfo">
           <el-card>
-            <el-description title="账号的基本信息">
-              <el-description-item label="账号"
+            <el-description :title="$t('user.accountBasicInfo')">
+              <el-description-item :label="$t('user.account')"
                                    :span='15'
                                    :value="userinfo.username"></el-description-item>
-              <el-description-item label="姓名"
+              <el-description-item :label="$t('user.name')"
                                    :span='15'
                                    :value="userinfo.realName"></el-description-item>
-              <el-description-item label="邮箱"
+              <el-description-item :label="$t('user.email')"
                                    :span='15'
                                    :value="userinfo.email"></el-description-item>
-              <el-description-item label="地址"
+              <el-description-item :label="$t('user.address')"
                                    :span='15'
                                    :value="userinfo.address"></el-description-item>
-              <el-description-item label="锁定"
+              <el-description-item :label="$t('user.locked')"
                                    :span='15'
                                    :value="userinfo.locked"></el-description-item>
-              <el-description-item label="创建时间"
+              <el-description-item :label="$t('user.createTime')"
                                    :span='15'
                                    :value="userinfo.createTime"></el-description-item>
             </el-description>
 
           </el-card>
         </el-tab-pane>
-        <el-tab-pane label="密码修改"
+        <el-tab-pane :label="$t('user.passwordModify')"
                      name="modifyPassword">
           <el-card>
             <ul>
               <li>
                 <p class="desc">
-                  修改密码:
+                  {{ $t('user.modifyPassword') }}
                   <a href="#"
-                     @click="showPassword=true">修改密码</a>
+                     @click="showPassword=true">{{ $t('user.modifyPasswordBtn') }}</a>
                 </p>
               </li>
             </ul>
@@ -51,7 +51,7 @@
     <el-dialog :visible.sync="showPassword"
                @close="clearPassword"
                :showClose="false"
-               title="修改我的密码"
+               :title="$t('user.modifyMyPassword')"
                width="360px"
                :before-close="handleClose">
       <el-form :model="pwdModify"
@@ -59,19 +59,19 @@
                label-width="80px"
                ref="modifyPwdForm">
         <el-form-item :minlength="6"
-                      label="原密码"
+                      :label="$t('user.oldPassword')"
                       prop="password">
           <el-input show-password
                     v-model="pwdModify.password"></el-input>
         </el-form-item>
         <el-form-item :minlength="6"
-                      label="新密码"
+                      :label="$t('user.newPassword')"
                       prop="newPassword">
           <el-input show-password
                     v-model="pwdModify.newPassword"></el-input>
         </el-form-item>
         <el-form-item :minlength="6"
-                      label="确认密码"
+                      :label="$t('user.confirmPassword')"
                       prop="confirmPassword">
           <el-input show-password
                     v-model="pwdModify.confirmPassword"></el-input>
@@ -79,9 +79,9 @@
       </el-form>
       <div class="dialog-footer"
            slot="footer">
-        <el-button @click="showPassword=false">取 消</el-button>
+        <el-button @click="showPassword=false">{{ $t('user.cancel') }}</el-button>
         <el-button @click="savePassword"
-                   type="primary">确 定</el-button>
+                   type="primary">{{ $t('user.confirm') }}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -101,8 +101,8 @@ export default {
       userinfo: {
         id: 0,
         username: "admin",
-        realName: "管理员",
-        email: "admin@126.com",
+        realName: "Administrator",
+        email: "admin@sqlrest.com",
         address: "",
         locked: false,
         createTime: "2021-07-19 20:26:06",
@@ -113,20 +113,20 @@ export default {
       pwdModify: {},
       rules: {
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 6, message: "最少6个字符", trigger: "blur" }
+          { required: true, message: this.$t('user.passwordRequired'), trigger: "blur" },
+          { min: 6, message: this.$t('user.passwordMinLength'), trigger: "blur" }
         ],
         newPassword: [
-          { required: true, message: "请输入新密码", trigger: "blur" },
-          { min: 6, message: "最少6个字符", trigger: "blur" }
+          { required: true, message: this.$t('user.newPasswordRequired'), trigger: "blur" },
+          { min: 6, message: this.$t('user.passwordMinLength'), trigger: "blur" }
         ],
         confirmPassword: [
-          { required: true, message: "请输入确认密码", trigger: "blur" },
-          { min: 6, message: "最少6个字符", trigger: "blur" },
+          { required: true, message: this.$t('user.confirmPasswordRequired'), trigger: "blur" },
+          { min: 6, message: this.$t('user.passwordMinLength'), trigger: "blur" },
           {
             validator: (rule, value, callback) => {
               if (value !== this.pwdModify.newPassword) {
-                callback(new Error("两次密码不一致"));
+                callback(new Error(this.$t('user.passwordMismatch')));
               } else {
                 callback();
               }
@@ -153,13 +153,13 @@ export default {
             if (0 === res.data.code) {
               this.userinfo = res.data.data;
             } else {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('user.loadDataFailed') + res.data.message);
             }
           },
           error => {
             this.$message({
               showClose: true,
-              message: "数据加载错误",
+              message: this.$t('user.dataLoadError'),
               type: "error"
             });
           }
@@ -178,7 +178,7 @@ export default {
         console.log(res);
         if (0 === res.data.code) {
           this.showPassword = false;
-          this.$message.success("修改密码成功！");
+          this.$message.success(this.$t('user.modifyPasswordSuccess'));
         } else {
           this.showPassword = true;
           this.$message(res.data.message);

@@ -10,6 +10,8 @@
 package org.dromara.sqlrest.common.enums;
 
 import cn.hutool.core.util.StrUtil;
+import org.dromara.sqlrest.common.util.I18nUtils;
+
 import java.util.function.Function;
 
 public enum NamingStrategyEnum {
@@ -32,6 +34,6 @@ public enum NamingStrategyEnum {
   }
 
   public String getDescription() {
-    return description;
+    return I18nUtils.getMessage("NamingStrategyEnum." + this.name());
   }
 }

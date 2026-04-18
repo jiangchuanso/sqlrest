@@ -46,12 +46,12 @@ public class TxVarModule implements VarModuleInterface {
     return VAR_NAME;
   }
 
-  @Comment("提交事务")
+  @Comment("comment.tx.commit")
   public void commit() {
     this.transactionManager.commit(this.transactionStatus);
   }
 
-  @Comment("回滚事务")
+  @Comment("comment.tx.rollback")
   public void rollback() {
     this.transactionManager.rollback(this.transactionStatus);
   }

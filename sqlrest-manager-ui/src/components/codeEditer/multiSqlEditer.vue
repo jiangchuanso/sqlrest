@@ -4,7 +4,7 @@
                size='mini'
                v-if="canAddSql"
                @click="addTab()"
-               style='left:10px;top:5px;'>添加SQL窗口</el-button>
+               style='left:10px;top:5px;'>{{ $t('common2.addSqlWindow') }}</el-button>
     <div class="quick-script-tag">
       <div class="mybatis-named-tag"
            @click="addSqlTag('foreach')">foreach</div>
@@ -133,12 +133,12 @@ export default {
     },
     addTab: function (sqlContent) {
       if (this.editableTabs.length > 6) {
-        alert("开启的SQL窗口个数已达最大个数")
+        alert(this.$t('common2.sqlWindowMaxAlert'))
         return
       }
       let newTabName = ++this.tabIndex + '';
       this.editableTabs.push({
-        title: 'SQL窗口(' + newTabName + ')',
+        title: this.$t('common2.sqlWindow') + '(' + newTabName + ')',
         name: newTabName,
         content: sqlContent ? sqlContent : ""
       });
@@ -176,7 +176,7 @@ export default {
       }
 
       if (this.cmMapper.size === 0) {
-        alert("请先点击‘添加SQL窗口’来添加一个SQL窗口！")
+        alert(this.$t('common2.addSqlWindowTip'))
         return
       }
 

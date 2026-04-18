@@ -37,20 +37,20 @@ public class CacheVarModule implements VarModuleInterface {
     return cacheFactory.getDistributedCache(Constants.CACHE_NAME_API_VAR);
   }
 
-  @Comment("根据键获取缓存中的值")
-  public String get(@Comment("key") String key) {
+  @Comment("comment.cache.get")
+  public String get(@Comment("comment.param.key") String key) {
     DistributedCache cache = getDistributedCache();
     return cache.get(key, String.class);
   }
 
-  @Comment("向缓存中写入指定键的值")
-  public void put(@Comment("key") String key, @Comment("value") String value, @Comment("ttl") long ttl) {
+  @Comment("comment.cache.put")
+  public void put(@Comment("comment.param.key") String key, @Comment("comment.param.paramValue") String value, @Comment("comment.param.ttl") long ttl) {
     DistributedCache cache = getDistributedCache();
     cache.put(key, value, ttl, TimeUnit.SECONDS);
   }
 
-  @Comment("删除缓存中指定键的值")
-  public void evict(@Comment("key") String key) {
+  @Comment("comment.cache.evict")
+  public void evict(@Comment("comment.param.key") String key) {
     DistributedCache cache = getDistributedCache();
     cache.evict(key);
   }

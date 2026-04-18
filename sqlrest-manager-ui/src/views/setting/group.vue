@@ -4,7 +4,7 @@
       <div class="group-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input placeholder="请输入名称关键字搜索"
+            <el-input :placeholder="$t('module.searchPlaceholder')"
                       size="mini"
                       v-model="searchText"
                       @change="searchByKeyword"
@@ -17,7 +17,7 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="addGroup">添加</el-button>
+                     @click="addGroup">{{ $t('setting.addGroup') }}</el-button>
         </div>
       </div>
 
@@ -26,20 +26,20 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('setting.id')"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="分组名称"
+                         :label="$t('setting.groupName')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('setting.createTime')"
                          min-width="20%"></el-table-column>
         <el-table-column prop="updateTime"
-                         label="更新时间"
+                         :label="$t('setting.updateTime')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('setting.operation')"
                          min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
@@ -47,18 +47,18 @@
                          type="danger"
                          icon="el-icon-document"
                          @click="handleRelation(scope.$index, scope.row)"
-                         round>关联</el-button>
+                         round>{{ $t('setting.relation') }}</el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>编辑</el-button>
+                         round>{{ $t('setting.edit') }}</el-button>
               <el-button size="small"
                          type="success"
                          v-if="scope.row.id!==1"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('setting.deleteBtn') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -74,7 +74,7 @@
                        :total="totalItemCount"></el-pagination>
       </div>
 
-      <el-dialog title="添加信息"
+      <el-dialog :title="$t('setting.addInfo')"
                  :visible.sync="createFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -83,7 +83,7 @@
                  status-icon
                  :rules="rules"
                  ref="createform">
-          <el-form-item label="分组名称"
+          <el-form-item :label="$t('setting.groupName')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -94,13 +94,13 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="createFormVisible = false">取 消</el-button>
+          <el-button @click="createFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="修改信息"
+      <el-dialog :title="$t('setting.updateInfo')"
                  :visible.sync="updateFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -109,7 +109,7 @@
                  status-icon
                  :rules="rules"
                  ref="updateform">
-          <el-form-item label="分组名称"
+          <el-form-item :label="$t('setting.groupName')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -120,17 +120,17 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="updateFormVisible = false">取 消</el-button>
+          <el-button @click="updateFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleSave">确 定</el-button>
+                     @click="handleSave">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="修改关联信息"
+      <el-dialog :title="$t('setting.modifyRelation')"
                  :visible.sync="relationFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
-        <el-alert title="取消勾选后执行修改操作时，被取消勾选项将被修改关联到id=1的“默认分组”中."
+        <el-alert :title="$t('setting.relationTip')"
                   type="warning"
                   show-icon>
         </el-alert>
@@ -145,10 +145,10 @@
         <div slot="footer"
              class="dialog-footer">
           <el-button type="primary"
-                     @click="relationFormVisible = false">关 闭</el-button>
+                     @click="relationFormVisible = false">{{ $t('common.close') }}</el-button>
           <el-button type="danger"
                      v-if="currentGroupId!==1"
-                     @click="handleRelationSave">修 改</el-button>
+                     @click="handleRelationSave">{{ $t('setting.modifyRelation') }}</el-button>
         </div>
       </el-dialog>
 
@@ -185,7 +185,7 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('setting.nameRequiredTip'),
             trigger: "blur"
           }
         ]
@@ -209,8 +209,8 @@ export default {
       for (var i = 0; i < 36; i++) {
         s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
       }
-      s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
-      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      s[14] = "4";
+      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
       s[8] = s[13] = s[18] = s[23] = "-";
 
       var uuid = s.join("");
@@ -233,7 +233,7 @@ export default {
           this.totalItemCount = res.data.pagination.total
           this.tableData = res.data.data;
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('setting.loadFailed') + res.data.message);
         }
       }
       );
@@ -242,11 +242,11 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此分组ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('setting.confirmDeleteGroup') + row.id + this.$t('common2.toVersion'),
+        this.$t('common.warning'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -256,7 +256,7 @@ export default {
           if (0 === res.data.code) {
             this.loadData();
           } else {
-            alert("删除失败:" + res.data.message);
+            alert(this.$t('setting.deleteFailed') + res.data.message);
           }
         });
       });
@@ -280,15 +280,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
-              this.$message("添加成功");
+              this.$message(this.$t('setting.addSuccessTip'));
               this.createform = {};
               this.loadData();
             } else {
-              alert("添加失败:" + res.data.message);
+              alert(this.$t('setting.addFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },
@@ -305,7 +305,6 @@ export default {
             Vue.set(item, 'id', this.uuid());
             if (item.children) {
               for (let one of item.children) {
-                //Vue.set(one, 'disabled', true);
                 if (one.selected) {
                   this.initCheckedKeys.push(one.id);
                 }
@@ -328,9 +327,9 @@ export default {
       }).then(res => {
         if (0 === res.data.code) {
           this.relationFormVisible = false;
-          this.$message("修改关联信息成功.");
+          this.$message(this.$t('setting.modifyRelationSuccess'));
         } else {
-          alert("修改失败:" + res.data.message);
+          alert(this.$t('setting.updateFailed') + res.data.message);
         }
       });
     },
@@ -353,15 +352,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.updateFormVisible = false;
-              this.$message("修改成功");
+              this.$message(this.$t('setting.updateSuccessTip'));
               this.loadData();
               this.updateform = {};
             } else {
-              alert("修改失败:" + res.data.message);
+              alert(this.$t('setting.updateFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },

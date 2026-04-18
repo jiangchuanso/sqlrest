@@ -88,8 +88,8 @@ public class DbVarModule implements VarModuleInterface {
     return rows.stream().map(this::build).collect(Collectors.toList());
   }
 
-  @Comment("查询所有的数据列表")
-  public List<Map<String, Object>> selectAll(@Comment("sqlOrXml") String sqlOrXml) throws SQLException {
+  @Comment("comment.db.selectAll")
+  public List<Map<String, Object>> selectAll(@Comment("comment.param.sqlOrXml") String sqlOrXml) throws SQLException {
     if (printSqlLog) {
       log.info("Enter selectAll() function, SQL:{},params:{}", sqlOrXml, params);
     }
@@ -103,8 +103,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("count所有数据的总数")
-  public Integer selectCount(@Comment("sqlOrXml") String sqlOrXml) {
+  @Comment("comment.db.selectCount")
+  public Integer selectCount(@Comment("comment.param.sqlOrXml") String sqlOrXml) {
     if (printSqlLog) {
       log.info("Enter selectCount() function, SQL:{},params:{}", sqlOrXml, params);
     }
@@ -119,8 +119,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("查询单条结果，并传入变量信息，查不到返回null")
-  public Map<String, Object> selectOne(@Comment("sqlOrXml") String sqlOrXml) {
+  @Comment("comment.db.selectOne")
+  public Map<String, Object> selectOne(@Comment("comment.param.sqlOrXml") String sqlOrXml) {
     if (printSqlLog) {
       log.info("Enter selectOne() function, SQL:{},params:{}", sqlOrXml, params);
     }
@@ -146,8 +146,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("分页查询数据列表")
-  public List<Map<String, Object>> page(@Comment("sqlOrXml") String sqlOrXml)
+  @Comment("comment.db.page")
+  public List<Map<String, Object>> page(@Comment("comment.param.sqlOrXml") String sqlOrXml)
       throws SQLException {
     if (printSqlLog) {
       log.info("Enter page() function, SQL:{},params:{}", sqlOrXml, params);
@@ -167,8 +167,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("执行insert操作，返回插入主键")
-  public Map<String, Object> insert(@Comment("sqlOrXml") String sqlOrXml) {
+  @Comment("comment.db.insert")
+  public Map<String, Object> insert(@Comment("comment.param.sqlOrXml") String sqlOrXml) {
     if (printSqlLog) {
       log.info("Enter insert() function, SQL:{},params:{}", sqlOrXml, params);
     }
@@ -191,8 +191,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("执行update操作，返回受影响行数")
-  public int update(@Comment("sqlOrXml") String sqlOrXml) {
+  @Comment("comment.db.update")
+  public int update(@Comment("comment.param.sqlOrXml") String sqlOrXml) {
     if (printSqlLog) {
       log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
     }
@@ -207,8 +207,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("批量执行操作，返回受影响的行数")
-  public int batchUpdate(@Comment("sqlList") List<String> sqlList) {
+  @Comment("comment.db.batchUpdate")
+  public int batchUpdate(@Comment("comment.param.sqlList") List<String> sqlList) {
     if (printSqlLog) {
       log.info("Enter batchUpdate() function, SQL:{},params:{}", sqlList);
     }
@@ -221,8 +221,8 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("执行delete操作，返回受影响行数")
-  public int delete(@Comment("sqlOrXml") String sqlOrXml) {
+  @Comment("comment.db.delete")
+  public int delete(@Comment("comment.param.sqlOrXml") String sqlOrXml) {
     if (printSqlLog) {
       log.info("Enter update() function, SQL:{},params:{}", sqlOrXml, params);
     }
@@ -237,7 +237,7 @@ public class DbVarModule implements VarModuleInterface {
     }
   }
 
-  @Comment("开启事务")
+  @Comment("comment.db.beginTx")
   public TxVarModule beginTx() {
     return new TxVarModule(dataSource);
   }

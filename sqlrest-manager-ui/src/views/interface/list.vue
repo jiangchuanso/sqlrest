@@ -2,100 +2,99 @@
   <div>
     <el-card>
       <div class="assignment-list-top">
-        <div class="left-search-input-group">
-          <div class="left-search-input">
-            <el-radio-group v-model="online"
-                            @change="handleSearch"
-                            size="small">
-              <el-radio-button :label="false">开发中</el-radio-button>
-              <el-radio-button :label="true">已上线</el-radio-button>
-            </el-radio-group>
-            <el-select v-model="groupId"
-                       size="mini"
-                       :clearable="true"
-                       style="width:15%"
-                       placeholder="选择授权分组">
-              <el-option v-for="(item,index) in groupLists"
-                         :key="index"
-                         :label="item.name"
-                         :value="item.id"></el-option>
-            </el-select>
-            <el-select v-model="moduleId"
-                       size="mini"
-                       :clearable="true"
-                       style="width:15%"
-                       placeholder="请选择模块">
-              <el-option v-for="(item,index) in moduleLists"
-                         :key="index"
-                         :label="item.name"
-                         :value="item.id"></el-option>
-            </el-select>
-            <el-select v-model="open"
-                       size="mini"
-                       :clearable="true"
-                       style="width:10%"
-                       placeholder="是否公开">
-              <el-option :key=true
-                         label="是"
-                         :value=true></el-option>
-              <el-option :key=false
-                         label="否"
-                         :value=false></el-option>
-            </el-select>
-            <el-input placeholder="名称搜索"
-                      size="mini"
-                      v-model="keyword"
-                      :clearable=true
-                      style="width:15%"
-                      @change="searchByKeyword">
-            </el-input>
-            <el-button type="primary"
-                       size="mini"
-                       icon="el-icon-search"
-                       @click="handleSearch">搜索</el-button>
-            <el-switch v-model="apiDocStatus"
-                       name="Swagger文档开关"
-                       active-color="#13ce66"
-                       inactive-color="#ff4949"
-                       :active-value=true
-                       :inactive-value=false
-                       v-if="online"
-                       active-text="文档开"
-                       inactive-text="文档关"
-                       @change="hanldeSwitchApiDoc()">
-            </el-switch>
-          </div>
+        <div class="left-search-input">
+          <el-radio-group v-model="online"
+                          @change="handleSearch"
+                          size="small">
+            <el-radio-button :label="false">{{ $t('interface.developing') }}</el-radio-button>
+            <el-radio-button :label="true">{{ $t('interface.online') }}</el-radio-button>
+          </el-radio-group>
+          <el-select v-model="groupId"
+                     size="mini"
+                     :clearable="true"
+                     style="width:15%"
+                     :placeholder="$t('interface.selectGroup')">
+            <el-option v-for="(item,index) in groupLists"
+                       :key="index"
+                       :label="item.name"
+                       :value="item.id"></el-option>
+          </el-select>
+          <el-select v-model="moduleId"
+                     size="mini"
+                     :clearable="true"
+                     style="width:15%"
+                     :placeholder="$t('interface.selectModule')">
+            <el-option v-for="(item,index) in moduleLists"
+                       :key="index"
+                       :label="item.name"
+                       :value="item.id"></el-option>
+          </el-select>
+          <el-select v-model="open"
+                     size="mini"
+                     :clearable="true"
+                     style="width:10%"
+                     :placeholder="$t('interface.isPublic')">
+            <el-option :key=true
+                       :label="$t('common.yes')"
+                       :value=true></el-option>
+            <el-option :key=false
+                       :label="$t('common.no')"
+                       :value=false></el-option>
+          </el-select>
+          <el-input :placeholder="$t('interface.searchByName')"
+                    size="mini"
+                    v-model="keyword"
+                    :clearable=true
+                    style="width:15%"
+                    @change="searchByKeyword">
+          </el-input>
+          <el-button type="primary"
+                     size="mini"
+                     icon="el-icon-search"
+                     @click="handleSearch">{{ $t('common.search') }}</el-button>
+          <el-switch v-model="apiDocStatus"
+                     active-color="#13ce66"
+                     inactive-color="#ff4949"
+                     :active-value=true
+                     :inactive-value=false
+                     v-if="online"
+                     :active-text="$t('interface.docOn')"
+                     :inactive-text="$t('interface.docOff')"
+                     @change="hanldeSwitchApiDoc()">
+          </el-switch>
         </div>
-        <el-button type="warning"
-                   size="mini"
-                   :disabled="isSelected"
-                   plain
-                   icon="el-icon-download"
-                   @click="handleBatchExport">导出接口</el-button>
-        <el-upload :action="uploadAssignmentPath"
-                   accept="application/json"
-                   :http-request="handleFileUpload"
-                   v-if="!online"
-                   :multiple="false"
-                   :show-file-list="false"
-                   :auto-upload="true">
+        <div class="right-button-group">
           <el-button type="warning"
                      size="mini"
+                     :disabled="isSelected"
                      plain
+                     icon="el-icon-download"
+                     @click="handleBatchExport">{{ $t('interface.export') }}</el-button>
+          <el-upload :action="uploadAssignmentPath"
+                     accept="application/json"
+                     :http-request="handleFileUpload"
                      v-if="!online"
-                     icon="el-icon-upload2">导入接口</el-button>
-        </el-upload>
-        <el-button type="warning"
-                   size="mini"
-                   :disabled="apiDocStatus==false"
-                   v-if="online"
-                   icon="el-icon-document-add"
-                   @click="openOnlineApiDoc">在线文档</el-button>
-        <el-button type="primary"
-                   size="mini"
-                   v-if="!online"
-                   icon="el-icon-document-add"
-                   @click="handleCreate">新建接口</el-button>
+                     :multiple="false"
+                     :show-file-list="false"
+                     :auto-upload="true">
+            <el-button type="warning"
+                       size="mini"
+                       plain
+                       v-if="!online"
+                       icon="el-icon-upload2">{{ $t('interface.import') }}</el-button>
+          </el-upload>
+          <el-button type="warning"
+                     size="mini"
+                     :disabled="apiDocStatus==false"
+                     v-if="online"
+                     icon="el-icon-document-add"
+                     @click="openOnlineApiDoc">{{ $t('interface.onlineDoc') }}</el-button>
+          <el-button type="primary"
+                     size="mini"
+                     v-if="!online"
+                     icon="el-icon-document-add"
+                     @click="handleCreate">{{ $t('interface.newInterface') }}</el-button>
+        </div>
       </div>
 
       <el-table :header-cell-style="{background:'#eef1f6',color:'#606266',whiteSpace:'nowrap'}"
@@ -109,10 +108,10 @@
                          type="selection"
                          width="60"></el-table-column>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('interface.id')"
                          width="80"></el-table-column>
         <el-table-column prop="name"
-                         label="名称"
+                         :label="$t('interface.name')"
                          show-overflow-tooltip
                          min-width="200">
           <template slot-scope="scope">
@@ -121,7 +120,7 @@
                      @click="handleDetail(scope.$index, scope.row)">{{ scope.row.name }}</el-link>
           </template>
         </el-table-column>
-        <el-table-column label="路径"
+        <el-table-column :label="$t('interface.path')"
                          show-overflow-tooltip
                          min-width="300">
           <template slot-scope="scope">
@@ -131,14 +130,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="moduleName"
-                         label="模块"
+                         :label="$t('interface.module')"
                          show-overflow-tooltip
                          min-width="120"></el-table-column>
         <el-table-column prop="groupName"
-                         label="授权分组"
+                         :label="$t('interface.group')"
                          show-overflow-tooltip
                          min-width="120"></el-table-column>
-        <el-table-column label="引擎"
+        <el-table-column :label="$t('interface.engine')"
                          min-width="100">
           <template slot-scope="scope">
             <el-tag size="medium"
@@ -146,29 +145,29 @@
           </template>
         </el-table-column>
         <el-table-column prop="status"
-                         label="上线"
+                         :label="$t('interface.online')"
                          :formatter="boolFormatPublish"
                          show-overflow-tooltip
                          v-if="online"
                          min-width="80"></el-table-column>
         <el-table-column prop="open"
-                         label="公开"
+                         :label="$t('interface.public')"
                          :formatter="boolFormatOpen"
                          v-if="online"
                          show-overflow-tooltip
                          min-width="80"></el-table-column>
         <el-table-column prop="alarm"
-                         label="告警"
+                         :label="$t('interface.alarm')"
                          :formatter="boolFormatAlarm"
                          v-if="online"
                          show-overflow-tooltip
                          min-width="80"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('interface.createTime')"
                          min-width="180"></el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('common.operation')"
                          fixed="right"
-                         min-width="320">
+                         min-width="350">
           <template slot-scope="scope">
             <el-button-group>
               <el-button size="small"
@@ -176,29 +175,29 @@
                          icon="el-icon-timer"
                          v-if="scope.row.status===false"
                          @click="handleOnline(scope.$index, scope.row)"
-                         round>上线</el-button>
+                         round>{{ $t('interface.goOnline') }}</el-button>
               <el-button size="small"
                          type="info"
                          icon="el-icon-delete-location"
                          v-if="scope.row.status===true"
                          @click="handleOffline(scope.$index, scope.row)"
-                         round>下线</el-button>
+                         round>{{ $t('interface.goOffline') }}</el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>修改</el-button>
+                         round>{{ $t('common.edit') }}</el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-position"
                          @click="handlePublish(scope.$index, scope.row)"
-                         round>发版</el-button>
+                         round>{{ $t('interface.publish') }}</el-button>
               <el-button size="small"
                          type="danger"
                          icon="el-icon-delete"
                          v-if="scope.row.status===false"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('common.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -215,14 +214,14 @@
       </div>
     </el-card>
 
-    <el-dialog title="发布新版本"
+    <el-dialog :title="$t('interface.publishNewVersion')"
                :visible.sync="publishDialogVisible"
                :showClose="false"
                width="40%"
                :before-close="handleClose">
       <el-form size="mini"
                status-icon>
-        <el-form-item label="版本描述"
+        <el-form-item :label="$t('interface.versionDesc')"
                       label-width="120px"
                       :required=true
                       style="width:85%">
@@ -234,13 +233,13 @@
       </el-form>
       <div slot="footer"
            class="dialog-footer">
-        <el-button @click="publishDialogVisible = false">取 消</el-button>
+        <el-button @click="publishDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary"
-                   @click="handlePublishVersion">发 布</el-button>
+                   @click="handlePublishVersion">{{ $t('interface.publish') }}</el-button>
       </div>
     </el-dialog>
 
-    <el-dialog title="选择上线版本"
+    <el-dialog :title="$t('interface.selectOnlineVersion')"
                :visible.sync="versionDialogVisible"
                :showClose="false"
                width="40%"
@@ -251,9 +250,9 @@
                 size="mini"
                 border>
         <template slot="empty">
-          <span>版本内容为空，请点击“发版”按钮发布一个版本来</span>
+          <span>{{ $t('interface.versionEmpty') }}</span>
         </template>
-        <el-table-column label="选择版本"
+        <el-table-column :label="$t('interface.selectVersion')"
                          min-width="120">
           <template slot-scope="scope">
             <el-radio v-model="selectCommitId"
@@ -261,22 +260,22 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime"
-                         label="生成时间"
+                         :label="$t('interface.generateTime')"
                          min-width="180"> </el-table-column>
         <el-table-column prop="description"
-                         label="版本描述"
+                         :label="$t('interface.versionDesc')"
                          show-overflow-tooltip
                          min-width="200"></el-table-column>
       </el-table>
       <div slot="footer"
            class="dialog-footer">
-        <el-button @click="versionDialogVisible = false">取 消</el-button>
+        <el-button @click="versionDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary"
-                   @click="handleDeploy">上 线</el-button>
+                   @click="handleDeploy">{{ $t('interface.deploy') }}</el-button>
       </div>
     </el-dialog>
 
-    <el-dialog title="请选择打开的在线文档类型"
+    <el-dialog :title="$t('interface.selectOpenApiDocType')"
                :visible.sync="selectOpenApiDocsDialogVisible"
                :showClose="false"
                width="20%"
@@ -284,7 +283,7 @@
       <el-select v-model="selectedOpenApiDocType"
                  size="mini"
                  style="width:95%"
-                 placeholder="请选择文档类型">
+                 :placeholder="$t('interface.selectDocType')">
         <el-option v-for="(item,index) in openApiDocs"
                    :key="index"
                    :label="item.key"
@@ -292,9 +291,9 @@
       </el-select>
       <div slot="footer"
            class="dialog-footer">
-        <el-button @click="selectOpenApiDocsDialogVisible = false">取 消</el-button>
+        <el-button @click="selectOpenApiDocsDialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary"
-                   @click="handleOpenApiDoc">打 开</el-button>
+                   @click="handleOpenApiDoc">{{ $t('interface.open') }}</el-button>
       </div>
     </el-dialog>
 
@@ -361,7 +360,7 @@ export default {
           this.totalCount = res.data.pagination.total;
           this.tableData = res.data.data;
         } else {
-          alert("加载列表失败:" + res.data.message);
+          alert(this.$t('interface.loadFailed') + res.data.message);
         }
       }
       );
@@ -384,7 +383,7 @@ export default {
           if (0 === res.data.code) {
             this.groupLists = res.data.data;
           } else {
-            alert("加载失败:" + res.data.message);
+            alert(this.$t('interface.loadFailed') + res.data.message);
           }
         }
       );
@@ -407,7 +406,7 @@ export default {
           if (0 === res.data.code) {
             this.moduleLists = res.data.data;
           } else {
-            alert("加载失败:" + res.data.message);
+            alert(this.$t('interface.loadFailed') + res.data.message);
           }
         }
       );
@@ -420,7 +419,7 @@ export default {
           this.apiDocStatus = res.data.data;
         } else {
           if (res.data.message) {
-            alert("操作失败:" + res.data.message);
+            alert(this.$t('interface.operationFailed') + res.data.message);
           }
         }
       });
@@ -437,7 +436,7 @@ export default {
           this.loadApiDocOpenStatus();
         } else {
           if (res.data.message) {
-            alert("操作失败:" + res.data.message);
+            alert(this.$t('interface.operationFailed') + res.data.message);
           }
         }
       });
@@ -446,21 +445,21 @@ export default {
       if (row.status === true) {
         return "V" + row.version;
       } else {
-        return "否";
+        return this.$t('common.no');
       }
     },
     boolFormatOpen (row) {
       if (row.open === true) {
-        return "是";
+        return this.$t('common.yes');
       } else {
-        return "否";
+        return this.$t('common.no');
       }
     },
     boolFormatAlarm (row) {
       if (row.alarm === true) {
-        return "开";
+        return this.$t('interface.on');
       } else {
-        return "关";
+        return this.$t('interface.off');
       }
     },
     handleSearch: function () {
@@ -486,7 +485,7 @@ export default {
             }
           } else {
             if (res.data.message) {
-              alert("操作失败:" + res.data.message);
+              alert(this.$t('message.operationFailed') + res.data.message);
             }
           }
           this.selectOpenApiDocsDialogVisible = false;
@@ -501,11 +500,11 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此接口ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('interface.confirmDelete') + row.id + "?",
+        this.$t('common.warning'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -516,7 +515,7 @@ export default {
             this.loadData();
           } else {
             if (res.data.message) {
-              alert("删除失败:" + res.data.message);
+              alert(this.$t('interface.deleteFailed') + res.data.message);
             }
           }
         });
@@ -528,9 +527,9 @@ export default {
     },
     handlePublishVersion: function () {
       if (!this.publishVersionDesc) {
-        this.$alert("版本描述内容不能为空", "错误信息",
+        this.$alert(this.$t('interface.versionDescRequired'), this.$t('common.error'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "error"
           }
         );
@@ -551,10 +550,10 @@ export default {
           this.selectRowId = null;
           this.publishVersionDesc = null;
           this.publishDialogVisible = false
-          this.$message("发布版本成功");
+          this.$message(this.$t('interface.publishSuccess'));
         } else {
           if (res.data.message) {
-            alert("发布版本失败," + res.data.message);
+            alert(this.$t('interface.publishFailed') + res.data.message);
           }
         }
       });
@@ -573,16 +572,16 @@ export default {
           this.versionDialogVisible = true;
         } else {
           if (res.data.message) {
-            alert("获取版本列表失败," + res.data.message);
+            alert(this.$t('interface.getVersionListFailed') + res.data.message);
           }
         }
       });
     },
     handleDeploy: function () {
       if (!this.selectCommitId || this.selectCommitId <= 0) {
-        this.$alert("请选择一个版本", "错误信息",
+        this.$alert(this.$t('interface.selectVersionFirst'), this.$t('common.error'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "error"
           }
         );
@@ -599,11 +598,11 @@ export default {
           this.selectRowId = null;
           this.selectCommitId = null;
           this.versionDialogVisible = false;
-          this.$message("上线成功");
+          this.$message(this.$t('interface.onlineSuccess'));
           this.loadData();
         } else {
           if (res.data.message) {
-            alert("上线失败," + res.data.message);
+            alert(this.$t('interface.onlineFailed') + res.data.message);
           }
         }
       });
@@ -617,11 +616,11 @@ export default {
         url: "/sqlrest/manager/api/v1/assignment/retire/" + row.id,
       }).then(res => {
         if (0 === res.data.code) {
-          this.$message("下线成功");
+          this.$message(this.$t('interface.offlineSuccess'));
           this.loadData();
         } else {
           if (res.data.message) {
-            alert("下线失败," + res.data.message);
+            alert(this.$t('interface.offlineFailed') + res.data.message);
           }
         }
       });
@@ -688,13 +687,13 @@ export default {
       })
         .then(res => {
           if (0 === res.data.code) {
-            this.$message.success("导入成功");
+            this.$message.success(this.$t('interface.importSuccess'));
             this.loadData();
           } else {
             if (res.data.message) {
-              this.$alert("导入失败," + res.data.message, "错误信息",
+              this.$alert(this.$t('interface.importFailed') + res.data.message, this.$t('common.error'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
@@ -702,7 +701,7 @@ export default {
           }
         })
         .catch(err => {
-          this.$message.error("导入失败," + err);
+          this.$message.error(this.$t('interface.importFailed') + err);
         });
     },
     handleSizeChange: function (pageSize) {
@@ -767,23 +766,23 @@ export default {
 .assignment-list-top {
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   padding: 5px;
 }
 
-.left-search-input-group {
-  width: calc(100% - 100px);
-  margin-right: auto;
-  display: flex;
-  justify-content: space-between;
-}
 .left-search-input {
-  margin-right: auto;
-}
-.right-add-button-group {
-  width: 100px;
-  margin-left: auto;
+  flex: 1;
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.right-button-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 10px;
+  gap: 5px;
 }
 </style>

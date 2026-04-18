@@ -33,17 +33,17 @@ public class ItemParam extends BaseParam {
 
   public void checkValid(HttpMethodEnum method) {
     if (StringUtils.isBlank(getName())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "input parameter name must is not blank");
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.parameter.name.blank");
     }
     if (getType() == ParamTypeEnum.OBJECT) {
       if (!method.isHasBody()) {
         throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-            "Request with GET/HEAD method cannot have object input parameter as body.");
+            "api.get.head.no.body");
       }
       if (null != children && children.size() > 0) {
         for (BaseParam param : children) {
           if (StringUtils.isBlank(param.getName())) {
-            throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "input parameter name must is not blank");
+            throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.parameter.name.blank");
           }
         }
       } else {

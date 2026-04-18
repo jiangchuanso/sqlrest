@@ -6,7 +6,7 @@
       <el-row class="descriptions-row">
         <slot v-if="$slots.default" />
         <div v-else
-             style="text-align: center; color: grey;">暂无数据</div>
+             style="text-align: center; color: grey;">{{ $t('common2.noData') }}</div>
       </el-row>
     </div>
   </div>

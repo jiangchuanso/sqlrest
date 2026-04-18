@@ -5,6 +5,8 @@ import App from './App'
 import router from './router'
 import axios from './assets/axios.js';
 import ElementUI from 'element-ui';
+import VueI18n from 'vue-i18n'
+import messages from './lang'
 import './assets/iconfont/iconfont.css'
 import './assets/dbicon/iconfont.css'
 import './assets/dbicon/iconfont.js'
@@ -16,9 +18,23 @@ import 'codemirror/lib/codemirror.css'
 import JsonViewer from 'vue-json-viewer'
 
 Vue.use(VueCodeMirror)
-Vue.use(axios)
 Vue.use(ElementUI)
-Vue.use(JsonViewer) 
+Vue.use(JsonViewer)
+
+// 初始化 i18n
+// 获取浏览器语言或默认中文
+const browserLang = navigator.language || 'zh-CN'
+const defaultLocale = browserLang.startsWith('en') ? 'en-US' : 'zh-CN'
+
+// 从 localStorage 读取用户偏好
+const savedLocale = localStorage.getItem('locale') || defaultLocale
+
+Vue.use(VueI18n)
+
+const i18n = new VueI18n({
+  locale: savedLocale,
+  messages
+})
 
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
@@ -34,6 +50,10 @@ axios.interceptors.request.use(config => {
     config.headers.Authorization = 'Bearer ' + token;
   }
 
+  // 添加语言Header，与后端i18n对接
+  const locale = localStorage.getItem('locale') || 'zh-CN';
+  config.headers['Accept-Language'] = locale;
+
   return config;
 }, function (error) {
   // 对请求错误做些什么
@@ -44,9 +64,10 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(res => {
   //对响应数据做些事
   if (res.data && (res.data.code === 401 || res.data.code === 403 || res.data.code === 404)) {
-    router.push({
-      path: "/login"
-    })
+    // 只有不在登录页时才跳转到登录页
+    if (router.currentRoute.path !== '/login') {
+      router.push({ path: "/login" }).catch(() => {});
+    }
   }
 
   return res
@@ -60,6 +81,7 @@ axios.interceptors.response.use(res => {
 new Vue({
   el: '#app',
   router,
+  i18n,
   components: { App },
   template: '<App/>'
 })

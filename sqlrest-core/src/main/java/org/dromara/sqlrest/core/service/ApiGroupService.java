@@ -39,7 +39,7 @@ public class ApiGroupService {
     try {
       apiGroupDao.insert(ApiGroupEntity.builder().name(name).build());
     } catch (DuplicateKeyException e) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "group name already exists");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "group.name.already.exists");
     }
   }
 
@@ -49,20 +49,20 @@ public class ApiGroupService {
     try {
       apiGroupDao.updateById(apiGroupEntity);
     } catch (DuplicateKeyException e) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "group name already exists");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "group.name.already.exists");
     }
   }
 
   @Transactional(rollbackFor = Exception.class)
   public void deleteGroup(Long id) {
     if (id.equals(1L)) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "forbid delete group which id is 1");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "group.forbid.delete.default");
     }
     if (apiAssignmentDao.existsGroupById(id)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "group.used.by.api");
     }
     if (SpringUtil.getBean(ApiOnlineDao.class).existsGroupById(id)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "used by api config");
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "group.used.by.api");
     }
     apiGroupDao.deleteById(id);
     appClientDao.deleteClientAuthByGroupId(id);

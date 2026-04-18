@@ -9,13 +9,13 @@
                        @change="searchByKeyword"
                        :clearable="true"
                        style="width:200px"
-                       placeholder="选择授权分组">
+                       :placeholder="$t('setting.selectAuthGroup')">
               <el-option v-for="(item,index) in groups"
                          :key="index"
                          :label="item.name"
                          :value="item.id"></el-option>
             </el-select>
-            <el-input placeholder="请输入名称关键字搜索"
+            <el-input :placeholder="$t('setting.searchPlaceholder')"
                       size="mini"
                       v-model="keyword"
                       @change="searchByKeyword"
@@ -28,7 +28,7 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="addClient">添加</el-button>
+                     @click="addClient">{{ $t('setting.add') }}</el-button>
         </div>
       </div>
 
@@ -37,70 +37,70 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('setting.id')"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="应用名称"
+                         :label="$t('setting.appName')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="description"
-                         label="描述"
+                         :label="$t('setting.description')"
                          show-overflow-tooltip
                          min-width="10%"></el-table-column>
         <el-table-column prop="appKey"
-                         label="应用账号"
+                         :label="$t('setting.appAccount')"
                          show-overflow-tooltip
                          min-width="12%"></el-table-column>
         <el-table-column prop="expireDuration"
-                         label="过期时间"
+                         :label="$t('setting.expireDuration')"
                          :formatter="stringFormatExpireDuration"
                          show-overflow-tooltip
                          min-width="18%"></el-table-column>
         <el-table-column prop="isExpired"
-                         label="是否过期"
+                         :label="$t('setting.isExpired')"
                          show-overflow-tooltip
                          min-width="10%">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.isExpired"
                     type="danger"
                     effect="dark"
-                    size="mini">已过期
+                    size="mini">{{ $t('setting.expired') }}
             </el-tag>
             <el-tag v-if="!scope.row.isExpired"
                     type="primary"
                     effect="dark"
-                    size="mini">未过期
+                    size="mini">{{ $t('setting.notExpired') }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="tokenAlive"
-                         label="Token生命期"
+                         :label="$t('setting.tokenLife')"
                          :formatter="stringFormatTokenAlive"
                          show-overflow-tooltip
                          min-width="18%"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('setting.createTime')"
                          min-width="18%">
         </el-table-column>
-        <el-table-column label="操作"
-                         min-width="35%">
+        <el-table-column :label="$t('setting.operation')"
+                         min-width="40%">
           <template slot-scope="scope">
             <el-button-group>
               <el-button size="small"
                          type="danger"
                          icon="el-icon-document"
                          @click="handleAuthorize(scope.$index, scope.row)"
-                         round>授权</el-button>
+                         round>{{ $t('setting.authorize') }}</el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-document"
                          @click="handleShowSecret(scope.$index, scope.row)"
-                         round>密钥</el-button>
+                         round>{{ $t('setting.secret') }}</el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('setting.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -116,7 +116,7 @@
                        :total="totalCount"></el-pagination>
       </div>
 
-      <el-dialog title="添加应用信息"
+      <el-dialog :title="$t('setting.addAppInfo')"
                  :visible.sync="createFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -125,7 +125,7 @@
                  status-icon
                  :rules="rules"
                  ref="createform">
-          <el-form-item label="应用名称"
+          <el-form-item :label="$t('setting.appName')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -133,47 +133,47 @@
             <el-input v-model="createform.name"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="描述"
+          <el-form-item :label="$t('setting.description')"
                         label-width="120px"
                         prop="description"
                         style="width:85%">
             <el-input type="textarea"
                       :rows="6"
                       :spellcheck="false"
-                      placeholder="请输入"
+                      :placeholder="$t('setting.description')"
                       v-model="createform.description"
                       auto-complete="off">
             </el-input>
           </el-form-item>
-          <el-form-item label="应用账号"
+          <el-form-item :label="$t('setting.appAccount')"
                         label-width="120px"
                         prop="appKey"
                         style="width:85%">
             <el-input v-model="createform.appKey"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="应用到期时长"
+          <el-form-item :label="$t('setting.expireDuration')"
                         label-width="120px"
                         prop="expireTime"
                         style="width:85%">
             <el-select v-model="createform.expireTime">
-              <el-option label="无期"
+              <el-option :label="$t('setting.neverExpire')"
                          value="EXPIRE_FOR_EVER"></el-option>
-              <el-option label="一次"
+              <el-option :label="$t('setting.onceExpire')"
                          value="EXPIRE_ONLY_ONCE"></el-option>
-              <el-option label="5分钟"
+              <el-option :label="'5' + $t('common.minutes')"
                          value="EXPIRE_05_MIN"></el-option>
-              <el-option label="30分钟"
+              <el-option :label="'30' + $t('common.minutes')"
                          value="EXPIRE_30_MIN"></el-option>
-              <el-option label="1小时"
+              <el-option :label="'1' + $t('common.hour')"
                          value="EXPIRE_01_HOUR"></el-option>
-              <el-option label="12小时"
+              <el-option :label="'12' + $t('common.hours')"
                          value="EXPIRE_12_HOUR"></el-option>
-              <el-option label="1天"
+              <el-option :label="'1' + $t('common.day')"
                          value="EXPIRE_01_DAY"></el-option>
-              <el-option label="15天"
+              <el-option :label="'15' + $t('common.days')"
                          value="EXPIRE_15_DAY"></el-option>
-              <el-option label="1个月"
+              <el-option :label="'1' + $t('common.month')"
                          value="EXPIRE_01_MOUTH"></el-option>
             </el-select>
           </el-form-item>
@@ -182,42 +182,42 @@
                         style="width:35%">
             <span slot="label"
                   style="display:inline-block;">
-              Token生命
+              {{ $t('setting.tokenLife') }}
               <el-tooltip effect="dark"
-                          content="‘短期’的token时长为7200秒，到期续约再调用认证接口获取;‘长期’的token永不会过期，但应用过期时也即随之过期,应用被删除时也即随之消亡."
+                          :content="$t('mcp.toolDescTip')"
                           placement="bottom">
                 <i class='el-icon-question' />
               </el-tooltip>
             </span>
             <el-select v-model="createform.tokenAlive">
-              <el-option label="短期"
+              <el-option :label="$t('setting.shortTerm')"
                          value="PERIOD"></el-option>
-              <el-option label="长期"
+              <el-option :label="$t('setting.longTerm')"
                          value="LONGEVITY"></el-option>
             </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="createFormVisible = false">取 消</el-button>
+          <el-button @click="createFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="查看密钥"
+      <el-dialog :title="$t('setting.viewSecret')"
                  :visible.sync="ShowSecretDialog">
         <el-input type="input"
                   style="width:55%"
                   id="secretTextInput"
                   v-model="clientSecret"></el-input>
-        <el-button @click="handleCopyText">点击复制</el-button>
+        <el-button @click="handleCopyText">{{ $t('setting.clickToCopy') }}</el-button>
         <span slot="footer">
-          <el-button @click="ShowSecretDialog = false">取消</el-button>
+          <el-button @click="ShowSecretDialog = false">{{ $t('common.cancel') }}</el-button>
         </span>
       </el-dialog>
 
-      <el-dialog title="授权分组"
+      <el-dialog :title="$t('setting.authGroup')"
                  :visible.sync="showAuthDialog"
                  @open="loadAllGroups">
         <el-checkbox-group v-model="selectList">
@@ -226,9 +226,9 @@
                        :key="item.id">{{ item.name }}</el-checkbox>
         </el-checkbox-group>
         <span slot="footer">
-          <el-button @click="showAuthDialog = false">取消</el-button>
+          <el-button @click="showAuthDialog = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleSaveAuth()">保存</el-button>
+                     @click="handleSaveAuth()">{{ $t('setting.saveAuth') }}</el-button>
         </span>
       </el-dialog>
 
@@ -270,28 +270,28 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('setting.nameRequired'),
             trigger: "blur"
           }
         ],
         appKey: [
           {
             required: true,
-            message: "应用账号不能为空",
+            message: this.$t('setting.accountRequired'),
             trigger: "blur"
           }
         ],
         expireTime: [
           {
             required: true,
-            message: "到期时间必须选择",
+            message: this.$t('setting.expireRequired'),
             trigger: "change"
           }
         ],
         tokenAlive: [
           {
             required: true,
-            message: "Token生命期必须选择",
+            message: this.$t('setting.tokenRequired'),
             trigger: "change"
           }
         ]
@@ -320,7 +320,7 @@ export default {
           this.totalCount = res.data.pagination.total;
           this.tableData = res.data.data;
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('setting.loadFailed') + res.data.message);
         }
       });
     },
@@ -340,16 +340,16 @@ export default {
         if (0 === res.data.code) {
           this.groups = res.data.data
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('setting.loadFailed') + res.data.message);
         }
       }).catch((error) => {
       })
     },
     stringFormatExpireDuration (row, column) {
       if (row.expireDuration === "FOR_EVER") {
-        return "永不过期";
+        return this.$t('setting.neverExpire');
       } else if (row.expireDuration === "ONLY_ONCE") {
-        return "一次过期";
+        return this.$t('setting.onceExpire');
       } else if (row.expireDuration === "TIME_VALUE") {
         return row.expireAtStr;
       }
@@ -357,9 +357,9 @@ export default {
     },
     stringFormatTokenAlive (row, column) {
       if (row.tokenAlive === "LONGEVITY") {
-        return "长期";
+        return this.$t('setting.longTerm');
       } else if (row.tokenAlive === "PERIOD") {
-        return "短期";
+        return this.$t('setting.shortTerm');
       }
       return "-";
     },
@@ -371,11 +371,11 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此应用ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('setting.confirmDelete') + row.id + this.$t('common2.toVersion'),
+        this.$t('common.warning'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -385,7 +385,7 @@ export default {
           if (0 === res.data.code) {
             this.loadData();
           } else {
-            alert("删除失败:" + res.data.message);
+            alert(this.$t('setting.deleteFailed') + res.data.message);
           }
         });
       });
@@ -413,15 +413,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
-              this.$message("添加信息成功");
+              this.$message(this.$t('setting.addSuccess'));
               this.createform = {};
               this.loadData();
             } else {
-              alert("添加信息失败:" + res.data.message);
+              alert(this.$t('setting.addFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },
@@ -442,15 +442,15 @@ export default {
           if (0 === res.data.code) {
             this.clientSecret = res.data.data
           } else {
-            alert("操作失败：" + res.data.message)
+            alert(this.$t('message.operationFailed') + res.data.message)
           }
         })
     },
     handleCopyText: function () {
       var d = document.getElementById("secretTextInput")
-      d.select() //选中
+      d.select()
       document.execCommand("copy")
-      this.$message.success("复制成功")
+      this.$message.success(this.$t('setting.copySuccess'))
     },
     handleAuthorize: function (index, row) {
       this.showAuthDialog = true
@@ -478,7 +478,7 @@ export default {
         if (0 === res.data.code) {
           this.showAuthDialog = false
         } else {
-          alert("操作失败:" + res.data.message);
+          alert(this.$t('message.operationFailed') + res.data.message);
         }
       });
     }

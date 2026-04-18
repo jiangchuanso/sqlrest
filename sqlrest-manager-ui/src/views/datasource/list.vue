@@ -4,7 +4,7 @@
       <div class="connection-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input placeholder="请输入连接名称关键字搜索"
+            <el-input :placeholder="$t('datasource.searchPlaceholder')"
                       v-model="keyword"
                       @change="searchByKeyword"
                       :clearable=true
@@ -16,11 +16,11 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="addConnection">添加</el-button>
+                     @click="addConnection">{{ $t('common.add') }}</el-button>
         </div>
       </div>
 
-      <el-dialog title="选择数据库类型"
+      <el-dialog :title="$t('datasource.selectDbType')"
                  :visible.sync="dbTypeDialogVisible"
                  width="800px"
                  center>
@@ -35,7 +35,7 @@
           </div>
         </div>
         <div slot="footer" class="dialog-footer">
-          <el-button type="primary" :disabled="!selectedDbType" @click="goToForm">下一步</el-button>
+          <el-button type="primary" :disabled="!selectedDbType" @click="goToForm">{{ $t('common.next') }}</el-button>
         </div>
       </el-dialog>
 
@@ -44,16 +44,16 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('datasource.id')"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="连接名称"
+                         :label="$t('datasource.name')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('datasource.createTime')"
                          min-width="18%"></el-table-column>
-        <el-table-column label="数据库类型"
+        <el-table-column :label="$t('datasource.type')"
                          show-overflow-tooltip
                          min-width="15%">
           <template slot-scope="scope">
@@ -62,14 +62,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="url"
-                         label="JDBC连接串"
+                         :label="$t('datasource.jdbcUrl')"
                          show-overflow-tooltip
                          min-width="15%"></el-table-column>
         <el-table-column prop="username"
-                         label="账号"
+                         :label="$t('datasource.username')"
                          show-overflow-tooltip
                          min-width="10%"></el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('common.operation')"
                          min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
@@ -77,22 +77,22 @@
                          type="danger"
                          icon="el-icon-video-play"
                          @click="handleTest(scope.$index, scope.row)"
-                         round>测试</el-button>
+                         round>{{ $t('datasource.test') }}</el-button>
               <el-button size="small"
                          type="primary"
                          icon="el-icon-document"
                          @click="handleMore(scope.$index, scope.row)"
-                         round>详情</el-button>
+                         round>{{ $t('datasource.detail') }}</el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>编辑</el-button>
+                         round>{{ $t('common.edit') }}</el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('common.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -108,41 +108,41 @@
                        :total="totalCount"></el-pagination>
       </div>
 
-      <el-dialog title="查看数据库连接信息"
+      <el-dialog :title="$t('datasource.detailTitle')"
                  :visible.sync="dialogFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
         <el-form :model="queryForm"
                  size="mini">
-          <el-form-item label="连接名称"
+          <el-form-item :label="$t('datasource.name')"
                         label-width="120px"
                         style="width:85%">
             <el-input v-model="queryForm.name"
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-form-item label="数据库类型"
+          <el-form-item :label="$t('datasource.type')"
                         label-width="120px"
                         style="width:85%">
             <el-input v-model="queryForm.type"
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-form-item label="数据库驱动"
+          <el-form-item :label="$t('datasource.driver')"
                         label-width="120px"
                         style="width:85%">
             <el-input v-model="queryForm.driver"
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-form-item label="驱动版本号"
+          <el-form-item :label="$t('datasource.driverVersion')"
                         label-width="120px"
                         style="width:85%">
             <el-input v-model="queryForm.version"
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-form-item label="JDBC连接串"
+          <el-form-item :label="$t('datasource.jdbcUrl')"
                         label-width="120px"
                         style="width:85%">
             <el-input type="textarea"
@@ -152,14 +152,14 @@
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-form-item label="账号名称"
+          <el-form-item :label="$t('datasource.username')"
                         label-width="120px"
                         style="width:85%">
             <el-input v-model="queryForm.username"
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-form-item label="连接密码"
+          <el-form-item :label="$t('datasource.password')"
                         label-width="120px"
                         style="width:85%">
             <el-input type="password"
@@ -167,46 +167,46 @@
                       auto-complete="off"
                       :readonly=true></el-input>
           </el-form-item>
-          <el-divider content-position="center">数据源连接池参数配置</el-divider>
+          <el-divider content-position="center">{{ $t('datasource.poolConfig') }}</el-divider>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="最大连接数" label-width="120px">
-                <el-input v-model="queryForm.poolConfig.maximumPoolSize" :readonly=true placeholder="默认: 10"></el-input>
+              <el-form-item :label="$t('datasource.maxPoolSize')" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.maximumPoolSize" :readonly=true :placeholder="$t('datasource.default') + ' 10'"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="最小空闲数" label-width="120px">
-                <el-input v-model="queryForm.poolConfig.minimumIdle" :readonly=true placeholder="默认: 10"></el-input>
+              <el-form-item :label="$t('datasource.minIdle')" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.minimumIdle" :readonly=true :placeholder="$t('datasource.default') + ' 10'"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="最大存活(ms)" label-width="120px">
-                <el-input v-model="queryForm.poolConfig.maxLifetime" :readonly=true placeholder="默认: 3600000"></el-input>
+              <el-form-item :label="$t('datasource.maxLifetime')" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.maxLifetime" :readonly=true :placeholder="$t('datasource.default') + ' 3600000'"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="连接超时(ms)" label-width="120px">
-                <el-input v-model="queryForm.poolConfig.connectionTimeout" :readonly=true placeholder="默认: 60000"></el-input>
+              <el-form-item :label="$t('datasource.connectionTimeout')" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.connectionTimeout" :readonly=true :placeholder="$t('datasource.default') + ' 60000'"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="空闲超时(ms)" label-width="120px">
-                <el-input v-model="queryForm.poolConfig.idleTimeout" :readonly=true placeholder="默认: 60000"></el-input>
+              <el-form-item :label="$t('datasource.idleTimeout')" label-width="120px">
+                <el-input v-model="queryForm.poolConfig.idleTimeout" :readonly=true :placeholder="$t('datasource.default') + ' 60000'"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">关闭</el-button>
+          <el-button @click="dialogFormVisible = false">{{ $t('common.close') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="添加数据源连接信息"
+      <el-dialog :title="$t('datasource.addTitle')"
                  :visible.sync="createFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -215,7 +215,7 @@
                  status-icon
                  :rules="rules"
                  ref="createform">
-          <el-form-item label="连接名称"
+          <el-form-item :label="$t('datasource.name')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -223,7 +223,7 @@
             <el-input v-model="createform.name"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="数据库类型"
+          <el-form-item :label="$t('datasource.type')"
                         label-width="120px"
                         :required=true
                         prop="type"
@@ -236,44 +236,44 @@
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item label="驱动版本"
+          <el-form-item :label="$t('datasource.driverVersion')"
                         label-width="120px"
                         :required=true
                         prop="version"
                         style="width:85%">
             <el-select v-model="createform.version"
-                       placeholder="请选择版本">
+                       :placeholder="$t('datasource.selectVersion')">
               <el-option v-for="(item,index) in connectionDriver"
                          :key="index"
                          :label="item.driverVersion"
                          :value="item.driverVersion"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="JDBC连接串"
+          <el-form-item :label="$t('datasource.jdbcUrl')"
                         label-width="120px"
                         :required=true
                         prop="url"
                         style="width:85%">
-            <el-alert title="样例："
+            <el-alert :title="$t('datasource.example') + ':'"
                       type="warning"
                       :description="createform.sample">
             </el-alert>
             <el-input type="textarea"
                       :rows="6"
                       :spellcheck="false"
-                      placeholder="请输入"
+                      :placeholder="$t('datasource.inputJdbcUrl')"
                       v-model="createform.url"
                       auto-complete="off">
             </el-input>
           </el-form-item>
-          <el-form-item label="账号名称"
+          <el-form-item :label="$t('datasource.username')"
                         label-width="120px"
                         prop="username"
                         style="width:85%">
             <el-input v-model="createform.username"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="连接密码"
+          <el-form-item :label="$t('datasource.password')"
                         label-width="120px"
                         prop="password"
                         style="width:85%">
@@ -281,52 +281,52 @@
                       v-model="createform.password"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-divider content-position="center">数据源连接池参数配置</el-divider>
+          <el-divider content-position="center">{{ $t('datasource.poolConfig') }}</el-divider>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="最大连接数" label-width="120px">
-                <el-input v-model.number="createform.poolConfig.maximumPoolSize" placeholder="默认: 10" clearable></el-input>
+              <el-form-item :label="$t('datasource.maxPoolSize')" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.maximumPoolSize" :placeholder="$t('datasource.default') + ' 10'" clearable></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="最小空闲数" label-width="120px">
-                <el-input v-model.number="createform.poolConfig.minimumIdle" placeholder="默认: 10" clearable></el-input>
+              <el-form-item :label="$t('datasource.minIdle')" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.minimumIdle" :placeholder="$t('datasource.default') + ' 10'" clearable></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="最大存活(ms)" label-width="120px">
-                <el-input v-model.number="createform.poolConfig.maxLifetime" placeholder="默认: 3600000" clearable></el-input>
+              <el-form-item :label="$t('datasource.maxLifetime')" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.maxLifetime" :placeholder="$t('datasource.default') + ' 3600000'" clearable></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="连接超时(ms)" label-width="120px">
-                <el-input v-model.number="createform.poolConfig.connectionTimeout" placeholder="默认: 60000" clearable></el-input>
+              <el-form-item :label="$t('datasource.connectionTimeout')" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.connectionTimeout" :placeholder="$t('datasource.default') + ' 60000'" clearable></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="空闲超时(ms)" label-width="120px">
-                <el-input v-model.number="createform.poolConfig.idleTimeout" placeholder="默认: 60000" clearable></el-input>
+              <el-form-item :label="$t('datasource.idleTimeout')" label-width="120px">
+                <el-input v-model.number="createform.poolConfig.idleTimeout" :placeholder="$t('datasource.default') + ' 60000'" clearable></el-input>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="goBackToDbType">上一步</el-button>
+          <el-button @click="goBackToDbType">{{ $t('common.previous') }}</el-button>
           <el-button type="success"
-                     @click="handlePreTest(createform,'createform')">测试</el-button>
+                     @click="handlePreTest(createform,'createform')">{{ $t('datasource.test') }}</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">{{ $t('common.confirm') }}</el-button>
           <el-button type="info"
-                     @click="createFormVisible = false">取 消</el-button>
+                     @click="createFormVisible = false">{{ $t('common.cancel') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="修改数据源连接信息"
+      <el-dialog :title="$t('datasource.editTitle')"
                  :visible.sync="updateFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -335,7 +335,7 @@
                  status-icon
                  :rules="rules"
                  ref="updateform">
-          <el-form-item label="连接名称"
+          <el-form-item :label="$t('datasource.name')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -343,7 +343,7 @@
             <el-input v-model="updateform.name"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="数据库类型"
+          <el-form-item :label="$t('datasource.type')"
                         label-width="120px"
                         :required=true
                         prop="type"
@@ -351,7 +351,7 @@
             <el-select v-model="updateform.type"
                        class="db-type-select"
                        @change="selectChangedDriverVersion"
-                       placeholder="请选择数据库" disabled>
+                       :placeholder="$t('datasource.selectDb')" disabled>
               <template slot="prefix" v-if="updateform.type">
                 <databaseIcon :type="updateform.type" style="line-height:32px;margin-left:4px;"></databaseIcon>
               </template>
@@ -366,20 +366,20 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="驱动版本"
+          <el-form-item :label="$t('datasource.driverVersion')"
                         label-width="120px"
                         :required=true
                         prop="version"
                         style="width:85%">
             <el-select v-model="updateform.version"
-                       placeholder="请选择版本">
+                       :placeholder="$t('datasource.selectVersion')">
               <el-option v-for="(item,index) in connectionDriver"
                          :key="index"
                          :label="item.driverVersion"
                          :value="item.driverVersion"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="JDBC连接串"
+          <el-form-item :label="$t('datasource.jdbcUrl')"
                         label-width="120px"
                         :required=true
                         prop="url"
@@ -390,48 +390,48 @@
                       v-model="updateform.url"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="账号名称"
+          <el-form-item :label="$t('datasource.username')"
                         label-width="120px"
                         style="width:85%">
             <el-input v-model="updateform.username"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-form-item label="连接密码"
+          <el-form-item :label="$t('datasource.password')"
                         label-width="120px"
                         style="width:85%">
             <el-input type="password"
                       v-model="updateform.password"
                       auto-complete="off"></el-input>
           </el-form-item>
-          <el-divider content-position="center">数据源连接池参数配置</el-divider>
+          <el-divider content-position="center">{{ $t('datasource.poolConfig') }}</el-divider>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="最大连接数" label-width="120px">
-                <el-input v-model.number="updateform.poolConfig.maximumPoolSize" placeholder="默认: 10" clearable></el-input>
+              <el-form-item :label="$t('datasource.maxPoolSize')" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.maximumPoolSize" :placeholder="$t('datasource.default') + ' 10'" clearable></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="最小空闲数" label-width="120px">
-                <el-input v-model.number="updateform.poolConfig.minimumIdle" placeholder="默认: 10" clearable></el-input>
+              <el-form-item :label="$t('datasource.minIdle')" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.minimumIdle" :placeholder="$t('datasource.default') + ' 10'" clearable></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="最大存活(ms)" label-width="120px">
-                <el-input v-model.number="updateform.poolConfig.maxLifetime" placeholder="默认: 3600000" clearable></el-input>
+              <el-form-item :label="$t('datasource.maxLifetime')" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.maxLifetime" :placeholder="$t('datasource.default') + ' 3600000'" clearable></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="连接超时(ms)" label-width="120px">
-                <el-input v-model.number="updateform.poolConfig.connectionTimeout" placeholder="默认: 60000" clearable></el-input>
+              <el-form-item :label="$t('datasource.connectionTimeout')" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.connectionTimeout" :placeholder="$t('datasource.default') + ' 60000'" clearable></el-input>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row :gutter="20">
             <el-col :span="12">
-              <el-form-item label="空闲超时(ms)" label-width="120px">
-                <el-input v-model.number="updateform.poolConfig.idleTimeout" placeholder="默认: 60000" clearable></el-input>
+              <el-form-item :label="$t('datasource.idleTimeout')" label-width="120px">
+                <el-input v-model.number="updateform.poolConfig.idleTimeout" :placeholder="$t('datasource.default') + ' 60000'" clearable></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -439,11 +439,11 @@
         <div slot="footer"
              class="dialog-footer">
           <el-button type="success"
-                     @click="handlePreTest(updateform,'updateform')">测试</el-button>
+                     @click="handlePreTest(updateform,'updateform')">{{ $t('datasource.test') }}</el-button>
           <el-button type="primary"
-                     @click="handleSave">确 定</el-button>
+                     @click="handleSave">{{ $t('common.confirm') }}</el-button>
           <el-button type="info"
-                     @click="updateFormVisible = false">取 消</el-button>
+                     @click="updateFormVisible = false">{{ $t('common.cancel') }}</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -525,28 +525,28 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('datasource.nameRequired'),
             trigger: "blur"
           }
         ],
         type: [
           {
             required: true,
-            message: "数据库类型必须选择",
+            message: this.$t('datasource.typeRequired'),
             trigger: "change"
           }
         ],
         version: [
           {
             required: true,
-            message: "驱动版本必须选择",
+            message: this.$t('datasource.versionRequired'),
             trigger: "change"
           }
         ],
         url: [
           {
             required: true,
-            message: "Jdbc URL必须提供",
+            message: this.$t('datasource.urlRequired'),
             trigger: "blur"
           }
         ]
@@ -578,7 +578,7 @@ export default {
           this.totalCount = res.data.pagination.total;
           this.tableData = res.data.data;
         } else {
-          alert("加载任务列表失败:" + res.data.message);
+          alert(this.$t('datasource.loadFailed') + res.data.message);
         }
       },
         function () {
@@ -600,7 +600,7 @@ export default {
           if (0 === res.data.code) {
             this.databaseType = res.data.data;
           } else {
-            alert("加载任务列表失败:" + res.data.message);
+            alert(this.$t('datasource.loadFailed') + res.data.message);
           }
         },
         function () {
@@ -612,11 +612,11 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此数据源ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('datasource.confirmDelete') + row.id + '?',
+        this.$t('common.info'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -627,7 +627,7 @@ export default {
           if (0 === res.data.code) {
             this.loadData();
           } else {
-            alert("删除任务失败:" + res.data.message);
+            alert(this.$t('datasource.deleteFailed') + res.data.message);
           }
         });
       });
@@ -641,16 +641,16 @@ export default {
         "/sqlrest/manager/api/v1/datasource/test/" + row.id
       ).then(res => {
         if (0 === res.data.code) {
-          this.$alert("测试连接成功!", "提示信息",
+          this.$alert(this.$t('datasource.connectionSuccess'), this.$t('common.info'),
             {
-              confirmButtonText: "确定",
+              confirmButtonText: this.$t('common.confirm'),
               type: "success"
             }
           );
         } else {
-          this.$alert(res.data.message, "错误信息",
+          this.$alert(res.data.message, this.$t('common.error'),
             {
-              confirmButtonText: "确定",
+              confirmButtonText: this.$t('common.confirm'),
               type: "error"
             }
           );
@@ -711,25 +711,25 @@ export default {
             data: JSON.stringify(requestData)
           }).then(res => {
             if (0 === res.data.code) {
-              this.$alert("测试连接信息成功", "测试操作成功",
+              this.$alert(this.$t('datasource.testSuccess'), this.$t('datasource.testResult'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "info"
                 }
               );
             } else {
-              this.$alert(res.data.message, "测试操作失败",
+              this.$alert(res.data.message, this.$t('datasource.testFailed'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
             }
           });
         } else {
-          this.$alert("请检查输入", "提示信息",
+          this.$alert(this.$t('datasource.checkInput'), this.$t('common.info'),
             {
-              confirmButtonText: "确定",
+              confirmButtonText: this.$t('common.confirm'),
               type: "info"
             }
           );
@@ -770,22 +770,22 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
-              this.$message("添加连接信息成功");
+              this.$message(this.$t('datasource.addSuccess'));
               this.createform = JSON.parse(JSON.stringify(this.defaultForm));
               this.loadData();
             } else {
-              this.$alert(res.data.message, "添加连接信息失败",
+              this.$alert(res.data.message, this.$t('datasource.addFailed'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
             }
           });
         } else {
-          this.$alert("请检查输入", "提示信息",
+          this.$alert(this.$t('datasource.checkInput'), this.$t('common.info'),
             {
-              confirmButtonText: "确定",
+              confirmButtonText: this.$t('common.confirm'),
               type: "info"
             }
           );
@@ -807,7 +807,7 @@ export default {
             this.createform.sample = varDatabaseType.sample;
           }
         } else {
-          this.$message.error("查询数据库可用的驱动版本失败," + res.data.message);
+          this.$message.error(this.$t('datasource.loadDriverFailed') + res.data.message);
           this.connectionDriver = [];
         }
       });
@@ -820,7 +820,7 @@ export default {
         if (0 === res.data.code) {
           this.connectionDriver = res.data.data;
         } else {
-          this.$message.error("查询数据库可用的驱动版本失败," + res.data.message);
+          this.$message.error(this.$t('datasource.loadDriverFailed') + res.data.message);
           this.connectionDriver = [];
         }
       });
@@ -860,22 +860,22 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.updateFormVisible = false;
-              this.$message("修改连接信息成功");
+              this.$message(this.$t('datasource.updateSuccess'));
               this.updateform = JSON.parse(JSON.stringify(this.defaultForm));
               this.loadData();
             } else {
-              this.$alert(res.data.message, "修改连接信息失败",
+              this.$alert(res.data.message, this.$t('datasource.updateFailed'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
             }
           });
         } else {
-          this.$alert("请检查输入", "提示信息",
+          this.$alert(this.$t('datasource.checkInput'), this.$t('common.info'),
             {
-              confirmButtonText: "确定",
+              confirmButtonText: this.$t('common.confirm'),
               type: "info"
             }
           );

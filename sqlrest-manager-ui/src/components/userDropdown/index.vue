@@ -2,7 +2,7 @@
   <div class="user-dropdown-wrap">
     <el-dropdown>
       <div class="user-dropdown-photo">
-        当前版本号：
+        {{ $t('common.version') }}
         <el-tag size="medium">{{ version }}</el-tag>
         <span class="user-dropdown-text">
           {{ nickname }}({{username}})
@@ -14,12 +14,12 @@
       <el-dropdown-menu solt="dropdown">
         <el-dropdown-item>
           <router-link to="/user/self">
-            <i class="el-icon-s-custom"></i>个人信息
+            <i class="el-icon-s-custom"></i>{{ $t('common.personalInfo') }}
           </router-link>
         </el-dropdown-item>
         <el-dropdown-item divided>
           <a @click="hadleLogout()">
-            <i class="el-icon-switch-button"></i>退出登录
+            <i class="el-icon-switch-button"></i>{{ $t('common.logout') }}
           </a>
         </el-dropdown-item>
       </el-dropdown-menu>

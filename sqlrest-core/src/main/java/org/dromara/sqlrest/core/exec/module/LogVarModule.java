@@ -29,13 +29,13 @@ public class LogVarModule implements VarModuleInterface {
     return VAR_NAME;
   }
 
-  @Comment("打印调试日志信息")
-  public void print(@Comment("message") String message) {
+  @Comment("comment.log.print")
+  public void print(@Comment("comment.param.message") String message) {
     DebugExecuteLogger.add(message);
   }
 
-  @Comment("打印调试日志信息")
-  public void print(@Comment("message") String message, @Comment("arguments") Object... arguments) {
+  @Comment("comment.log.print")
+  public void print(@Comment("comment.param.message") String message, @Comment("comment.param.arguments") Object... arguments) {
     // https://blog.csdn.net/weixin_44792849/article/details/131854226
     DebugExecuteLogger.add(MessageFormatter.arrayFormat(message, arguments).getMessage());
   }

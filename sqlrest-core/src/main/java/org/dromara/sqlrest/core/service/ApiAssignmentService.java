@@ -49,6 +49,7 @@ import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.service.DisplayRecord;
+import org.dromara.sqlrest.common.util.I18nUtils;
 import org.dromara.sqlrest.core.driver.DriverLoadService;
 import org.dromara.sqlrest.core.dto.ApiAssignmentBaseResponse;
 import org.dromara.sqlrest.core.dto.ApiAssignmentDetailResponse;
@@ -94,8 +95,6 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ApiAssignmentService {
 
-  private final static Map<String, List<ScriptEditorCompletion>> memCache = new ConcurrentHashMap<>();
-
   @Resource
   private ApiAssignmentDao apiAssignmentDao;
   @Resource
@@ -112,10 +111,6 @@ public class ApiAssignmentService {
   private DriverLoadService driverLoadService;
 
   public List<ScriptEditorCompletion> completions() {
-    return memCache.computeIfAbsent("COMPLETION", this::computeCompletions);
-  }
-
-  private List<ScriptEditorCompletion> computeCompletions(String key) {
     List<ScriptEditorCompletion> results = new ArrayList<>();
     results.addAll(ScriptExecutorService.syntax);
 
@@ -124,17 +119,18 @@ public class ApiAssignmentService {
       for (Method method : clazz.getMethods()) {
         if (method.isAnnotationPresent(Comment.class)) {
           String methodName = method.getName();
+          String methodComment = I18nUtils.getMessage(method.getAnnotation(Comment.class).value());
           String params = Stream.of(method.getParameters())
               .map(item -> {
                 String type = item.getType().getSimpleName();
                 String name = item.isAnnotationPresent(Comment.class)
-                    ? item.getAnnotation(Comment.class).value()
+                    ? I18nUtils.getMessage(item.getAnnotation(Comment.class).value())
                     : item.getName();
                 return type + " " + name;
               })
               .collect(Collectors.joining(","));
           results.add(ScriptEditorCompletion.builder()
-              .meta(method.getReturnType().getName())
+              .meta(methodComment)
               .caption(String.format("%s.%s(%s)", varName, methodName, params))
               .value(String.format("%s.%s( )", varName, methodName))
               .build());
@@ -181,7 +177,7 @@ public class ApiAssignmentService {
     if (null == dataSourceEntity) {
       String message = "datasource[id=" + request.getDataSourceId() + " not exist!";
       log.warn("Error for debug, information:{}", message);
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, message);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.datasource.not.found", request.getDataSourceId());
     }
     List<ApiContextEntity> scripts = request.getContextList().stream()
         .map(str -> ApiContextEntity.builder().sqlText(str).build())
@@ -191,10 +187,10 @@ public class ApiAssignmentService {
       List<ParamValue> invalidArgs = new ArrayList<>();
       for (ParamValue paramValue : request.getParamValues()) {
         if (StringUtils.isBlank(paramValue.getName())) {
-          throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter name must is not blank");
+          throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.parameter.name.blank");
         }
         if (Objects.isNull(paramValue.getType())) {
-          throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "parameter type must is not null");
+          throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.parameter.type.null");
         }
         if (paramValue.getType().isObject()) {
           if (null != paramValue.getChildren()) {
@@ -232,7 +228,10 @@ public class ApiAssignmentService {
         String msg = "必填参数为空," + invalidArgs.stream().map(
             p -> (p.getIsArray() ? "数组" : "") + "参数'" + p.getName()
         ).collect(Collectors.joining(";"));
-        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, msg);
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.required.param.empty",
+            invalidArgs.stream().map(
+                p -> (p.getIsArray() ? "array " : "") + "param'" + p.getName()
+            ).collect(Collectors.joining(";")));
       }
 
       for (ParamValue param : request.getParamValues()) {
@@ -374,7 +373,7 @@ public class ApiAssignmentService {
 
   public Long createAssignment(ApiAssignmentSaveRequest request) {
     if (StringUtils.isBlank(request.getPath()) || null == request.getMethod()) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "path or method");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.path.or.method.required");
     }
     if (null != apiAssignmentDao.getByUk(request.getMethod(), request.getPath())) {
       String message = String.format("path=[%s]%s", request.getMethod().name(), request.getPath());
@@ -384,7 +383,7 @@ public class ApiAssignmentService {
       if (!request.getMethod().isHasBody()) {
         if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-              "Request with GET/HEAD method cannot have body.");
+              "api.get.head.no.body");
         }
       }
 
@@ -399,10 +398,10 @@ public class ApiAssignmentService {
     }
     if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-          "Invalid datasourceId or maybe not exist.");
+          "api.invalid.datasourceId");
     }
     if (CollectionUtils.isEmpty(request.getContextList())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "contextList");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.context.list.required");
     }
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
@@ -416,11 +415,11 @@ public class ApiAssignmentService {
 
     if (request.getCacheKeyType().isUseCache()) {
       if (request.getCacheExpireSeconds() <= 0) {
-        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "Invalid param cacheExpireSeconds");
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.invalid.cache.expire.seconds");
       }
       if (CacheKeyTypeEnum.SPEL == request.getCacheKeyType()) {
         if (StringUtils.isBlank(request.getCacheKeyExpr())) {
-          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "SPEL cache must has cacheKeyExpr");
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.spel.cache.key.required");
         }
       }
       if (CacheKeyTypeEnum.AUTO == request.getCacheKeyType()) {
@@ -464,26 +463,26 @@ public class ApiAssignmentService {
 
   public void updateAssignment(ApiAssignmentSaveRequest request) {
     if (StringUtils.isBlank(request.getPath()) || null == request.getMethod()) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "path or method");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.path.or.method.required");
     }
     ApiAssignmentEntity exists = apiAssignmentDao.getById(request.getId(), false);
     if (null == exists) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.id.not.found", request.getId());
     }
     if (exists.getMethod() != request.getMethod()) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "can't update method");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.cannot.update.method");
     }
     if (!StringUtils.equals(exists.getPath(), request.getPath())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "can't update path");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.cannot.update.path");
     }
     if (CollectionUtils.isEmpty(request.getContextList())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "sqlTextList");
+      throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.sql.text.list.required");
     }
     if (!CollectionUtils.isEmpty(request.getParams())) {
       if (!request.getMethod().isHasBody()) {
         if (request.getParams().stream().anyMatch(i -> ParamLocationEnum.REQUEST_BODY == i.getLocation())) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-              "Request with GET/HEAD method cannot have body.");
+              "api.get.head.no.body");
         }
       }
       for (ItemParam itemParam : request.getParams()) {
@@ -497,7 +496,7 @@ public class ApiAssignmentService {
     }
     if (null == request.getDatasourceId() || null == dataSourceDao.getById(request.getDatasourceId())) {
       throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT,
-          "Invalid datasourceId or maybe not exist.");
+          "api.invalid.datasourceId");
     }
     if (null == request.getNamingStrategy()) {
       request.setNamingStrategy(NamingStrategyEnum.CAMEL_CASE);
@@ -508,11 +507,11 @@ public class ApiAssignmentService {
 
     if (request.getCacheKeyType().isUseCache()) {
       if (request.getCacheExpireSeconds() <= 0) {
-        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "Invalid param cacheExpireSeconds");
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.invalid.cache.expire.seconds");
       }
       if (CacheKeyTypeEnum.SPEL == request.getCacheKeyType()) {
         if (StringUtils.isBlank(request.getCacheKeyExpr())) {
-          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "SPEL cache must has cacheKeyExpr");
+          throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "api.spel.cache.key.required");
         }
       }
       if (CacheKeyTypeEnum.AUTO == request.getCacheKeyType()) {
@@ -579,7 +578,7 @@ public class ApiAssignmentService {
           DataTypeFormatMapValue.builder()
               .key(entry.getKey())
               .value(entry.getValue())
-              .remark(entry.getKey().getClassName())
+              .remark(entry.getKey().getRemark())
               .build());
     }
     response.setFormatMap(formatMap);
@@ -645,7 +644,7 @@ public class ApiAssignmentService {
   @Transactional(rollbackFor = Exception.class)
   public void updateGroup(Long groupId, List<Long> ids) {
     if (null == groupId || null == apiGroupDao.getById(groupId)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "groupId=" + groupId);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.id.not.found", groupId);
     }
     apiAssignmentDao.resetGroupByGroupId(groupId);
     apiOnlineDao.resetGroupByGroupId(groupId);

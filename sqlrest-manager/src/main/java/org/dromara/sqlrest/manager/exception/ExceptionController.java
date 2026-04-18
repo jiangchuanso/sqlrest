@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.util.I18nUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,7 +46,7 @@ public class ExceptionController {
 
     log.error("Error:", e);
     if (e instanceof NullPointerException) {
-      return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, "Null Pointer Exception");
+      return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, I18nUtils.getMessage("common.null.pointer"));
     } else {
       return ResultEntity.failed(ResponseErrorCode.ERROR_INTERNAL_ERROR, e.getMessage());
     }

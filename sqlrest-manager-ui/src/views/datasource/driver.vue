@@ -6,7 +6,7 @@
           <div slot="header"
                align="center"
                class="clearfix">
-            <span><b>数据库类型列表</b></span>
+            <span><b>{{ $t('common2.driverVersionNumber') }}</b></span>
           </div>
           <div class="navsBox">
             <ul>
@@ -27,7 +27,7 @@
             <el-button type="primary"
                        size="mini"
                        icon="el-icon-document-add"
-                       @click="dialogVisible=true">添加</el-button>
+                       @click="dialogVisible=true">{{ $t('common2.addDriverJar') }}</el-button>
           </div>
           <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                     :data="versionDrivers"
@@ -35,34 +35,34 @@
                     stripe
                     border>
             <template slot="empty">
-              <span>单击左侧数据库类型来查看对应的驱动版本信息</span>
+              <span>{{ $t('common2.clickSelectType') }}</span>
             </template>
             <el-table-column property="driverVersion"
-                             label="驱动版本号"
+                             :label="$t('common2.driverVersionNumber')"
                              min-width="20%"></el-table-column>
             <el-table-column property="driverClass"
-                             label="驱动类名"
+                             :label="$t('common2.driverClass')"
                              min-width="40%"></el-table-column>
             <el-table-column property="jarFiles"
                              :formatter="formatJarFileList"
-                             label="驱动JAR名称"
+                             :label="$t('common2.driverJarName')"
                              min-width="40%"></el-table-column>
           </el-table>
         </div>
       </div>
     </el-card>
-    <el-dialog title="添加数据库驱动JAR说明"
+    <el-dialog :title="$t('common2.addDriverJar')"
                :visible.sync="dialogVisible"
                width="40%"
                :before-close="handleClose">
-      <span>请按照驱动路径所在的目录${SQLREST_HOME}/drivers下，在数据库类型为名称的目录下，以驱动版本号为名称创建目录并放置对应的驱动jar文件，然后重启即可生效。具体可参考https://gitee.com/inrgihc/sqlrest/tree/master/drivers下的目录结构。</span>
+      <span>{{ $t('common2.driverPathTip') }}</span>
       <span></span>
-      <span>特殊说明：驱动版本目录下的所有JAR必须无任何外部依赖，否则，也需将其依赖JAR一起放置到对应的目录下。</span>
+      <span>{{ $t('common2.driverDependTip') }}</span>
       <span slot="footer"
             class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button @click="dialogVisible = false">{{ $t('common.cancel') }}</el-button>
         <el-button type="primary"
-                   @click="dialogVisible = false">确 定</el-button>
+                   @click="dialogVisible = false">{{ $t('common.confirm') }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -94,7 +94,7 @@ export default {
           this.handleChooseClick('MYSQL', 0);
         } else {
           if (res.data.message) {
-            alert("初始化数据库类型信息失败:" + res.data.message);
+            alert(this.$t('common2.initDriverFailed') + res.data.message);
           }
         }
       }
@@ -109,13 +109,13 @@ export default {
           this.versionDrivers = res.data.data;
         } else {
           if (res.data.message) {
-            alert("查询驱动版本信息失败," + res.data.message);
+            alert(this.$t('common2.queryDriverFailed') + res.data.message);
           }
         }
       });
     },
     handleClose (done) {
-      this.$confirm('确认关闭？')
+      this.$confirm(this.$t('common2.confirmClose'))
         .then(_ => {
           done();
         })

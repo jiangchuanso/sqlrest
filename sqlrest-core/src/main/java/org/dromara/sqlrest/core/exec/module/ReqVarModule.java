@@ -30,8 +30,8 @@ public class ReqVarModule implements VarModuleInterface {
     return VAR_NAME;
   }
 
-  @Comment("设置一个请求参数，如果存在同名将被覆盖")
-  public void setParam(@Comment("name") String name, @Comment("value") Object value) {
+  @Comment("comment.req.setParam")
+  public void setParam(@Comment("comment.param.paramName") String name, @Comment("comment.param.paramValue") Object value) {
     this.params.put(name, value);
   }
 }

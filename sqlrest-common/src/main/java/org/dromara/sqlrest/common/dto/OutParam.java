@@ -48,10 +48,10 @@ public class OutParam implements Serializable {
 
   public void checkValid() {
     if (StringUtils.isBlank(getName())) {
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "output parameter name must is not blank");
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.parameter.name.blank");
     }
     if (null == getType()) {
-      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "output parameter type must is not empty");
+      throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR, "common.parameter.type.null");
     }
 
     if (getType() == ParamTypeEnum.OBJECT) {
@@ -59,7 +59,7 @@ public class OutParam implements Serializable {
         for (OutParam param : children) {
           if (StringUtils.isBlank(param.getName())) {
             throw new CommonException(ResponseErrorCode.ERROR_INTERNAL_ERROR,
-                "output parameter name must is not blank");
+                "common.parameter.name.blank");
           }
         }
       } else {

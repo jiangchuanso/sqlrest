@@ -4,33 +4,33 @@
     <div class="top-bar">
       <div class="title-area">
         <span class="title-icon">🗂️</span>
-        <span class="title-text">集群拓扑结构</span>
-        <span v-if="lastRefreshTime" class="last-refresh">上次刷新: {{ lastRefreshTime }}</span>
+        <span class="title-text">{{ $t('setting.clusterTopology') }}</span>
+        <span v-if="lastRefreshTime" class="last-refresh">{{ $t('setting.lastRefresh') }} {{ lastRefreshTime }}</span>
       </div>
       <div class="legend-area">
         <div class="legend-item">
           <span class="legend-dot manager-dot"></span>
           <div class="legend-info">
             <span class="legend-label">Manager</span>
-            <span class="legend-desc">接口管理节点</span>
+            <span class="legend-desc">{{ $t('setting.managerNode') }}</span>
           </div>
         </div>
         <div class="legend-item">
           <span class="legend-dot gateway-dot"></span>
           <div class="legend-info">
             <span class="legend-label">Gateway</span>
-            <span class="legend-desc">接口网关节点</span>
+            <span class="legend-desc">{{ $t('setting.gatewayNode') }}</span>
           </div>
         </div>
         <div class="legend-item">
           <span class="legend-dot executor-dot"></span>
           <div class="legend-info">
             <span class="legend-label">Executor</span>
-            <span class="legend-desc">接口执行节点</span>
+            <span class="legend-desc">{{ $t('setting.executorNode') }}</span>
           </div>
         </div>
         <button class="refresh-btn" :class="{ spinning: isLoading }" @click="refreshData">
-          <span class="btn-icon">↻</span> 刷新
+          <span class="btn-icon">↻</span> {{ $t('setting.refresh') }}
         </button>
       </div>
     </div>
@@ -39,19 +39,19 @@
     <div class="stats-bar">
       <div class="stat-card manager-card">
         <span class="stat-num">{{ managerCount }}</span>
-        <span class="stat-label">Manager 节点</span>
+        <span class="stat-label">{{ $t('setting.managerNode') }}</span>
       </div>
       <div class="stat-card gateway-card">
         <span class="stat-num">{{ gatewayCount }}</span>
-        <span class="stat-label">Gateway 节点</span>
+        <span class="stat-label">{{ $t('setting.gatewayNode') }}</span>
       </div>
       <div class="stat-card executor-card">
         <span class="stat-num">{{ executorCount }}</span>
-        <span class="stat-label">Executor 节点</span>
+        <span class="stat-label">{{ $t('setting.executorNode') }}</span>
       </div>
       <div class="stat-card total-card">
         <span class="stat-num">{{ totalCount }}</span>
-        <span class="stat-label">节点总数</span>
+        <span class="stat-label">{{ $t('setting.totalNodes') }}</span>
       </div>
     </div>
 
@@ -59,12 +59,12 @@
     <div class="chart-wrapper">
       <div v-if="isLoading" class="loading-mask">
         <div class="spinner"></div>
-        <span class="loading-text">正在加载拓扑数据...</span>
+        <span class="loading-text">{{ $t('setting.loading') }}</span>
       </div>
       <div v-if="isEmpty && !isLoading" class="empty-state">
         <div class="empty-icon">📡</div>
-        <div class="empty-text">暂无节点数据</div>
-        <div class="empty-sub">请确认服务正常运行后点击刷新</div>
+        <div class="empty-text">{{ $t('setting.noData') }}</div>
+        <div class="empty-sub">{{ $t('setting.refreshTip') }}</div>
       </div>
       <div id="topology-chart" ref="topologyChart"></div>
     </div>
@@ -102,7 +102,6 @@ export default {
   },
   mounted () {
     this.initChart();
-    // 数据加载完成后再渲染
     this.loadNodeData().then(() => {
       this.renderChart();
     });
@@ -153,7 +152,6 @@ export default {
 
           this.nodes = [...managerNodes, ...gatewayNodes, ...executorNodes];
 
-          // 构建连接：Manager → Gateway → Executor
           this.links = [];
           managerNodes.forEach(manager => {
             gatewayNodes.forEach(gateway => {
@@ -169,10 +167,10 @@ export default {
           this.isEmpty = this.nodes.length === 0;
           this.lastRefreshTime = new Date().toLocaleTimeString();
         } else {
-          this.$message({ message: '加载节点数据失败：' + res.data.message, type: 'error' });
+          this.$message({ message: this.$t('setting.loadFailedTip') + res.data.message, type: 'error' });
         }
       }).catch(() => {
-        this.$message({ message: '网络请求失败，请稍后重试', type: 'error' });
+        this.$message({ message: this.$t('setting.networkFailed'), type: 'error' });
       }).finally(() => {
         this.isLoading = false;
       });
@@ -213,9 +211,10 @@ export default {
       if (!this.chart) return;
       if (this.nodes.length === 0) return;
 
+      const chartDom = this.$refs.topologyChart;
+      const height = chartDom ? chartDom.clientHeight : 600;
       const positions = this.calculatePositions();
 
-      // 角色配色
       const roleStyle = {
         Manager: {
           color: 'rgba(59, 130, 246, 0.92)',
@@ -290,15 +289,10 @@ export default {
         };
       });
 
-      // 层级标签（虚拟节点，不连线，放在图左侧）
-      const el = this.$refs.topologyChart;
-      const width = (el && el.clientWidth) || 900;
-      const height = (el && el.clientHeight) || 600;
-
       const layerLabels = [
-        { x: 18, y: height * 0.15, text: '管理层', color: '#3b82f6' },
-        { x: 18, y: height * 0.45, text: '网关层', color: '#10b981' },
-        { x: 18, y: height * 0.78, text: '执行层', color: '#f59e0b' }
+        { x: 18, y: height * 0.15, text: this.$t('common2.managementLayer'), color: '#3b82f6' },
+        { x: 18, y: height * 0.45, text: this.$t('common2.gatewayLayer'), color: '#10b981' },
+        { x: 18, y: height * 0.78, text: this.$t('common2.executorLayer'), color: '#f59e0b' }
       ].map((l, idx) => ({
         id: '__layer_' + idx,
         name: l.text,
@@ -347,12 +341,12 @@ export default {
             if (!d.role) return '';
             var roleColors = { Manager: '#60a5fa', Gateway: '#34d399', Executor: '#fbbf24' };
             var color = roleColors[d.role] || '#fff';
-            var statusText = d.status === 'warning' ? '⚠️ 告警' : '✅ 正常';
+            var statusText = d.status === 'warning' ? '⚠️ Warning' : '✅ Normal';
             return '<div style="min-width:200px;padding:4px 0">' +
               '<div style="font-size:15px;font-weight:bold;color:' + color + ';margin-bottom:8px">' + d.role + ' · ' + d.name + '</div>' +
-              '<div style="color:#94a3b8;margin-bottom:6px">状态：' + statusText + '</div>' +
+              '<div style="color:#94a3b8;margin-bottom:6px">Status: ' + statusText + '</div>' +
               '<div style="display:flex;gap:12px;margin-top:6px">' +
-                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">内存</div>' +
+                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">Memory</div>' +
                 '<div style="color:#f1f5f9;font-size:14px;font-weight:600">' + d.memVal + '%</div>' +
                 '<div style="height:4px;background:#1e3a5f;border-radius:2px;margin-top:3px">' +
                 '<div style="height:4px;width:' + d.memVal + '%;background:#60a5fa;border-radius:2px"></div></div></div>' +
@@ -360,7 +354,7 @@ export default {
                 '<div style="color:#f1f5f9;font-size:14px;font-weight:600">' + d.cpuVal + '%</div>' +
                 '<div style="height:4px;background:#1e3a5f;border-radius:2px;margin-top:3px">' +
                 '<div style="height:4px;width:' + d.cpuVal + '%;background:#34d399;border-radius:2px"></div></div></div>' +
-                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">磁盘</div>' +
+                '<div style="flex:1"><div style="color:#94a3b8;font-size:11px">Disk</div>' +
                 '<div style="color:#f1f5f9;font-size:14px;font-weight:600">' + d.diskVal + '%</div>' +
                 '<div style="height:4px;background:#1e3a5f;border-radius:2px;margin-top:3px">' +
                 '<div style="height:4px;width:' + d.diskVal + '%;background:#fbbf24;border-radius:2px"></div></div></div>' +
@@ -433,7 +427,7 @@ export default {
     refreshData () {
       this.loadNodeData().then(() => {
         this.renderChart();
-        this.$message({ message: '拓扑数据已刷新', type: 'success', duration: 1500 });
+        this.$message({ message: this.$t('setting.refreshSuccess'), type: 'success', duration: 1500 });
       });
     }
   }
@@ -450,7 +444,6 @@ export default {
   font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-/* ===== 顶部标题栏 ===== */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -579,7 +572,6 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* ===== 统计卡片栏 ===== */
 .stats-bar {
   display: flex;
   gap: 12px;
@@ -644,7 +636,6 @@ export default {
 .total-card .stat-num { color: #e2e8f0; }
 .total-card .stat-label { color: #94a3b8; }
 
-/* ===== 图表区域 ===== */
 .chart-wrapper {
   flex: 1;
   position: relative;
@@ -658,7 +649,6 @@ export default {
   border-radius: 12px;
 }
 
-/* ===== 加载蒙层 ===== */
 .loading-mask {
   position: absolute;
   inset: 0;
@@ -686,7 +676,6 @@ export default {
   font-size: 14px;
 }
 
-/* ===== 空数据提示 ===== */
 .empty-state {
   position: absolute;
   inset: 0;

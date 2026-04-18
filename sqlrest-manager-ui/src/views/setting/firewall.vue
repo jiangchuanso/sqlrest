@@ -2,52 +2,52 @@
   <div>
     <el-card>
       <el-form label-width="200px">
-        <el-form-item label="访问控制">
+        <el-form-item :label="$t('setting.accessControl')">
           <el-switch v-model="status"
                      active-color="#13ce66"
                      active-value="ON"
                      inactive-value="OFF"
-                     active-text="开启"
-                     inactive-text="关闭">
+                     :active-text="$t('setting.open')"
+                     :inactive-text="$t('setting.closeText')">
           </el-switch>
         </el-form-item>
         <div v-show="status=='ON'">
-          <el-form-item label="名单">
+          <el-form-item :label="$t('setting.list')">
             <el-radio-group v-model="mode"
                             @change="modeChange">
-              <el-radio label="BLACK">黑名单</el-radio>
-              <el-radio label="WHITE">白名单</el-radio>
+              <el-radio label="BLACK">{{ $t('setting.blackList') }}</el-radio>
+              <el-radio label="WHITE">{{ $t('setting.whiteList') }}</el-radio>
             </el-radio-group>
-            <el-alert title="除了黑名单列表中的IP禁止访问API，其他IP一律允许访问"
+            <el-alert :title="$t('setting.blackListTip')"
                       type="warning"
                       :closable="false"
                       v-show="mode == 'BLACK'"></el-alert>
-            <el-alert title="只有白名单列表中的IP才允许访问API，其他IP一律禁止访问"
+            <el-alert :title="$t('setting.whiteListTip')"
                       type="warning"
                       :closable="false"
                       v-show="mode == 'WHITE'"></el-alert>
           </el-form-item>
-          <el-form-item label="黑名单IP列表"
+          <el-form-item :label="$t('setting.blackListIp')"
                         v-show="mode == 'BLACK'">
             <el-input type="textarea"
                       :autosize="{ minRows: 8, maxRows: 20 }"
                       v-model="addresses"
-                      placeholder="每行一个IP，多个IP请用换行分隔.">
+                      :placeholder="$t('setting.ipPlaceholder')">
             </el-input>
           </el-form-item>
-          <el-form-item label="白名单IP列表"
+          <el-form-item :label="$t('setting.whiteListIp')"
                         v-show="mode == 'WHITE'">
             <el-input type="textarea"
                       :autosize="{ minRows: 8, maxRows: 20 }"
                       v-model="addresses"
-                      placeholder="每行一个IP，多个IP请用换行分隔.">
+                      :placeholder="$t('setting.ipPlaceholder')">
             </el-input>
           </el-form-item>
         </div>
         <el-form-item>
           <el-button type="primary"
                      @click="handleSave"
-                     plain>保存</el-button>
+                     plain>{{ $t('setting.saveBtn') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -73,7 +73,7 @@ export default {
           this.mode = res.data.data.mode;
           this.addresses = res.data.data.addresses;
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('setting.loadFailed') + res.data.message);
         }
       }
       );
@@ -83,7 +83,7 @@ export default {
     },
     handleSave () {
       if (this.status === 'ON' && (!this.addresses || /^\s*$/.test(this.addresses))) {
-        alert('IP列表不能为空!')
+        alert(this.$t('setting.ipListEmpty'))
         return
       }
       this.$http({
@@ -99,15 +99,15 @@ export default {
         })
       }).then(res => {
         if (0 === res.data.code) {
-          this.$alert("访问控制保存成功", "提示信息",
+          this.$alert(this.$t('setting.saveSuccessTip'), this.$t('common.info'),
             {
-              confirmButtonText: "确定",
+              confirmButtonText: this.$t('common.confirm'),
               type: "info"
             }
           );
           this.loadData();
         } else {
-          alert("保存失败:" + res.data.message);
+          alert(this.$t('setting.saveFailed') + res.data.message);
         }
       });
     }

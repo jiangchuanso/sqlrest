@@ -22,7 +22,7 @@ import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.service.FlowControlManger;
-import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
+import org.dromara.sqlrest.common.util.I18nUtils;
 import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import java.io.IOException;
@@ -100,7 +100,7 @@ public class SentinelFlowControlManager implements FlowControlManger {
   public void handleBlockException(String resourceName, HttpServletResponse response)
       throws IOException {
     response.setStatus(Constants.SC_TOO_MANY_REQUESTS);
-    ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_TOO_MANY_REQUESTS, resourceName);
+    ResultEntity result = ResultEntity.failed(ResponseErrorCode.ERROR_TOO_MANY_REQUESTS, I18nUtils.getMessage("ERROR_TOO_MANY_REQUESTS") + ": " + resourceName);
     response.getWriter().append(JSONUtil.toJsonStr(result));
   }
 }

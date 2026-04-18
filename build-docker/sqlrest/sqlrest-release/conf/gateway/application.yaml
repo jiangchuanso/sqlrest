@@ -5,6 +5,9 @@ spring:
     include: ${DB_TYPE:mysql}
   application:
     name: sqlrest-gateway
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
   main:
     web-application-type: reactive
   cloud:

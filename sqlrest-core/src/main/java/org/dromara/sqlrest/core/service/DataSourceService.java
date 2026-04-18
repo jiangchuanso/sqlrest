@@ -137,7 +137,7 @@ public class DataSourceService {
   public void testDataSource(Long id) {
     DataSourceEntity dataSourceEntity = dataSourceDao.getById(id);
     if (null == dataSourceEntity) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.id.not.found", id);
     }
     File driverPathFile = SpringUtil.getBean(DriverLoadService.class)
         .getVersionDriverFile(dataSourceEntity.getType(),
@@ -150,7 +150,7 @@ public class DataSourceService {
   public void createDataSource(DataSourceSaveRequest request) {
     if (Objects.nonNull(dataSourceDao.getByName(request.getName()))) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS,
-          "name [" + request.getName() + "] already exists");
+          "datasource.name.exists", request.getName());
     }
 
     DataSourceEntity dataSourceEntity = new DataSourceEntity();
@@ -163,12 +163,12 @@ public class DataSourceService {
 
   public void updateDataSource(DataSourceSaveRequest request) {
     if (Objects.isNull(request.getId()) || Objects.isNull(dataSourceDao.getById(request.getId()))) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + request.getId());
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.id.not.found", request.getId());
     }
 
     DataSourceEntity exist = dataSourceDao.getByName(request.getName());
     if (Objects.nonNull(exist) && !exist.getId().equals(request.getId())) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "name=" + request.getName());
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "common.name.exists", request.getName());
     }
 
     DataSourceEntity dataSourceEntity = new DataSourceEntity();
@@ -182,10 +182,10 @@ public class DataSourceService {
 
   public void deleteDataSource(Long id) {
     if (SpringUtil.getBean(ApiAssignmentDao.class).existsDataSourceById(id)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "id=" + id);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "common.id.not.found", id);
     }
     if (SpringUtil.getBean(ApiOnlineDao.class).existsDataSourceById(id)) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "id=" + id);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_USED, "common.id.not.found", id);
     }
     dataSourceDao.deleteById(id);
     DataSourceUtils.dropHikariDataSource(id);
@@ -357,11 +357,11 @@ public class DataSourceService {
       } else {
         if (supportDbType.hasDatabaseName() && StringUtils.isBlank(matcher.group("database"))) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_JDBC_URL,
-              "库名没有指定 :" + conn.getUrl());
+              "datasource.db.name.missing", conn.getUrl());
         }
         if (supportDbType.hasFilePath() && StringUtils.isBlank(matcher.group("file"))) {
           throw new CommonException(ResponseErrorCode.ERROR_INVALID_JDBC_URL,
-              "文件路径没有指定 :" + conn.getUrl());
+              "datasource.file.path.missing", conn.getUrl());
         }
 
         break;

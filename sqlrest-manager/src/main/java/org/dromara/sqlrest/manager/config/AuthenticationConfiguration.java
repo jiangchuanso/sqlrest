@@ -76,21 +76,21 @@ public class AuthenticationConfiguration implements WebMvcConfigurer {
 
         String accessToken = TokenUtils.getRequestToken(request);
         if (StringUtils.isEmpty(accessToken)) {
-          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "无Token认证失败，请登录");
+          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "auth.no.token");
         }
 
         Object cache = CacheUtils.get(accessToken);
         if (null == cache) {
-          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "token不存在或已经失效，请重新登录!");
+          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "auth.token.invalid");
         }
 
         SystemUserEntity systemUserEntity = (SystemUserEntity) cache;
         SystemUserEntity user = systemUserDAO.findByUsername(systemUserEntity.getUsername());
         if (null == user) {
-          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "token所使用的认证用户不存在!");
+          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "auth.token.user.not.exists");
         }
         if (Boolean.TRUE.equals(user.getLocked())) {
-          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "token所使用的认证用户已经被锁定");
+          throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "auth.token.user.locked");
         }
 
         request.setAttribute("username", user.getUsername());

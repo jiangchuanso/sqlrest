@@ -8,7 +8,7 @@
                      :startVal="startVal"
                      :endVal="statistics.totalCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">开发接口数</p>
+            <p class="cardItem_p1">{{ $t('dashboard.devInterfaceCount') }}</p>
           </div>
           <div class="cardItem_icon">
             <i class="el-icon-s-grid color-green1"></i>
@@ -22,7 +22,7 @@
                      :startVal="startVal"
                      :endVal="statistics.openCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">开放接口数</p>
+            <p class="cardItem_p1">{{ $t('dashboard.openInterfaceCount') }}</p>
           </div>
           <div class="cardItem_icon">
             <i class="el-icon-s-data color-blue"></i>
@@ -36,7 +36,7 @@
                      :startVal="startVal"
                      :endVal="statistics.publishCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">上线接口数</p>
+            <p class="cardItem_p1">{{ $t('dashboard.onlineInterfaceCount') }}</p>
           </div>
           <div class="cardItem_icon">
             <i class="el-icon-loading color-green2"></i>
@@ -50,7 +50,7 @@
                      :startVal="startVal"
                      :endVal="statistics.datasourceCount"
                      :duration="2000"></CountTo>
-            <p class="cardItem_p1">数据源总数</p>
+            <p class="cardItem_p1">{{ $t('dashboard.datasourceTotal') }}</p>
           </div>
           <div class="cardItem_icon">
             <i class="el-icon-office-building color-red"></i>
@@ -63,10 +63,10 @@
            class="clearfix">
         <el-row>
           <el-col :span="8">
-            <span>时间范围:</span>
+            <span>{{ $t('dashboard.timeRange') }}:</span>
             <el-select v-model="selectDays"
                        @change="selectChangedRangeTime"
-                       placeholder="请选择统计时间">
+                       :placeholder="$t('dashboard.selectTimeRange')">
               <el-option v-for="item in optionDays"
                          :key="item.value"
                          :label="item.label"
@@ -75,10 +75,10 @@
             </el-select>
           </el-col>
           <el-col :span="8">
-            <span>TOPN数:</span>
+            <span>{{ $t('dashboard.topNCount') }}:</span>
             <el-select v-model="topNum"
                        @change="selectChangedTopNum"
-                       placeholder="请选择topN">
+                       :placeholder="$t('dashboard.selectTopN')">
               <el-option v-for="item in optionTopN"
                          :key="item.value"
                          :label="item.label"
@@ -125,17 +125,17 @@ export default {
       startVal: 0,
       statistics: {},
       optionDays: [
-        { label: '1日内', value: 1 },
-        { label: '3日内', value: 3 },
-        { label: '7日内', value: 7 },
-        { label: '30日内', value: 30 },
+        { label: '1', value: 1 },
+        { label: '3', value: 3 },
+        { label: '7', value: 7 },
+        { label: '30', value: 30 },
       ],
       optionTopN: [
-        { label: 'Top3', value: 3 },
-        { label: 'Top5', value: 5 },
-        { label: 'Top6', value: 6 },
-        { label: 'Top8', value: 8 },
-        { label: 'Top10', value: 10 },
+        { label: 'Top3 ', value: 3 },
+        { label: 'Top5 ', value: 5 },
+        { label: 'Top6 ', value: 6 },
+        { label: 'Top8 ', value: 8 },
+        { label: 'Top10 ', value: 10 },
       ],
       selectDays: 7,
       topNum: 6,
@@ -146,7 +146,7 @@ export default {
       topAddrChart: null,
       barChartData: {
         title: {
-          text: '趋势统计'
+          text: ''
         },
         tooltip: {
           trigger: "axis"
@@ -154,13 +154,13 @@ export default {
         legend: {
           data: [
             {
-              name: '总数',
+              name: '',
               textStyle: {
                 color: '#000'
               }
             },
             {
-              name: '成功数',
+              name: '',
               textStyle: {
                 color: '#000'
               }
@@ -200,13 +200,13 @@ export default {
         },
         series: [
           {
-            name: "总数",
+            name: '',
             type: "bar",
             barWidth: '8%',
             data: []
           },
           {
-            name: "成功数",
+            name: '',
             type: "bar",
             barWidth: '8%',
             data: []
@@ -215,7 +215,7 @@ export default {
       },
       pieChartData: {
         title: {
-          text: '失败率'
+          text: ''
         },
         tooltip: {
           trigger: 'item'
@@ -226,12 +226,12 @@ export default {
         },
         series: [
           {
-            name: '操作状态',
+            name: '',
             type: 'pie',
             radius: '55%',
             data: [
-              { value: 0, name: '成功' },
-              { value: 0, name: '失败' },
+              { value: 0, name: '' },
+              { value: 0, name: '' },
             ],
             emphasis: {
               itemStyle: {
@@ -245,7 +245,7 @@ export default {
       },
       topPathData: {
         title: {
-          text: 'TOP接口'
+          text: ''
         },
         color: ['#40c9c6'],
         tooltip: {
@@ -278,7 +278,7 @@ export default {
       },
       topAppData: {
         title: {
-          text: 'TOP应用'
+          text: ''
         },
         color: ['#36a3f7'],
         tooltip: {
@@ -311,7 +311,7 @@ export default {
       },
       topAddrData: {
         title: {
-          text: 'TOP地址'
+          text: ''
         },
         color: ['#34bfa3'],
         tooltip: {
@@ -398,7 +398,7 @@ export default {
               var result = res.data.data;
               this.topPathData.yAxis.data = result.map(t => t.name).reverse()
               this.topPathData.series[0].data = result.map(t => t.count).reverse()
-              this.topPathData.title.text = 'TOP' + this.topNum + '接口'
+              this.topPathData.title.text = 'TOP' + this.topNum + this.$t('dashboard.topInterface')
               this.topPathChart.setOption(this.topPathData, true);
             }
           }
@@ -411,7 +411,7 @@ export default {
               var result = res.data.data;
               this.topAppData.yAxis.data = result.map(t => t.name).reverse()
               this.topAppData.series[0].data = result.map(t => t.count).reverse()
-              this.topAppData.title.text = 'TOP' + this.topNum + '应用'
+              this.topAppData.title.text = 'TOP' + this.topNum + this.$t('dashboard.topApp')
               this.topAppChart.setOption(this.topAppData, true);
             }
           }
@@ -424,7 +424,7 @@ export default {
               var result = res.data.data;
               this.topAddrData.yAxis.data = result.map(t => t.name).reverse()
               this.topAddrData.series[0].data = result.map(t => t.count).reverse()
-              this.topAddrData.title.text = 'TOP' + this.topNum + '地址'
+              this.topAddrData.title.text = 'TOP' + this.topNum + this.$t('dashboard.topAddr')
               this.topAddrChart.setOption(this.topAddrData, true);
             }
           }
@@ -436,9 +436,44 @@ export default {
     },
     selectChangedTopNum: function () {
       this.loadData();
+    },
+    initTranslations () {
+      this.optionDays = [
+        { label: this.$t('dashboard.1day'), value: 1 },
+        { label: this.$t('dashboard.3days'), value: 3 },
+        { label: this.$t('dashboard.7days'), value: 7 },
+        { label: this.$t('dashboard.30days'), value: 30 },
+      ];
+      this.barChartData.title.text = this.$t('dashboard.trendStats');
+      this.barChartData.legend.data[0].name = this.$t('dashboard.total');
+      this.barChartData.legend.data[1].name = this.$t('dashboard.successCount');
+      this.barChartData.series[0].name = this.$t('dashboard.total');
+      this.barChartData.series[1].name = this.$t('dashboard.successCount');
+      this.pieChartData.title.text = this.$t('dashboard.failRate');
+      this.pieChartData.series[0].name = this.$t('dashboard.operationStatus');
+      this.topPathData.title.text = this.$t('dashboard.topInterface');
+      this.topAppData.title.text = this.$t('dashboard.topApp');
+      this.topAddrData.title.text = this.$t('dashboard.topAddr');
+    },
+    updateChartsLocale () {
+      this.initTranslations();
+      this.loadData();
+    }
+  },
+  computed: {
+    currentLocale () {
+      return this.$i18n.locale
+    }
+  },
+  watch: {
+    currentLocale () {
+      this.$nextTick(() => {
+        this.updateChartsLocale();
+      });
     }
   },
   created () {
+    this.initTranslations();
     this.loadTotal();
   },
   mounted () {

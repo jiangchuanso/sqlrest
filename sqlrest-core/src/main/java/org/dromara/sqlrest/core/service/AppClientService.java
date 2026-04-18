@@ -110,7 +110,7 @@ public class AppClientService {
   public String getSecret(Long id) {
     AppClientEntity entity = appClientDao.getById(id);
     if (null == entity) {
-      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "id=" + id);
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "common.id.not.found", id);
     }
     return entity.getAppSecret();
   }

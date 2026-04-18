@@ -4,7 +4,7 @@
       <div class="client-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input placeholder="请输入名称关键字搜索"
+            <el-input :placeholder="$t('mcp.searchPlaceholder')"
                       size="mini"
                       v-model="keyword"
                       @change="searchByKeyword"
@@ -17,7 +17,7 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="handleAdd">添加</el-button>
+                     @click="handleAdd">{{ $t('mcp.add') }}</el-button>
         </div>
       </div>
 
@@ -26,30 +26,30 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('mcp.id')"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="工具名称"
+                         :label="$t('mcp.toolName')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="description"
-                         label="描述"
+                         :label="$t('mcp.toolDesc')"
                          show-overflow-tooltip
                          min-width="15%"></el-table-column>
         <el-table-column prop="apiName"
-                         label="链接接口"
+                         :label="$t('mcp.linkApi')"
                          :formatter="stringFormatApiInfo"
                          show-overflow-tooltip
                          min-width="15%"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('mcp.createTime')"
                          min-width="15%">
         </el-table-column>
         <el-table-column prop="updateTime"
-                         label="更新时间"
+                         :label="$t('mcp.updateTime')"
                          min-width="15%">
         </el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('mcp.operation')"
                          min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
@@ -57,17 +57,17 @@
                          type="warning"
                          icon="el-icon-document"
                          @click="handleLink(scope.$index, scope.row)"
-                         round>跳转</el-button>
+                         round>{{ $t('mcp.view') }}</el-button>
               <el-button size="small"
                          type="danger"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>修改</el-button>
+                         round>{{ $t('mcp.edit') }}</el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('mcp.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -83,7 +83,7 @@
                        :total="totalCount"></el-pagination>
       </div>
 
-      <el-dialog title="添加工具"
+      <el-dialog :title="$t('mcp.addTool')"
                  :visible.sync="createFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -98,9 +98,9 @@
                         style="width:85%">
             <span slot="label"
                   style="display:inline-block;">
-              工具名称
+              {{ $t('mcp.toolName') }}
               <el-tooltip effect="dark"
-                          content="tool的名称，即函数名，建议采用英文字母、数字及下划线命名"
+                          :content="$t('mcp.toolNameTip')"
                           placement="bottom">
                 <i class='el-icon-question' />
               </el-tooltip>
@@ -114,9 +114,9 @@
                         style="width:85%">
             <span slot="label"
                   style="display:inline-block;">
-              工具描述
+              {{ $t('mcp.toolDesc') }}
               <el-tooltip effect="dark"
-                          content="tool的描述，请尽量详细描述此项，以便大模型能够正确使用到此tool"
+                          :content="$t('mcp.toolDescTip')"
                           placement="bottom">
                 <i class='el-icon-question' />
               </el-tooltip>
@@ -124,30 +124,30 @@
             <el-input type="textarea"
                       :rows="6"
                       :spellcheck="false"
-                      placeholder="请输入"
+                      :placeholder="$t('mcp.pleaseSelect')"
                       v-model="createform.description"
                       auto-complete="off">
             </el-input>
           </el-form-item>
-          <el-form-item label="模块名称"
+          <el-form-item :label="$t('mcp.moduleName')"
                         label-width="120px"
                         :required=true
                         style="width:85%">
             <el-select v-model="createform.moduleId"
                        @change="selectChangedModule"
-                       placeholder="请选择">
+                       :placeholder="$t('mcp.pleaseSelect')">
               <el-option v-for="(item,index) in moduleList"
                          :key="index"
                          :label="`[${item.id}] ${item.name}`"
                          :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="接口名称"
+          <el-form-item :label="$t('mcp.apiName')"
                         label-width="120px"
                         :required=true
                         style="width:85%">
             <el-select v-model="createform.apiId"
-                       placeholder="请选择">
+                       :placeholder="$t('mcp.pleaseSelect')">
               <el-option v-for="(item,index) in apiList"
                          :key="index"
                          :label="`[${item.id}] ${item.name}`"
@@ -157,13 +157,13 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="createFormVisible = false">取 消</el-button>
+          <el-button @click="createFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="修改工具"
+      <el-dialog :title="$t('mcp.updateTool')"
                  :visible.sync="updateFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -178,9 +178,9 @@
                         style="width:85%">
             <span slot="label"
                   style="display:inline-block;">
-              工具名称
+              {{ $t('mcp.toolName') }}
               <el-tooltip effect="dark"
-                          content="tool的名称，即函数名，建议采用英文字母、数字及下划线命名"
+                          :content="$t('mcp.toolNameTip')"
                           placement="bottom">
                 <i class='el-icon-question' />
               </el-tooltip>
@@ -194,9 +194,9 @@
                         style="width:85%">
             <span slot="label"
                   style="display:inline-block;">
-              工具描述
+              {{ $t('mcp.toolDesc') }}
               <el-tooltip effect="dark"
-                          content="tool的描述，请尽量详细描述此项，以便大模型能够正确使用到此tool"
+                          :content="$t('mcp.toolDescTip')"
                           placement="bottom">
                 <i class='el-icon-question' />
               </el-tooltip>
@@ -204,30 +204,30 @@
             <el-input type="textarea"
                       :rows="6"
                       :spellcheck="false"
-                      placeholder="请输入"
+                      :placeholder="$t('mcp.pleaseSelect')"
                       v-model="updateform.description"
                       auto-complete="off">
             </el-input>
           </el-form-item>
-          <el-form-item label="模块名称"
+          <el-form-item :label="$t('mcp.moduleName')"
                         label-width="120px"
                         :required=true
                         style="width:85%">
             <el-select v-model="updateform.moduleId"
                        @change="selectChangedModule"
-                       placeholder="请选择">
+                       :placeholder="$t('mcp.pleaseSelect')">
               <el-option v-for="(item,index) in moduleList"
                          :key="index"
                          :label="`[${item.id}] ${item.name}`"
                          :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="接口名称"
+          <el-form-item :label="$t('mcp.apiName')"
                         label-width="120px"
                         :required=true
                         style="width:85%">
             <el-select v-model="updateform.apiId"
-                       placeholder="请选择">
+                       :placeholder="$t('mcp.pleaseSelect')">
               <el-option v-for="(item,index) in apiList"
                          :key="index"
                          :label="`[${item.id}] ${item.name}`"
@@ -237,9 +237,9 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="updateFormVisible = false">取 消</el-button>
+          <el-button @click="updateFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleSave">确 定</el-button>
+                     @click="handleSave">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
@@ -285,14 +285,14 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('mcp.nameRequired'),
             trigger: "blur"
           }
         ],
         description: [
           {
             required: true,
-            message: "描述不能为空",
+            message: this.$t('mcp.descRequired'),
             trigger: "blur"
           }
         ]
@@ -321,7 +321,7 @@ export default {
           this.totalCount = res.data.pagination.total;
           this.tableData = res.data.data;
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('mcp.loadFailed') + res.data.message);
         }
       });
     },
@@ -344,7 +344,7 @@ export default {
             this.moduleList = res.data.data || [];
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('mcp.loadFailed') + res.data.message);
               this.moduleList = [];
             }
           }
@@ -395,18 +395,18 @@ export default {
         if (0 === res.data.code) {
           this.apiList = res.data.data;
         } else {
-          alert("加载列表失败:" + res.data.message);
+          alert(this.$t('mcp.loadListFailed') + res.data.message);
         }
       }
       );
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此工具ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('mcp.confirmDelete') + row.id + this.$t('common2.toVersion'),
+        this.$t('common.warning'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -416,7 +416,7 @@ export default {
           if (0 === res.data.code) {
             this.loadData();
           } else {
-            alert("删除失败:" + res.data.message);
+            alert(this.$t('mcp.deleteFailed') + res.data.message);
           }
         });
       });
@@ -438,15 +438,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
-              this.$message("添加成功");
+              this.$message(this.$t('mcp.addSuccess'));
               this.createform = {};
               this.loadData();
             } else {
-              alert("添加失败:" + res.data.message);
+              alert(this.$t('mcp.addFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },
@@ -468,15 +468,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.updateFormVisible = false;
-              this.$message("修改成功");
+              this.$message(this.$t('mcp.updateSuccess'));
               this.updateform = {};
               this.loadData();
             } else {
-              alert("修改失败:" + res.data.message);
+              alert(this.$t('message.operationFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },

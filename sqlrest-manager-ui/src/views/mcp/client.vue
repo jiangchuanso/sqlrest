@@ -4,7 +4,7 @@
       <div class="group-list-top">
         <div class="left-search-input-group">
           <div class="left-search-input">
-            <el-input placeholder="名称搜索"
+            <el-input :placeholder="$t('module.searchPlaceholder')"
                       size="mini"
                       v-model="searchText"
                       :clearable=true
@@ -17,7 +17,7 @@
           <el-button type="primary"
                      size="mini"
                      icon="el-icon-document-add"
-                     @click="addGroup">添加</el-button>
+                     @click="addGroup">{{ $t('mcp.add') }}</el-button>
         </div>
       </div>
 
@@ -26,20 +26,20 @@
                 size="small"
                 border>
         <el-table-column prop="id"
-                         label="编号"
+                         :label="$t('mcp.id')"
                          min-width="5%"></el-table-column>
         <el-table-column prop="name"
-                         label="名称"
+                         :label="$t('mcp.name')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
         <el-table-column prop="createTime"
-                         label="创建时间"
+                         :label="$t('mcp.createTime')"
                          min-width="20%"></el-table-column>
         <el-table-column prop="updateTime"
-                         label="更新时间"
+                         :label="$t('mcp.updateTime')"
                          show-overflow-tooltip
                          min-width="20%"></el-table-column>
-        <el-table-column label="操作"
+        <el-table-column :label="$t('mcp.operation')"
                          min-width="35%">
           <template slot-scope="scope">
             <el-button-group>
@@ -47,17 +47,17 @@
                          type="danger"
                          icon="el-icon-document"
                          @click="handleShowToken(scope.$index, scope.row)"
-                         round>查看</el-button>
+                         round>{{ $t('mcp.view') }}</el-button>
               <el-button size="small"
                          type="warning"
                          icon="el-icon-edit"
                          @click="handleUpdate(scope.$index, scope.row)"
-                         round>编辑</el-button>
+                         round>{{ $t('mcp.edit') }}</el-button>
               <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
-                         round>删除</el-button>
+                         round>{{ $t('mcp.delete') }}</el-button>
             </el-button-group>
           </template>
         </el-table-column>
@@ -73,10 +73,10 @@
                        :total="totalItemCount"></el-pagination>
       </div>
 
-      <el-dialog title="查看"
+      <el-dialog :title="$t('mcp.view')"
                  :visible.sync="ShowTokenDialog">
         <el-form size="mini">
-          <el-form-item label="MCP访问令牌"
+          <el-form-item :label="$t('mcp.mcpToken')"
                         label-width="100px"
                         style="width:100%">
             <el-input type="input"
@@ -84,13 +84,13 @@
                       :spellcheck="false"
                       id="tokenTextInput"
                       v-model="clientTokenValue"></el-input>
-            <el-button @click="handleCopyTokenText">点击复制</el-button>
+            <el-button @click="handleCopyTokenText">{{ $t('mcp.clickToCopy') }}</el-button>
           </el-form-item>
-          <el-form-item label="SSE服务地址"
+          <el-form-item :label="$t('mcp.sseAddress')"
                         label-width="100px"
                         style="width:100%">
             <el-tooltip effect="dark"
-                        content="服务器发送事件(SSE)"
+                        :content="$t('mcp.sseTip')"
                         placement="bottom">
               <i class='el-icon-question' />
             </el-tooltip>
@@ -100,13 +100,13 @@
                       id="sseAddressTextInput"
                       v-model="serverSseUrlAddress"></el-input>
             <el-button style="width:10%"
-                       @click="handleCopySseAddressText">点击复制</el-button>
+                       @click="handleCopySseAddressText">{{ $t('mcp.clickToCopy') }}</el-button>
           </el-form-item>
-          <el-form-item label="流式Http地址"
+          <el-form-item :label="$t('mcp.streamAddress')"
                         label-width="100px"
                         style="width:100%">
             <el-tooltip effect="dark"
-                        content="可流式传输的HTTP(StreamableHttp)"
+                        :content="$t('mcp.streamTip')"
                         placement="bottom">
               <i class='el-icon-question' />
             </el-tooltip>
@@ -116,15 +116,15 @@
                       id="streamAddressTextInput"
                       v-model="serverStreamUrlAddress"></el-input>
             <el-button style="width:10%"
-                       @click="handleCopyStreamAddressText">点击复制</el-button>
+                       @click="handleCopyStreamAddressText">{{ $t('mcp.clickToCopy') }}</el-button>
           </el-form-item>
         </el-form>
         <span slot="footer">
-          <el-button @click="ShowTokenDialog = false">取消</el-button>
+          <el-button @click="ShowTokenDialog = false">{{ $t('common.cancel') }}</el-button>
         </span>
       </el-dialog>
 
-      <el-dialog title="添加信息"
+      <el-dialog :title="$t('setting.addInfo')"
                  :visible.sync="createFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -133,7 +133,7 @@
                  status-icon
                  :rules="rules"
                  ref="createform">
-          <el-form-item label="令牌名称"
+          <el-form-item :label="$t('mcp.name')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -144,13 +144,13 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="createFormVisible = false">取 消</el-button>
+          <el-button @click="createFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleCreate">确 定</el-button>
+                     @click="handleCreate">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
 
-      <el-dialog title="修改信息"
+      <el-dialog :title="$t('setting.updateInfo')"
                  :visible.sync="updateFormVisible"
                  :showClose="false"
                  :before-close="handleClose">
@@ -159,7 +159,7 @@
                  status-icon
                  :rules="rules"
                  ref="updateform">
-          <el-form-item label="令牌名称"
+          <el-form-item :label="$t('mcp.name')"
                         label-width="120px"
                         :required=true
                         prop="name"
@@ -170,9 +170,9 @@
         </el-form>
         <div slot="footer"
              class="dialog-footer">
-          <el-button @click="updateFormVisible = false">取 消</el-button>
+          <el-button @click="updateFormVisible = false">{{ $t('common.cancel') }}</el-button>
           <el-button type="primary"
-                     @click="handleSave">确 定</el-button>
+                     @click="handleSave">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -211,7 +211,7 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('mcp.nameRequired'),
             trigger: "blur"
           }
         ]
@@ -238,7 +238,7 @@ export default {
           this.totalItemCount = res.data.pagination.total
           this.tableData = res.data.data;
         } else {
-          alert("加载数据失败:" + res.data.message);
+          alert(this.$t('mcp.loadFailed') + res.data.message);
         }
       }
       );
@@ -256,7 +256,7 @@ export default {
             this.serverStreamUrlAddress = res.data.data.streamAddrPrefix + token;
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('mcp.loadFailed') + res.data.message);
             }
           }
         }
@@ -266,11 +266,11 @@ export default {
     },
     handleDelete: function (index, row) {
       this.$confirm(
-        "此操作将此令牌ID=" + row.id + "删除么, 是否继续?",
-        "提示",
+        this.$t('mcp.confirmDeleteClient') + row.id + this.$t('common2.toVersion'),
+        this.$t('common.warning'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -280,7 +280,7 @@ export default {
           if (0 === res.data.code) {
             this.loadData();
           } else {
-            alert("删除失败:" + res.data.message);
+            alert(this.$t('mcp.deleteFailed') + res.data.message);
           }
         });
       });
@@ -304,15 +304,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.createFormVisible = false;
-              this.$message("添加成功");
+              this.$message(this.$t('mcp.addSuccess'));
               this.createform = {};
               this.loadData();
             } else {
-              alert("添加失败:" + res.data.message);
+              alert(this.$t('mcp.addFailedClient') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },
@@ -324,17 +324,17 @@ export default {
     handleCopyTokenText: function () {
       document.getElementById("tokenTextInput").select()
       document.execCommand("copy")
-      this.$message.success("复制令牌成功")
+      this.$message.success(this.$t('mcp.tokenCopied'))
     },
     handleCopySseAddressText: function () {
       document.getElementById("sseAddressTextInput").select()
       document.execCommand("copy")
-      this.$message.success("复制SSE地址成功")
+      this.$message.success(this.$t('mcp.sseCopied'))
     },
     handleCopyStreamAddressText: function () {
       document.getElementById("streamAddressTextInput").select()
       document.execCommand("copy")
-      this.$message.success("复制StreamableHttp地址成功")
+      this.$message.success(this.$t('mcp.streamCopied'))
     },
     handleUpdate: function (index, row) {
       this.updateform = JSON.parse(JSON.stringify(row));
@@ -355,15 +355,15 @@ export default {
           }).then(res => {
             if (0 === res.data.code) {
               this.updateFormVisible = false;
-              this.$message("修改成功");
+              this.$message(this.$t('mcp.updateSuccess'));
               this.loadData();
               this.updateform = {};
             } else {
-              alert("修改失败:" + res.data.message);
+              alert(this.$t('message.operationFailed') + res.data.message);
             }
           });
         } else {
-          alert("请检查输入");
+          alert(this.$t('common.checkInput'));
         }
       });
     },

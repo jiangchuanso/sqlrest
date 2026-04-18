@@ -5,7 +5,7 @@
         <el-button type="primary"
                    size="mini"
                    @click="handleShowTree">
-          元数据查看
+          {{ $t('common2.metadataView') }}
           <i class="el-icon-d-arrow-left"
              v-if="showTree"></i>
           <i class="el-icon-d-arrow-right"
@@ -19,20 +19,20 @@
                      size="mini"
                      @click="handleExitShowVersionDetail">
             <i class="el-icon-question">
-              退出版本查看</i>
+              {{ $t('common2.exitVersionView') }}</i>
           </el-button>
 
           <el-button type="warning"
                      size="mini"
                      @click="handleHelp">
             <i class="el-icon-question">
-              帮助</i>
+              {{ $t('common2.help') }}</i>
           </el-button>
           <el-button type="primary"
                      size="mini"
                      @click="handleGoBack">
             <i class="el-icon-d-arrow-left">
-              返回</i>
+              {{ $t('common2.back') }}</i>
           </el-button>
 
           <el-button type="primary"
@@ -40,21 +40,21 @@
                      v-if="!isOnlyShowDetail"
                      icon="el-icon-arrow-left"
                      @click="handleDebug">
-            调试
+            {{ $t('common2.debug') }}
           </el-button>
           <el-button type="primary"
                      size="mini"
                      v-if="!isOnlyShowDetail"
                      icon="el-icon-arrow-left"
                      @click="handleSave">
-            保存
+            {{ $t('common2.save') }}
           </el-button>
           <el-button type="primary"
                      size="mini"
                      v-if="isOnlyShowDetail"
                      icon="el-icon-top"
                      @click="handleShowVersionList">
-            版本
+            {{ $t('common2.version') }}
           </el-button>
         </div>
       </el-col>
@@ -63,7 +63,7 @@
       <el-col :span="4"
               v-if="showTree">
         <div class="grid-content bg-purple">
-          <el-select placeholder="请选择数据源"
+          <el-select :placeholder="$t('common2.selectDatasource')"
                      v-model="createParam.dataSourceId"
                      @change="loadTreeData">
             <el-option v-for="(item,index) in connectionList"
@@ -72,7 +72,7 @@
                        :value="item.id"></el-option>
           </el-select>
           <el-tree ref="tree"
-                   empty-text="请选择数据源后查看"
+                   :empty-text="$t('common2.emptySelectDatasource')"
                    style="min-height: 500px; max-height: 800px; overflow: auto;"
                    :indent=6
                    :data="treeData"
@@ -94,19 +94,19 @@
                    ref="form">
             <el-tabs type="border-card"
                      v-model="tabActiveName">
-              <el-tab-pane label="SQL配置"
+              <el-tab-pane :label="$t('common2.sqlConfig')"
                            name="basic">
                 <el-row>
                   <el-col :span="6">
-                    <el-form-item label="执行"
+                    <el-form-item :label="$t('common2.execute')"
                                   label-width="65px">
                       <el-radio-group size="small"
                                       @change="agreeEngineChange"
                                       v-model="createParam.engine">
                         <el-radio-button label="SQL"
-                                         :disabled="$route.query.id>0 && createParam.engine==='SCRIPT'">SQL语句</el-radio-button>
+                                         :disabled="$route.query.id>0 && createParam.engine==='SCRIPT'">{{ $t('common2.sqlStatement') }}</el-radio-button>
                         <el-radio-button label="SCRIPT"
-                                         :disabled="$route.query.id>0 && createParam.engine==='SQL'">Groovy脚本</el-radio-button>
+                                         :disabled="$route.query.id>0 && createParam.engine==='SQL'">{{ $t('common2.groovyScript') }}</el-radio-button>
                       </el-radio-group>
                     </el-form-item>
                   </el-col>
@@ -122,9 +122,9 @@
                     <el-form-item label-width="65px">
                       <span slot="label"
                             style="display:inline-block;">
-                        语句
+                        {{ $t('common2.statement') }}
                         <el-tooltip effect="dark"
-                                    content="每个SQL窗口中至多写一条SQL语句，支持Mybatis的动态SQL语法"
+                                    :content="$t('common2.parseInputParamsTip')"
                                     placement="bottom">
                           <i class='el-icon-question' />
                         </el-tooltip>
@@ -142,9 +142,9 @@
                     <el-form-item label-width="65px">
                       <span slot="label"
                             style="display:inline-block;">
-                        脚本
+                        {{ $t('common2.script') }}
                         <el-tooltip effect="dark"
-                                    content="可以编写符合groovy语法格式的脚本内容"
+                                    :content="$t('common2.parseScriptTip')"
                                     placement="bottom">
                           <i class='el-icon-question' />
                         </el-tooltip>
@@ -158,7 +158,7 @@
 
                 <el-tabs type="border-card"
                          tab-position="left">
-                  <el-tab-pane label="入参">
+                  <el-tab-pane :label="$t('common2.inputParams')">
                     <el-row>
                       <el-col :span="3"
                               v-if="createParam.engine==='SQL'">
@@ -167,7 +167,7 @@
                                    icon="el-icon-arrow-down"
                                    v-if="!isOnlyShowDetail"
                                    @click="handleParseInputParams">
-                          入参解析
+                          {{ $t('common2.parseInputParams') }}
                         </el-button>
                       </el-col>
                       <el-col :span="3">
@@ -176,7 +176,7 @@
                                    icon="el-icon-arrow-down"
                                    v-if="!isOnlyShowDetail"
                                    @click="handleAddInputParams">
-                          添加入参
+                          {{ $t('common2.addInputParams') }}
                         </el-button>
                       </el-col>
                       <el-col :span="3">
@@ -185,7 +185,7 @@
                                    icon="el-icon-arrow-down"
                                    v-if="!isOnlyShowDetail"
                                    @click="handleAddPagableParams">
-                          分页参数
+                          {{ $t('common2.pageParams') }}
                         </el-button>
                       </el-col>
                       <el-col :span="15">
@@ -198,11 +198,10 @@
                               row-key="id"
                               :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                               border>
-                      <!--如果不是懒加载的话，后端不要设置hasChildren 这个属性，要不然不能树形显示； -->
                       <template slot="empty">
-                        <span>请输入sql后点击"入参解析"按钮后解析出这里的入参</span>
+                        <span>{{ $t('common2.afterSqlParse') }}</span>
                       </template>
-                      <el-table-column label="参数名"
+                      <el-table-column :label="$t('common2.paramName')"
                                        min-width="35%">
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.name"
@@ -210,7 +209,7 @@
                                     :disabled="isOnlyShowDetail"> </el-input>
                         </template>
                       </el-table-column>
-                      <el-table-column label="参数位置"
+                      <el-table-column :label="$t('common2.paramLocation')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-select v-model="scope.row.location"
@@ -224,7 +223,7 @@
                           </el-select>
                         </template>
                       </el-table-column>
-                      <el-table-column label="参数类型"
+                      <el-table-column :label="$t('common2.paramType')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-select v-model="scope.row.type"
@@ -237,21 +236,21 @@
                           </el-select>
                         </template>
                       </el-table-column>
-                      <el-table-column label="数组"
+                      <el-table-column :label="$t('common2.isArray')"
                                        min-width="10%">
                         <template slot-scope="scope">
                           <el-checkbox v-model="scope.row.isArray"
                                        :disabled="isOnlyShowDetail"></el-checkbox>
                         </template>
                       </el-table-column>
-                      <el-table-column label="必填"
+                      <el-table-column :label="$t('common2.required')"
                                        min-width="10%">
                         <template slot-scope="scope">
                           <el-checkbox v-model="scope.row.required"
                                        :disabled="isOnlyShowDetail"></el-checkbox>
                         </template>
                       </el-table-column>
-                      <el-table-column label="默认值"
+                      <el-table-column :label="$t('common2.defaultValue')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.defaultValue"
@@ -259,7 +258,7 @@
                                     :disabled="isOnlyShowDetail "></el-input>
                         </template>
                       </el-table-column>
-                      <el-table-column label="描述"
+                      <el-table-column :label="$t('common2.description')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.remark"
@@ -267,7 +266,7 @@
                                     :disabled="isOnlyShowDetail"></el-input>
                         </template>
                       </el-table-column>
-                      <el-table-column label="操作"
+                      <el-table-column :label="$t('common2.operation')"
                                        v-if="!isOnlyShowDetail"
                                        min-width="25%">
                         <template slot-scope="scope">
@@ -281,13 +280,13 @@
                       </el-table-column>
                     </el-table>
                   </el-tab-pane>
-                  <el-tab-pane label="出参">
+                  <el-tab-pane :label="$t('common2.outputParams')">
                     <el-button type="primary"
                                size="mini"
                                icon="el-icon-arrow-down"
                                v-if="!isOnlyShowDetail"
                                @click="handleAddOutputParams">
-                      添加出参
+                      {{ $t('common2.addOutputParams') }}
                     </el-button>
                     <el-table :data="outputParams"
                               :header-cell-style="{background:'#eef1f6',color:'#606266'}"
@@ -297,9 +296,9 @@
                               :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
                               border>
                       <template slot="empty">
-                        <span>请输入sql后成功执行"调试"按钮后解析出这里的出参</span>
+                        <span>{{ $t('common2.afterDebugSuccess') }}</span>
                       </template>
-                      <el-table-column label="参数名"
+                      <el-table-column :label="$t('common2.paramName')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.name"
@@ -307,7 +306,7 @@
                                     :disabled="isOnlyShowDetail"> </el-input>
                         </template>
                       </el-table-column>
-                      <el-table-column label="参数类型"
+                      <el-table-column :label="$t('common2.paramType')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-select v-model="scope.row.type"
@@ -320,7 +319,7 @@
                           </el-select>
                         </template>
                       </el-table-column>
-                      <el-table-column label="描述"
+                      <el-table-column :label="$t('common2.description')"
                                        min-width="25%">
                         <template slot-scope="scope">
                           <el-input v-model="scope.row.remark"
@@ -328,7 +327,7 @@
                                     :disabled="isOnlyShowDetail"></el-input>
                         </template>
                       </el-table-column>
-                      <el-table-column label="操作"
+                      <el-table-column :label="$t('common2.operation')"
                                        v-if="!isOnlyShowDetail"
                                        min-width="25%">
                         <template slot-scope="scope">
@@ -344,11 +343,11 @@
                   </el-tab-pane>
                 </el-tabs>
               </el-tab-pane>
-              <el-tab-pane label="接口配置"
+              <el-tab-pane :label="$t('common2.interfaceConfig')"
                            name="detail">
                 <el-row>
                   <el-col :span="12">
-                    <el-form-item label="路径"
+                    <el-form-item :label="$t('common2.path')"
                                   label-width="65px"
                                   style="width:80%"
                                   :required=true
@@ -360,7 +359,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item label="方法"
+                    <el-form-item :label="$t('common2.method')"
                                   label-width="65px"
                                   style="width:50%"
                                   :required=true
@@ -381,7 +380,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="12">
-                    <el-form-item label="名称"
+                    <el-form-item :label="$t('mcp.name')"
                                   label-width="65px"
                                   :required=true
                                   prop="name">
@@ -392,7 +391,7 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item label="类型"
+                    <el-form-item :label="$t('common2.type')"
                                   style="width:80%"
                                   label-width="65px"
                                   :required=true
@@ -409,13 +408,13 @@
                 </el-row>
                 <el-row>
                   <el-col :span="12">
-                    <el-form-item label="模块"
+                    <el-form-item :label="$t('common2.module')"
                                   label-width="65px"
                                   :required=true
                                   style="width:80%"
                                   prop="module">
                       <el-select v-model="createParam.module"
-                                 placeholder="请选择"
+                                 :placeholder="$t('common2.pleaseSelect')"
                                  :disabled="isOnlyShowDetail">
                         <el-option v-for="(item,index) in moduleList"
                                    :key="index"
@@ -425,13 +424,13 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="12">
-                    <el-form-item label="授权"
+                    <el-form-item :label="$t('common2.auth')"
                                   label-width="65px"
                                   style="width:80%"
                                   :required=true
                                   prop="group">
                       <el-select v-model="createParam.group"
-                                 placeholder="请选择"
+                                 :placeholder="$t('common2.pleaseSelect')"
                                  :disabled="isOnlyShowDetail">
                         <el-option v-for="(item,index) in groupList"
                                    :key="index"
@@ -443,7 +442,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="24">
-                    <el-form-item label="描述"
+                    <el-form-item :label="$t('common2.description')"
                                   label-width="60px"
                                   prop="description"
                                   style="width:100%">
@@ -454,7 +453,7 @@
                   </el-col>
                 </el-row>
               </el-tab-pane>
-              <el-tab-pane label="出参格式"
+              <el-tab-pane :label="$t('common2.outputFormat')"
                            name="outputParams">
                 <el-row>
                   <el-col :span="12">
@@ -464,15 +463,15 @@
                                     style="width:60%">
                         <span slot="label"
                               style="display:inline-block;">
-                          命名策略
+                          {{ $t('common2.namingStrategy') }}
                           <el-tooltip effect="dark"
-                                      content="修改命名策略后，需再次执行“调试”操作以纠正出参列表"
+                                      :content="$t('common2.namingStrategyTip')"
                                       placement="top">
                             <i class='el-icon-question' />
                           </el-tooltip>
                         </span>
                         <el-select v-model="createParam.namingStrategy"
-                                   placeholder="请选择"
+                                   :placeholder="$t('common2.pleaseSelect')"
                                    :disabled="isOnlyShowDetail">
                           <el-option v-for="(item,index) in responseNamingStrategy"
                                      :key="index"
@@ -485,7 +484,7 @@
                 </el-row>
                 <el-row>
                   <el-col :span="12">
-                    <el-form-item label="数据格式"
+                    <el-form-item :label="$t('common2.dataFormat')"
                                   label-width="120px"
                                   prop="formatMap"
                                   style="width:60%">
@@ -502,9 +501,9 @@
                   </el-col>
                 </el-row>
               </el-tab-pane>
-              <el-tab-pane label="缓存配置"
+              <el-tab-pane :label="$t('common2.cacheConfig')"
                            name="cacheConfig">
-                <el-form-item label="缓存方法"
+                <el-form-item :label="$t('common2.cacheMethod')"
                               label-width="120px"
                               style="width:60%">
                   <el-select v-model="createParam.cacheKeyType"
@@ -521,9 +520,9 @@
                               v-show="createParam.cacheKeyType==='SPEL'">
                   <span slot="label"
                         style="display:inline-block;">
-                    SpEL表达式
+                    {{ $t('common2.spelExpression') }}
                     <el-tooltip effect="dark"
-                                content="必填，可以使用Spring表达式语言(Spring Expression Language，SpEL)计算入参值的缓存KEY,例如：#deptNo或#dept.deptNo等形式"
+                                :content="$t('common2.spelTip')"
                                 placement="top">
                       <i class='el-icon-question' />
                     </el-tooltip>
@@ -533,7 +532,7 @@
                             style="width:75%"
                             :disabled="isOnlyShowDetail"></el-input>
                 </el-form-item>
-                <el-form-item label="过期时长(秒)"
+                <el-form-item :label="$t('common2.expireSeconds')"
                               label-width="120px"
                               style="width:60%"
                               v-show="createParam.cacheKeyType==='SPEL'|| createParam.cacheKeyType==='AUTO'">
@@ -545,65 +544,65 @@
                                    step-strictly></el-input-number>
                 </el-form-item>
               </el-tab-pane>
-              <el-tab-pane label="认证配置"
+              <el-tab-pane :label="$t('common2.authConfig')"
                            name="authen">
                 <el-row>
                   <el-col :span="24">
-                    <el-form-item label="是否公开">
+                    <el-form-item :label="$t('common2.isPublic')">
                       <el-switch v-model="createParam.open"
                                  active-color="#13ce66"
                                  :active-value="true"
                                  :inactive-value="false"
-                                 active-text="开启"
-                                 inactive-text="关闭"
+                                 :active-text="$t('setting.open')"
+                                 :inactive-text="$t('setting.closeText')"
                                  :disabled="isOnlyShowDetail">
                       </el-switch>
                     </el-form-item>
                   </el-col>
                 </el-row>
               </el-tab-pane>
-              <el-tab-pane label="告警配置"
+              <el-tab-pane :label="$t('common2.alarmConfig')"
                            name="alarm">
                 <el-row>
                   <el-col :span="24">
-                    <el-form-item label="是否告警">
+                    <el-form-item :label="$t('common2.isAlarm')">
                       <el-switch v-model="createParam.alarm"
                                  active-color="#13ce66"
                                  :active-value="true"
                                  :inactive-value="false"
-                                 active-text="开启"
-                                 inactive-text="关闭"
+                                 :active-text="$t('setting.open')"
+                                 :inactive-text="$t('setting.closeText')"
                                  :disabled="isOnlyShowDetail">
                       </el-switch>
                     </el-form-item>
                   </el-col>
                 </el-row>
               </el-tab-pane>
-              <el-tab-pane label="流量控制"
+              <el-tab-pane :label="$t('common2.flowControl')"
                            name="flowControl">
                 <el-row>
                   <el-col :span="24">
-                    <el-form-item label="是否控制流量">
+                    <el-form-item :label="$t('common2.isFlowControl')">
                       <el-switch v-model="createParam.flowStatus"
                                  active-color="#13ce66"
                                  :active-value="true"
                                  :inactive-value="false"
-                                 active-text="开启"
-                                 inactive-text="关闭"
+                                 :active-text="$t('setting.open')"
+                                 :inactive-text="$t('setting.closeText')"
                                  :disabled="isOnlyShowDetail">
                       </el-switch>
                     </el-form-item>
                     <div v-show="createParam.flowStatus">
-                      <el-form-item label="阈值类型">
+                      <el-form-item :label="$t('common2.thresholdType')">
                         <el-radio-group size="small"
                                         v-model="createParam.flowGrade"
                                         :disabled="isOnlyShowDetail"
                                         border>
-                          <el-radio :label="1">QPS</el-radio>
-                          <el-radio :label="0">并发线程数</el-radio>
+                          <el-radio :label="1">{{ $t('common2.qps') }}</el-radio>
+                          <el-radio :label="0">{{ $t('common2.concurrentThreads') }}</el-radio>
                         </el-radio-group>
                       </el-form-item>
-                      <el-form-item label="单机阈值">
+                      <el-form-item :label="$t('common2.singleMachineThreshold')">
                         <el-input-number v-model="createParam.flowCount"
                                          size="small"
                                          :step="1"
@@ -620,7 +619,7 @@
       </el-col>
     </el-row>
 
-    <el-drawer title="接口调试"
+    <el-drawer :title="$t('common2.debug')"
                :visible.sync="showDebugDrawer"
                direction="ltr"
                size="65%"
@@ -635,7 +634,7 @@
                       default-expand-all
                       size="mini"
                       border>
-              <el-table-column label="参数名"
+              <el-table-column :label="$t('common2.paramName')"
                                min-width="35%">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.name"
@@ -643,7 +642,7 @@
                             type="string"> </el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="参数类型"
+              <el-table-column :label="$t('common2.paramType')"
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-select v-model="scope.row.type"
@@ -655,21 +654,21 @@
                   </el-select>
                 </template>
               </el-table-column>
-              <el-table-column label="数组"
+              <el-table-column :label="$t('common2.isArray')"
                                min-width="10%">
                 <template slot-scope="scope">
                   <el-checkbox v-model="scope.row.isArray"
                                :disabled="true"></el-checkbox>
                 </template>
               </el-table-column>
-              <el-table-column label="必填"
+              <el-table-column :label="$t('common2.required')"
                                min-width="10%">
                 <template slot-scope="scope">
                   <el-checkbox v-model="scope.row.required"
                                :disabled="true"></el-checkbox>
                 </template>
               </el-table-column>
-              <el-table-column label="描述"
+              <el-table-column :label="$t('common2.description')"
                                min-width="25%">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.remark"
@@ -677,7 +676,7 @@
                             type="string"></el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="值"
+              <el-table-column :label="$t('common2.defaultValue')"
                                min-width="50%">
                 <template slot-scope="scope">
                   <div v-if="scope.row.isArray">
@@ -714,7 +713,7 @@
         <el-row>
           <el-col>
             <el-tooltip effect="dark"
-                        content="暂不支持对象数组的入参调试功能，但接口支持对象数组入参"
+                        :content="$t('common2.objectArrayDebugTip')"
                         placement="bottom">
               <i class='el-icon-question' />
             </el-tooltip>
@@ -723,7 +722,7 @@
                          size="mini"
                          icon="el-icon-arrow-left"
                          @click="handleExecuteDebug">
-                执行调试
+                {{ $t('common2.executeDebug') }}
               </el-button>
             </div>
           </el-col>
@@ -731,14 +730,14 @@
         <el-row>
           <el-col :span="24">
             <el-tabs type="border-card">
-              <el-tab-pane label="执行结果">
+              <el-tab-pane :label="$t('common2.executeResult')">
                 <json-viewer :value="debugResponse"
                              :expand-depth=5
                              copyable
                              boxed
                              sort></json-viewer>
               </el-tab-pane>
-              <el-tab-pane label="执行信息">
+              <el-tab-pane :label="$t('common2.executeInfo')">
                 <div class="debug-console-log-text">
                   {{debugConsoleLog}}<br />
                 </div>
@@ -749,7 +748,7 @@
       </el-card>
     </el-drawer>
 
-    <el-drawer title="版本列表"
+    <el-drawer :title="$t('common2.versionList')"
                :visible.sync="showVersionDrawer"
                direction="ltr"
                size="40%"
@@ -759,31 +758,31 @@
                   :data="versionList"
                   size="small"
                   border>
-          <el-table-column label="版本"
+          <el-table-column :label="$t('common2.version')"
                            min-width="10%">
             <template slot-scope="scope">
               V{{ scope.row.version }}
             </template>
           </el-table-column>
           <el-table-column prop="online"
-                           label="在线"
+                           :label="$t('common2.online')"
                            :formatter="boolFormatOnline"
                            min-width="10%"></el-table-column>
           <el-table-column prop="createTime"
-                           label="时间"
+                           :label="$t('common2.time')"
                            min-width="30%"> </el-table-column>
           <el-table-column prop="description"
-                           label="描述"
+                           :label="$t('common2.description')"
                            show-overflow-tooltip
                            min-width="30%"></el-table-column>
-          <el-table-column label="查看"
+          <el-table-column :label="$t('common2.view')"
                            min-width="10%">
             <template slot-scope="scope">
               <el-link icon="el-icon-view"
                        @click="handleShowVersionDetail(scope.$index, scope.row)"></el-link>
             </template>
           </el-table-column>
-          <el-table-column label="回滚"
+          <el-table-column :label="$t('common2.rollback')"
                            min-width="10%">
             <template slot-scope="scope">
               <el-link icon="el-icon-male"
@@ -813,21 +812,9 @@ export default {
       groupList: [],
       moduleList: [],
       connectionList: [],
-      paramTypeList: [
-        { name: "整型", value: "LONG" },
-        { name: "浮点型", value: "DOUBLE" },
-        { name: "字符串", value: "STRING" },
-        { name: "日期", value: "DATE" },
-        { name: "时间", value: "TIME" },
-        { name: "布尔", value: "BOOLEAN" },
-        { name: "对象", value: "OBJECT" }
-      ],
+      paramTypeList: [],
       contentTypes: ['application/x-www-form-urlencoded', 'application/json'],
-      cacheKeyTypeList: [
-        { name: "关闭缓存功能", value: "NONE" },
-        { name: "哈希生存缓存KEY", value: "AUTO" },
-        { name: "SpEL生成缓存KEY", value: "SPEL" },
-      ],
+      cacheKeyTypeList: [],
       showTree: true,
       editorHeightNum: 300,
       createParam: {
@@ -882,49 +869,49 @@ export default {
         name: [
           {
             required: true,
-            message: "名称不能为空",
+            message: this.$t('common2.nameCannotEmpty'),
             trigger: "blur"
           }
         ],
         dataSourceId: [
           {
             required: true,
-            message: "数据源必须选择",
+            message: this.$t('common2.datasourceRequired'),
             trigger: "change"
           }
         ],
         group: [
           {
             required: true,
-            message: "分组必须选择",
+            message: this.$t('common2.groupRequired'),
             trigger: "change"
           }
         ],
         module: [
           {
             required: true,
-            message: "模块必须选择",
+            message: this.$t('common2.moduleRequired'),
             trigger: "change"
           }
         ],
         method: [
           {
             required: true,
-            message: "方法必须选择",
+            message: this.$t('common2.methodRequired'),
             trigger: "change"
           }
         ],
         path: [
           {
             required: true,
-            message: "路径必须提供",
+            message: this.$t('common2.pathRequired'),
             trigger: "blur"
           }
         ],
         contentType: [
           {
             required: true,
-            message: "内容类型必须选择",
+            message: this.$t('common2.contentTypeRequired'),
             trigger: "change"
           }
         ],
@@ -939,14 +926,32 @@ export default {
   },
   components: { multiSqlEditer, scriptEditer, JsonViewer },
   methods: {
+    initParamTypeList () {
+      this.paramTypeList = [
+        { name: this.$t('common2.integer'), value: "LONG" },
+        { name: this.$t('common2.float'), value: "DOUBLE" },
+        { name: this.$t('common2.string'), value: "STRING" },
+        { name: this.$t('common2.date'), value: "DATE" },
+        { name: this.$t('common2.time'), value: "TIME" },
+        { name: this.$t('common2.boolean'), value: "BOOLEAN" },
+        { name: this.$t('common2.object'), value: "OBJECT" }
+      ];
+    },
+    initCacheKeyTypeList () {
+      this.cacheKeyTypeList = [
+        { name: this.$t('common2.disabled'), value: "NONE" },
+        { name: "AUTO", value: "AUTO" },
+        { name: "SpEL", value: "SPEL" },
+      ];
+    },
     uuid: function () {
       var s = [];
       var hexDigits = "0123456789abcdef";
       for (var i = 0; i < 36; i++) {
         s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
       }
-      s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
-      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+      s[14] = "4";
+      s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
       s[8] = s[13] = s[18] = s[23] = "-";
 
       var uuid = s.join("");
@@ -1023,7 +1028,7 @@ export default {
           this.applyAssignmentDetail(detail);
         } else {
           if (res.data.message) {
-            alert("查询失败," + res.data.message);
+            alert(this.$t('common2.queryFailed') + res.data.message);
           }
         }
       });
@@ -1042,7 +1047,7 @@ export default {
             this.connectionList = res.data.data || [];
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('common2.loadDataFailed') + res.data.message);
               this.connectionList = [];
             }
           }
@@ -1068,7 +1073,7 @@ export default {
             this.groupList = res.data.data || [];
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('common2.loadDataFailed') + res.data.message);
               this.groupList = [];
             }
           }
@@ -1094,7 +1099,7 @@ export default {
             this.moduleList = res.data.data || [];
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('common2.loadDataFailed') + res.data.message);
               this.moduleList = [];
             }
           }
@@ -1113,7 +1118,7 @@ export default {
             }
           } else {
             if (res.data.message) {
-              alert("加载数据失败:" + res.data.message);
+              alert(this.$t('common2.loadDataFailed') + res.data.message);
             }
           }
         }
@@ -1151,26 +1156,21 @@ export default {
     },
     mergeFormatMap: function (existingFormatMap) {
 
-      // 如果没有现有的formatMap，直接返回系统默认的
       if (!existingFormatMap || existingFormatMap.length === 0) {
         return this.responseTypeFormat || [];
       }
 
-      // 如果还没有加载系统格式，先返回现有的
       if (!this.responseTypeFormat || this.responseTypeFormat.length === 0) {
         return existingFormatMap;
       }
 
-      // 合并逻辑：以系统格式为基础，用现有配置覆盖相同key的值
       const merged = [...this.responseTypeFormat];
       const existingMap = {};
 
-      // 创建现有配置的映射
       existingFormatMap.forEach(item => {
         existingMap[item.key] = item.value;
       });
 
-      // 用现有配置覆盖系统默认值
       merged.forEach(item => {
         if (existingMap.hasOwnProperty(item.key)) {
           item.value = existingMap[item.key];
@@ -1198,7 +1198,7 @@ export default {
                   this.treeData.push(obj);
                 }
               } else {
-                this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
+                this.$alert(this.$t('common2.loadFailed') + res.data.message, this.$t('common2.dataLoadFailed'));
               }
             }
           );
@@ -1210,14 +1210,14 @@ export default {
         if (node.level === 1) {
           let tableView = [
             {
-              'label': '表',
+              'label': this.$t('common2.typeTable'),
               'parent': this.createParam.dataSourceId,
               'value': node.label,
               'hasChild': true,
               'type': 'TABLE',
             },
             {
-              'label': '视图',
+              'label': this.$t('common2.typeView'),
               'parent': this.createParam.dataSourceId,
               'value': node.label,
               'hasChild': true,
@@ -1255,7 +1255,6 @@ export default {
               nameList.push(element)
             }
 
-            // SQL关键词提示
             if (this.tableHints[schema] && Array.isArray(this.tableHints[schema])) {
               this.tableHints[schema].push(nameList)
             } else {
@@ -1266,7 +1265,7 @@ export default {
             }
             return resolve(tableList);
           } else {
-            this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
+            this.$alert(this.$t('common2.loadFailed') + res.data.message, this.$t('common2.dataLoadFailed'));
           }
         }
       );
@@ -1290,13 +1289,12 @@ export default {
             }
             return resolve(columnList);
           } else {
-            this.$alert("加载失败，原因：" + res.data.message, '数据加载失败');
+            this.$alert(this.$t('common2.loadFailed') + res.data.message, this.$t('common2.dataLoadFailed'));
           }
         }
       );
     },
     renderContent (h, { node, data, store }) {
-      // https://www.cnblogs.com/zhoushuang0426/p/11059989.html
       if (node.level === 1) {
         return (
           <div class="custom-tree-node">
@@ -1365,7 +1363,7 @@ export default {
     handleParseInputParams: function () {
       var currTabSql = this.$refs.sqlEditors.queryCurrentTabSql()
       if (/^\s*$/.test(currTabSql)) {
-        alert("SQL内容不能为空")
+        alert(this.$t('common2.sqlCannotEmpty'))
         return
       }
       this.$http({
@@ -1378,9 +1376,9 @@ export default {
         res => {
           if (0 === res.data.code) {
             if (res.data.data && res.data.data.length === 0) {
-              this.$alert("解析的入参为空", "错误信息",
+              this.$alert(this.$t('common2.parseInputEmpty'), this.$t('common2.parseError'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
@@ -1424,9 +1422,9 @@ export default {
             };
           } else {
             if (res.data.message) {
-              this.$alert(res.data.message, "错误信息",
+              this.$alert(res.data.message, this.$t('common2.parseError'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
@@ -1467,7 +1465,7 @@ export default {
             isArray: false,
             required: true,
             defaultValue: "1",
-            remark: "页号"
+            remark: this.$t('common2.pageNum')
           }
         );
       }
@@ -1482,14 +1480,14 @@ export default {
             isArray: false,
             required: true,
             defaultValue: "10",
-            remark: "页大小"
+            remark: this.$t('common2.pageSize')
           },
         )
       }
       if (!add) {
-        this.$alert("已经存在分页参数了！", "提示信息",
+        this.$alert(this.$t('common2.pageParamsExist'), this.$t('common.warning'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "info"
           }
         );
@@ -1518,7 +1516,6 @@ export default {
       }
     },
     deleteInputSubParamsItem: function (index, childRow) {
-      // 通过 childRow 访问父级行数据
       const parentRow = this.getInputParamsParentRow(childRow);
       if (parentRow) {
         const childIndex = parentRow.children.indexOf(childRow);
@@ -1533,8 +1530,6 @@ export default {
       const index = this.inputParams.findIndex(item => row == item)
       if (index !== -1) {
         if (!this.inputParams[index].children) {
-          // 如果还没有 children 数组，则创建它
-          // 使用 Vue.set 来确保响应性
           Vue.set(this.inputParams[index], 'children', []);
         }
         this.inputParams[index].location = 'REQUEST_BODY';
@@ -1553,9 +1548,9 @@ export default {
         );
       } else {
         row.type = 'STRING';
-        this.$alert('只允许嵌套一层，类型被还原为字符串类型', "操作提示",
+        this.$alert(this.$t('common2.selectNested'), this.$t('common.warning'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "info"
           }
         );
@@ -1586,9 +1581,9 @@ export default {
           }
 
           if (!this.createParam.dataSourceId) {
-            this.$alert('请选择一个数据源来', "错误信息",
+            this.$alert(this.$t('common2.selectDatasourceTip'), this.$t('common2.parseError'),
               {
-                confirmButtonText: "确定",
+                confirmButtonText: this.$t('common.confirm'),
                 type: "error"
               }
             );
@@ -1596,9 +1591,9 @@ export default {
           }
 
           if (this.checkSqlsOrScriptEmpty(sqls)) {
-            this.$alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容', "错误信息",
+            this.$alert(isSql ? this.$t('common2.checkSqlContent') : this.$t('common2.checkScriptContent'), this.$t('common2.parseError'),
               {
-                confirmButtonText: "确定",
+                confirmButtonText: this.$t('common.confirm'),
                 type: "error"
               }
             );
@@ -1610,7 +1605,7 @@ export default {
             }
           }
         } else {
-          alert("请检查输入");
+          alert(this.$t('common2.checkInput'));
         }
       });
     },
@@ -1650,12 +1645,12 @@ export default {
         res => {
           if (0 === res.data.code) {
             this.$router.push({ path: '/interface/list' });
-            this.$message("添加信息成功");
+            this.$message(this.$t('common2.addSuccess'));
           } else {
             if (res.data.message) {
-              this.$alert(res.data.message, "错误信息",
+              this.$alert(res.data.message, this.$t('common2.parseError'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
@@ -1697,16 +1692,18 @@ export default {
           params: this.inputParams,
           outputs: this.outputParams
         })
-      }).then(
+      }
+      )
+      .then(
         res => {
           if (0 === res.data.code) {
             this.$router.push({ path: '/interface/list' });
-            this.$message("更新信息成功");
+            this.$message(this.$t('common2.updateSuccess'));
           } else {
             if (res.data.message) {
-              this.$alert(res.data.message, "错误信息",
+              this.$alert(res.data.message, this.$t('common2.parseError'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
@@ -1729,9 +1726,9 @@ export default {
       }
 
       if (!this.createParam.dataSourceId) {
-        this.$alert('请选择一个数据源来', "错误信息",
+        this.$alert(this.$t('common2.selectDatasourceTip'), this.$t('common2.parseError'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "error"
           }
         );
@@ -1739,9 +1736,9 @@ export default {
       }
 
       if (this.checkSqlsOrScriptEmpty(sqls)) {
-        this.$alert(isSql ? '请检查SQL窗口内容' : '请检查脚本内容', "错误信息",
+        this.$alert(isSql ? this.$t('common2.checkSqlContent') : this.$t('common2.checkScriptContent'), this.$t('common2.parseError'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "error"
           }
         );
@@ -1808,9 +1805,9 @@ export default {
             this.debugConsoleLog = res.data.data.logs;
             let arr = res.data.data.types;
             if (Array.isArray(arr) && arr.length === 0) {
-              this.$alert("结果集内容为空", "提示信息",
+              this.$alert(this.$t('common2.resultSetEmpty'), this.$t('common.warning'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "info"
                 }
               );
@@ -1847,9 +1844,9 @@ export default {
             }
           } else {
             if (res.data.message) {
-              this.$alert(res.data.message, "错误信息",
+              this.$alert(res.data.message, this.$t('common2.parseError'),
                 {
-                  confirmButtonText: "确定",
+                  confirmButtonText: this.$t('common.confirm'),
                   type: "error"
                 }
               );
@@ -1885,8 +1882,6 @@ export default {
       const index = this.outputParams.findIndex(item => row == item)
       if (index !== -1) {
         if (!this.outputParams[index].children) {
-          // 如果还没有 children 数组，则创建它
-          // 使用 Vue.set 来确保响应性
           Vue.set(this.outputParams[index], 'children', []);
         }
         this.outputParams[index].location = 'REQUEST_BODY';
@@ -1905,9 +1900,9 @@ export default {
         );
       } else {
         row.type = 'STRING';
-        this.$alert('只允许嵌套一层，类型被还原为字符串类型', "操作提示",
+        this.$alert(this.$t('common2.selectNested'), this.$t('common.warning'),
           {
-            confirmButtonText: "确定",
+            confirmButtonText: this.$t('common.confirm'),
             type: "info"
           }
         );
@@ -1922,7 +1917,6 @@ export default {
       }
     },
     deleteOutputSubParamsItem: function (index, childRow) {
-      // 通过 childRow 访问父级行数据
       const parentRow = this.getOutputParamsParentRow(childRow);
       if (parentRow) {
         const childIndex = parentRow.children.indexOf(childRow);
@@ -1946,14 +1940,14 @@ export default {
           this.showVersionDrawer = true;
         } else {
           if (res.data.message) {
-            alert("获取版本列表失败," + res.data.message);
+            alert(this.$t('service.getVersionListFailed') + res.data.message);
           }
         }
       });
     },
     boolFormatOnline: function (row) {
       if (row.online === true) {
-        return "是";
+        return this.$t('common.yes');
       } else {
         return "-";
       }
@@ -1972,10 +1966,10 @@ export default {
           let detail = res.data.data.detail;
           this.applyAssignmentDetail(detail);
           this.showVersionDetail = true
-          this.$message("当前内容已经切换为版本V" + row.version + "了.");
+          this.$message(this.$t('common2.switchVersionSuccess') + row.version + this.$t('common2.switchVersionEnd'));
         } else {
           if (res.data.message) {
-            alert("查看版本详情失败," + res.data.message);
+            alert(this.$t('common2.queryFailed') + res.data.message);
           }
         }
       });
@@ -1983,15 +1977,15 @@ export default {
     handleExitShowVersionDetail: function () {
       this.loadAssignmentDetail();
       this.showVersionDetail = false;
-      this.$message("当前退出版本详情查看了.");
+      this.$message(this.$t('common2.exitVersionSuccess'));
     },
     handleRevertVersionDetail: function (index, row) {
       this.$confirm(
-        "确定要执行回滚最新可编辑内容到版本V" + row.version + "么, 是否继续?",
-        "提示",
+        this.$t('common2.confirmRollback') + row.version + this.$t('common2.toVersion'),
+        this.$t('common2.rollbackTip'),
         {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+          confirmButtonText: this.$t('common.confirm'),
+          cancelButtonText: this.$t('common.cancel'),
           type: "warning"
         }
       ).then(() => {
@@ -2005,10 +1999,10 @@ export default {
           if (0 === res.data.code) {
             this.showVersionDrawer = false;
             this.loadAssignmentDetail();
-            this.$message("版本回退成功");
+            this.$message(this.$t('common2.rollbackSuccess'));
           } else {
             if (res.data.message) {
-              alert("版本回退失败," + res.data.message);
+              alert(this.$t('common2.rollbackFailed') + res.data.message);
             }
           }
         });
@@ -2016,6 +2010,8 @@ export default {
     }
   },
   async created () {
+    this.initParamTypeList();
+    this.initCacheKeyTypeList();
     await this.loadResponseTypeFormat();
     this.loadAssignmentDetail();
     this.loadConnections();

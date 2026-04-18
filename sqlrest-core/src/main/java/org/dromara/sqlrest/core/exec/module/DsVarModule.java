@@ -45,8 +45,8 @@ public class DsVarModule implements VarModuleInterface {
     return VAR_NAME;
   }
 
-  @Comment("根据数据源ID获取db模块")
-  public DbVarModule getDB(@Comment("id") Long id) {
+  @Comment("comment.ds.getDB")
+  public DbVarModule getDB(@Comment("comment.param.id") Long id) {
     DataSourceEntity dsEntity = dataSourceDao.getById(id);
     if (null == dsEntity) {
       throw new RuntimeException("Not found id=" + id + " data source!");

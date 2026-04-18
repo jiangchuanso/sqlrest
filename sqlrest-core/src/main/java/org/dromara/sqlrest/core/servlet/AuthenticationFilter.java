@@ -34,6 +34,7 @@ import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.exception.UnAuthorizedException;
 import org.dromara.sqlrest.common.exception.UnPermissionException;
 import org.dromara.sqlrest.common.service.FlowControlManger;
+import org.dromara.sqlrest.common.util.I18nUtils;
 import org.dromara.sqlrest.common.util.InetUtils;
 import org.dromara.sqlrest.common.util.TokenUtils;
 import org.dromara.sqlrest.core.exec.ApiAssignmentCache;
@@ -140,7 +141,7 @@ public class AuthenticationFilter implements Filter {
           if (!verify) {
             log.error("Failed verify group from token [{}] , app key [{}].", tokenStr, appKey);
             String message = String.format("/%s/%s[%s]", Constants.API_PATH_PREFIX, path, method.name());
-            throw new UnPermissionException("No Permission to access: " + message);
+            throw new UnPermissionException(I18nUtils.getMessage("auth.no.permission", message));
           }
         }
       }

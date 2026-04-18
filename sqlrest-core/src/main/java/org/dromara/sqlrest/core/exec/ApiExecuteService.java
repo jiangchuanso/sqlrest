@@ -43,6 +43,7 @@ import org.dromara.sqlrest.common.enums.ParamTypeEnum;
 import org.dromara.sqlrest.common.enums.ProductTypeEnum;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.util.I18nUtils;
 import org.dromara.sqlrest.core.driver.DriverLoadService;
 import org.dromara.sqlrest.core.exec.engine.ApiExecutorEngineFactory;
 import org.dromara.sqlrest.core.exec.extractor.HttpRequestBodyExtractor;
@@ -118,7 +119,7 @@ public class ApiExecuteService {
   private DataSourceEntity getDataSourceEntity(ApiAssignmentEntity config) {
     DataSourceEntity dsEntity = dataSourceDao.getById(config.getDatasourceId());
     if (null == dsEntity) {
-      String message = "datasource[id=" + config.getDatasourceId() + " not exist!";
+      String message = I18nUtils.getMessage("common.datasource.not.found", config.getDatasourceId());
       log.warn("Error for handle api[id={}],information:{}", config.getId(), message);
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, message);
     }
@@ -140,9 +141,15 @@ public class ApiExecuteService {
   }
 
   private String convertInvalidArgs(List<ItemParam> invalidArgs) {
-    return "无效参数," + invalidArgs.stream().map(
-        p -> (p.getIsArray() ? "数组" : "") + "参数'" + p.getName() + "'位于" + p.getLocation().getIn()
-    ).collect(Collectors.joining(";"));
+    return I18nUtils.getMessage("api.invalid.param")
+        + ","
+        + invalidArgs.stream()
+            .map(
+                p ->
+                    (p.getIsArray() ? I18nUtils.getMessage("api.param.array") : "")
+                        + I18nUtils.getMessage("api.param.name", p.getName())
+                        + p.getLocation().getIn())
+            .collect(Collectors.joining(";"));
   }
 
   private Map<String, Object> mergeParameters(HttpServletRequest request, List<ItemParam> params,

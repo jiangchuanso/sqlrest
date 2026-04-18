@@ -10,13 +10,17 @@
 package org.dromara.sqlrest.gateway.filter;
 
 import cn.hutool.json.JSONUtil;
+import java.util.Locale;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
+import org.dromara.sqlrest.common.util.I18nUtils;
 import org.dromara.sqlrest.common.util.InetUtils;
 import org.dromara.sqlrest.core.gateway.FirewallFilterService;
+import org.dromara.sqlrest.core.util.LocaleUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -57,7 +61,9 @@ public class ClientAddressFilter implements GlobalFilter, Ordered {
     String clientHostAddr = request.getRemoteAddress().getHostString();
     if (!firewallFilterService.canAccess(clientHostAddr)) {
       log.info("Forbidden access for client : {}, path : {}, method : {}", clientHostAddr, path, method);
-      ResultEntity data = ResultEntity.failed(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, clientHostAddr);
+      Locale locale = LocaleUtils.resolveLocale(request);
+      String message = I18nUtils.getMessage("ERROR_CLIENT_FORBIDDEN", locale) + ", " + clientHostAddr;
+      ResultEntity data = ResultEntity.failed(ResponseErrorCode.ERROR_CLIENT_FORBIDDEN, message);
       String json = JSONUtil.toJsonStr(data);
       DataBuffer wrap = response.bufferFactory().wrap(json.getBytes());
       return response.writeWith(Mono.just(wrap));
@@ -75,4 +81,6 @@ public class ClientAddressFilter implements GlobalFilter, Ordered {
   public int getOrder() {
     return 0;
   }
+
+
 }
