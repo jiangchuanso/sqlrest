@@ -1,57 +1,56 @@
-![](https://gitee.com/inrgihc/sqlrest/badge/star.svg)
-![](https://gitee.com/inrgihc/sqlrest/badge/fork.svg?theme=gvp)
 
 ![SQLREST](docs/images/SQLREST.PNG#pic_center)
 
-> 将 SQL 操作转化为 RESTful API的便捷工具
+Language: [简体中文](README.zh.md) [English](README.md)
 
-## 一、工具介绍
+> A convenient tool that transforms SQL operations into RESTful APIs
 
-SQLREST ( 简称: SR ) 是一个完全开源的项目，旨在提供一种简单而强大的方式来将 SQL( 或SQL-Like，即: DSL ) 操作转化为 RESTful API。它支持多种数据库，允许用户通过配置 SQL(或DSL) 语句来创建 API，
-无需编写复杂的后端逻辑，用户只需选择数据源、输入SQL或脚本、简单path配置即可快速生成API接口。
+## 1. Introduction
 
-### 1、功能介绍
+SQLREST (abbreviated as SR) is a fully open-source project designed to provide a simple yet powerful way to transform SQL (or SQL-Like, i.e., DSL) operations into RESTful APIs. It supports multiple databases and allows users to create APIs by configuring SQL (or DSL) statements without writing complex backend logic. Users only need to select a data source, input SQL or scripts, and configure a simple path to quickly generate API endpoints.
 
-SQLREST的功能包括：
+### 1.1 Features
 
-- **SQL直接构建API**：通过配置增删改查SQL和参数即可生成 RESTful API。
-- **多数据库支持**：支持常见的20+种数据库，其中包含多款国产数据库。
-- **MyBatis语法支持**：支持MyBatis的动态SQL语法。
-- **Groovy脚本支持**：支持groovy语法构建复杂场景下的接口逻辑。
-- **参数类型支持**：支持整型/浮点型/时间/日期/布尔/字符串/对象等多种类型。
-- **ContentType支持**：支持application/x-www-form-urlencoded及application/json等多种入参请求格式。
-- **身份认证支持**：提供基于Token的认证机制，保护API安全。
-- **在线接口文档**：支持自动生成swagger和knife4j等在线接口文档。
-- **缓存配置支持**：支持Hazelcast或Redis缓存，提升API访问性能。
-- **流控配置管理**：通过Sentinel支持流量控制，防止系统过载。
-- **统一告警对接**：支持统一告警系统的对接与触发。
-- **RESTful接口转发**：支持通过DSL进行HTTP数据源的RESTful接口转发功能。
-- **文档数据库支持**：支持通过DSL进行MongoDB和ElasticSearch等文档数据库开发接口。
-- **接口版本管理**：支持接口的版本控制管理功能。
-- **批量导入导出**：支持接口的批量导入导出功能。
-- **大模型MCP服务**：支持简单配置即可创建MCP的tool。
+SQLREST provides the following features:
 
-SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
+- **SQL-driven API Creation**: Generate RESTful APIs by configuring CRUD SQL statements and parameters.
+- **Multi-Database Support**: Supports 20+ common databases, including several domestic Chinese databases.
+- **MyBatis Syntax Support**: Supports MyBatis dynamic SQL syntax.
+- **Groovy Script Support**: Supports Groovy syntax for building complex interface logic.
+- **Parameter Type Support**: Supports integer, float, time, date, boolean, string, object, and more.
+- **ContentType Support**: Supports application/x-www-form-urlencoded, application/json, and other request formats.
+- **Authentication Support**: Provides token-based authentication to secure APIs.
+- **Online API Documentation**: Supports auto-generated Swagger and Knife4j online documentation.
+- **Cache Configuration Support**: Supports Hazelcast or Redis caching to improve API performance.
+- **Flow Control Management**: Supports traffic control via Sentinel to prevent system overload.
+- **Unified Alert Integration**: Supports integration with unified alerting systems.
+- **RESTful API Forwarding**: Supports HTTP data source RESTful API forwarding via DSL.
+- **Document Database Support**: Supports MongoDB, ElasticSearch, and other document databases via DSL.
+- **API Version Management**: Supports API version control management.
+- **Batch Import/Export**: Supports bulk import and export of APIs.
+- **LLM MCP Service**: Supports creating MCP tools with simple configuration.
 
-- **快速将 SQL(或DSL) 转换为 API**
-- **适用于数据中台、BI 工具、低代码平台等**
+As a data access middleware in microservice architectures, SQLREST is suitable for the following scenarios:
 
-### 2、数据库清单
+- **Quickly convert SQL (or DSL) into APIs**
+- **Applicable to data platforms, BI tools, low-code platforms, etc.**
 
-截至当前，已支持的数据库包括：
+### 1.2 Supported Databases
 
-- 甲骨文的Oracle
-- 微软的Microsoft SQLServer(2005+)
+To date, the supported databases include:
+
+- Oracle
+- Microsoft SQL Server (2005+)
 - MySQL
 - MariaDB
 - PostgreSQL/Greenplum
-- IBM的DB2
-- Sybase数据库
-- 国产达梦数据库DM
-- 国产人大金仓数据库Kingbase8
-- 国产翰高数据库HighGo
-- 国产神通数据库Oscar
-- 国产南大通用数据库GBase8a
+- IBM DB2
+- Sybase
+- DM (Dameng)
+- Kingbase8
+- HighGo
+- Oscar
+- GBase8a
 - Apache Hive
 - Cloudera Impala
 - SQLite3
@@ -63,161 +62,160 @@ SQLREST作为微服务架构下的数据访问中间件，适合以下场景：
 - TDEngine
 - MongoDB
 - ElasticSearch
-- Http(RESTful)
+- Http (RESTful)
 
-### 3、模块结构功能
+### 1.3 Module Structure
 
 ![STRUCTURE.PNG](docs/images/STRUCTURE.PNG)
 
 ```
 └── sqlrest
-    ├── sqlrest-common           // sqlrest通用定义模块
-    ├── sqlrest-mcp              // sqlrest的MCP协议模块
-    ├── sqlrest-template         // sqlrest的SQL内容模板模块
-    ├── sqlrest-cache            // sqlrest执行器缓存模块
-    ├── sqlrest-persistence      // sqlrest的数据库持久化模块
-    ├── sqlrest-core             // sqlrest接口核心实现模块
-    ├── sqlrest-gateway          // Gateway网关节点
-    ├── sqlrest-executor         // Executor执行节点
-    ├── sqlrest-manager          // Manager管理节点
-    ├── sqlrest-manager-ui       // WEB交互页面
-    ├── sqlrest-dist             // 项目打包模块
+    ├── sqlrest-common           // Common definitions module
+    ├── sqlrest-mcp              // MCP protocol module
+    ├── sqlrest-template         // SQL content template module
+    ├── sqlrest-cache            // Executor cache module
+    ├── sqlrest-persistence      // Database persistence module
+    ├── sqlrest-core             // Core API implementation module
+    ├── sqlrest-gateway          // Gateway node
+    ├── sqlrest-executor         // Executor node
+    ├── sqlrest-manager          // Manager node
+    ├── sqlrest-manager-ui       // Web UI
+    ├── sqlrest-dist             // Packaging module
 ```
 
-### 4、正在规划中的功能
+### 1.4 Planned Features
 
-- **接口详情功能**: 支持接口的详细定义、数据来源、访问分析等功能。
-- **语法提示增强**: 在实现的库名表名提示的基础上，基于数据库元信息的增强智能提示，强化用户体验。
+- **API Details**: Support for detailed API definitions, data sources, access analytics, and more.
+- **Enhanced Syntax Hints**: Build upon existing database/table name hints with database metadata-driven intelligent suggestions for improved user experience.
 
-## 二、编译打包
+## 2. Build & Package
 
-本工具纯Java语言开发，依赖全部来自于开源项目。SQLREST项目采用Maven构建。
+This tool is developed in pure Java, with all dependencies from open-source projects. SQLREST uses Maven for building.
 
-### 1、编译打包
+### 2.1 Build
 
-- 环境要求:
+- Requirements:
 
-  **JDK**:>=1.8 （建议用JDK 1.8）
+  **JDK**: >=1.8 (JDK 1.8 recommended)
 
-  **maven**:>=3.6
-> Maven 仓库默认在国外， 国内使用难免很慢，可以更换为阿里云的仓库。
->  
-> 参考教程： [配置阿里云的仓库教程](https://www.runoob.com/maven/maven-repositories.html)
+  **Maven**: >=3.6
+> The Maven repository is hosted overseas by default, which can be slow in China. You can switch to the Alibaba Cloud mirror.
+>
+> Tutorial: [Configure Alibaba Cloud Maven Mirror](https://www.runoob.com/maven/maven-repositories.html)
 
-- 编译命令:
+- Build commands:
 
-**(1) windows下：**
-
-```
- 双击build.cmd脚本文件即可编译打包
-```
-
-**(2) Linux/MacOS下：**
+**(1) On Windows:**
 
 ```
-git clone https://gitee.com/inrgihc/sqlrest.git
+Double-click the build.cmd script to build and package
+```
+
+**(2) On Linux/macOS:**
+
+```
+git clone https://github.com/inrgihc/sqlrest.git
 cd sqlrest/
 sh ./build.sh
 ```
 
-**(3) Docker下:**
+**(3) With Docker:**
 
 ```
-git clone https://gitee.com/inrgihc/sqlrest.git
+git clone https://github.com/inrgihc/sqlrest.git
 cd sqlrest/
 sh ./docker-maven-build.sh
 ```
 
-### 2、安装部署
+### 2.2 Installation & Deployment
 
-(1) 当编译打包完成后，会在sqlrest/target/目录下生成sqlrest-release-x.x.x.tar.gz的打包文件，将文件拷贝到已安装JRE的部署机器上解压即可。
+(1) After building, a packaged file named `sqlrest-release-x.x.x.tar.gz` will be generated in the `sqlrest/target/` directory. Copy it to a machine with JRE installed and extract it.
 
-(2) 基于docker-compose提供linux联网环境下的一键安装，x86(arm下需自行制作docker镜像)的CentOS系统下安装命令如下：
+(2) A one-click installation based on docker-compose is available for networked Linux environments. For x86 CentOS (ARM requires building your own Docker image), run:
 
 ```
 curl -k -sSL https://gitee.com/inrgihc/sqlrest/attach_files/2241027/download -o /tmp/sr.sh && systemctl stop firewalld && bash /tmp/sr.sh && rm -f /tmp/sr.sh
 ```
 
-文档详见: [build-docker/install/README.md](build-docker/install)
+For details, see: [build-docker/install/README.md](build-docker/install)
 
-(3) 物理机方式部署
+(3) Bare-metal deployment:
 
-- 步骤1：准备好一个MySQL5.7+或PostgreSQL11+的数据库
+- Step 1: Prepare a MySQL 5.7+ or PostgreSQL 11+ database
 
-> 当使用MySQL数据库时，config.ini里的DB_TYPE配置mysql,并需要配置 MYSQLDB_ 前缀的参数;
-> 
-> 当使用PostgreSQL数据库时，config.ini里的DB_TYPE配置postgres,并需要配置 PGDB_ 前缀的参数
+> When using MySQL, set `DB_TYPE` to `mysql` in `config.ini` and configure the `MYSQLDB_` prefixed parameters;
+>
+> When using PostgreSQL, set `DB_TYPE` to `postgres` in `config.ini` and configure the `PGDB_` prefixed parameters.
 
-- 步骤2：修改sqlrest-release-x.x.x/conf/config.ini配置文件
+- Step 2: Modify the `sqlrest-release-x.x.x/conf/config.ini` configuration file
 
 ```
-# manager节点的host地址，如果gateway与executor节点
-# 与manager不在同一台机器时需要配置manger节点的IP地址
+# Host address of the manager node. If gateway and executor nodes
+# are not on the same machine as manager, configure the manager IP here.
 MANAGER_HOST=localhost
 
 
-# manager的端口号
+# Manager port
 MANAGER_PORT=8090
 
-# executor的端口号
+# Executor port
 EXECUTOR_PORT=8092
 
-# gateway的端口号
+# Gateway port
 GATEWAY_PORT=8091
 
 
-# 数据库类型:mysql或postgres
+# Database type: mysql or postgres
 DB_TYPE=mysql
 
-# mysql的host地址
+# MySQL host address
 MYSQLDB_HOST=192.168.31.57
-# mysql的端口号
+# MySQL port
 MYSQLDB_PORT=3306
-# mysql的库名
+# MySQL database name
 MYSQLDB_NAME=sqlrest
-# mysql的账号
+# MySQL username
 MYSQLDB_USERNAME=root
-# mysql的密码
+# MySQL password
 MYSQLDB_PASSWORD=123456
 
-# pgsql的host地址
+# PostgreSQL host address
 PGDB_HOST=192.168.31.57
-# pgsql的端口号
+# PostgreSQL port
 PGDB_PORT=5432
-# pgsql的库名
+# PostgreSQL database name
 PGDB_NAME=sqlrest
-# pgsql的账号
+# PostgreSQL username
 PGDB_USERNAME=postgres
-# pgsql的密码
+# PostgreSQL password
 PGDB_PASSWORD=123456
 
 
-# JSON序列化时区设置
+# JSON serialization timezone
 JSON_TIMEZONE=Asia/Shanghai
 
-# 数据源账号密码是否加密存储
+# Whether to encrypt datasource credentials at rest
 SQLREST_DS_ENCRYPT=false
 
-# 外部配置化网关/管理地址，默认为空
+# Externally configured gateway/manager addresses, empty by default
 # SQLREST_MANAGER_URL=http://www.example.com:8090
 # SQLREST_GATEWAY_URL=http://www.example.com:8091
 ```
 
->sqlrest的缓存支持使用分布式的hazelcast或者redis，在conf/{manager,gateway,executor}/目录下的application.yml配
->置文件中，可通过如下调整配置实用redis缓存，默认为使用hazelcast缓存(注意:manager/gateway/executor三者的缓存配置要一致)。
+> SQLREST's cache supports distributed Hazelcast or Redis. In the `application.yml` configuration file under `conf/{manager,gateway,executor}/`, you can configure Redis caching as follows. The default is Hazelcast (note: the cache configuration must be consistent across manager, gateway, and executor).
 
 ```
 sqlrest:
   cache:
     hazelcast:
-      # 是否开启使用hazelcast缓存
+      # Whether to enable Hazelcast caching
       enabled: false
     redis:
-      # 是否开启使用redis缓存，开启时需要配置下面对应的redis信息
+      # Whether to enable Redis caching. When enabled, configure the Redis info below
       enabled: true
-      # 哨兵模式下不用配置host
+      # Not needed in sentinel mode
       host: 127.0.0.1
-      # 哨兵模式下不用配置port
+      # Not needed in sentinel mode
       port: 6379
       password: 123456
       database: 0
@@ -227,90 +225,90 @@ sqlrest:
         max-active: 8
         max-wait: -1
         time-between-eviction-runs: -1
-      # 非哨兵模式下删除掉sentinel整个节点
+      # Remove the entire sentinel node in non-sentinel mode
       sentinel:
-        # 哨兵模式下需要配置master
+        # Configure master in sentinel mode
         master: mymaster
-        # 哨兵模式下需要配置nodes
+        # Configure nodes in sentinel mode
         nodes: 127.0.0.1:26379,127.0.0.1:26380,127.0.0.1:26381
 ```
 
-- 步骤3：如果为多主机节点部署，需要将sqlrest-release-x.x.x分发到其他主机节点上；如果为单机（单节点）部署可直接忽略本步骤。
+- Step 3: For multi-node deployment, distribute `sqlrest-release-x.x.x` to other host nodes. For single-node deployment, skip this step.
 
-- 步骤4：启动服务
+- Step 4: Start the services
 
-> windows下，需按照如下顺序双击脚本启动对应的服务
+> On Windows, start the services in the following order by double-clicking the scripts:
 
-启动manager服务：bin/manager_startup.cmd
+Start the manager service: `bin/manager_startup.cmd`
 
-启动executor服务：bin/executor_startup.cmd
+Start the executor service: `bin/executor_startup.cmd`
 
-启动gateway服务：bin/gateway_startup.cmd
+Start the gateway service: `bin/gateway_startup.cmd`
 
-> linux/macos下，需按照如下顺序执行脚本启动对应的服务
+> On Linux/macOS, start the services in the following order:
 
-启动manager服务：sh bin/sqlrestctl.sh start manager
+Start the manager service: `sh bin/sqlrestctl.sh start manager`
 
-启动executor服务：sh bin/sqlrestctl.sh start executor
+Start the executor service: `sh bin/sqlrestctl.sh start executor`
 
-启动gateway服务：sh bin/sqlrestctl.sh start gateway
+Start the gateway service: `sh bin/sqlrestctl.sh start gateway`
 
-### 3、系统访问
+### 2.3 Access the System
 
-启动完成后,通过http://<MANAGER_HOST>:<MANAGER_PORT> 地址即可访问。
+After startup, access the system via `http://<MANAGER_HOST>:<MANAGER_PORT>`.
 
-登陆账号：```admin```  登陆密码：```123456```
+Login username: ```admin```  Login password: ```123456```
 
-## 三、使用教程
+## 3. Usage
 
-### 1、使用说明文档
+### 3.1 Documentation
 
-[《SQLREST工具使用说明文档》](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
+[SQLREST User Guide](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
 
-### 2、部分系统截图
+### 3.2 Screenshots
 
-![001.png](docs/images/001.PNG)
+![001.png](docs/images/en_US/001.PNG)
 
-![002.png](docs/images/002.PNG)
+![002.png](docs/images/en_US/002.PNG)
 
-![003.png](docs/images/003.PNG)
+![003.png](docs/images/en_US/003.PNG)
 
-![004.png](docs/images/004.PNG)
+![004.png](docs/images/en_US/004.PNG)
 
-![005.png](docs/images/005.PNG)
+![005.png](docs/images/en_US/005.PNG)
 
-![006.png](docs/images/006.PNG)
+![006.png](docs/images/en_US/006.PNG)
 
-![009.png](docs/images/009.PNG)
+![009.png](docs/images/en_US/009.PNG)
 
-![010.png](docs/images/010.PNG)
+![010.png](docs/images/en_US/010.PNG)
 
-![011.png](docs/images/011.PNG)
+![011.png](docs/images/en_US/011.PNG)
 
-## 四、贡献参与
+## 4. Contributing
 
-为了能让项目得到更好的可持续的发展，SQLREST期望获得更多的代码开发爱好者参与代码贡献，包括但不限于：
+To help the project achieve sustainable development, SQLREST welcomes contributions from developers, including but not limited to:
 
-- 改进前端 UI/UX
-- 修复 bug 和性能优化
-- 增加新的易用性功能
+- Improving frontend UI/UX
+- Fixing bugs and optimizing performance
+- Adding new usability features
 
-贡献操作文档参考：[贡献说明指南](https://gitee.com/inrgihc/dbswitch/blob/master/CONTRIBUTE.md)
+Contribution guide: [Contributing Guide](CONTRIBUTE.md)
 
-## 五、项目推荐
+## 5. Recommended Project
 
-[数据库迁移同步工具dbswitch] (https://gitee.com/inrgihc/dbswitch)
+[Database Migration & Sync Tool - dbswitch](https://github.com/inrgihc/dbswitch)
 
-## 六、社区推荐
+## 6. Community
 
 <div>
 	<a href="https://dromara.org/zh/projects/" target="_blank">
-        <img src="https://foruda.gitee.com/avatar/1664439580221599999/5162368_dromara_1664439580.png" alt="dromara" title="让每一位开源爱好者，体会到开源的快乐。">
+        <img src="https://foruda.gitee.com/avatar/1664439580221599999/5162368_dromara_1664439580.png" alt="dromara" title="Let every open-source enthusiast experience the joy of open source.">
     </a>
 </div>
 
-## 七、问题反馈
+## 7. Feedback
 
-如果您看到并使用了本工具，或您觉得本工具对您有价值，请为此项目**点个赞**，以表示对本项目的支持，多谢！如果您在使用时遇到了bug，欢迎在issue中反馈。也可扫描下方二维码入群讨论：（加好友请注明："SQLREST交流"）
+If you find this tool useful, please **give it a star** to show your support. Thank you! If you encounter any bugs, please report them in the issues. You can also join the discussion group by scanning the QR code below (please mention "SQLREST Discussion" when adding as a friend):
 
 ![structure](https://gitee.com/inrgihc/dbswitch/raw/master/docs/images/weixin.PNG)
