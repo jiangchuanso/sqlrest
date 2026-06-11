@@ -84,16 +84,13 @@ jobs:
       - name: Prepare Docker build context
         run: |
           set -e
-          # 创建 Docker 构建上下文目录
           mkdir -p ./docker-context/sqlrest
           cd ./docker-context
           
-          # 复制原始 tarball 并解压
           cp "${{ steps.find_tar.outputs.tar_file }}" ./original.tar.gz
           mkdir tmp_extract
           tar -xzf original.tar.gz -C tmp_extract
           
-          # 找到解压后的顶层目录（如 sqlrest-release-1.8.0）
           EXTRACTED_DIR=$(find tmp_extract -maxdepth 1 -type d ! -path tmp_extract | head -1)
           if [ -z "$EXTRACTED_DIR" ]; then
             echo "Error: No directory found after extraction"
@@ -101,15 +98,15 @@ jobs:
           fi
           
           echo "Extracted directory: $EXTRACTED_DIR"
-          # 进入解压目录，将所有内容重新打包为 sqlrest-release.tar.gz
-          cd "$EXTRACTED_DIR"
-          tar -czf ../../sqlrest/sqlrest-release.tar.gz .
-          cd ../..
+          # 重命名解压出的目录为 sqlrest-release（保留顶层目录）
+          mv "$EXTRACTED_DIR" ./sqlrest-release
+          # 打包整个 sqlrest-release 目录
+          tar -czf ./sqlrest/sqlrest-release.tar.gz ./sqlrest-release
+          rm -rf ./sqlrest-release
           
-          # 清理临时文件
           rm -rf tmp_extract original.tar.gz
           
-          # 复制 Dockerfile 文件（必须存在）
+          # 复制 Dockerfile
           if [ -f ../build-docker/sqlrest/Dockerfile-manager ]; then
             cp ../build-docker/sqlrest/Dockerfile-manager ./sqlrest/
           else
