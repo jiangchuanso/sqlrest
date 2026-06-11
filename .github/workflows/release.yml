@@ -50,10 +50,9 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Build SQLRest with Maven (docker-maven-build.sh)
+      - name: Build SQLRest with Maven
         run: |
-          chmod +x docker-maven-build.sh
-          sh ./docker-maven-build.sh
+          mvn clean package -DskipTests
 
       - name: Find generated tar.gz file
         id: find_tar
@@ -88,12 +87,10 @@ jobs:
           mkdir -p ./docker-context/sqlrest/contents
           cd ./docker-context
           
-          # 复制原始 tarball 并解压
           cp "${{ steps.find_tar.outputs.tar_file }}" ./original.tar.gz
           mkdir tmp_extract
           tar -xzf original.tar.gz -C tmp_extract
           
-          # 找到解压出的顶层目录（如 sqlrest-release-1.8.0）
           EXTRACTED_DIR=$(find tmp_extract -maxdepth 1 -type d ! -path tmp_extract | head -1)
           if [ -z "$EXTRACTED_DIR" ]; then
             echo "Error: No directory found after extraction"
@@ -101,16 +98,15 @@ jobs:
           fi
           
           echo "Extracted directory: $EXTRACTED_DIR"
-          # 将其内部所有内容移动到 contents/ 目录下
           mv "$EXTRACTED_DIR"/* ./sqlrest/contents/
           
-          # 复制 Dockerfile 文件（假设它们位于 build-docker/sqlrest/ 目录下）
-          # 如果不存在，可以在这里生成默认的 Dockerfile
+          rm -rf tmp_extract original.tar.gz
+          
+          # 复制自定义 Dockerfile（如果存在）
           mkdir -p ./sqlrest
           if [ -f ../build-docker/sqlrest/Dockerfile-manager ]; then
             cp ../build-docker/sqlrest/Dockerfile-manager ./sqlrest/
           else
-            # 提供默认的 Dockerfile-manager（用户可根据实际情况调整）
             printf 'FROM eclipse-temurin:8-jre\n' > ./sqlrest/Dockerfile-manager
             printf '\n' >> ./sqlrest/Dockerfile-manager
             printf 'COPY contents /sqlrest-release\n' >> ./sqlrest/Dockerfile-manager
@@ -143,9 +139,6 @@ jobs:
             printf '\n' >> ./sqlrest/Dockerfile-gateway
             printf 'CMD ["/sqlrest-release/bin/startup.sh"]\n' >> ./sqlrest/Dockerfile-gateway
           fi
-          
-          # 清理临时文件
-          rm -rf tmp_extract original.tar.gz
           
           echo "Docker context prepared at ./docker-context/sqlrest"
           ls -lh ./sqlrest/contents/
