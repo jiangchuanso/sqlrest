@@ -84,13 +84,16 @@ jobs:
       - name: Prepare Docker build context
         run: |
           set -e
-          mkdir -p ./docker-context/sqlrest/contents
+          # 创建 Docker 构建上下文目录
+          mkdir -p ./docker-context/sqlrest
           cd ./docker-context
           
+          # 复制原始 tarball 并解压
           cp "${{ steps.find_tar.outputs.tar_file }}" ./original.tar.gz
           mkdir tmp_extract
           tar -xzf original.tar.gz -C tmp_extract
           
+          # 找到解压后的顶层目录（如 sqlrest-release-1.8.0）
           EXTRACTED_DIR=$(find tmp_extract -maxdepth 1 -type d ! -path tmp_extract | head -1)
           if [ -z "$EXTRACTED_DIR" ]; then
             echo "Error: No directory found after extraction"
@@ -98,50 +101,38 @@ jobs:
           fi
           
           echo "Extracted directory: $EXTRACTED_DIR"
-          mv "$EXTRACTED_DIR"/* ./sqlrest/contents/
+          # 进入解压目录，将所有内容重新打包为 sqlrest-release.tar.gz
+          cd "$EXTRACTED_DIR"
+          tar -czf ../../sqlrest/sqlrest-release.tar.gz .
+          cd ../..
           
+          # 清理临时文件
           rm -rf tmp_extract original.tar.gz
           
-          # 复制自定义 Dockerfile（如果存在）
-          mkdir -p ./sqlrest
+          # 复制 Dockerfile 文件（必须存在）
           if [ -f ../build-docker/sqlrest/Dockerfile-manager ]; then
             cp ../build-docker/sqlrest/Dockerfile-manager ./sqlrest/
           else
-            printf 'FROM eclipse-temurin:8-jre\n' > ./sqlrest/Dockerfile-manager
-            printf '\n' >> ./sqlrest/Dockerfile-manager
-            printf 'COPY contents /sqlrest-release\n' >> ./sqlrest/Dockerfile-manager
-            printf 'WORKDIR /sqlrest-release\n' >> ./sqlrest/Dockerfile-manager
-            printf 'RUN chmod u+x bin/startup.sh\n' >> ./sqlrest/Dockerfile-manager
-            printf '\n' >> ./sqlrest/Dockerfile-manager
-            printf 'CMD ["/sqlrest-release/bin/startup.sh"]\n' >> ./sqlrest/Dockerfile-manager
+            echo "Error: build-docker/sqlrest/Dockerfile-manager not found"
+            exit 1
           fi
           
           if [ -f ../build-docker/sqlrest/Dockerfile-executor ]; then
             cp ../build-docker/sqlrest/Dockerfile-executor ./sqlrest/
           else
-            printf 'FROM eclipse-temurin:8-jre\n' > ./sqlrest/Dockerfile-executor
-            printf '\n' >> ./sqlrest/Dockerfile-executor
-            printf 'COPY contents /sqlrest-release\n' >> ./sqlrest/Dockerfile-executor
-            printf 'WORKDIR /sqlrest-release\n' >> ./sqlrest/Dockerfile-executor
-            printf 'RUN chmod u+x bin/startup.sh\n' >> ./sqlrest/Dockerfile-executor
-            printf '\n' >> ./sqlrest/Dockerfile-executor
-            printf 'CMD ["/sqlrest-release/bin/startup.sh"]\n' >> ./sqlrest/Dockerfile-executor
+            echo "Error: build-docker/sqlrest/Dockerfile-executor not found"
+            exit 1
           fi
           
           if [ -f ../build-docker/sqlrest/Dockerfile-gateway ]; then
             cp ../build-docker/sqlrest/Dockerfile-gateway ./sqlrest/
           else
-            printf 'FROM eclipse-temurin:8-jre\n' > ./sqlrest/Dockerfile-gateway
-            printf '\n' >> ./sqlrest/Dockerfile-gateway
-            printf 'COPY contents /sqlrest-release\n' >> ./sqlrest/Dockerfile-gateway
-            printf 'WORKDIR /sqlrest-release\n' >> ./sqlrest/Dockerfile-gateway
-            printf 'RUN chmod u+x bin/startup.sh\n' >> ./sqlrest/Dockerfile-gateway
-            printf '\n' >> ./sqlrest/Dockerfile-gateway
-            printf 'CMD ["/sqlrest-release/bin/startup.sh"]\n' >> ./sqlrest/Dockerfile-gateway
+            echo "Error: build-docker/sqlrest/Dockerfile-gateway not found"
+            exit 1
           fi
           
           echo "Docker context prepared at ./docker-context/sqlrest"
-          ls -lh ./sqlrest/contents/
+          ls -lh ./sqlrest/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
