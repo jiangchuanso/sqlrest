@@ -14,17 +14,17 @@ import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.persistence.entity.VersionCommitEntity;
 import org.dromara.sqlrest.persistence.mapper.VersionCommitMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@RequiredArgsConstructor
 public class VersionCommitDao {
 
-  @Resource
-  private VersionCommitMapper versionCommitMapper;
+  private final VersionCommitMapper versionCommitMapper;
 
   @Transactional(rollbackFor = Exception.class)
   public VersionCommitEntity createVersion(Long bizId, String description, String content) {

@@ -20,7 +20,7 @@ import org.dromara.sqlrest.core.dto.McpToolSaveRequest;
 import org.dromara.sqlrest.manager.service.McpManageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"MCP工具管理接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/mcp/tool")
+@RequiredArgsConstructor
 public class McpToolController {
 
-  @Resource
-  private McpManageService mcpManageService;
+  private final McpManageService mcpManageService;
 
   @ApiOperation(value = "添加MCP工具")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)

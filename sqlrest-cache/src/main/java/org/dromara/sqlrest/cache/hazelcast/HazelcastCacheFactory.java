@@ -14,14 +14,14 @@ import org.dromara.sqlrest.cache.DistributedCache;
 import com.hazelcast.core.HazelcastInstance;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class HazelcastCacheFactory implements CacheFactory {
 
   private Map<String, HazelcastDistributedCache> cacheMap = new ConcurrentHashMap<>();
 
-  @Resource
-  private HazelcastInstance hazelcastInstance;
+  private final HazelcastInstance hazelcastInstance;
 
   @Override
   public <T> Map<String, T> getCacheMap(String key, Class<T> clazz) {

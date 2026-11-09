@@ -10,6 +10,7 @@
 package org.dromara.sqlrest.cache;
 
 import com.hazelcast.config.Config;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.eureka.one.EurekaOneDiscoveryStrategyFactory;
 import com.netflix.discovery.EurekaClient;
 import java.util.ArrayList;
@@ -57,8 +58,8 @@ public class SqlrestCacheConfiguration {
     }
 
     @Bean
-    public CacheFactory hazelcastCacheFactory() {
-      return new HazelcastCacheFactory();
+    public CacheFactory hazelcastCacheFactory(HazelcastInstance hazelcastInstance) {
+      return new HazelcastCacheFactory(hazelcastInstance);
     }
   }
 
@@ -118,8 +119,8 @@ public class SqlrestCacheConfiguration {
     }
 
     @Bean
-    public CacheFactory redisCacheFactory() {
-      return new RedisCacheFactory();
+    public CacheFactory redisCacheFactory(JedisClient jedisClient) {
+      return new RedisCacheFactory(jedisClient);
     }
   }
 

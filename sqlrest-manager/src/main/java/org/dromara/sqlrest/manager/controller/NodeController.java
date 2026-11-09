@@ -14,7 +14,7 @@ import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.core.dto.TopologyNodeResponse;
 import org.dromara.sqlrest.manager.service.NodeService;
 import io.swagger.annotations.Api;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"节点信息接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/node")
+@RequiredArgsConstructor
 public class NodeController {
 
-  @Resource
-  private NodeService nodeService;
+  private final NodeService nodeService;
 
   @GetMapping(value = "/gateway", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity<String> getApiGatewayPrefix() {

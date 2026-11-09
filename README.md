@@ -217,6 +217,7 @@ sqlrest:
       host: 127.0.0.1
       # Not needed in sentinel mode
       port: 6379
+      username: default
       password: 123456
       database: 0
       pool:

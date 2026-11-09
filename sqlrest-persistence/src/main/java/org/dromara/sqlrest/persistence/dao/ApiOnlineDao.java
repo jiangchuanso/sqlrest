@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.common.dto.ApiIdVersion;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
@@ -28,10 +28,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Repository
+@RequiredArgsConstructor
 public class ApiOnlineDao {
 
-  @Resource
-  private ApiOnlineMapper apiOnlineMapper;
+  private final ApiOnlineMapper apiOnlineMapper;
 
   private ApiAssignmentEntity buildAssignmentEntity(ApiOnlineEntity entity) {
     if (null == entity) {

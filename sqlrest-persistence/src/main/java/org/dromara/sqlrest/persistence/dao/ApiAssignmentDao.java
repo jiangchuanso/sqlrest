@@ -11,7 +11,7 @@ package org.dromara.sqlrest.persistence.dao;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
@@ -22,12 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Repository
+@RequiredArgsConstructor
 public class ApiAssignmentDao {
 
-  @Resource
-  private ApiAssignmentMapper apiAssignmentMapper;
-  @Resource
-  private ApiContextDao apiContextDao;
+  private final ApiAssignmentMapper apiAssignmentMapper;
+  private final ApiContextDao apiContextDao;
 
   public List<Long> getUpgradeOnlineAssignments() {
     return apiAssignmentMapper.getUpgradeOnlineAssignments();

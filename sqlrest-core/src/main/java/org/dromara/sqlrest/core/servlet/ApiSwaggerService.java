@@ -45,7 +45,7 @@ import org.dromara.sqlrest.persistence.entity.SystemParamEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ApiSwaggerService {
 
   private static final String INFO_TITLE = "SQLREST在线接口文档";
@@ -72,9 +73,9 @@ public class ApiSwaggerService {
 
   private static final ThreadLocal<Integer> THREAD_LOCAL = new ThreadLocal<>();
 
-  @Resource private ApiOnlineDao apiOnlineDao;
-  @Resource private ApiModuleDao apiModuleDao;
-  @Resource private SystemParamDao systemParamDao;
+  private final ApiOnlineDao apiOnlineDao;
+  private final ApiModuleDao apiModuleDao;
+  private final SystemParamDao systemParamDao;
 
   private String getApiUrlPrefix() {
     return String.format("/%s/", Constants.API_PATH_PREFIX);

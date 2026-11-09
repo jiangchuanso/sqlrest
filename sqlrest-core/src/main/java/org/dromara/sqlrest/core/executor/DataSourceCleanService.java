@@ -9,10 +9,10 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.executor;
 
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.core.util.DataSourceUtils;
 import org.dromara.sqlrest.persistence.dao.DataSourceDao;
 import java.util.Set;
-import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -21,10 +21,10 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DataSourceCleanService {
 
-  @Resource
-  private DataSourceDao dataSourceDao;
+  private final DataSourceDao dataSourceDao;
 
   /*每小时执行一次*/
   @EventListener(ApplicationReadyEvent.class)

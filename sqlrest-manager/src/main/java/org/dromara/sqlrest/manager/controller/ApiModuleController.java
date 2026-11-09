@@ -17,7 +17,7 @@ import org.dromara.sqlrest.core.service.ApiModuleService;
 import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import org.springframework.http.MediaType;
@@ -33,10 +33,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"模块管理接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/module")
+@RequiredArgsConstructor
 public class ApiModuleController {
 
-  @Resource
-  private ApiModuleService apiModuleService;
+  private final ApiModuleService apiModuleService;
 
   @ApiOperation(value = "添加模块")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)

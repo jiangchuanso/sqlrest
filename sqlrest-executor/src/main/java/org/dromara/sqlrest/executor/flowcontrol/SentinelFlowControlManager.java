@@ -28,8 +28,8 @@ import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -38,10 +38,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SentinelFlowControlManager implements FlowControlManger {
 
-  @Resource
-  private ApiOnlineDao apiOnlineDao;
+  private final ApiOnlineDao apiOnlineDao;
 
   /*每分钟执行一次*/
   @EventListener(ApplicationReadyEvent.class)

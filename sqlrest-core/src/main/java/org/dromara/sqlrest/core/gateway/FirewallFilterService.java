@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -27,12 +27,12 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FirewallFilterService {
 
   private volatile FirewallRulesEntity firewallRules;
 
-  @Resource
-  private FirewallRulesDao firewallRulesDao;
+  private final FirewallRulesDao firewallRulesDao;
 
   @PostConstruct
   public void init() {

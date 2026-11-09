@@ -13,7 +13,7 @@ import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.core.service.SystemParamService;
 import io.swagger.annotations.Api;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"参数管理接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/param")
+@RequiredArgsConstructor
 public class SystemParamController {
 
-  @Resource
-  private SystemParamService systemParamService;
+  private final SystemParamService systemParamService;
 
   @GetMapping(value = "/value/query", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity getByParamKey(@RequestParam("key") String key) {

@@ -12,7 +12,7 @@ package org.dromara.sqlrest.manager.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.core.dto.VersionCommitResponse;
@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"版本控制接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/version")
+@RequiredArgsConstructor
 public class VersionCommitController {
 
-  @Resource
-  private ApiAssignmentService apiAssignmentService;
+  private final ApiAssignmentService apiAssignmentService;
 
   @ApiOperation(value = "查询版本列表")
   @GetMapping(value = "/list/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

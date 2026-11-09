@@ -23,7 +23,7 @@ import org.dromara.sqlrest.persistence.util.JsonUtils;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.Objects;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -33,12 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ClientTokenService {
 
-  @Resource
-  private AppClientDao appClientDao;
-  @Resource
-  private CacheFactory cacheFactory;
+  private final AppClientDao appClientDao;
+  private final CacheFactory cacheFactory;
 
   @EventListener(ApplicationReadyEvent.class)
   public void init() {

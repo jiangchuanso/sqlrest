@@ -17,9 +17,9 @@ import org.dromara.sqlrest.common.util.TokenUtils;
 import org.dromara.sqlrest.persistence.dao.SystemUserDao;
 import org.dromara.sqlrest.persistence.entity.SystemUserEntity;
 import java.util.Arrays;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +29,10 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class AuthenticationConfiguration implements WebMvcConfigurer {
+
+  private final SystemUserDao systemUserDao;
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
@@ -65,9 +68,6 @@ public class AuthenticationConfiguration implements WebMvcConfigurer {
   public HandlerInterceptor authenticationInterceptor() {
     return new HandlerInterceptor() {
 
-      @Resource
-      private SystemUserDao systemUserDAO;
-
       @Override
       public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!(handler instanceof HandlerMethod)) {
@@ -85,7 +85,7 @@ public class AuthenticationConfiguration implements WebMvcConfigurer {
         }
 
         SystemUserEntity systemUserEntity = (SystemUserEntity) cache;
-        SystemUserEntity user = systemUserDAO.findByUsername(systemUserEntity.getUsername());
+        SystemUserEntity user = systemUserDao.findByUsername(systemUserEntity.getUsername());
         if (null == user) {
           throw new CommonException(ResponseErrorCode.ERROR_ACCESS_FORBIDDEN, "auth.token.user.not.exists");
         }

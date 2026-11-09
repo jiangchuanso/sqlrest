@@ -221,6 +221,7 @@ sqlrest:
       host: 127.0.0.1
       # 哨兵模式下不用配置port
       port: 6379
+      username: default
       password: 123456
       database: 0
       pool:

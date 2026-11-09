@@ -14,15 +14,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.dromara.sqlrest.persistence.entity.McpClientEntity;
 import org.dromara.sqlrest.persistence.mapper.McpClientMapper;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class McpClientDao {
 
-  @Resource
-  private McpClientMapper mcpClientMapper;
+  private final McpClientMapper mcpClientMapper;
 
   public void insert(McpClientEntity mcpClientEntity) {
     mcpClientMapper.insert(mcpClientEntity);

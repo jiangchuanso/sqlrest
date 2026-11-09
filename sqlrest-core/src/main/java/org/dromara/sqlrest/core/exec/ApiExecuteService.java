@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -59,16 +59,13 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ApiExecuteService {
 
-  @Resource
-  private CacheFactory cacheFactory;
-  @Resource
-  private DataSourceDao dataSourceDao;
-  @Resource
-  private DriverLoadService driverLoadService;
-  @Resource
-  private List<HttpRequestBodyExtractor> requestBodyExtractors;
+  private final CacheFactory cacheFactory;
+  private final DataSourceDao dataSourceDao;
+  private final DriverLoadService driverLoadService;
+  private final List<HttpRequestBodyExtractor> requestBodyExtractors;
 
   private DistributedCache getDistributedCache() {
     return cacheFactory.getDistributedCache(Constants.CACHE_NAME_API_RESPONSE);

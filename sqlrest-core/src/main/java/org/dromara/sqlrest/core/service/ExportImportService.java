@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,20 +44,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@RequiredArgsConstructor
 public class ExportImportService {
 
   private final String charsetName = StandardCharsets.UTF_8.name();
 
-  @Resource
-  private ApiAssignmentDao apiAssignmentDao;
-  @Resource
-  private DataSourceDao dataSourceDao;
-  @Resource
-  private ApiGroupDao apiGroupDao;
-  @Resource
-  private ApiModuleDao apiModuleDao;
-  @Resource
-  private ApiAssignmentService apiAssignmentService;
+  private final ApiAssignmentDao apiAssignmentDao;
+  private final DataSourceDao dataSourceDao;
+  private final ApiGroupDao apiGroupDao;
+  private final ApiModuleDao apiModuleDao;
+  private final ApiAssignmentService apiAssignmentService;
 
   public void exportAssignments(List<Long> ids, HttpServletResponse response) {
     Map<Long, DataSourceEntity> dataSourceEntityMap = dataSourceDao.listAll()

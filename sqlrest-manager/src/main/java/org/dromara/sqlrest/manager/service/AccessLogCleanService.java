@@ -10,7 +10,7 @@
 package org.dromara.sqlrest.manager.service;
 
 import org.dromara.sqlrest.persistence.mapper.AccessRecordMapper;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AccessLogCleanService {
 
   @Value("${access.log.clean.days:30}")
   private Integer cleanJobLogDays;
 
-  @Resource
-  private AccessRecordMapper accessRecordMapper;
+  private final AccessRecordMapper accessRecordMapper;
 
   @EventListener(ApplicationReadyEvent.class)
   public void cleanOnceAfterRestart() {

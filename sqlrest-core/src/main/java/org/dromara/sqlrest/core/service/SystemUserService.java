@@ -20,16 +20,16 @@ import org.dromara.sqlrest.core.dto.SystemUserDetailResponse;
 import org.dromara.sqlrest.persistence.dao.SystemUserDao;
 import org.dromara.sqlrest.persistence.entity.SystemUserEntity;
 import java.util.Objects;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SystemUserService {
 
-  @Resource
-  private SystemUserDao systemUserDao;
+  private final SystemUserDao systemUserDao;
 
   public AccessToken login(String username, String password) {
     SystemUserEntity user = systemUserDao.findByUsername(username);

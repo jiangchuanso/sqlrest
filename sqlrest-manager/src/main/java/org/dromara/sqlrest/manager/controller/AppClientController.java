@@ -21,7 +21,7 @@ import org.dromara.sqlrest.core.service.AppClientService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,10 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"客户端应用接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/client")
+@RequiredArgsConstructor
 public class AppClientController {
 
-  @Resource
-  private AppClientService appClientService;
+  private final AppClientService appClientService;
 
   @ApiOperation(value = "添加客户端应用")
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -10,7 +10,7 @@
 package org.dromara.sqlrest.core.service;
 
 import cn.hutool.extra.spring.SpringUtil;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
@@ -26,14 +26,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ApiGroupService {
 
-  @Resource
-  private ApiGroupDao apiGroupDao;
-  @Resource
-  private ApiAssignmentDao apiAssignmentDao;
-  @Resource
-  private AppClientDao appClientDao;
+  private final ApiGroupDao apiGroupDao;
+  private final ApiAssignmentDao apiAssignmentDao;
+  private final AppClientDao appClientDao;
 
   public void createGroup(String name) {
     try {

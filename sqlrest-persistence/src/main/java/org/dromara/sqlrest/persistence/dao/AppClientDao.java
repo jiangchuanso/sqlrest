@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.dto.IdWithName;
@@ -26,12 +26,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@RequiredArgsConstructor
 public class AppClientDao {
 
-  @Resource
-  private AppClientMapper appClientMapper;
-  @Resource
-  private ClientGroupMapper clientAuthMapper;
+  private final AppClientMapper appClientMapper;
+  private final ClientGroupMapper clientAuthMapper;
 
   public void insert(AppClientEntity appClientEntity) {
     appClientMapper.insert(appClientEntity);

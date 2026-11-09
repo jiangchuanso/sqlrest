@@ -11,7 +11,7 @@ package org.dromara.sqlrest.manager.upgrade;
 
 import cn.hutool.extra.spring.SpringUtil;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
@@ -33,16 +33,14 @@ import org.springframework.util.StopWatch;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class VersionUpgradeRunner implements ApplicationRunner {
 
   private static final String COMMIT_INIT_DESC = "First Commit By Upgrade.";
 
-  @Resource
-  private ApiAssignmentDao apiAssignmentDao;
-  @Resource
-  private VersionCommitDao versionCommitDao;
-  @Resource
-  private ApiOnlineDao apiOnlineDao;
+  private final ApiAssignmentDao apiAssignmentDao;
+  private final VersionCommitDao versionCommitDao;
+  private final ApiOnlineDao apiOnlineDao;
 
   @Override
   public void run(ApplicationArguments args) throws Exception {

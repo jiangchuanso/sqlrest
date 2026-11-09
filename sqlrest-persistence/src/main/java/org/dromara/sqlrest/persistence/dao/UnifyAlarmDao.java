@@ -12,16 +12,16 @@ package org.dromara.sqlrest.persistence.dao;
 import org.dromara.sqlrest.common.enums.OnOffEnum;
 import org.dromara.sqlrest.persistence.entity.UnifyAlarmEntity;
 import org.dromara.sqlrest.persistence.mapper.UnifyAlarmMapper;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class UnifyAlarmDao {
 
   private static final Long ID = 1L;
 
-  @Resource
-  private UnifyAlarmMapper unifyAlarmMapper;
+  private final UnifyAlarmMapper unifyAlarmMapper;
 
   public UnifyAlarmEntity getUnifyAlarmConfig() {
     return unifyAlarmMapper.selectById(ID);

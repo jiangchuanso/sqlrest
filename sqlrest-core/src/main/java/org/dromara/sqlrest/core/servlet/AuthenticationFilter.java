@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -52,6 +52,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthenticationFilter implements Filter {
 
   private static final ExecutorService alarmExecutor = ExecutorBuilder.create()
@@ -61,16 +62,11 @@ public class AuthenticationFilter implements Filter {
       .setHandler(new CallerRunsPolicy())
       .build();
 
-  @Resource
-  private ApiOnlineDao apiOnlineDao;
-  @Resource
-  private FlowControlManger flowControlManger;
-  @Resource
-  private ClientTokenService clientTokenService;
-  @Resource
-  private AccessRecordMapper accessRecordMapper;
-  @Resource
-  private UnifyAlarmOpsService unifyAlarmOpsService;
+  private final ApiOnlineDao apiOnlineDao;
+  private final FlowControlManger flowControlManger;
+  private final ClientTokenService clientTokenService;
+  private final AccessRecordMapper accessRecordMapper;
+  private final UnifyAlarmOpsService unifyAlarmOpsService;
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)

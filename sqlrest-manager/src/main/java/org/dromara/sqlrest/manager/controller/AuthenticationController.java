@@ -16,7 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
@@ -29,10 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"登陆认证接口"})
 @RestController
 @RequestMapping(value = "/user")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-  @Resource
-  private SystemUserService systemUserService;
+  private final SystemUserService systemUserService;
 
   @ApiOperation(value = "账号登录", notes = "使用一个账号密码登录")
   @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)

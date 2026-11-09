@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -37,14 +37,13 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class NodeService {
 
   private static final RestTemplate restTemplate = new RestTemplate(new AlarmHttpRequestFactory());
 
-  @Resource
-  private DiscoveryClient discoveryClient;
-  @Resource
-  private SqlrestUrlConfiguration sqlrestUrlConfiguration;
+  private final DiscoveryClient discoveryClient;
+  private final SqlrestUrlConfiguration sqlrestUrlConfiguration;
 
   public String getGatewayAddr() {
     List<ServiceInstance> instances = discoveryClient.getInstances(Constants.GATEWAY_APPLICATION_NAME);

@@ -13,14 +13,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.dromara.sqlrest.persistence.entity.SystemParamEntity;
 import org.dromara.sqlrest.persistence.mapper.SystemParamMapper;
 import java.util.Objects;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class SystemParamDao {
 
-  @Resource
-  private SystemParamMapper systemParamMapper;
+  private final SystemParamMapper systemParamMapper;
 
   public SystemParamEntity getByParamKey(String paramKey) {
     QueryWrapper<SystemParamEntity> queryWrapper = new QueryWrapper<>();

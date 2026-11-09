@@ -18,7 +18,7 @@ import org.dromara.sqlrest.core.executor.UnifyAlarmOpsService;
 import org.dromara.sqlrest.persistence.entity.UnifyAlarmEntity;
 import io.swagger.annotations.Api;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,10 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"告警配置接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/alarm")
+@RequiredArgsConstructor
 public class UnifyAlarmController {
 
-  @Resource
-  private UnifyAlarmOpsService unifyAlarmOpsService;
+  private final UnifyAlarmOpsService unifyAlarmOpsService;
 
   @GetMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity<UnifyAlarmEntity> getUnifyAlarmConfig() {

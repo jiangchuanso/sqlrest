@@ -27,20 +27,16 @@ import org.dromara.sqlrest.persistence.util.PageUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OverviewService {
 
-  @Resource
-  private AccessRecordMapper accessRecordMapper;
-
-  @Resource
-  private DataSourceMapper dataSourceMapper;
-
-  @Resource
-  private ApiAssignmentMapper apiAssignmentMapper;
+  private final AccessRecordMapper accessRecordMapper;
+  private final DataSourceMapper dataSourceMapper;
+  private final ApiAssignmentMapper apiAssignmentMapper;
 
   public Map<String, Integer> count() {
     return accessRecordMapper.selectCount();

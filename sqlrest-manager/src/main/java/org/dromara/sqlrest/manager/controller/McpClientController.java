@@ -37,10 +37,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"MCP令牌管理接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/mcp/client")
+@RequiredArgsConstructor
 public class McpClientController {
 
-  @Resource
-  private McpManageService mcpManageService;
+  private final McpManageService mcpManageService;
 
   @ApiOperation(value = "获取MCP服务地址")
   @GetMapping(value = "/endpoint", produces = MediaType.APPLICATION_JSON_VALUE)

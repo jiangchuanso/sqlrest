@@ -9,8 +9,8 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.executor.config;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServlet;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.core.exec.ApiExecuteService;
@@ -26,6 +26,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @EnableScheduling
 @Configuration
+@RequiredArgsConstructor
 public class ExecutorServletConfig {
 
   private static final String URL_PATH_PATTERN = String.format("/%s/*", Constants.API_PATH_PREFIX);
@@ -33,8 +34,7 @@ public class ExecutorServletConfig {
   @Value("${sqlrest.executor.print-sql-log}")
   private boolean printSqlLog;
 
-  @Resource
-  private AuthenticationFilter authenticationFilter;
+  private final AuthenticationFilter authenticationFilter;
 
   /**
    * API接口认证

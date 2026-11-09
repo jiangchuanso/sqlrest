@@ -14,16 +14,16 @@ import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.persistence.dao.SystemParamDao;
 import org.dromara.sqlrest.persistence.entity.SystemParamEntity;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SystemParamService {
 
-  @Resource
-  private SystemParamDao systemParamDao;
+  private final SystemParamDao systemParamDao;
 
   public Object getByParamKey(String key) {
     SystemParamEntity entity = systemParamDao.getByParamKey(key);

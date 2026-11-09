@@ -29,7 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -93,22 +93,16 @@ import org.springframework.util.CollectionUtils;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ApiAssignmentService {
 
-  @Resource
-  private ApiAssignmentDao apiAssignmentDao;
-  @Resource
-  private ApiOnlineDao apiOnlineDao;
-  @Resource
-  private VersionCommitDao versionCommitDao;
-  @Resource
-  private DataSourceDao dataSourceDao;
-  @Resource
-  private ApiGroupDao apiGroupDao;
-  @Resource
-  private ApiModuleDao apiModuleDao;
-  @Resource
-  private DriverLoadService driverLoadService;
+  private final ApiAssignmentDao apiAssignmentDao;
+  private final ApiOnlineDao apiOnlineDao;
+  private final VersionCommitDao versionCommitDao;
+  private final DataSourceDao dataSourceDao;
+  private final ApiGroupDao apiGroupDao;
+  private final ApiModuleDao apiModuleDao;
+  private final DriverLoadService driverLoadService;
 
   public List<ScriptEditorCompletion> completions() {
     List<ScriptEditorCompletion> results = new ArrayList<>();

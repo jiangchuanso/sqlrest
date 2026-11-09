@@ -10,7 +10,7 @@
 package org.dromara.sqlrest.core.exec.module;
 
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.cache.CacheFactory;
 import org.dromara.sqlrest.cache.DistributedCache;
 import org.dromara.sqlrest.common.consts.Constants;
@@ -21,12 +21,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Module(CacheVarModule.VAR_NAME)
+@RequiredArgsConstructor
 public class CacheVarModule implements VarModuleInterface {
 
   protected static final String VAR_NAME = "cache";
 
-  @Resource
-  private CacheFactory cacheFactory;
+  private final CacheFactory cacheFactory;
 
   @Override
   public String getVarModuleName() {

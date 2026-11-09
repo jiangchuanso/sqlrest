@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
@@ -32,12 +32,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ApiModuleService {
 
-  @Resource
-  private ApiModuleDao apiModuleDao;
-  @Resource
-  private ApiAssignmentDao apiAssignmentDao;
+  private final ApiModuleDao apiModuleDao;
+  private final ApiAssignmentDao apiAssignmentDao;
 
   public void createModule(String name) {
     try {

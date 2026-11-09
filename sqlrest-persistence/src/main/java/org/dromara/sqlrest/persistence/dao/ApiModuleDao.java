@@ -13,15 +13,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
 import org.dromara.sqlrest.persistence.mapper.ApiModuleMapper;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 @Repository
+@RequiredArgsConstructor
 public class ApiModuleDao {
 
-  @Resource
-  private ApiModuleMapper apiModuleMapper;
+  private final ApiModuleMapper apiModuleMapper;
 
   public void insert(ApiModuleEntity entity) {
     apiModuleMapper.insert(entity);

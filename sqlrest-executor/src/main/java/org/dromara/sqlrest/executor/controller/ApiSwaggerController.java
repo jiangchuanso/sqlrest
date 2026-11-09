@@ -14,8 +14,8 @@ import io.swagger.annotations.Api;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.core.servlet.ApiSwaggerService;
 import org.springframework.http.HttpStatus;
@@ -32,12 +32,11 @@ import springfox.documentation.spring.web.json.JsonSerializer;
 @CrossOrigin
 @RestController
 @RequestMapping(value = Constants.API_DOC_PATH_PREFIX)
+@RequiredArgsConstructor
 public class ApiSwaggerController {
 
-  @Resource
-  private ApiSwaggerService apiSwaggerService;
-  @Resource
-  private JsonSerializer jsonSerializer;
+  private final ApiSwaggerService apiSwaggerService;
+  private final JsonSerializer jsonSerializer;
 
   @GetMapping(value = {"/swagger.json", "/knife4j/swagger.json"}, produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Json> getSwaggerJson(HttpServletRequest request) {

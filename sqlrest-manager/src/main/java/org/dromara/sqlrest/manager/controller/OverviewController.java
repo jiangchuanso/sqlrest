@@ -20,7 +20,7 @@ import org.dromara.sqlrest.core.service.OverviewService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"统计相关接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/overview")
+@RequiredArgsConstructor
 public class OverviewController {
 
-  @Resource
-  private OverviewService overviewService;
+  private final OverviewService overviewService;
 
   @ApiOperation(value = "计数统计")
   @GetMapping(value = "/counter", produces = MediaType.APPLICATION_JSON_VALUE)

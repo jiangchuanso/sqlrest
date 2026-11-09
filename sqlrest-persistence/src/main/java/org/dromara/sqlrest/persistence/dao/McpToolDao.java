@@ -20,11 +20,10 @@ import org.dromara.sqlrest.persistence.mapper.McpToolMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class McpToolDao {
 
-  @Resource
-  private McpToolMapper mcpToolMapper;
-
+  private final McpToolMapper mcpToolMapper;
 
   public void insert(McpToolEntity entity) {
     mcpToolMapper.insert(entity);

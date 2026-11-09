@@ -11,7 +11,7 @@ package org.dromara.sqlrest.gateway.filter;
 
 import cn.hutool.json.JSONUtil;
 import java.util.Locale;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.consts.Constants;
@@ -36,10 +36,10 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ClientAddressFilter implements GlobalFilter, Ordered {
 
-  @Resource
-  private FirewallFilterService firewallFilterService;
+  private final FirewallFilterService firewallFilterService;
 
   /*每30秒执行一次*/
   @EventListener(ApplicationReadyEvent.class)

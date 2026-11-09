@@ -25,7 +25,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,10 +52,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @Service
+@RequiredArgsConstructor
 public class DataSourceService {
 
-  @Resource
-  private DataSourceDao dataSourceDao;
+  private final DataSourceDao dataSourceDao;
 
   public List<DatabaseTypeDetailResponse> getTypes() {
     List<DatabaseTypeDetailResponse> lists = new ArrayList<>();

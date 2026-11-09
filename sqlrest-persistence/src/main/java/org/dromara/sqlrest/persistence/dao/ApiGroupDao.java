@@ -13,15 +13,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.dromara.sqlrest.persistence.entity.ApiGroupEntity;
 import org.dromara.sqlrest.persistence.mapper.ApiGroupMapper;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 @Repository
+@RequiredArgsConstructor
 public class ApiGroupDao {
 
-  @Resource
-  private ApiGroupMapper apiGroupMapper;
+  private final ApiGroupMapper apiGroupMapper;
 
   public void insert(ApiGroupEntity entity) {
     apiGroupMapper.insert(entity);

@@ -15,17 +15,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.persistence.entity.DataSourceEntity;
 import org.dromara.sqlrest.persistence.mapper.DataSourceMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 @Repository
+@RequiredArgsConstructor
 public class DataSourceDao {
 
-  @Resource
-  private DataSourceMapper dataSourceMapper;
+  private final DataSourceMapper dataSourceMapper;
 
   public void insert(DataSourceEntity dataSourceEntity) {
     dataSourceMapper.insert(dataSourceEntity);

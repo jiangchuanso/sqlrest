@@ -9,7 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.executor.config;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.executor.interceptor.ExecutorInterceptor;
 import org.dromara.sqlrest.persistence.dao.SystemParamDao;
@@ -19,14 +19,13 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
+@RequiredArgsConstructor
 public class ExecutorWebConfig implements WebMvcConfigurer {
 
   private final String swaggerPathPattern = Constants.API_DOC_PATH_PREFIX + "/swagger/**";
   private final String knif4jPathPattern = Constants.API_DOC_PATH_PREFIX + "/knife4j/**";
 
-
-  @Resource
-  private SystemParamDao systemParamDao;
+  private final SystemParamDao systemParamDao;
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {

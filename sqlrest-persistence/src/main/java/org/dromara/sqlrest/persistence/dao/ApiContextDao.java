@@ -13,15 +13,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.dromara.sqlrest.persistence.entity.ApiContextEntity;
 import org.dromara.sqlrest.persistence.mapper.ApiContextMapper;
 import java.util.List;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
+@RequiredArgsConstructor
 public class ApiContextDao {
 
-  @Resource
-  private ApiContextMapper apiContextMapper;
+  private final ApiContextMapper apiContextMapper;
 
   @Transactional(rollbackFor = Exception.class)
   public void batchInsert(List<ApiContextEntity> records) {

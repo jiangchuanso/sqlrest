@@ -37,12 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"数据源管理接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/datasource")
+@RequiredArgsConstructor
 public class DataSourceController {
 
-  @Resource
-  private DataSourceService datasourceService;
-  @Resource
-  private DriverLoadService driverLoadService;
+  private final DataSourceService datasourceService;
+  private final DriverLoadService driverLoadService;
 
   @ApiOperation(value = "数据库类型")
   @GetMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)

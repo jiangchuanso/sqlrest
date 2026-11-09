@@ -14,7 +14,7 @@ import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.core.servlet.ClientTokenService;
 import java.util.Map;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/token")
+@RequiredArgsConstructor
 public class ClientTokenController {
 
-  @Resource
-  private ClientTokenService clientTokenService;
+  private final ClientTokenService clientTokenService;
 
   @PostMapping(value = "/generate", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResultEntity generateToken(@RequestBody Map<String, String> body) {

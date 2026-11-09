@@ -33,17 +33,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AppClientService {
 
-  @Resource
-  private AppClientDao appClientDao;
-  @Resource
-  private CacheFactory cacheFactory;
+  private final AppClientDao appClientDao;
+  private final CacheFactory cacheFactory;
 
   public void create(AppClientSaveRequest request) {
     if (null != appClientDao.getByAppKey(request.getAppKey())) {

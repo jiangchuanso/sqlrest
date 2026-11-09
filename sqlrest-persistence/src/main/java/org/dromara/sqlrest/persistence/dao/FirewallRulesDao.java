@@ -13,16 +13,16 @@ import org.dromara.sqlrest.common.enums.OnOffEnum;
 import org.dromara.sqlrest.common.enums.WhiteBlackEnum;
 import org.dromara.sqlrest.persistence.entity.FirewallRulesEntity;
 import org.dromara.sqlrest.persistence.mapper.FirewallRulesMapper;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class FirewallRulesDao {
 
   private static final Long ID = 1L;
 
-  @Resource
-  private FirewallRulesMapper firewallRulesMapper;
+  private final FirewallRulesMapper firewallRulesMapper;
 
   public FirewallRulesEntity getFirewallRules() {
     return firewallRulesMapper.selectById(ID);

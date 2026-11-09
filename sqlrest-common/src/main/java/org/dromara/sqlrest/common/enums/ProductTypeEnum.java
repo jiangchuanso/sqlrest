@@ -690,7 +690,9 @@ public enum ProductTypeEnum {
   }
 
   public boolean hasDatabaseName() {
-    return !Arrays.asList(DM, SQLITE3, MYSQL, MARIADB, GBASE8A, MONGODB, ELASTICSEARCH, HTTP).contains(this);
+    return !Arrays.asList(
+            DM, SQLITE3, MYSQL, MARIADB, STARROCKS, DORIS, GBASE8A, MONGODB, ELASTICSEARCH, HTTP)
+        .contains(this);
   }
 
   public boolean isNoViewTables(){

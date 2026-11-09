@@ -15,7 +15,7 @@ import org.dromara.sqlrest.core.dto.SystemUserDetailResponse;
 import org.dromara.sqlrest.core.service.SystemUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"用户管理接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/user")
+@RequiredArgsConstructor
 public class SystemUserController {
 
-  @Resource
-  private SystemUserService systemUserService;
+  private final SystemUserService systemUserService;
 
   @ApiOperation(value = "用户详情", notes = "根据用户ID获取用户详情")
   @GetMapping(value = "/detail/id", produces = MediaType.APPLICATION_JSON_VALUE)

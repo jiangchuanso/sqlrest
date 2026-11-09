@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -50,12 +50,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Api(tags = {"API配置接口"})
 @RestController
 @RequestMapping(value = Constants.MANGER_API_V1 + "/assignment")
+@RequiredArgsConstructor
 public class ApiAssignmentController {
 
-  @Resource
-  private ApiAssignmentService apiAssignmentService;
-  @Resource
-  private ExportImportService exportImportService;
+  private final ApiAssignmentService apiAssignmentService;
+  private final ExportImportService exportImportService;
 
   @ApiOperation(value = "获取自动提示列表")
   @GetMapping(value = "/completions", produces = MediaType.APPLICATION_JSON_VALUE)

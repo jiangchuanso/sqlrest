@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.http.HttpEntity;
@@ -37,15 +37,11 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UnifyAlarmOpsService {
 
-  @Resource
-  private UnifyAlarmDao unifyAlarmDao;
-  private final RestTemplate restTemplate;
-
-  public UnifyAlarmOpsService() {
-    this.restTemplate = new RestTemplate(new AlarmHttpRequestFactory());
-  }
+  private final UnifyAlarmDao unifyAlarmDao;
+  private final RestTemplate restTemplate = new RestTemplate(new AlarmHttpRequestFactory());
 
   public UnifyAlarmEntity getUnifyAlarmConfig() {
     return unifyAlarmDao.getUnifyAlarmConfig();

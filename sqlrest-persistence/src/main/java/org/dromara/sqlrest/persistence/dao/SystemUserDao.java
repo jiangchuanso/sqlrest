@@ -13,14 +13,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.dromara.sqlrest.persistence.entity.SystemUserEntity;
 import org.dromara.sqlrest.persistence.mapper.SystemUserMapper;
 import java.util.Objects;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@RequiredArgsConstructor
 public class SystemUserDao {
 
-  @Resource
-  private SystemUserMapper systemUserMapper;
+  private final SystemUserMapper systemUserMapper;
 
   public SystemUserEntity getById(Long id) {
     return systemUserMapper.selectById(id);
