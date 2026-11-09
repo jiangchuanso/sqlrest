@@ -302,7 +302,11 @@ sqlrest:
 
 ## 五、项目推荐
 
-[数据库迁移同步工具dbswitch] (https://gitee.com/inrgihc/dbswitch)
+[1].开源的数据库迁移同步工具dbswitch:[https://gitee.com/inrgihc/dbswitch](https://gitee.com/inrgihc/dbswitch)
+
+[2].开源的RESTful接口开发(SQL2API)工具SQLREST:[https://gitee.com/inrgihc/sqlrest](https://gitee.com/inrgihc/sqlrest)
+
+[3].开源的接口数据采集入库(API2DB)工具APIGrab:[https://gitee.com/inrgihc/apigrab](https://gitee.com/inrgihc/apigrab)
 
 ## 六、社区推荐
 

@@ -300,6 +300,12 @@ Contribution guide: [Contributing Guide](CONTRIBUTE.md)
 
 [Database Migration & Sync Tool - dbswitch](https://github.com/inrgihc/dbswitch)
 
+[1].Opensource database migration and sync tool - dbswitch:[https://gitee.com/inrgihc/dbswitch](https://gitee.com/inrgihc/dbswitch)
+
+[2].Opensource RESTful interface develop (SQL2API) tool - SQLREST:[https://gitee.com/inrgihc/sqlrest](https://gitee.com/inrgihc/sqlrest)
+
+[3].Opensource RESTful interface craw to database (API2DB) tool - APIGrab:[https://gitee.com/inrgihc/apigrab](https://gitee.com/inrgihc/apigrab)
+
 ## 6. Community
 
 <div>
