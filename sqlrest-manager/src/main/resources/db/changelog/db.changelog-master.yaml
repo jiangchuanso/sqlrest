@@ -22,4 +22,6 @@ databaseChangeLog:
 - include:
     file: classpath:db/changelog/log-v1.7.1.yaml
 - include:
+    file: classpath:db/changelog/log-v1.8.1.yaml
+- include:
     file: classpath:db/changelog/log-v1.9.0.yaml

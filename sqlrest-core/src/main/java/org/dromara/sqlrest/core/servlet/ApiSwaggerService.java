@@ -33,7 +33,6 @@ import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.BaseParam;
 import org.dromara.sqlrest.common.dto.ItemParam;
 import org.dromara.sqlrest.common.dto.OutParam;
-import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
 import org.dromara.sqlrest.common.enums.HttpMethodEnum;
 import org.dromara.sqlrest.common.enums.ParamTypeEnum;
 import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
@@ -347,13 +346,8 @@ public class ApiSwaggerService {
   private ApiResponses getApiResponses(ApiAssignmentEntity assignment, OpenAPI openAPI) {
     List<OutParam> outputs = assignment.getOutputs();
 
-    // 检查USE_SYSTEM_RESPONSE_FORMAT配置
-    Map<DataTypeFormatEnum, String> responseFormat = assignment.getResponseFormat();
-    String useSystemResponseFormatValue =
-        responseFormat != null
-            ? responseFormat.get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT)
-            : null;
-    boolean useSystemFormat = !"false".equals(useSystemResponseFormatValue);
+    // 从wrapResponse配置判断是否使用系统标准格式
+    boolean useSystemFormat = !Boolean.FALSE.equals(assignment.getWrapResponse());
     Schema rootSchema;
     if (useSystemFormat) {
       // 使用系统标准格式：包含code、message、data结构
@@ -404,7 +398,7 @@ public class ApiSwaggerService {
             dataSchema.addProperties(param.getName(), propertiesItem);
           }
         }
-        rootSchema.addProperties("data", dataSchema);
+        rootSchema.addProperties("data", wrapDataBySingleRecord(dataSchema, assignment));
       }
     } else {
       // 直接返回数据格式：不包含code、message包装
@@ -455,6 +449,11 @@ public class ApiSwaggerService {
       }
     }
 
+    // 非系统包装格式时，data 不做 code/message 外层；按 singleRecord 决定 data 是数组还是单对象
+    if (!useSystemFormat) {
+      rootSchema = wrapDataBySingleRecord(rootSchema, assignment);
+    }
+
     ApiResponses apiResponses = new ApiResponses();
     Schema outputSchema = new Schema();
     String outputEntityName = genParamEntityName();
@@ -472,6 +471,21 @@ public class ApiSwaggerService {
     apiResponses.addApiResponse("403", new ApiResponse().description("Forbidden"));
     apiResponses.addApiResponse("404", new ApiResponse().description("Not Found"));
     return apiResponses;
+  }
+
+  /**
+   * 根据 singleRecord 决定单个出参对象的结构：singleRecord=true 折叠为单对象（保持 schema 原样）；
+   * singleRecord=false 时数据为多条，将 schema 包裹为数组。
+   *
+   * @param itemSchema 单条记录的 object schema
+   * @param assignment 接口配置
+   * @return 单对象 schema 或 ArraySchema(list包裹单对象)
+   */
+  private Schema wrapDataBySingleRecord(Schema itemSchema, ApiAssignmentEntity assignment) {
+    if (Boolean.TRUE.equals(assignment.getSingleRecord())) {
+      return itemSchema;
+    }
+    return new ArraySchema().items(itemSchema);
   }
 
   private String getTypeFormat(ParamTypeEnum type) {

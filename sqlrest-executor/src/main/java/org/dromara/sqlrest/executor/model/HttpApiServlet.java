@@ -19,7 +19,6 @@ import org.dromara.sqlrest.core.exec.ApiAssignmentCache;
 import org.dromara.sqlrest.core.exec.ApiExecuteService;
 import org.dromara.sqlrest.core.util.JacksonUtils;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
-import org.dromara.sqlrest.common.enums.DataTypeFormatEnum;
 
 public class HttpApiServlet extends HttpServlet {
 
@@ -35,10 +34,9 @@ public class HttpApiServlet extends HttpServlet {
     ApiAssignmentEntity apiConfigEntity = ApiAssignmentCache.get();
     ResultEntity result = apiExecuteService.execute(apiConfigEntity, request, printSqlLog);
     
-    // 从responseFormat配置中读取USE_SYSTEM_RESPONSE_FORMAT的值
-    String useSystemResponseFormat = apiConfigEntity.getResponseFormat().get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT);
-    boolean useSystemFormat = !"false".equalsIgnoreCase(useSystemResponseFormat);
-    
+    // 从wrapResponse配置判断是否返回完整系统格式
+    boolean useSystemFormat = !Boolean.FALSE.equals(apiConfigEntity.getWrapResponse());
+
     String json;
     if (useSystemFormat) {
       // 返回完整的ResultEntity

@@ -500,6 +500,38 @@
                     </el-form-item>
                   </el-col>
                 </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <el-form-item prop="wrapResponse"
+                                  label-width="120px">
+                      <span slot="label"
+                            style="display:inline-block;">
+                        {{ $t('common2.wrapResponse') }}
+                        <el-tooltip effect="dark"
+                                    :content="$t('common2.wrapResponseTip')"
+                                    placement="top">
+                          <i class='el-icon-question' />
+                        </el-tooltip>
+                      </span>
+                      <el-switch v-model="createParam.wrapResponse"
+                                 :active-value="true"
+                                 :inactive-value="false"
+                                 :disabled="isOnlyShowDetail"></el-switch>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+                <el-row>
+                  <el-col :span="24">
+                    <el-form-item :label="$t('common2.singleRecord')"
+                                  prop="singleRecord"
+                                  label-width="120px">
+                      <el-switch v-model="createParam.singleRecord"
+                                 :active-value="true"
+                                 :inactive-value="false"
+                                 :disabled="isOnlyShowDetail"></el-switch>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
               </el-tab-pane>
               <el-tab-pane :label="$t('common2.cacheConfig')"
                            name="cacheConfig">
@@ -833,6 +865,8 @@ export default {
         open: false,
         namingStrategy: 'CAMEL_CASE',
         formatMap: null,
+        wrapResponse: true,
+        singleRecord: false,
         open: false,
         alarm: false,
         flowStatus: false,
@@ -981,6 +1015,10 @@ export default {
         script: "",
         namingStrategy: detail.namingStrategy,
         formatMap: mergedFormatMap,
+        wrapResponse: (detail.wrapResponse !== undefined && detail.wrapResponse !== null)
+          ? detail.wrapResponse : true,
+        singleRecord: (detail.singleRecord !== undefined && detail.singleRecord !== null)
+          ? detail.singleRecord : false,
         open: detail.open,
         alarm: detail.alarm,
         flowStatus: detail.flowStatus,
@@ -1156,18 +1194,21 @@ export default {
     },
     mergeFormatMap: function (existingFormatMap) {
 
-      if (!existingFormatMap || existingFormatMap.length === 0) {
+      const cleanedExisting = (existingFormatMap || [])
+        .filter(item => item.key !== 'USE_SYSTEM_RESPONSE_FORMAT');
+
+      if (cleanedExisting.length === 0) {
         return this.responseTypeFormat || [];
       }
 
       if (!this.responseTypeFormat || this.responseTypeFormat.length === 0) {
-        return existingFormatMap;
+        return cleanedExisting;
       }
 
       const merged = [...this.responseTypeFormat];
       const existingMap = {};
 
-      existingFormatMap.forEach(item => {
+      cleanedExisting.forEach(item => {
         existingMap[item.key] = item.value;
       });
 
@@ -1628,6 +1669,8 @@ export default {
           open: this.createParam.open,
           namingStrategy: this.createParam.namingStrategy,
           formatMap: this.createParam.formatMap,
+          wrapResponse: this.createParam.wrapResponse,
+          singleRecord: this.createParam.singleRecord,
           open: this.createParam.open,
           alarm: this.createParam.alarm,
           flowStatus: this.createParam.flowStatus,
@@ -1679,6 +1722,8 @@ export default {
           open: this.createParam.open,
           namingStrategy: this.createParam.namingStrategy,
           formatMap: this.createParam.formatMap,
+          wrapResponse: this.createParam.wrapResponse,
+          singleRecord: this.createParam.singleRecord,
           open: this.createParam.open,
           alarm: this.createParam.alarm,
           flowStatus: this.createParam.flowStatus,
@@ -1795,6 +1840,8 @@ export default {
           engine: this.createParam.engine,
           namingStrategy: this.createParam.namingStrategy,
           formatMap: this.createParam.formatMap,
+          wrapResponse: this.createParam.wrapResponse,
+          singleRecord: this.createParam.singleRecord,
           contextList: sqls,
           paramValues: this.debugParams
         })

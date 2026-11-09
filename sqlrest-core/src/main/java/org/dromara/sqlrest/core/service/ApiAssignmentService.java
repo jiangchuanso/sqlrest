@@ -336,6 +336,10 @@ public class ApiAssignmentService {
       if (ProductTypeEnum.HTTP == dataSourceEntity.getType() && answer instanceof List) {
         answer = ((List) answer).get(0);
       }
+      if (Boolean.TRUE.equals(request.getSingleRecord()) && answer instanceof List) {
+        List<?> list = (List<?>) answer;
+        answer = list.isEmpty() ? null : list.get(0);
+      }
       List<OutParam> types = JacksonUtils.parseFiledTypesAndFillNullAsString(results);
       String logs = Optional.ofNullable(DebugExecuteLogger.get())
           .orElseGet(ArrayList::new).stream().map(DisplayRecord::getDisplayText)
@@ -356,12 +360,11 @@ public class ApiAssignmentService {
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setCharacterEncoding(Charsets.UTF_8.name());
 
-    Map<DataTypeFormatEnum, String> formatMap = request.getFormatMap().stream()
-        .collect(
-            Collectors.toMap(
-                DataTypeFormatMapValue::getKey,
-                DataTypeFormatMapValue::getValue,
-                (a, b) -> a));
+    Map<DataTypeFormatEnum, String> formatMap =
+        request.getFormatMap().stream()
+            .collect(
+                Collectors.toMap(
+                    DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a));
     response.getWriter().append(JacksonUtils.toJsonStr(entity, formatMap));
   }
 
@@ -443,6 +446,8 @@ public class ApiAssignmentService {
     assignmentEntity.setContextList(contextList);
     assignmentEntity.setResponseFormat(request.getFormatMap().stream()
         .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a)));
+    assignmentEntity.setWrapResponse(request.getWrapResponse());
+    assignmentEntity.setSingleRecord(request.getSingleRecord());
     assignmentEntity.setNamingStrategy(request.getNamingStrategy());
     assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
     assignmentEntity.setFlowGrade(request.getFlowGrade());
@@ -536,6 +541,8 @@ public class ApiAssignmentService {
     assignmentEntity.setContextList(contextList);
     assignmentEntity.setResponseFormat(request.getFormatMap().stream()
         .collect(Collectors.toMap(DataTypeFormatMapValue::getKey, DataTypeFormatMapValue::getValue, (a, b) -> a)));
+    assignmentEntity.setWrapResponse(request.getWrapResponse());
+    assignmentEntity.setSingleRecord(request.getSingleRecord());
     assignmentEntity.setNamingStrategy(request.getNamingStrategy());
     assignmentEntity.setFlowStatus(Optional.ofNullable(request.getFlowStatus()).orElse(false));
     assignmentEntity.setFlowGrade(request.getFlowGrade());

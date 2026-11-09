@@ -17,6 +17,7 @@ import org.apache.ibatis.annotations.Update;
 import org.dromara.sqlrest.common.dto.NameCount;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
+import org.dromara.sqlrest.persistence.entity.ResponseFormatRawRow;
 
 public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
 
@@ -119,4 +120,16 @@ public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
       + "LEFT JOIN SQLREST_API_MODULE m on a.module_id = m.id "
       + "GROUP BY m.name ORDER BY count DESC LIMIT #{limit}")
   List<NameCount> getModuleApiCount(@Param("limit") Integer limit);
+
+  @Select("SELECT id AS id, response_format AS response_format "
+      + "FROM SQLREST_API_ASSIGNMENT")
+  List<ResponseFormatRawRow> selectResponseFormatRaw();
+
+  @Update("UPDATE SQLREST_API_ASSIGNMENT "
+      + "SET wrap_response = #{wrapResponse}, response_format = #{responseFormat} "
+      + "WHERE id = #{id} AND response_format = #{oldResponseFormat}")
+  int updateWrapResponseIfUnchanged(@Param("id") Long id,
+      @Param("wrapResponse") Boolean wrapResponse,
+      @Param("responseFormat") String responseFormat,
+      @Param("oldResponseFormat") String oldResponseFormat);
 }

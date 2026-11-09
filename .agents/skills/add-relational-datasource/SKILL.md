@@ -20,11 +20,10 @@ metadata:
 
 ## 触发方式
 
-本技能文件同时存在于两个位置：
+本技能文件存在于位置：
 
 | 位置 | 触发方式 |
 |------|----------|
-| `.opencode/skills/add-relational-datasource/SKILL.md` | **自动触发** — opencode 会将其注册到 `available_skills`，匹配时通过 `skill` 工具加载。需在会话启动时识别，新增后需重启会话生效。 |
 | `.agents/skills/add-relational-datasource/SKILL.md` | **手动触发** — Agent 依据 `AGENTS.md` 中 `.agents (必读)` 的指引，主动读取此文件并按步骤执行。 |
 
 ### 触发提示词

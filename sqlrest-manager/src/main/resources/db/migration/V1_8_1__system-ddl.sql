@@ -1,0 +1,2 @@
+ALTER TABLE `SQLREST_API_ASSIGNMENT` ADD COLUMN `wrap_response` tinyint(1) NOT NULL DEFAULT 1 COMMENT '接口响应是否包装为系统标准格式' AFTER `response_format`;
+ALTER TABLE `SQLREST_API_ASSIGNMENT` ADD COLUMN `single_record` tinyint(1) NOT NULL DEFAULT 0 COMMENT '接口响应是否为单条记录' AFTER `wrap_response`;

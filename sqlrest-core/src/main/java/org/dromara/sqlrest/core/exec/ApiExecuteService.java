@@ -134,6 +134,10 @@ public class ApiExecuteService {
     if (ProductTypeEnum.HTTP == dsEntity.getType() && answer instanceof List) {
       answer = ((List) answer).get(0);
     }
+    if (Boolean.TRUE.equals(config.getSingleRecord()) && answer instanceof List) {
+      List<?> list = (List<?>) answer;
+      answer = list.isEmpty() ? null : list.get(0);
+    }
     return ResultEntity.success(answer);
   }
 

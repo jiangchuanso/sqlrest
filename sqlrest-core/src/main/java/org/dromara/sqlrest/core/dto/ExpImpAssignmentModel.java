@@ -51,6 +51,10 @@ public class ExpImpAssignmentModel {
 
   private Map<DataTypeFormatEnum, String> responseFormat;
 
+  private Boolean wrapResponse;
+
+  private Boolean singleRecord;
+
   private NamingStrategyEnum namingStrategy;
 
   private Boolean flowStatus;

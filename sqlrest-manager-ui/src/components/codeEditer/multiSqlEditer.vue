@@ -29,7 +29,7 @@
                     :ref="editableTabs[index].name"
                     :value="editableTabs[index].content"
                     :options="cmOptions"
-                    @ready="onCmReady"
+                    @ready="cm => onCmReady(item.name, cm)"
                     @focus="onCmFocus"
                     @inputRead="onCmCodeChange">
         </codemirror>
@@ -115,8 +115,11 @@ export default {
     }
   },
   methods: {
-    onCmReady (cm) {
-      this.cmMapper.set(this.currentTabName, cm)
+    onCmReady (tabName, cm) {
+      // 必须使用每个 tab 自己的 name 注册，不能用 currentTabName：
+      // 多个 SQL 窗口同时渲染时，ready 事件是异步批量触发的，
+      // 此时 currentTabName 已指向最后一个 tab，会导致前面的窗口内容丢失
+      this.cmMapper.set(tabName, cm)
       cm.setSize('100%', '300px')
     },
     onCmFocus (cm) {
@@ -130,6 +133,7 @@ export default {
     resetEditor: function () {
       this.tabIndex = 0;
       this.editableTabs = [];
+      this.cmMapper.clear();
     },
     addTab: function (sqlContent) {
       if (this.editableTabs.length > 6) {

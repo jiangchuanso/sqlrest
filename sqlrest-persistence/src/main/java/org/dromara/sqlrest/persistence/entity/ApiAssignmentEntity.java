@@ -86,6 +86,12 @@ public class ApiAssignmentEntity {
   @TableField(value = "response_format", typeHandler = FormatMapHandler.class)
   private Map<DataTypeFormatEnum, String> responseFormat;
 
+  @TableField("wrap_response")
+  private Boolean wrapResponse;
+
+  @TableField("single_record")
+  private Boolean singleRecord;
+
   @TableField(value = "naming_strategy", typeHandler = EnumTypeHandler.class)
   private NamingStrategyEnum namingStrategy;
 

@@ -89,6 +89,12 @@ public class ApiAssignmentSaveRequest {
   @ApiModelProperty("接口出参数据类型转换格式")
   private List<DataTypeFormatMapValue> formatMap;
 
+  @ApiModelProperty("响应是否包装为系统标准格式")
+  private Boolean wrapResponse;
+
+  @ApiModelProperty("响应是否为单条记录(单条时取list首个元素)")
+  private Boolean singleRecord;
+
   @NotNull(message = "namingStrategy不能为null")
   @ApiModelProperty("接口出参属性命名策略")
   private NamingStrategyEnum namingStrategy;

@@ -117,6 +117,8 @@ public class ExportImportService {
     model.setContentType(assignmentEntity.getContentType());
     model.setEngine(assignmentEntity.getEngine());
     model.setResponseFormat(assignmentEntity.getResponseFormat());
+    model.setWrapResponse(assignmentEntity.getWrapResponse());
+    model.setSingleRecord(assignmentEntity.getSingleRecord());
     model.setNamingStrategy(assignmentEntity.getNamingStrategy());
     model.setFlowStatus(assignmentEntity.getFlowStatus());
     model.setFlowGrade(assignmentEntity.getFlowGrade());
@@ -172,6 +174,8 @@ public class ExportImportService {
     request.setParams(model.getParams());
     request.setOutputs(model.getOutputs());
     request.setFormatMap(formatMap);
+    request.setWrapResponse(model.getWrapResponse());
+    request.setSingleRecord(model.getSingleRecord());
     request.setNamingStrategy(model.getNamingStrategy());
     request.setFlowStatus(model.getFlowStatus());
     request.setFlowGrade(model.getFlowGrade());

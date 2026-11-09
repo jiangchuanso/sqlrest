@@ -10,7 +10,6 @@
 package org.dromara.sqlrest.common.enums;
 
 import cn.hutool.core.date.DatePattern;
-import org.dromara.sqlrest.common.util.I18nUtils;
 
 public enum DataTypeFormatEnum {
   DATE(java.sql.Date.class.getName(), DatePattern.NORM_DATE_PATTERN),
@@ -22,24 +21,14 @@ public enum DataTypeFormatEnum {
   TIMESTAMP(java.sql.Timestamp.class.getName(), DatePattern.NORM_DATETIME_PATTERN),
 
   BIG_DECIMAL(java.math.BigDecimal.class.getName(), 6),
-  
-  // 系统返回格式配置：true=返回完整ResultEntity，false=只返回data属性
-  USE_SYSTEM_RESPONSE_FORMAT(null, "format.use.system.response", "true"),
   ;
 
   private String className;
-  private String remarkKey;
   private String defaultPattern;
   private int numberScale;
 
   DataTypeFormatEnum(String className, String defaultPattern) {
     this.className = className;
-    this.defaultPattern = defaultPattern;
-  }
-
-  DataTypeFormatEnum(String className, String remarkKey, String defaultPattern) {
-    this.className = className;
-    this.remarkKey = remarkKey;
     this.defaultPattern = defaultPattern;
   }
 
@@ -53,9 +42,6 @@ public enum DataTypeFormatEnum {
   }
 
   public String getRemark() {
-    if (remarkKey != null) {
-      return I18nUtils.getMessage(remarkKey);
-    }
     return className;
   }
 

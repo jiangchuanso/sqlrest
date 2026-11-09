@@ -11,8 +11,11 @@ package org.dromara.sqlrest.manager.upgrade;
 
 import cn.hutool.extra.spring.SpringUtil;
 import java.util.List;
+
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.dao.VersionCommitDao;
@@ -22,6 +25,7 @@ import org.dromara.sqlrest.persistence.entity.VersionCommitEntity;
 import org.dromara.sqlrest.persistence.util.JsonUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
@@ -32,6 +36,7 @@ import org.springframework.util.StopWatch;
  * @author suntang
  */
 @Slf4j
+@Order(2)
 @Component
 @RequiredArgsConstructor
 public class VersionUpgradeRunner implements ApplicationRunner {
@@ -45,16 +50,18 @@ public class VersionUpgradeRunner implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) throws Exception {
     VersionUpgradeRunner runner = SpringUtil.getBean(VersionUpgradeRunner.class);
-    log.info("Startup upgrade version control now.");
+    log.info("Startup upgrade VCS data now.");
     StopWatch stopWatch = new StopWatch();
     stopWatch.start("UpgradeVersion");
     List<Long> idList = apiAssignmentDao.getUpgradeOnlineAssignments();
-    for (Long id : idList) {
-      if (null == versionCommitDao.getLatestVersion(id)) {
-        runner.upgradeApiAssignment(apiAssignmentDao.getById(id, true));
+    if (CollectionUtils.isNotEmpty(idList)) {
+      for (Long id : idList) {
+        if (null == versionCommitDao.getLatestVersion(id)) {
+          runner.upgradeApiAssignment(apiAssignmentDao.getById(id, true));
+        }
       }
+      Lists.partition(idList, 500).forEach(apiAssignmentDao::resetUpgradeOnlineAssignments);
     }
-    apiAssignmentDao.resetUpgradeOnlineAssignments(idList);
     stopWatch.stop();
     log.info("Success upgrade version control for {} APIs, total cost {} ms .",
         idList.size(), stopWatch.getTotalTimeMillis());
