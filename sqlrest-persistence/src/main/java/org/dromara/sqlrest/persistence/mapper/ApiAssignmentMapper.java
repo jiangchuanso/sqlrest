@@ -14,6 +14,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.dromara.sqlrest.common.dto.NameCount;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.ModuleAssignmentEntity;
 
@@ -102,4 +103,20 @@ public interface ApiAssignmentMapper extends BaseMapper<ApiAssignmentEntity> {
       + "</script>")
   List<ApiAssignmentEntity> searchAll(@Param("groupId") Long groupId, @Param("moduleId") Long moduleId,
       @Param("open") Boolean open, @Param("searchText") String searchText, @Param("online") Boolean online);
+
+  @Select("SELECT engine as name,count(1) as count from SQLREST_API_ASSIGNMENT GROUP BY engine ORDER BY count DESC")
+  List<NameCount> getEngineRatio();
+
+  @Select("SELECT d.name as name,count(a.id) as count from SQLREST_API_ASSIGNMENT a "
+      + "LEFT JOIN SQLREST_DATASOURCE d on a.datasource_id = d.id "
+      + "GROUP BY d.name ORDER BY count DESC")
+  List<NameCount> getDatasourceApiCount();
+
+  @Select("SELECT method as name,count(1) as count from SQLREST_API_ASSIGNMENT GROUP BY method ORDER BY count DESC")
+  List<NameCount> getMethodRatio();
+
+  @Select("SELECT m.name as name,count(a.id) as count from SQLREST_API_ASSIGNMENT a "
+      + "LEFT JOIN SQLREST_API_MODULE m on a.module_id = m.id "
+      + "GROUP BY m.name ORDER BY count DESC LIMIT #{limit}")
+  List<NameCount> getModuleApiCount(@Param("limit") Integer limit);
 }

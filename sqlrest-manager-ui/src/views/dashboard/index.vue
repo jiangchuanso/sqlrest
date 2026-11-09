@@ -58,10 +58,9 @@
         </div>
       </el-col>
     </el-row>
-    <el-card class="box-card">
-      <div slot="header"
-           class="clearfix">
-        <el-row>
+    <el-tabs type="border-card" class="dash-tabs" @tab-click="handleTabClick">
+      <el-tab-pane :label="$t('dashboard.callOverview')">
+        <el-row :gutter="12" class="filter-row">
           <el-col :span="8">
             <span>{{ $t('dashboard.timeRange') }}:</span>
             <el-select v-model="selectDays"
@@ -89,27 +88,52 @@
           <el-col :span="8">
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="8">
-            <div id="topPathChart"></div>
+        <el-row :gutter="12" class="chart-row">
+          <el-col :span="12">
+            <div id="topPathChart" class="chart-panel"></div>
           </el-col>
-          <el-col :span="8">
-            <div id="topAppChart"></div>
-          </el-col>
-          <el-col :span="8">
-            <div id="topAddrChart"></div>
+          <el-col :span="12">
+            <div id="topAppChart" class="chart-panel"></div>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="16">
-            <div id="barChart"></div>
+        <el-row :gutter="12" class="chart-row">
+          <el-col :span="12">
+            <div id="topAddrChart" class="chart-panel"></div>
           </el-col>
-          <el-col :span="8">
-            <div id="pieChart"></div>
+          <el-col :span="12">
+            <div id="pieChart" class="chart-panel"></div>
           </el-col>
         </el-row>
-      </div>
-    </el-card>
+        <el-row :gutter="12" class="chart-row">
+          <el-col :span="24">
+            <div id="barChart" class="chart-panel chart-panel-full"></div>
+          </el-col>
+        </el-row>
+      </el-tab-pane>
+      <el-tab-pane :label="$t('dashboard.devOverview')">
+        <el-row :gutter="12" class="chart-row">
+          <el-col :span="12">
+            <div id="dsTypeChart" class="chart-panel"></div>
+          </el-col>
+          <el-col :span="12">
+            <div id="engineChart" class="chart-panel"></div>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12" class="chart-row">
+          <el-col :span="12">
+            <div id="methodChart" class="chart-panel"></div>
+          </el-col>
+          <el-col :span="12">
+            <div id="moduleChart" class="chart-panel"></div>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12" class="chart-row">
+          <el-col :span="24">
+            <div id="dsApiChart" class="chart-panel chart-panel-full"></div>
+          </el-col>
+        </el-row>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 <script>
@@ -144,6 +168,93 @@ export default {
       topPathChart: null,
       topAppChart: null,
       topAddrChart: null,
+      dsTypeChart: null,
+      engineChart: null,
+      methodChart: null,
+      moduleChart: null,
+      dsApiChart: null,
+      dsTypeData: {
+        title: { text: '' },
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 'right' },
+        series: [{
+          name: '',
+          type: 'pie',
+          radius: '55%',
+          data: [],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      },
+      engineData: {
+        title: { text: '' },
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 'right' },
+        color: ['#40c9c6', '#36a3f7'],
+        series: [{
+          name: '',
+          type: 'pie',
+          radius: '55%',
+          data: [],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      },
+      methodData: {
+        title: { text: '' },
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 'right' },
+        color: ['#40c9c6', '#36a3f7', '#f4516c', '#34bfa3', '#e6a23c'],
+        series: [{
+          name: '',
+          type: 'pie',
+          radius: '55%',
+          data: [],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      },
+      moduleData: {
+        title: { text: '' },
+        color: ['#36a3f7'],
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        legend: {},
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'value', boundaryGap: [0, 0.01] },
+        yAxis: { type: 'category', data: [] },
+        series: [{ type: 'bar', data: [] }]
+      },
+      dsApiData: {
+        title: { text: '' },
+        color: ['#36a3f7'],
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        legend: {},
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'value', boundaryGap: [0, 0.01] },
+        yAxis: { type: 'category', data: [] },
+        series: [{ type: 'bar', data: [] }]
+      },
       barChartData: {
         title: {
           text: ''
@@ -431,6 +542,54 @@ export default {
         );
 
     },
+    loadDashboardStats: function () {
+      this.$http.get("/sqlrest/manager/api/v1/overview/datasource-type-ratio")
+        .then(res => {
+          if (0 === res.data.code) {
+            var list = res.data.data.map(item => ({ name: item.name, value: item.count }));
+            this.dsTypeData.series[0].data = list;
+            this.dsTypeChart.setOption(this.dsTypeData, true);
+          }
+        });
+
+      this.$http.get("/sqlrest/manager/api/v1/overview/engine-ratio")
+        .then(res => {
+          if (0 === res.data.code) {
+            var list = res.data.data.map(item => ({ name: item.name, value: item.count }));
+            this.engineData.series[0].data = list;
+            this.engineChart.setOption(this.engineData, true);
+          }
+        });
+
+      this.$http.get("/sqlrest/manager/api/v1/overview/method-ratio")
+        .then(res => {
+          if (0 === res.data.code) {
+            var list = res.data.data.map(item => ({ name: item.name, value: item.count }));
+            this.methodData.series[0].data = list;
+            this.methodChart.setOption(this.methodData, true);
+          }
+        });
+
+      this.$http.get("/sqlrest/manager/api/v1/overview/datasource-api-count")
+        .then(res => {
+          if (0 === res.data.code) {
+            var result = res.data.data;
+            this.dsApiData.yAxis.data = result.map(t => t.name).reverse();
+            this.dsApiData.series[0].data = result.map(t => t.count).reverse();
+            this.dsApiChart.setOption(this.dsApiData, true);
+          }
+        });
+
+      this.$http.get("/sqlrest/manager/api/v1/overview/module-api-count")
+        .then(res => {
+          if (0 === res.data.code) {
+            var result = res.data.data;
+            this.moduleData.yAxis.data = result.map(t => t.name).reverse();
+            this.moduleData.series[0].data = result.map(t => t.count).reverse();
+            this.moduleChart.setOption(this.moduleData, true);
+          }
+        });
+    },
     selectChangedRangeTime: function () {
       this.loadData();
     },
@@ -454,10 +613,35 @@ export default {
       this.topPathData.title.text = this.$t('dashboard.topInterface');
       this.topAppData.title.text = this.$t('dashboard.topApp');
       this.topAddrData.title.text = this.$t('dashboard.topAddr');
+      this.dsTypeData.title.text = this.$t('dashboard.datasourceTypeRatio');
+      this.dsTypeData.series[0].name = this.$t('dashboard.datasourceTypeRatio');
+      this.engineData.title.text = this.$t('dashboard.engineRatio');
+      this.engineData.series[0].name = this.$t('dashboard.engineRatio');
+      this.methodData.title.text = this.$t('dashboard.methodRatio');
+      this.methodData.series[0].name = this.$t('dashboard.methodRatio');
+      this.moduleData.title.text = this.$t('dashboard.moduleApiCount');
+      this.moduleData.series[0].name = this.$t('dashboard.moduleApiCount');
+      this.dsApiData.title.text = this.$t('dashboard.datasourceApiCount');
     },
     updateChartsLocale () {
       this.initTranslations();
       this.loadData();
+      this.loadDashboardStats();
+    },
+    handleTabClick: function () {
+      this.$nextTick(() => {
+        this.resizeAllCharts();
+      });
+    },
+    resizeAllCharts: function () {
+      var charts = [this.barChart, this.pieChart, this.topPathChart,
+        this.topAppChart, this.topAddrChart, this.dsTypeChart,
+        this.engineChart, this.methodChart, this.moduleChart, this.dsApiChart];
+      for (var i = 0; i < charts.length; i++) {
+        if (charts[i]) {
+          charts[i].resize();
+        }
+      }
     }
   },
   computed: {
@@ -482,7 +666,16 @@ export default {
     this.topPathChart = this.$echarts.init(document.getElementById("topPathChart"));
     this.topAppChart = this.$echarts.init(document.getElementById("topAppChart"));
     this.topAddrChart = this.$echarts.init(document.getElementById("topAddrChart"));
+    this.dsTypeChart = this.$echarts.init(document.getElementById("dsTypeChart"));
+    this.engineChart = this.$echarts.init(document.getElementById("engineChart"));
+    this.methodChart = this.$echarts.init(document.getElementById("methodChart"));
+    this.moduleChart = this.$echarts.init(document.getElementById("moduleChart"));
+    this.dsApiChart = this.$echarts.init(document.getElementById("dsApiChart"));
     this.loadData();
+    this.loadDashboardStats();
+    window.addEventListener('resize', this.resizeAllCharts);
+    this.$nextTick(() => this.resizeAllCharts());
+    setTimeout(() => this.resizeAllCharts(), 300);
   }
 };
 </script>
@@ -504,21 +697,23 @@ export default {
 .color-green2 {
   color: #34bfa3 !important;
 }
-.dashbord {
-  background-color: #f0f3f4;
-}
 
 .infoCrads {
-  margin: 20px 20px 20px 20px;
+  margin: 0 0 16px 0;
 }
 
 .infoCrads .el-col {
-  padding: 10px 20px;
+  padding: 0 8px;
 }
 
 .infoCrads .el-col .cardItem {
-  height: 128px;
+  height: 100px;
   background: #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
 }
 
 .cardItem {
@@ -527,52 +722,57 @@ export default {
 
 .cardItem .cardItem_txt {
   float: left;
-  margin: 26px 0 0 20px;
 }
 
 .cardItem .cardItem_txt .cardItem_p0 {
-  font-size: 20px;
-  margin: 26px 0 0 20px;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
 }
 
 .cardItem .cardItem_txt .cardItem_p1 {
-  font-size: 20px;
-  margin: 26px 0 0 20px;
+  font-size: 14px;
+  margin: 4px 0 0 0;
+  color: #999;
 }
 
 .cardItem .cardItem_icon {
-  font-size: 64px;
+  font-size: 48px;
   font-weight: bold;
 }
 
-#barChart {
-  width: 95%;
-  height: 300px;
-  box-shadow: 1px 3px 3px #f0eeee;
-  padding: 20px;
+.dash-tabs {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
-#pieChart {
-  width: 95%;
-  height: 300px;
-  box-shadow: 1px 3px 3px #f0eeee;
-  padding: 20px;
+
+.chart-row {
+  margin-bottom: 16px;
 }
-#topPathChart {
-  width: 95%;
-  height: 300px;
-  box-shadow: 2px 3px 3px #f0eeee;
-  padding: 20px;
+
+.chart-panel {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  width: 100%;
+  height: 350px;
 }
-#topAppChart {
-  width: 95%;
-  height: 300px;
-  box-shadow: 2px 3px 3px #f0eeee;
-  padding: 20px;
+
+.chart-panel-full {
+  height: 380px;
 }
-#topAddrChart {
-  width: 95%;
-  height: 300px;
-  box-shadow: 2px 3px 3px #f0eeee;
-  padding: 20px;
+
+#dsApiChart {
+  height: 420px;
+}
+
+#moduleChart {
+  height: 420px;
+}
+
+.filter-row {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 4px;
 }
 </style>

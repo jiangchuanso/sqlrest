@@ -11,6 +11,7 @@ package org.dromara.sqlrest.persistence.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.dromara.sqlrest.common.dto.DateCount;
+import org.dromara.sqlrest.common.dto.HourCount;
 import org.dromara.sqlrest.common.dto.NameCount;
 import org.dromara.sqlrest.persistence.entity.AccessRecordEntity;
 import java.util.List;
@@ -142,6 +143,68 @@ public interface AccessRecordMapper extends BaseMapper<AccessRecordEntity> {
       + "</if>"
       + "</script>")
   List<DateCount> getDailyTrend(@Param("days") Integer days);
+
+  @Select("<script>"
+      + "<if test='_databaseId == \"mysql\" '>"
+      + "SELECT concat('HTTP(',status,')') as name,count(1) as count from SQLREST_ACCESS_RECORD "
+      + "WHERE api_id = #{apiId} "
+      + "AND DATE_SUB( CURDATE(), INTERVAL ${days} DAY ) <![CDATA[ <=  ]]> date(create_time) "
+      + "GROUP BY status "
+      + "ORDER BY count DESC "
+      + "</if>"
+      + "<if test='_databaseId == \"postgresql\" '>"
+      + "SELECT concat('HTTP(',status,')') as name,count(1) as count from SQLREST_ACCESS_RECORD "
+      + "WHERE api_id = #{apiId} "
+      + "AND CURRENT_DATE - INTERVAL'${days} day' <![CDATA[ <=  ]]> create_time::date "
+      + "GROUP BY status "
+      + "ORDER BY count DESC "
+      + "</if>"
+      + "</script>")
+  List<NameCount> getApiHttpStatusCount(@Param("apiId") Long apiId, @Param("days") Integer days);
+
+  @Select("<script>"
+      + "<if test='_databaseId == \"mysql\" '>"
+      + "SELECT "
+      + " DATE_FORMAT(create_time,'%Y-%m-%d') as of_date , "
+      + " count(*) as total, "
+      + " sum(case when status=200 then 1 else 0 end) as success "
+      + "FROM SQLREST_ACCESS_RECORD "
+      + "WHERE api_id = #{apiId} "
+      + "AND DATE_SUB( CURDATE(), INTERVAL ${days} DAY ) <![CDATA[ <=  ]]> date(create_time) "
+      + "GROUP BY of_date "
+      + "ORDER BY of_date ASC "
+      + "</if>"
+      + "<if test='_databaseId == \"postgresql\" '>"
+      + "SELECT "
+      + " to_char(create_time, 'YYYY-MM-DD') as of_date , "
+      + " count(*) as total, "
+      + " sum(case when status=200 then 1 else 0 end) as success "
+      + "FROM SQLREST_ACCESS_RECORD "
+      + "WHERE api_id = #{apiId} "
+      + "AND CURRENT_DATE - INTERVAL'${days} day' <![CDATA[ <=  ]]> create_time::date "
+      + "GROUP BY of_date "
+      + "ORDER BY of_date ASC "
+      + "</if>"
+      + "</script>")
+  List<DateCount> getApiDailyTrend(@Param("apiId") Long apiId, @Param("days") Integer days);
+
+  @Select("<script>"
+      + "<if test='_databaseId == \"mysql\" '>"
+      + "SELECT HOUR(create_time) as hour,count(*) as count from SQLREST_ACCESS_RECORD "
+      + "WHERE api_id = #{apiId} "
+      + "AND TO_DAYS(create_time) = TO_DAYS(#{date}) "
+      + "GROUP BY HOUR(create_time) "
+      + "ORDER BY hour ASC "
+      + "</if>"
+      + "<if test='_databaseId == \"postgresql\" '>"
+      + "SELECT EXTRACT(HOUR FROM create_time)::int as hour,count(*) as count from SQLREST_ACCESS_RECORD "
+      + "WHERE api_id = #{apiId} "
+      + "AND create_time::date = #{date}::date "
+      + "GROUP BY EXTRACT(HOUR FROM create_time) "
+      + "ORDER BY hour ASC "
+      + "</if>"
+      + "</script>")
+  List<HourCount> getApiHourlyTrend(@Param("apiId") Long apiId, @Param("date") String date);
 
   @Delete("<script>"
       + "<if test='_databaseId == \"mysql\" '>"

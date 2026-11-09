@@ -59,7 +59,14 @@ export default {
     fail: '失败',
     topInterface: 'TOP接口',
     topApp: 'TOP应用',
-    topAddr: 'TOP地址'
+    topAddr: 'TOP地址',
+    datasourceTypeRatio: '数据源类别占比',
+    engineRatio: '引擎类型占比',
+    datasourceApiCount: '数据源接口数量',
+    methodRatio: '接口方法占比',
+    moduleApiCount: '模块接口占比',
+    callOverview: '调用概览',
+    devOverview: '接口概览'
   },
   menu: {
     dashboard: '仪表盘',
@@ -332,7 +339,19 @@ export default {
     onlineVersion: '上线版本：',
     moduleName: '模块名称：',
     authGroup: '授权分组：',
-    requireAuth: '需要认证'
+    requireAuth: '需要认证',
+    callStatistics: '调用统计',
+    timeRange: '时间范围',
+    selectTimeRange: '请选择统计时间',
+    selectDate: '请选择日期',
+    timeRangeHint: '影响HTTP状态码占比和每日调用趋势',
+    dateHint: '仅影响24小时调用趋势',
+    httpStatusRatio: 'HTTP状态码占比',
+    dailyTrend: '每日调用趋势',
+    hourlyTrend: '24小时调用趋势',
+    callCount: '调用次数',
+    date: '日期',
+    hour: '小时'
   },
   setting: {
     alarm: '告警配置',

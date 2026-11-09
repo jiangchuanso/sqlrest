@@ -9,7 +9,7 @@
             {{ $t('common2.back') }}</i>
         </el-button>
       </div>
-      <el-tabs type="border-card">
+      <el-tabs type="border-card" @tab-click="handleStatTabClick">
         <el-tab-pane :label="$t('service.interfaceDefinition')">
           <el-row class="detail-row">
             <el-col :span="4">
@@ -244,6 +244,62 @@
                            :total="totalAccessItemCount"></el-pagination>
           </div>
         </el-tab-pane>
+        <el-tab-pane :label="$t('service.callStatistics')">
+          <el-row class="stat-filter-row">
+            <el-col :span="8">
+              <span class="stat-label">{{ $t('service.timeRange') }}
+                <el-tooltip :content="$t('service.timeRangeHint')" placement="top">
+                  <i class="el-icon-question" style="color:#409eff;cursor:pointer;font-size:14px;margin-left:4px;"></i>
+                </el-tooltip>
+              </span>
+              <el-select v-model="statDays"
+                         @change="handleStatDaysChange"
+                         :placeholder="$t('service.selectTimeRange')"
+                         size="small"
+                         style="width: 140px">
+                <el-option v-for="item in optionDays"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value">
+                </el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="16">
+            </el-col>
+          </el-row>
+          <el-row :gutter="12" class="chart-row">
+            <el-col :span="12">
+              <div id="statusRatioChart" class="chart-panel"></div>
+            </el-col>
+            <el-col :span="12">
+              <div id="dailyTrendChart" class="chart-panel"></div>
+            </el-col>
+          </el-row>
+          <el-row class="stat-filter-row">
+            <el-col :span="8">
+              <span class="stat-label">{{ $t('service.date') }}
+                <el-tooltip :content="$t('service.dateHint')" placement="top">
+                  <i class="el-icon-question" style="color:#409eff;cursor:pointer;font-size:14px;margin-left:4px;"></i>
+                </el-tooltip>
+              </span>
+              <el-date-picker v-model="statDate"
+                              type="date"
+                              value-format="yyyy-MM-dd"
+                              :placeholder="$t('service.selectDate')"
+                              size="small"
+                              @change="handleStatDateChange"
+                              style="width: 180px">
+              </el-date-picker>
+            </el-col>
+            <el-col :span="16">
+            </el-col>
+          </el-row>
+          <el-row :gutter="12" class="chart-row">
+            <el-col :span="24">
+              <div id="hourlyTrendChart" class="chart-panel chart-panel-full"></div>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
       </el-tabs>
     </div>
 
@@ -356,6 +412,59 @@ export default {
       versionDialogVisible: false,
       versionList: [],
       selectCommitId: null,
+      statDays: 7,
+      statDate: null,
+      optionDays: [
+        { label: '1', value: 1 },
+        { label: '3', value: 3 },
+        { label: '7', value: 7 },
+        { label: '30', value: 30 },
+      ],
+      statusRatioChart: null,
+      dailyTrendChart: null,
+      hourlyTrendChart: null,
+      statusRatioData: {
+        title: { text: '' },
+        tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+        legend: { orient: 'vertical', left: 'right' },
+        color: ['#40c9c6', '#36a3f7', '#f4516c', '#34bfa3', '#e6a23c', '#9b59b6'],
+        series: [{
+          name: '',
+          type: 'pie',
+          radius: ['35%', '55%'],
+          center: ['50%', '55%'],
+          avoidLabelOverlap: false,
+          label: { show: false },
+          emphasis: {
+            label: { show: true, fontSize: '14', fontWeight: 'bold' },
+            itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' }
+          },
+          labelLine: { show: false },
+          data: []
+        }]
+      },
+      dailyTrendData: {
+        title: { text: '' },
+        tooltip: { trigger: 'axis' },
+        legend: { data: [{ name: '', textStyle: { color: '#000' } }, { name: '', textStyle: { color: '#000' } }] },
+        color: ['#36a3f7', '#40c9c6'],
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'category', boundaryGap: true, data: [], axisLabel: { interval: 0, textStyle: { color: '#000', fontSize: 10 }, margin: 8 }, axisLine: { show: true, lineStyle: { color: 'rgb(2,121,253)' } }, axisTick: { show: false } },
+        yAxis: { type: 'value' },
+        series: [
+          { name: '', type: 'bar', barWidth: '30%', data: [] },
+          { name: '', type: 'bar', barWidth: '30%', data: [] }
+        ]
+      },
+      hourlyTrendData: {
+        title: { text: '' },
+        tooltip: { trigger: 'axis' },
+        color: ['#36a3f7'],
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'category', boundaryGap: true, data: [], axisLabel: { interval: 0, textStyle: { color: '#000', fontSize: 10 } }, axisLine: { show: true, lineStyle: { color: 'rgb(2,121,253)' } } },
+        yAxis: { type: 'value' },
+        series: [{ name: '', type: 'bar', barWidth: '60%', data: [] }]
+      },
     };
   },
   components: { JsonViewer },
@@ -525,14 +634,140 @@ export default {
           }
         }
       });
-    }
+    },
+    loadStatusRatio: function () {
+      this.$http.get("/sqlrest/manager/api/v1/overview/api/"
+        + this.currentInterfaceId + "/status-ratio/" + this.statDays)
+        .then(res => {
+          if (0 === res.data.code) {
+            var list = res.data.data.map(item => ({ name: item.name, value: item.count }));
+            this.statusRatioData.series[0].data = list;
+            this.statusRatioChart.setOption(this.statusRatioData, true);
+          }
+        });
+    },
+    loadDailyTrend: function () {
+      this.$http.get("/sqlrest/manager/api/v1/overview/api/"
+        + this.currentInterfaceId + "/daily-trend/" + this.statDays)
+        .then(res => {
+          if (0 === res.data.code) {
+            var lists = res.data.data;
+            var xAxisData = [];
+            var y1AxisData = [];
+            var y2AxisData = [];
+            for (var i = 0; i < lists.length; i++) {
+              xAxisData.push(lists[i].ofDate);
+              y1AxisData.push(lists[i].total);
+              y2AxisData.push(lists[i].success);
+            }
+            this.dailyTrendData.xAxis.data = xAxisData;
+            this.dailyTrendData.series[0].data = y1AxisData;
+            this.dailyTrendData.series[1].data = y2AxisData;
+            this.dailyTrendChart.setOption(this.dailyTrendData, true);
+          }
+        });
+    },
+    loadHourlyTrend: function () {
+      if (!this.statDate) {
+        return;
+      }
+      this.$http.get("/sqlrest/manager/api/v1/overview/api/"
+        + this.currentInterfaceId + "/hourly-trend?date=" + this.statDate)
+        .then(res => {
+          if (0 === res.data.code) {
+            var lists = res.data.data;
+            var hourData = [];
+            var countData = [];
+            for (var h = 0; h < 24; h++) {
+              hourData.push(h + ':00');
+              var found = lists.find(function (item) { return item.hour === h; });
+              countData.push(found ? found.count : 0);
+            }
+            this.hourlyTrendData.xAxis.data = hourData;
+            this.hourlyTrendData.series[0].data = countData;
+            this.hourlyTrendChart.setOption(this.hourlyTrendData, true);
+          }
+        });
+    },
+    loadCallStatistics: function () {
+      this.loadStatusRatio();
+      this.loadDailyTrend();
+      this.loadHourlyTrend();
+    },
+    handleStatDaysChange: function () {
+      this.loadStatusRatio();
+      this.loadDailyTrend();
+    },
+    handleStatDateChange: function () {
+      this.loadHourlyTrend();
+    },
+    initStatChartsLocale: function () {
+      this.optionDays = [
+        { label: this.$t('dashboard.1day'), value: 1 },
+        { label: this.$t('dashboard.3days'), value: 3 },
+        { label: this.$t('dashboard.7days'), value: 7 },
+        { label: this.$t('dashboard.30days'), value: 30 },
+      ];
+      this.statusRatioData.title.text = this.$t('service.httpStatusRatio');
+      this.statusRatioData.series[0].name = this.$t('service.httpStatusRatio');
+      this.dailyTrendData.title.text = this.$t('service.dailyTrend');
+      this.dailyTrendData.legend.data[0].name = this.$t('dashboard.total');
+      this.dailyTrendData.legend.data[1].name = this.$t('dashboard.successCount');
+      this.dailyTrendData.series[0].name = this.$t('dashboard.total');
+      this.dailyTrendData.series[1].name = this.$t('dashboard.successCount');
+      this.hourlyTrendData.title.text = this.$t('service.hourlyTrend');
+      this.hourlyTrendData.series[0].name = this.$t('service.callCount');
+    },
+    handleStatTabClick: function () {
+      this.$nextTick(() => {
+        this.resizeStatCharts();
+      });
+    },
+    resizeStatCharts: function () {
+      var charts = [this.statusRatioChart, this.dailyTrendChart, this.hourlyTrendChart];
+      for (var i = 0; i < charts.length; i++) {
+        if (charts[i]) {
+          charts[i].resize();
+        }
+      }
+    },
   },
   created () {
     this.currentInterfaceId = this.$route.query.id;
     this.currentCommitId = this.$route.query.commitId;
     this.reloadIntefaceDetail();
     this.reloadAccessLogList();
-  }
+  },
+  mounted () {
+    this.initStatChartsLocale();
+    this.$nextTick(() => {
+      var today = new Date();
+      var y = today.getFullYear();
+      var m = (today.getMonth() + 1).toString().padStart(2, '0');
+      var d = today.getDate().toString().padStart(2, '0');
+      this.statDate = y + '-' + m + '-' + d;
+      this.statusRatioChart = this.$echarts.init(document.getElementById("statusRatioChart"));
+      this.dailyTrendChart = this.$echarts.init(document.getElementById("dailyTrendChart"));
+      this.hourlyTrendChart = this.$echarts.init(document.getElementById("hourlyTrendChart"));
+      this.loadCallStatistics();
+      window.addEventListener('resize', this.resizeStatCharts);
+      this.$nextTick(() => this.resizeStatCharts());
+      setTimeout(() => this.resizeStatCharts(), 300);
+    });
+  },
+  computed: {
+    currentLocale () {
+      return this.$i18n.locale;
+    }
+  },
+  watch: {
+    currentLocale () {
+      this.$nextTick(() => {
+        this.initStatChartsLocale();
+        this.loadCallStatistics();
+      });
+    }
+  },
 };
 </script>
 
@@ -589,5 +824,33 @@ export default {
 .btn-text {
   font-size: 12px;
   color: #6873ce;
+}
+
+.stat-filter-row {
+  margin: 0 0 16px 0;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.chart-row {
+  margin-bottom: 16px;
+}
+
+.chart-panel {
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  width: 100%;
+  height: 350px;
+}
+
+.chart-panel-full {
+  height: 380px;
 }
 </style>

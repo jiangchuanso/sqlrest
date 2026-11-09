@@ -12,6 +12,7 @@ package org.dromara.sqlrest.core.service;
 import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.dromara.sqlrest.common.dto.DateCount;
+import org.dromara.sqlrest.common.dto.HourCount;
 import org.dromara.sqlrest.common.dto.NameCount;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.core.dto.ApiAccessLogBasicResponse;
@@ -19,6 +20,8 @@ import org.dromara.sqlrest.persistence.dao.AppClientDao;
 import org.dromara.sqlrest.persistence.entity.AccessRecordEntity;
 import org.dromara.sqlrest.persistence.entity.AppClientEntity;
 import org.dromara.sqlrest.persistence.mapper.AccessRecordMapper;
+import org.dromara.sqlrest.persistence.mapper.ApiAssignmentMapper;
+import org.dromara.sqlrest.persistence.mapper.DataSourceMapper;
 import org.dromara.sqlrest.persistence.util.PageUtils;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,12 @@ public class OverviewService {
 
   @Resource
   private AccessRecordMapper accessRecordMapper;
+
+  @Resource
+  private DataSourceMapper dataSourceMapper;
+
+  @Resource
+  private ApiAssignmentMapper apiAssignmentMapper;
 
   public Map<String, Integer> count() {
     return accessRecordMapper.selectCount();
@@ -54,6 +63,38 @@ public class OverviewService {
 
   public List<NameCount> topClient(Integer days, Integer n) {
     return accessRecordMapper.getTopAppClientAccess(days > 0 ? days - 1 : days, n);
+  }
+
+  public List<NameCount> datasourceTypeRatio() {
+    return dataSourceMapper.getDatasourceTypeRatio();
+  }
+
+  public List<NameCount> engineRatio() {
+    return apiAssignmentMapper.getEngineRatio();
+  }
+
+  public List<NameCount> datasourceApiCount() {
+    return apiAssignmentMapper.getDatasourceApiCount();
+  }
+
+  public List<NameCount> methodRatio() {
+    return apiAssignmentMapper.getMethodRatio();
+  }
+
+  public List<NameCount> moduleApiCount() {
+    return apiAssignmentMapper.getModuleApiCount(15);
+  }
+
+  public List<NameCount> apiStatusRatio(Long apiId, Integer days) {
+    return accessRecordMapper.getApiHttpStatusCount(apiId, days > 0 ? days - 1 : days);
+  }
+
+  public List<DateCount> apiDailyTrend(Long apiId, Integer days) {
+    return accessRecordMapper.getApiDailyTrend(apiId, days > 0 ? days - 1 : days);
+  }
+
+  public List<HourCount> apiHourlyTrend(Long apiId, String date) {
+    return accessRecordMapper.getApiHourlyTrend(apiId, date);
   }
 
   public PageResult<ApiAccessLogBasicResponse> pageByApiId(Long apiId, Integer page, Integer size) {

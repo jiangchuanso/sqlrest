@@ -59,7 +59,14 @@ export default {
     fail: 'Fail',
     topInterface: 'TOP Interface',
     topApp: 'TOP App',
-    topAddr: 'TOP Address'
+    topAddr: 'TOP Address',
+    datasourceTypeRatio: 'Datasource Type Ratio',
+    engineRatio: 'Engine Type Ratio',
+    datasourceApiCount: 'Datasource API Count',
+    methodRatio: 'Method Ratio',
+    moduleApiCount: 'Module API Count',
+    callOverview: 'Call Overview',
+    devOverview: 'API Overview'
   },
   menu: {
     dashboard: 'Dashboard',
@@ -332,7 +339,19 @@ export default {
     onlineVersion: 'Online Version:',
     moduleName: 'Module Name:',
     authGroup: 'Auth Group:',
-    requireAuth: 'Requires Auth'
+    requireAuth: 'Requires Auth',
+    callStatistics: 'Call Statistics',
+    timeRange: 'Time Range',
+    selectTimeRange: 'Select Time Range',
+    selectDate: 'Select Date',
+    timeRangeHint: 'Affects HTTP status ratio and daily trend',
+    dateHint: 'Only affects 24h call trend',
+    httpStatusRatio: 'HTTP Status Ratio',
+    dailyTrend: 'Daily Call Trend',
+    hourlyTrend: '24h Call Trend',
+    callCount: 'Call Count',
+    date: 'Date',
+    hour: 'Hour'
   },
   setting: {
     alarm: 'Alarm Config',

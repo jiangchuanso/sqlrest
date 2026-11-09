@@ -11,6 +11,7 @@ package org.dromara.sqlrest.manager.controller;
 
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.dto.DateCount;
+import org.dromara.sqlrest.common.dto.HourCount;
 import org.dromara.sqlrest.common.dto.NameCount;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.dto.ResultEntity;
@@ -76,5 +77,56 @@ public class OverviewController {
   public PageResult<ApiAccessLogBasicResponse> callLogs(@PathVariable("id") Long id, @RequestParam("page") Integer page,
       @RequestParam("size") Integer size) {
     return overviewService.pageByApiId(id, page, size);
+  }
+
+  @ApiOperation(value = "数据源类别占比")
+  @GetMapping(value = "/datasource-type-ratio", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<NameCount>> datasourceTypeRatio() {
+    return ResultEntity.success(overviewService.datasourceTypeRatio());
+  }
+
+  @ApiOperation(value = "引擎类型占比")
+  @GetMapping(value = "/engine-ratio", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<NameCount>> engineRatio() {
+    return ResultEntity.success(overviewService.engineRatio());
+  }
+
+  @ApiOperation(value = "数据源接口数量")
+  @GetMapping(value = "/datasource-api-count", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<NameCount>> datasourceApiCount() {
+    return ResultEntity.success(overviewService.datasourceApiCount());
+  }
+
+  @ApiOperation(value = "接口方法占比")
+  @GetMapping(value = "/method-ratio", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<NameCount>> methodRatio() {
+    return ResultEntity.success(overviewService.methodRatio());
+  }
+
+  @ApiOperation(value = "模块接口数量")
+  @GetMapping(value = "/module-api-count", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<NameCount>> moduleApiCount() {
+    return ResultEntity.success(overviewService.moduleApiCount());
+  }
+
+  @ApiOperation(value = "API状态码占比")
+  @GetMapping(value = "/api/{apiId}/status-ratio/{days}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<NameCount>> apiStatusRatio(@PathVariable("apiId") Long apiId,
+      @PathVariable("days") Integer days) {
+    return ResultEntity.success(overviewService.apiStatusRatio(apiId, days));
+  }
+
+  @ApiOperation(value = "API每日调用趋势")
+  @GetMapping(value = "/api/{apiId}/daily-trend/{days}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<DateCount>> apiDailyTrend(@PathVariable("apiId") Long apiId,
+      @PathVariable("days") Integer days) {
+    return ResultEntity.success(overviewService.apiDailyTrend(apiId, days));
+  }
+
+  @ApiOperation(value = "API 24小时调用趋势")
+  @GetMapping(value = "/api/{apiId}/hourly-trend", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<HourCount>> apiHourlyTrend(@PathVariable("apiId") Long apiId,
+      @RequestParam("date") String date) {
+    return ResultEntity.success(overviewService.apiHourlyTrend(apiId, date));
   }
 }
