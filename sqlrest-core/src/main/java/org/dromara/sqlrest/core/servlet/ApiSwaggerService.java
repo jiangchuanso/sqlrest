@@ -15,13 +15,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.NumberSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
@@ -32,14 +26,6 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityScheme.Type;
 import io.swagger.v3.oas.models.tags.Tag;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -59,11 +45,19 @@ import org.dromara.sqlrest.persistence.entity.SystemParamEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * 文档格式说明：https://openapi.apifox.cn/
- * <p>
- * SwaggerEditor: https://editor.swagger.io/
- * </p>
+ *
+ * <p>SwaggerEditor: https://editor.swagger.io/
  */
 @Slf4j
 @Service
@@ -72,18 +66,15 @@ public class ApiSwaggerService {
   private static final String INFO_TITLE = "SQLREST在线接口文档";
   private static final String INFO_VERSION = "1.0";
   private static final String INFO_DESCRIPTION = "基于SQLREST配置生成的Swagger在线接口文档";
-  private static final String TOKEN_MODEL = "TOKEN认证授权";
+  private static final String TOKEN_MODEL = "TokenAuthentication&Authorization";
   private static final String APPLICATION_JSON = "application/json";
   private static final String AUTHORIZATION = "Authorization";
 
   private static final ThreadLocal<Integer> THREAD_LOCAL = new ThreadLocal<>();
 
-  @Resource
-  private ApiOnlineDao apiOnlineDao;
-  @Resource
-  private ApiModuleDao apiModuleDao;
-  @Resource
-  private SystemParamDao systemParamDao;
+  @Resource private ApiOnlineDao apiOnlineDao;
+  @Resource private ApiModuleDao apiModuleDao;
+  @Resource private SystemParamDao systemParamDao;
 
   private String getApiUrlPrefix() {
     return String.format("/%s/", Constants.API_PATH_PREFIX);
@@ -101,23 +92,29 @@ public class ApiSwaggerService {
   }
 
   private Triple<String, String, String> getOpenApiInfo() {
-    SystemParamEntity title = systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_TITLE);
-    SystemParamEntity version = systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_VERSION);
-    SystemParamEntity description = systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_DESCRIPTION);
+    SystemParamEntity title =
+        systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_TITLE);
+    SystemParamEntity version =
+        systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_VERSION);
+    SystemParamEntity description =
+        systemParamDao.getByParamKey(Constants.SYS_PARAM_KEY_SWAGGER_INFO_DESCRIPTION);
     return Triple.of(
         Optional.ofNullable(title).map(SystemParamEntity::getParamValue).orElse(INFO_TITLE),
         Optional.ofNullable(version).map(SystemParamEntity::getParamValue).orElse(INFO_VERSION),
-        Optional.ofNullable(description).map(SystemParamEntity::getParamValue).orElse(INFO_DESCRIPTION)
-    );
+        Optional.ofNullable(description)
+            .map(SystemParamEntity::getParamValue)
+            .orElse(INFO_DESCRIPTION));
   }
 
   public OpenAPI getSwaggerJson(HttpServletRequest request) {
     clearThreadLocal();
 
     Triple<String, String, String> entity = getOpenApiInfo();
-    Info info = new Info().title(entity.getLeft())
-        .version(entity.getMiddle())
-        .description(entity.getRight());
+    Info info =
+        new Info()
+            .title(entity.getLeft())
+            .version(entity.getMiddle())
+            .description(entity.getRight());
 
     OpenAPI openAPI = new OpenAPI();
     openAPI.info(info);
@@ -129,13 +126,13 @@ public class ApiSwaggerService {
       openAPI.addTagsItem(new Tag().name(module.getName()));
     }
 
-    //token获取接口
+    // token获取接口
     openAPI.path("/token/generate", getTokenGeneratePathItem(openAPI));
 
     // 自定义的接口
-    Map<Long, ApiModuleEntity> moduleIdMap = moduleEntities.stream()
-        .collect(Collectors.toMap(ApiModuleEntity::getId,
-            Function.identity(), (a, b) -> a));
+    Map<Long, ApiModuleEntity> moduleIdMap =
+        moduleEntities.stream()
+            .collect(Collectors.toMap(ApiModuleEntity::getId, Function.identity(), (a, b) -> a));
     String urlPrefix = getApiUrlPrefix();
     for (ApiAssignmentEntity assignment : apiOnlineDao.listAll()) {
       String path = urlPrefix + assignment.getPath();
@@ -143,28 +140,27 @@ public class ApiSwaggerService {
 
       PathItem pathItem = new PathItem();
       pathItem.setSummary(assignment.getName());
-      pathItem.setDescription(StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
+      pathItem.setDescription(
+          StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
 
       Operation operation = new Operation();
       operation.setOperationId(String.valueOf(assignment.getId()));
       operation.addTagsItem(moduleIdMap.get(assignment.getModuleId()).getName());
-      //FIX：导入接口文档到apifox时，方法名不能正常显示接口名称问题
+      // FIX：导入接口文档到apifox时，方法名不能正常显示接口名称问题
       operation.setSummary(assignment.getName());
-      operation.setDescription(StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
+      operation.setDescription(
+          StringUtils.defaultIfBlank(assignment.getDescription(), assignment.getName()));
 
       // 入参
       List<ItemParam> params = assignment.getParams();
       if (!CollectionUtils.isEmpty(params)) {
-        List<ItemParam> paramList = params.stream()
-            .filter(i -> i.getLocation().isParameter())
-            .collect(Collectors.toList());
+        List<ItemParam> paramList =
+            params.stream().filter(i -> i.getLocation().isParameter()).collect(Collectors.toList());
         for (ItemParam param : paramList) {
           ParamTypeEnum type = param.getType();
 
           Parameter parameter =
-              param.getLocation().isHeader()
-                  ? new HeaderParameter()
-                  : new QueryParameter();
+              param.getLocation().isHeader() ? new HeaderParameter() : new QueryParameter();
           parameter.setName(param.getName());
 
           Schema schema = new Schema().type(type.getJsType());
@@ -183,9 +179,10 @@ public class ApiSwaggerService {
           operation.addParametersItem(parameter);
         }
 
-        List<ItemParam> requestBodyList = params.stream()
-            .filter(i -> i.getLocation().isRequestBody())
-            .collect(Collectors.toList());
+        List<ItemParam> requestBodyList =
+            params.stream()
+                .filter(i -> i.getLocation().isRequestBody())
+                .collect(Collectors.toList());
         if (requestBodyList.size() > 0) {
           RequestBody requestBody = new RequestBody();
           requestBody.setRequired(true);
@@ -195,13 +192,17 @@ public class ApiSwaggerService {
           for (ItemParam param : requestBodyList) {
             ParamTypeEnum type = param.getType();
 
-            Schema schema = new Schema().type(type.getJsType());
+            Schema schema = new Schema().type(type.getJsType()).description(param.getRemark());
             if (param.getIsArray()) {
               if (type.isObject()) {
-                Schema subObjectSchema = new ObjectSchema().name(param.getName());
+                Schema subObjectSchema =
+                    new ObjectSchema().name(param.getName()).description(param.getRemark());
                 if (null != param.getChildren()) {
                   for (BaseParam baseParam : param.getChildren()) {
-                    Schema subSchema = new Schema().type(baseParam.getType().getJsType());
+                    Schema subSchema =
+                        new Schema()
+                            .type(baseParam.getType().getJsType())
+                            .description(baseParam.getRemark());
                     if (Optional.ofNullable(baseParam.getIsArray()).orElse(false)) {
                       ArraySchema subArraySchema = new ArraySchema().items(subSchema);
                       subObjectSchema.addProperties(baseParam.getName(), subArraySchema);
@@ -218,10 +219,14 @@ public class ApiSwaggerService {
               }
             } else {
               if (type.isObject()) {
-                Schema subObjectSchema = new ObjectSchema().name(param.getName());
+                Schema subObjectSchema =
+                    new ObjectSchema().name(param.getName()).description(param.getRemark());
                 if (null != param.getChildren()) {
                   for (BaseParam baseParam : param.getChildren()) {
-                    Schema subSchema = new Schema().type(baseParam.getType().getJsType());
+                    Schema subSchema =
+                        new Schema()
+                            .type(baseParam.getType().getJsType())
+                            .description(baseParam.getRemark());
                     if (Optional.ofNullable(baseParam.getIsArray()).orElse(false)) {
                       ArraySchema subArraySchema = new ArraySchema().items(subSchema);
                       subObjectSchema.addProperties(baseParam.getName(), subArraySchema);
@@ -242,10 +247,7 @@ public class ApiSwaggerService {
           String inputEntityName = genParamEntityName();
           openAPI.getComponents().addSchemas(inputEntityName, objectSchema);
           inputSchema.set$ref("#/components/schemas/" + inputEntityName);
-          content.addMediaType(
-              assignment.getContentType(),
-              new MediaType().schema(inputSchema)
-          );
+          content.addMediaType(assignment.getContentType(), new MediaType().schema(inputSchema));
           requestBody.setContent(content);
           operation.setRequestBody(requestBody);
         }
@@ -267,18 +269,16 @@ public class ApiSwaggerService {
 
       // 响应
       operation.setResponses(getApiResponses(assignment, openAPI));
-      operation.security(Collections.singletonList(new SecurityRequirement().addList(AUTHORIZATION)));
+      operation.security(
+          Collections.singletonList(new SecurityRequirement().addList(AUTHORIZATION)));
 
       openAPI.path(path, pathItem);
     }
 
-    Map<String, SecurityScheme> securitySchemes = ImmutableMap.of(
-        AUTHORIZATION,
-        new SecurityScheme()
-            .type(Type.HTTP)
-            .scheme("bearer")
-            .bearerFormat("JWT")
-    );
+    Map<String, SecurityScheme> securitySchemes =
+        ImmutableMap.of(
+            AUTHORIZATION,
+            new SecurityScheme().type(Type.HTTP).scheme("bearer").bearerFormat("JWT"));
     openAPI.getComponents().securitySchemes(securitySchemes);
 
     return openAPI;
@@ -293,57 +293,49 @@ public class ApiSwaggerService {
     requestBody.setRequired(true);
     requestBody.setDescription(TOKEN_MODEL);
     Content content = new Content();
-    Schema requestSchema = new ObjectSchema().name("type")
-        .addProperties("clientId", new StringSchema())
-        .addProperties("secret", new StringSchema());
+    Schema requestSchema =
+        new ObjectSchema()
+            .name("type")
+            .addProperties("clientId", new StringSchema().description("client id"))
+            .addProperties("secret", new StringSchema().description("client secret"));
     Schema inputSchema = new Schema();
     String inputEntityName = genParamEntityName();
     inputSchema.set$ref("#/components/schemas/" + inputEntityName);
     openAPI.getComponents().addSchemas(inputEntityName, requestSchema);
-    content.addMediaType(APPLICATION_JSON,
-        new MediaType().schema(inputSchema)
-    );
+    content.addMediaType(APPLICATION_JSON, new MediaType().schema(inputSchema));
     requestBody.setContent(content);
 
     Operation operation = new Operation();
     operation.setOperationId("0");
     operation.addTagsItem(TOKEN_MODEL);
     operation.setRequestBody(requestBody);
-    //FIX：导入接口文档到apifox时，方法名不能正常显示接口名称问题
+    // FIX：导入接口文档到apifox时，方法名不能正常显示接口名称问题
     operation.setSummary(TOKEN_MODEL);
     operation.setDescription(TOKEN_MODEL);
 
-    Schema rootSchema = new Schema().name("type")
-        .type("object")
-        .addProperties("accessToken", new StringSchema())
-        .addProperties("expireSeconds", new NumberSchema());
+    Schema rootSchema =
+        new Schema()
+            .name("type")
+            .type("object")
+            .addProperties("accessToken", new StringSchema().description("access token"))
+            .addProperties("expireSeconds", new NumberSchema().description("expire seconds"));
 
     ApiResponses apiResponses = new ApiResponses();
     Schema outputSchema = new Schema();
     String outputEntityName = genParamEntityName();
     outputSchema.set$ref("#/components/schemas/" + outputEntityName);
     openAPI.getComponents().addSchemas(outputEntityName, rootSchema);
-    apiResponses.addApiResponse("200",
-        new ApiResponse().description("OK")
+    apiResponses.addApiResponse(
+        "200",
+        new ApiResponse()
+            .description("OK")
             .content(
-                new Content().addMediaType(
-                    "application/json",
-                    new MediaType().schema(outputSchema)
-                )
-            )
-    );
-    apiResponses.addApiResponse("201",
-        new ApiResponse().description("Created")
-    );
-    apiResponses.addApiResponse("401",
-        new ApiResponse().description("Unauthorized")
-    );
-    apiResponses.addApiResponse("403",
-        new ApiResponse().description("Forbidden")
-    );
-    apiResponses.addApiResponse("404",
-        new ApiResponse().description("Not Found")
-    );
+                new Content()
+                    .addMediaType("application/json", new MediaType().schema(outputSchema))));
+    apiResponses.addApiResponse("201", new ApiResponse().description("Created"));
+    apiResponses.addApiResponse("401", new ApiResponse().description("Unauthorized"));
+    apiResponses.addApiResponse("403", new ApiResponse().description("Forbidden"));
+    apiResponses.addApiResponse("404", new ApiResponse().description("Not Found"));
     operation.setResponses(apiResponses);
 
     pathItem.setPost(operation);
@@ -356,24 +348,30 @@ public class ApiSwaggerService {
 
     // 检查USE_SYSTEM_RESPONSE_FORMAT配置
     Map<DataTypeFormatEnum, String> responseFormat = assignment.getResponseFormat();
-    String useSystemResponseFormatValue = responseFormat != null ?
-        responseFormat.get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT) : null;
+    String useSystemResponseFormatValue =
+        responseFormat != null
+            ? responseFormat.get(DataTypeFormatEnum.USE_SYSTEM_RESPONSE_FORMAT)
+            : null;
     boolean useSystemFormat = !"false".equals(useSystemResponseFormatValue);
     Schema rootSchema;
     if (useSystemFormat) {
       // 使用系统标准格式：包含code、message、data结构
-      rootSchema = new ObjectSchema()
-          .addProperties("code", new NumberSchema())
-          .addProperties("message", new StringSchema());
+      rootSchema =
+          new ObjectSchema()
+              .addProperties("code", new NumberSchema().description("code"))
+              .addProperties("message", new StringSchema().description("message"));
 
       if (!CollectionUtils.isEmpty(outputs)) {
         ObjectSchema dataSchema = new ObjectSchema();
+        dataSchema.setDescription("data");
         for (OutParam param : outputs) {
           ParamTypeEnum typeItem = param.getType();
           if (Optional.ofNullable(param.getIsArray()).orElse(false)) {
-            Schema subSchema = new Schema().type(param.getType().getJsType())
-                .description(param.getRemark())
-                .format(getTypeFormat(param.getType()));
+            Schema subSchema =
+                new Schema()
+                    .type(param.getType().getJsType())
+                    .description(param.getRemark())
+                    .format(getTypeFormat(param.getType()));
             ArraySchema subArraySchema = new ArraySchema().items(subSchema);
             dataSchema.addProperties(param.getName(), subArraySchema);
           } else {
@@ -382,9 +380,11 @@ public class ApiSwaggerService {
               propertiesItem = new ObjectSchema().description(param.getRemark());
               if (!CollectionUtils.isEmpty(param.getChildren())) {
                 for (OutParam subParam : param.getChildren()) {
-                  Schema subSchema = new Schema().type(subParam.getType().getJsType())
-                      .description(subParam.getRemark())
-                      .format(getTypeFormat(subParam.getType()));
+                  Schema subSchema =
+                      new Schema()
+                          .type(subParam.getType().getJsType())
+                          .description(subParam.getRemark())
+                          .format(getTypeFormat(subParam.getType()));
                   if (Optional.ofNullable(subParam.getIsArray()).orElse(false)) {
                     ArraySchema subArraySchema = new ArraySchema().items(subSchema);
                     propertiesItem.addProperties(subParam.getName(), subArraySchema);
@@ -394,9 +394,11 @@ public class ApiSwaggerService {
                 }
               }
             } else {
-              propertiesItem = new Schema().type(typeItem.getJsType())
-                  .description(param.getRemark())
-                  .format(getTypeFormat(typeItem));
+              propertiesItem =
+                  new Schema()
+                      .type(typeItem.getJsType())
+                      .description(param.getRemark())
+                      .format(getTypeFormat(typeItem));
             }
             dataSchema.addProperties(param.getName(), propertiesItem);
           }
@@ -410,9 +412,11 @@ public class ApiSwaggerService {
         for (OutParam param : outputs) {
           ParamTypeEnum typeItem = param.getType();
           if (Optional.ofNullable(param.getIsArray()).orElse(false)) {
-            Schema subSchema = new Schema().type(param.getType().getJsType())
-                .description(param.getRemark())
-                .format(getTypeFormat(param.getType()));
+            Schema subSchema =
+                new Schema()
+                    .type(param.getType().getJsType())
+                    .description(param.getRemark())
+                    .format(getTypeFormat(param.getType()));
             ArraySchema subArraySchema = new ArraySchema().items(subSchema);
             rootSchema.addProperties(param.getName(), subArraySchema);
           } else {
@@ -421,9 +425,11 @@ public class ApiSwaggerService {
               propertiesItem = new ObjectSchema().description(param.getRemark());
               if (!CollectionUtils.isEmpty(param.getChildren())) {
                 for (OutParam subParam : param.getChildren()) {
-                  Schema subSchema = new Schema().type(subParam.getType().getJsType())
-                      .description(subParam.getRemark())
-                      .format(getTypeFormat(subParam.getType()));
+                  Schema subSchema =
+                      new Schema()
+                          .type(subParam.getType().getJsType())
+                          .description(subParam.getRemark())
+                          .format(getTypeFormat(subParam.getType()));
                   if (Optional.ofNullable(subParam.getIsArray()).orElse(false)) {
                     ArraySchema subArraySchema = new ArraySchema().items(subSchema);
                     propertiesItem.addProperties(subParam.getName(), subArraySchema);
@@ -433,9 +439,11 @@ public class ApiSwaggerService {
                 }
               }
             } else {
-              propertiesItem = new Schema().type(typeItem.getJsType())
-                  .description(param.getRemark())
-                  .format(getTypeFormat(typeItem));
+              propertiesItem =
+                  new Schema()
+                      .type(typeItem.getJsType())
+                      .description(param.getRemark())
+                      .format(getTypeFormat(typeItem));
             }
             rootSchema.addProperties(param.getName(), propertiesItem);
           }
@@ -451,26 +459,17 @@ public class ApiSwaggerService {
     String outputEntityName = genParamEntityName();
     outputSchema.set$ref("#/components/schemas/" + outputEntityName);
     openAPI.getComponents().addSchemas(outputEntityName, rootSchema);
-    apiResponses.addApiResponse("200",
-        new ApiResponse().description("OK").content(
-            new Content().addMediaType(
-                "application/json",
-                new MediaType().schema(outputSchema)
-            )
-        )
-    );
-    apiResponses.addApiResponse("201",
-        new ApiResponse().description("Created")
-    );
-    apiResponses.addApiResponse("401",
-        new ApiResponse().description("Unauthorized")
-    );
-    apiResponses.addApiResponse("403",
-        new ApiResponse().description("Forbidden")
-    );
-    apiResponses.addApiResponse("404",
-        new ApiResponse().description("Not Found")
-    );
+    apiResponses.addApiResponse(
+        "200",
+        new ApiResponse()
+            .description("OK")
+            .content(
+                new Content()
+                    .addMediaType("application/json", new MediaType().schema(outputSchema))));
+    apiResponses.addApiResponse("201", new ApiResponse().description("Created"));
+    apiResponses.addApiResponse("401", new ApiResponse().description("Unauthorized"));
+    apiResponses.addApiResponse("403", new ApiResponse().description("Forbidden"));
+    apiResponses.addApiResponse("404", new ApiResponse().description("Not Found"));
     return apiResponses;
   }
 
