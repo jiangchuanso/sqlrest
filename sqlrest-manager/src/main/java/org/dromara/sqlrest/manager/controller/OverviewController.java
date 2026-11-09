@@ -75,8 +75,11 @@ public class OverviewController {
   @ApiOperation(value = "接口调用日志")
   @GetMapping(value = "/log/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public PageResult<ApiAccessLogBasicResponse> callLogs(@PathVariable("id") Long id, @RequestParam("page") Integer page,
-      @RequestParam("size") Integer size) {
-    return overviewService.pageByApiId(id, page, size);
+      @RequestParam("size") Integer size,
+      @RequestParam(value = "statusCode", required = false) Integer statusCode,
+      @RequestParam(value = "startTime", required = false) String startTime,
+      @RequestParam(value = "endTime", required = false) String endTime) {
+    return overviewService.pageByApiId(id, page, size, statusCode, startTime, endTime);
   }
 
   @ApiOperation(value = "数据源类别占比")

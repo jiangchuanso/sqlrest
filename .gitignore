@@ -46,4 +46,6 @@ yarn-error.log*
 .workbuddy
 .codebuddy
 .trae
+.claude
+.codex
 .opencode

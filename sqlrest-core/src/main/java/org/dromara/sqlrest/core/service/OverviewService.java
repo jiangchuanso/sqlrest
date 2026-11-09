@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.core.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import cn.hutool.extra.spring.SpringUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.dromara.sqlrest.common.dto.DateCount;
@@ -97,19 +98,28 @@ public class OverviewService {
     return accessRecordMapper.getApiHourlyTrend(apiId, date);
   }
 
-  public PageResult<ApiAccessLogBasicResponse> pageByApiId(Long apiId, Integer page, Integer size) {
+  public PageResult<ApiAccessLogBasicResponse> pageByApiId(Long apiId, Integer page, Integer size,
+      Integer statusCode, String startTime, String endTime) {
     Map<String, String> map = SpringUtil.getBean(AppClientDao.class)
         .listAll().stream()
         .collect(
             Collectors.toMap(
                 AppClientEntity::getAppKey,
                 one -> String.format("[%d]%s(%s)", one.getId(), one.getName(), one.getAppKey())));
+    LambdaQueryWrapper<AccessRecordEntity> query = Wrappers.<AccessRecordEntity>lambdaQuery()
+        .eq(AccessRecordEntity::getApiId, apiId);
+    if (statusCode != null) {
+      query.eq(AccessRecordEntity::getStatus, statusCode);
+    }
+    if (startTime != null && !startTime.isEmpty()) {
+      query.ge(AccessRecordEntity::getCreateTime, startTime);
+    }
+    if (endTime != null && !endTime.isEmpty()) {
+      query.le(AccessRecordEntity::getCreateTime, endTime);
+    }
+    query.orderByDesc(AccessRecordEntity::getId);
     return PageUtils.getPage(() ->
-            accessRecordMapper.selectList(
-                Wrappers.<AccessRecordEntity>lambdaQuery()
-                    .eq(AccessRecordEntity::getApiId, apiId)
-                    .orderByDesc(AccessRecordEntity::getId)
-            ).stream().map(
+            accessRecordMapper.selectList(query).stream().map(
                 record -> ApiAccessLogBasicResponse.builder()
                     .id(record.getId())
                     .status(record.getStatus())

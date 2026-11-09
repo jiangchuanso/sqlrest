@@ -176,6 +176,54 @@
           </el-row>
         </el-tab-pane>
           <el-tab-pane :label="$t('service.accessLog')">
+          <el-row class="log-filter-row">
+            <el-col :span="6">
+              <span class="filter-label">{{ $t('service.statusCode') }}:</span>
+              <el-select v-model="logStatusCode"
+                         :placeholder="$t('service.allStatus')"
+                         size="small"
+                         clearable
+                         style="width: 130px"
+                         @change="handleLogFilterChange">
+                <el-option label="200" :value="200"></el-option>
+                <el-option label="400" :value="400"></el-option>
+                <el-option label="401" :value="401"></el-option>
+                <el-option label="403" :value="403"></el-option>
+                <el-option label="404" :value="404"></el-option>
+                <el-option label="500" :value="500"></el-option>
+                <el-option label="502" :value="502"></el-option>
+                <el-option label="503" :value="503"></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="10">
+              <span class="filter-label">{{ $t('service.timeRange') }}:</span>
+              <el-date-picker v-model="logStartTime"
+                              type="datetime"
+                              value-format="yyyy-MM-dd HH:mm:ss"
+                              :placeholder="$t('service.startTime')"
+                              size="small"
+                              style="width: 170px"
+                              @change="handleLogFilterChange">
+              </el-date-picker>
+              <span style="margin:0 6px;color:#999;">~</span>
+              <el-date-picker v-model="logEndTime"
+                              type="datetime"
+                              value-format="yyyy-MM-dd HH:mm:ss"
+                              :placeholder="$t('service.endTime')"
+                              size="small"
+                              style="width: 170px"
+                              @change="handleLogFilterChange">
+              </el-date-picker>
+            </el-col>
+            <el-col :span="4">
+              <el-button size="small"
+                         type="primary"
+                         icon="el-icon-search"
+                         @click="handleLogFilterSearch">{{ $t('common.search') }}</el-button>
+              <el-button size="small"
+                         @click="handleLogFilterReset">{{ $t('common.reset') }}</el-button>
+            </el-col>
+          </el-row>
           <el-table :header-cell-style="{background:'#eef1f6',color:'#606266'}"
                     :data="accessLogData"
                     size="small"
@@ -235,6 +283,7 @@
           </el-table>
           <div class="page"
                align="right">
+
             <el-pagination @size-change="handleAccessSizeChange"
                            @current-change="handleAccessCurrentChange"
                            :current-page="currentAccessPageNum"
@@ -465,6 +514,9 @@ export default {
         yAxis: { type: 'value' },
         series: [{ name: '', type: 'bar', barWidth: '60%', data: [] }]
       },
+      logStatusCode: null,
+      logStartTime: null,
+      logEndTime: null,
     };
   },
   components: { JsonViewer },
@@ -517,9 +569,18 @@ export default {
       });
     },
     reloadAccessLogList: function () {
+      var params = "?page=" + this.currentAccessPageNum + "&size=" + this.currentAccessPageSize;
+      if (this.logStatusCode !== null && this.logStatusCode !== '') {
+        params += "&statusCode=" + this.logStatusCode;
+      }
+      if (this.logStartTime) {
+        params += "&startTime=" + this.logStartTime;
+      }
+      if (this.logEndTime) {
+        params += "&endTime=" + this.logEndTime;
+      }
       this.$http.get(
-        "/sqlrest/manager/api/v1/overview/log/" + this.currentInterfaceId
-        + "?page=" + this.currentAccessPageNum + "&size=" + this.currentAccessPageSize
+        "/sqlrest/manager/api/v1/overview/log/" + this.currentInterfaceId + params
       ).then(res => {
         if (0 === res.data.code) {
           this.totalAccessItemCount = res.data.pagination.total
@@ -550,6 +611,19 @@ export default {
     handleAccessCurrentChange: function (currentPage) {
       this.currentAccessPageNum = currentPage;
       this.reloadAccessLogList()
+    },
+    handleLogFilterChange: function () {
+      this.currentAccessPageNum = 1;
+    },
+    handleLogFilterSearch: function () {
+      this.reloadAccessLogList();
+    },
+    handleLogFilterReset: function () {
+      this.logStatusCode = null;
+      this.logStartTime = null;
+      this.logEndTime = null;
+      this.currentAccessPageNum = 1;
+      this.reloadAccessLogList();
     },
     boolTypeFormat (value) {
       if (value === true) {
@@ -836,6 +910,21 @@ export default {
 .stat-label {
   font-size: 14px;
   margin-right: 8px;
+}
+
+.log-filter-row {
+  margin: 0 0 12px 0;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: #606266;
+  margin-right: 6px;
 }
 
 .chart-row {
