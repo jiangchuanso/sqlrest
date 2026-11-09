@@ -78,7 +78,13 @@ public class SqlJdbcUtils {
             for (String column : columns) {
               try {
                 Object value = rs.getObject(column);
-                if (ProductTypeEnum.HTTP == productType) {
+                if (value instanceof java.sql.Clob) {
+                  // CLOB/NCLOB(含 oracle.sql.CLOB)直接序列化会触发
+                  // CLOB.physicalConnection -> Connection 自引用循环，统一转为字符串
+                  value = convertClob((java.sql.Clob) value);
+                } else if (value instanceof java.sql.Blob) {
+                  value = convertBlob((java.sql.Blob) value);
+                } else if (ProductTypeEnum.HTTP == productType) {
                   if (value instanceof java.sql.Array) {
                     value = convertArray((java.sql.Array) value);
                   } else if (value instanceof java.sql.Struct) {
@@ -125,6 +131,32 @@ public class SqlJdbcUtils {
       return JsonUtils.toBeanObject(struct.toString(), Map.class);
     } catch (Exception e) {
       return struct;
+    }
+  }
+
+  private Object convertClob(java.sql.Clob clob) {
+    try {
+      long length = clob.length();
+      if (length < 0) {
+        return null;
+      }
+      return clob.getSubString(1, (int) Math.min(length, Integer.MAX_VALUE));
+    } catch (Exception e) {
+      log.warn("Failed to convert Clob to String: {}", e.getMessage(), e);
+      return null;
+    }
+  }
+
+  private Object convertBlob(java.sql.Blob blob) {
+    try {
+      long length = blob.length();
+      if (length < 0) {
+        return null;
+      }
+      return blob.getBytes(1, (int) Math.min(length, Integer.MAX_VALUE));
+    } catch (Exception e) {
+      log.warn("Failed to convert Blob to byte[]: {}", e.getMessage(), e);
+      return null;
     }
   }
 
