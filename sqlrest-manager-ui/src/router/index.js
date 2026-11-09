@@ -120,16 +120,16 @@ const constantRouter = new Router({
           component: () => import('@/views/mcp/index'),
           children: [
             {
-              path: '/mcp/client',
-              name: 'menu.tokenConfig',
-              icon: "el-icon-s-platform",
-              component: () => import('@/views/mcp/client'),
-            },
-            {
               path: '/mcp/tool',
               name: 'menu.toolConfig',
               icon: "el-icon-setting",
               component: () => import('@/views/mcp/tool'),
+            },
+            {
+              path: '/mcp/client',
+              name: 'menu.tokenConfig',
+              icon: "el-icon-s-platform",
+              component: () => import('@/views/mcp/client'),
             }
           ]
         },

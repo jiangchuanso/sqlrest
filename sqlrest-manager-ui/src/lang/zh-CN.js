@@ -314,7 +314,6 @@ export default {
     integer: '整型',
     float: '浮点型',
     string: '字符串',
-    date: '日期',
     timeType: '时间',
     object: '对象',
     yes: '是',
@@ -500,7 +499,13 @@ export default {
     addSuccessClient: '添加信息成功',
     addFailedClient: '添加信息失败:',
     updateSuccessClient: '修改成功',
-    modifySuccess: '修改成功'
+    modifySuccess: '修改成功',
+    toolAuth: '关联',
+    toolAuthTitle: '配置Tool',
+    toolAuthOptional: '可选Tool',
+    toolAuthSelected: '已选Tool',
+    toolSearchPlaceholder: '请输入关键字搜索',
+    toolAuthSaveSuccess: '配置成功'
   },
   about: {
     title: '关于SQLREST工具',

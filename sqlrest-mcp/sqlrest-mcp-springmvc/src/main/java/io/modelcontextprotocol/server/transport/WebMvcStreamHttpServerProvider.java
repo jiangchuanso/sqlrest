@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpServerFeatures.AsyncToolSpecification;
 import io.modelcontextprotocol.server.McpSyncServer;
+import io.modelcontextprotocol.server.McpToolAccess;
+import io.modelcontextprotocol.server.McpToolAuthorizer;
 import io.modelcontextprotocol.spec.McpError;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,11 +44,13 @@ public class WebMvcStreamHttpServerProvider {
 
   private final McpSyncServer mcpSyncServer;
 
+  private final McpToolAuthorizer toolAuthorizer;
+
   private final RouterFunction<ServerResponse> routerFunction;
 
   public WebMvcStreamHttpServerProvider(ObjectMapper objectMapper,
       WebMvcSseServerAuthChecker serverAuthChecker, String mcpEndpoint,
-      McpSyncServer mcpSyncServer) {
+      McpSyncServer mcpSyncServer, McpToolAuthorizer toolAuthorizer) {
     Assert.notNull(objectMapper, "ObjectMapper must not be null");
     Assert.notNull(mcpEndpoint, "MCP endpoint must not be null");
 
@@ -53,6 +58,7 @@ public class WebMvcStreamHttpServerProvider {
     this.serverAuthChecker = serverAuthChecker;
     this.mcpEndpoint = mcpEndpoint;
     this.mcpSyncServer = mcpSyncServer;
+    this.toolAuthorizer = toolAuthorizer;
     this.routerFunction = RouterFunctions.route()
         .GET(this.mcpEndpoint, this::handleGet)
         .POST(this.mcpEndpoint, this::handlePost)
@@ -79,13 +85,14 @@ public class WebMvcStreamHttpServerProvider {
           .body(new McpError("Invalid Accept headers. Expected APPLICATION_JSON"));
     }
 
+    String accessToken = null;
     if (null != this.serverAuthChecker) {
       String tokenParamName = this.serverAuthChecker.getTokenParamName();
       if (!request.param(tokenParamName).isPresent()) {
         return ServerResponse.badRequest().body(new McpError("Token missing in param"));
       }
 
-      String accessToken = request.param(tokenParamName).get();
+      accessToken = request.param(tokenParamName).get();
       if (!this.serverAuthChecker.checkTokenValid(accessToken)) {
         return ServerResponse.badRequest().body(new McpError("Token invalid in param"));
       }
@@ -101,11 +108,11 @@ public class WebMvcStreamHttpServerProvider {
         case McpSchema.METHOD_NOTIFICATION_INITIALIZED:
           return handleNotificationInitialized();
         case McpSchema.METHOD_TOOLS_LIST:
-          return handleListTools(root.get("id").asText());
+          return handleListTools(root.get("id").asText(), accessToken);
         case McpSchema.METHOD_PING:
           return handlePing(root.get("id").asText());
         case McpSchema.METHOD_TOOLS_CALL:
-          return handleCallTool(root.get("id").asText(), root.get("params"));
+          return handleCallTool(root.get("id").asText(), accessToken, root.get("params"));
         case McpSchema.METHOD_LOGGING_SET_LEVEL:
           return handleSettingLoggingLevel(root.get("id").asText(), root.get("params"));
         default:
@@ -160,9 +167,11 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handleListTools(String id) {
+  private ServerResponse handleListTools(String id, String accessToken) {
+    Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, accessToken);
     List<Tool> tools = mcpSyncServer.listTool().stream()
         .map(McpServerFeatures.AsyncToolSpecification::getTool)
+        .filter(tool -> McpToolAccess.isAllowed(allowed, tool.getName()))
         .collect(Collectors.toList());
 
     Map<String, Object> toolsMap = new HashMap<>(2);
@@ -175,12 +184,14 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handleCallTool(String id, JsonNode params) {
+  private ServerResponse handleCallTool(String id, String accessToken, JsonNode params) {
     McpSchema.CallToolRequest callToolRequest = objectMapper.convertValue(params,
         new TypeReference<CallToolRequest>() {
         });
 
+    Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, accessToken);
     Optional<AsyncToolSpecification> toolSpecification = mcpSyncServer.listTool().stream()
+        .filter(tr -> McpToolAccess.isAllowed(allowed, tr.getTool().getName()))
         .filter(tr -> callToolRequest.getName().equals(tr.getTool().getName()))
         .findAny();
 

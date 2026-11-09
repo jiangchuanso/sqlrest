@@ -9,7 +9,9 @@
 /////////////////////////////////////////////////////////////
 package org.dromara.sqlrest.manager.controller;
 
+import java.util.List;
 import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.IdWithName;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.core.dto.EntitySearchRequest;
@@ -22,6 +24,7 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,5 +64,11 @@ public class McpToolController {
   @PostMapping(value = "/listAll", produces = MediaType.APPLICATION_JSON_VALUE)
   public PageResult<McpToolResponse> listAll(@RequestBody EntitySearchRequest request) {
     return mcpManageService.listToolAll(request);
+  }
+
+  @ApiOperation(value = "全部Tool选项")
+  @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<IdWithName>> list() {
+    return ResultEntity.success(mcpManageService.listToolOptions());
   }
 }

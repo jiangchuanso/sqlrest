@@ -191,6 +191,8 @@ public interface McpServer {
 
 		private McpSchema.ServerCapabilities serverCapabilities;
 
+		private McpToolAuthorizer toolAuthorizer;
+
 		/**
 		 * The Model Context Protocol (MCP) allows servers to expose tools that can be
 		 * invoked by language models. Tools enable models to interact with external
@@ -573,6 +575,11 @@ public interface McpServer {
 			return this;
 		}
 
+		public AsyncSpecification toolAuthorizer(McpToolAuthorizer toolAuthorizer) {
+			this.toolAuthorizer = toolAuthorizer;
+			return this;
+		}
+
 		/**
 		 * Builds an asynchronous MCP server that provides non-blocking operations.
 		 * @return A new instance of {@link McpAsyncServer} configured with this builder's
@@ -582,7 +589,7 @@ public interface McpServer {
 			McpServerFeatures.Async features = new McpServerFeatures.Async(this.serverInfo, this.serverCapabilities, this.tools,
 					this.resources, this.resourceTemplates, this.prompts, this.rootsChangeHandlers);
 			ObjectMapper mapper = this.objectMapper != null ? this.objectMapper : new ObjectMapper();
-			return new McpAsyncServer(this.transportProvider, mapper, features);
+			return new McpAsyncServer(this.transportProvider, mapper, features, this.toolAuthorizer);
 		}
 
 	}
@@ -602,6 +609,8 @@ public interface McpServer {
 		private McpSchema.Implementation serverInfo = DEFAULT_SERVER_INFO;
 
 		private McpSchema.ServerCapabilities serverCapabilities;
+
+		private McpToolAuthorizer toolAuthorizer;
 
 		/**
 		 * The Model Context Protocol (MCP) allows servers to expose tools that can be
@@ -984,6 +993,11 @@ public interface McpServer {
 			return this;
 		}
 
+		public SyncSpecification toolAuthorizer(McpToolAuthorizer toolAuthorizer) {
+			this.toolAuthorizer = toolAuthorizer;
+			return this;
+		}
+
 		/**
 		 * Builds a synchronous MCP server that provides blocking operations.
 		 * @return A new instance of {@link McpSyncServer} configured with this builder's
@@ -994,7 +1008,8 @@ public interface McpServer {
 					this.tools, this.resources, this.resourceTemplates, this.prompts, this.rootsChangeHandlers);
 			McpServerFeatures.Async asyncFeatures = McpServerFeatures.Async.fromSync(syncFeatures);
 			ObjectMapper mapper = this.objectMapper != null ? this.objectMapper : new ObjectMapper();
-			McpAsyncServer asyncServer = new McpAsyncServer(this.transportProvider, mapper, asyncFeatures);
+			McpAsyncServer asyncServer = new McpAsyncServer(this.transportProvider, mapper, asyncFeatures,
+					this.toolAuthorizer);
 
 			return new McpSyncServer(asyncServer);
 		}

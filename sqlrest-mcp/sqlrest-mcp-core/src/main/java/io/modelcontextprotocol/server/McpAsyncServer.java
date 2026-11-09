@@ -105,7 +105,15 @@ public class McpAsyncServer {
 	 */
 	McpAsyncServer(McpServerTransportProvider mcpTransportProvider, ObjectMapper objectMapper,
 			McpServerFeatures.Async features) {
-		this.delegate = new AsyncServerImpl(mcpTransportProvider, objectMapper, features);
+		this(mcpTransportProvider, objectMapper, features, null);
+	}
+
+	/**
+	 * sqlrest 定制：`toolAuthorizer` 用于按客户端令牌过滤可见 Tool；为 null 时不过滤。
+	 */
+	McpAsyncServer(McpServerTransportProvider mcpTransportProvider, ObjectMapper objectMapper,
+			McpServerFeatures.Async features, McpToolAuthorizer toolAuthorizer) {
+		this.delegate = new AsyncServerImpl(mcpTransportProvider, objectMapper, features, toolAuthorizer);
 	}
 
 	/**
@@ -373,6 +381,8 @@ public class McpAsyncServer {
 
 		private final ObjectMapper objectMapper;
 
+		private final McpToolAuthorizer toolAuthorizer;
+
 		private final McpSchema.ServerCapabilities serverCapabilities;
 
 		private final McpSchema.Implementation serverInfo;
@@ -390,9 +400,10 @@ public class McpAsyncServer {
 		private List<String> protocolVersions = Collections.singletonList(McpSchema.LATEST_PROTOCOL_VERSION);
 
 		AsyncServerImpl(McpServerTransportProvider mcpTransportProvider, ObjectMapper objectMapper,
-				McpServerFeatures.Async features) {
+				McpServerFeatures.Async features, McpToolAuthorizer toolAuthorizer) {
 			this.mcpTransportProvider = mcpTransportProvider;
 			this.objectMapper = objectMapper;
+			this.toolAuthorizer = toolAuthorizer;
 			this.serverInfo = features.getServerInfo();
 			this.serverCapabilities = features.getServerCapabilities();
 			this.tools.addAll(features.getTools());
@@ -450,6 +461,7 @@ public class McpAsyncServer {
 
 			mcpTransportProvider
 				.setSessionFactory(transport -> new McpServerSession(UUID.randomUUID().toString(), transport,
+						transport.getClientToken(),
 						this::asyncInitializeRequestHandler, Mono::empty, requestHandlers, notificationHandlers));
 		}
 
@@ -615,7 +627,11 @@ public class McpAsyncServer {
 
 		private McpServerSession.RequestHandler<McpSchema.ListToolsResult> toolsListRequestHandler() {
 			return (exchange, params) -> {
-				List<Tool> tools = this.tools.stream().map(McpServerFeatures.AsyncToolSpecification::getTool).collect(Collectors.toList());
+				Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, exchange.getClientToken());
+				List<Tool> tools = this.tools.stream()
+					.map(McpServerFeatures.AsyncToolSpecification::getTool)
+					.filter(tool -> McpToolAccess.isAllowed(allowed, tool.getName()))
+					.collect(Collectors.toList());
 
 				return Mono.just(new McpSchema.ListToolsResult(tools, null));
 			};
@@ -627,7 +643,9 @@ public class McpAsyncServer {
 						new TypeReference<McpSchema.CallToolRequest>() {
 						});
 
+				Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, exchange.getClientToken());
 				Optional<McpServerFeatures.AsyncToolSpecification> toolSpecification = this.tools.stream()
+					.filter(tr -> McpToolAccess.isAllowed(allowed, tr.getTool().getName()))
 					.filter(tr -> callToolRequest.getName().equals(tr.getTool().getName()))
 					.findAny();
 

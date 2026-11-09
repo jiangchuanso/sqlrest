@@ -229,18 +229,20 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
 			return ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).body("Server is shutting down");
 		}
 
+		String accessToken = null;
 		if (null != this.serverAuthChecker) {
 			String tokenParamName = this.serverAuthChecker.getTokenParamName();
 			if (!request.param(tokenParamName).isPresent()) {
 				return ServerResponse.badRequest().body(new McpError("Token missing in sse connection"));
 			}
 
-			String accessToken = request.param(tokenParamName).get();
+			accessToken = request.param(tokenParamName).get();
 			if (!this.serverAuthChecker.checkTokenValid(accessToken)) {
 				return ServerResponse.badRequest().body(new McpError("Token invalid in sse connection"));
 			}
 		}
 
+		final String sessionClientToken = accessToken;
 		String sessionId = UUID.randomUUID().toString();
 		logger.debug("Creating new SSE connection for session: {}", sessionId);
 
@@ -256,7 +258,8 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
 					sessions.remove(sessionId);
 				});
 
-				WebMvcMcpSessionTransport sessionTransport = new WebMvcMcpSessionTransport(sessionId, sseBuilder);
+				WebMvcMcpSessionTransport sessionTransport = new WebMvcMcpSessionTransport(sessionId, sseBuilder,
+						sessionClientToken);
 				McpServerSession session = sessionFactory.create(sessionTransport);
 				this.sessions.put(sessionId, session);
 
@@ -334,15 +337,24 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
 
 		private final SseBuilder sseBuilder;
 
+		private final String clientToken;
+
 		/**
 		 * Creates a new session transport with the specified ID and SSE builder.
 		 * @param sessionId The unique identifier for this session
 		 * @param sseBuilder The SSE builder for sending server events to the client
+		 * @param clientToken The client token bound to this SSE session
 		 */
-		WebMvcMcpSessionTransport(String sessionId, SseBuilder sseBuilder) {
+		WebMvcMcpSessionTransport(String sessionId, SseBuilder sseBuilder, String clientToken) {
 			this.sessionId = sessionId;
 			this.sseBuilder = sseBuilder;
+			this.clientToken = clientToken;
 			logger.debug("Session transport {} initialized with SSE builder", sessionId);
+		}
+
+		@Override
+		public String getClientToken() {
+			return this.clientToken;
 		}
 
 		/**

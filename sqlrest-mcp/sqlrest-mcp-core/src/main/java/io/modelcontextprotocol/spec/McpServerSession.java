@@ -43,6 +43,9 @@ public class McpServerSession implements McpSession {
 
 	private final McpServerTransport transport;
 
+	/** sqlrest 定制：建立该会话时认证通过的客户端令牌。 */
+	private final String clientToken;
+
 	private final Sinks.One<McpAsyncServerExchange> exchangeSink = Sinks.one();
 
 	private final AtomicReference<McpSchema.ClientCapabilities> clientCapabilities = new AtomicReference<>();
@@ -69,11 +72,12 @@ public class McpServerSession implements McpSession {
 	 * @param requestHandlers map of request handlers to use
 	 * @param notificationHandlers map of notification handlers to use
 	 */
-	public McpServerSession(String id, McpServerTransport transport, InitRequestHandler initHandler,
+	public McpServerSession(String id, McpServerTransport transport, String clientToken, InitRequestHandler initHandler,
 			InitNotificationHandler initNotificationHandler, Map<String, RequestHandler<?>> requestHandlers,
 			Map<String, NotificationHandler> notificationHandlers) {
 		this.id = id;
 		this.transport = transport;
+		this.clientToken = clientToken;
 		this.initRequestHandler = initHandler;
 		this.initNotificationHandler = initNotificationHandler;
 		this.requestHandlers = requestHandlers;
@@ -90,6 +94,10 @@ public class McpServerSession implements McpSession {
 	 */
 	public String getId() {
 		return this.id;
+	}
+
+	public String getClientToken() {
+		return this.clientToken;
 	}
 
 	/**

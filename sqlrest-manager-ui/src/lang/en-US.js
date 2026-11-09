@@ -314,7 +314,6 @@ export default {
     integer: 'Integer',
     float: 'Float',
     string: 'String',
-    date: 'Date',
     timeType: 'Time',
     object: 'Object',
     yes: 'Yes',
@@ -500,7 +499,13 @@ export default {
     addSuccessClient: 'Info added successfully',
     addFailedClient: 'Failed to add info:',
     updateSuccessClient: 'Updated successfully',
-    modifySuccess: 'Modified successfully'
+    modifySuccess: 'Modified successfully',
+    toolAuth: 'Associate',
+    toolAuthTitle: 'Configure Tools',
+    toolAuthOptional: 'Available Tools',
+    toolAuthSelected: 'Selected Tools',
+    toolSearchPlaceholder: 'Search',
+    toolAuthSaveSuccess: 'Configured successfully'
   },
   about: {
     title: 'About SQLREST',

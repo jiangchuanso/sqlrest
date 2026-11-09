@@ -54,6 +54,11 @@
                          @click="handleUpdate(scope.$index, scope.row)"
                          round>{{ $t('mcp.edit') }}</el-button>
               <el-button size="small"
+                         type="primary"
+                         icon="el-icon-s-check"
+                         @click="handleToolAuth(scope.$index, scope.row)"
+                         round>{{ $t('mcp.toolAuth') }}</el-button>
+              <el-button size="small"
                          type="success"
                          icon="el-icon-delete"
                          @click="handleDelete(scope.$index, scope.row)"
@@ -175,6 +180,31 @@
                      @click="handleSave">{{ $t('common.confirm') }}</el-button>
         </div>
       </el-dialog>
+
+      <el-dialog :title="$t('mcp.toolAuthTitle')"
+                 :visible.sync="toolAuthDialogVisible"
+                 width="900px"
+                 @open="loadToolOptions">
+        <div class="tool-auth-transfer">
+          <el-transfer v-model="selectedToolIds"
+                       :data="toolOptions"
+                       filterable
+                       :filter-placeholder="$t('mcp.toolSearchPlaceholder')"
+                       :titles="[$t('mcp.toolAuthOptional'), $t('mcp.toolAuthSelected')]">
+            <el-tooltip slot-scope="{ option }"
+                        :content="option.label"
+                        placement="top"
+                        :disabled="option.label.length <= 24">
+              <span class="tool-auth-transfer-label">{{ option.label }}</span>
+            </el-tooltip>
+          </el-transfer>
+        </div>
+        <span slot="footer">
+          <el-button @click="toolAuthDialogVisible = false">{{ $t('common.cancel') }}</el-button>
+          <el-button type="primary"
+                     @click="handleSaveToolAuth">{{ $t('common.confirm') }}</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -217,7 +247,11 @@ export default {
         ]
       },
       createFormVisible: false,
-      updateFormVisible: false
+      updateFormVisible: false,
+      toolAuthDialogVisible: false,
+      toolAuthClientId: 0,
+      toolOptions: [],
+      selectedToolIds: []
     }
   },
   methods: {
@@ -367,6 +401,58 @@ export default {
         }
       });
     },
+    loadToolOptions: function () {
+      this.$http.get("/sqlrest/manager/api/v1/mcp/tool/list")
+        .then(res => {
+          if (0 === res.data.code) {
+            this.toolOptions = res.data.data.map(item => ({
+              key: item.id,
+              label: '[' + item.id + '] ' + item.name
+            }));
+          } else {
+            alert(this.$t('mcp.loadListFailed') + res.data.message);
+          }
+        })
+        .catch(error => {
+          alert(this.$t('mcp.loadListFailed') + error);
+        });
+    },
+    handleToolAuth: function (index, row) {
+      this.toolAuthClientId = row.id;
+      this.selectedToolIds = [];
+      this.toolAuthDialogVisible = true;
+      this.$http.get("/sqlrest/manager/api/v1/mcp/client/auth/" + row.id)
+        .then(res => {
+          if (0 === res.data.code) {
+            this.selectedToolIds = res.data.data.map(item => item.id);
+          } else {
+            alert(this.$t('mcp.loadFailed') + res.data.message);
+          }
+        })
+        .catch(error => {
+          alert(this.$t('mcp.loadFailed') + error);
+        });
+    },
+    handleSaveToolAuth: function () {
+      this.$http({
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        url: "/sqlrest/manager/api/v1/mcp/client/auth/create",
+        data: JSON.stringify({
+          clientId: this.toolAuthClientId,
+          toolIds: this.selectedToolIds
+        })
+      }).then(res => {
+        if (0 === res.data.code) {
+          this.toolAuthDialogVisible = false;
+          this.$message(this.$t('mcp.toolAuthSaveSuccess'));
+        } else {
+          alert(this.$t('message.operationFailed') + res.data.message);
+        }
+      });
+    },
     handleSizeChange: function (pageSize) {
       this.currentPageSize = pageSize;
       this.loadData();
@@ -418,5 +504,36 @@ export default {
   width: 100px;
   margin-right: 5px;
   margin: 10px 5px;
+}
+
+.tool-auth-transfer >>> .el-transfer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tool-auth-transfer >>> .el-transfer-panel {
+  width: 45%;
+}
+.tool-auth-transfer >>> .el-transfer__buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+.tool-auth-transfer >>> .el-transfer-panel__item .el-checkbox__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100% - 28px);
+  vertical-align: middle;
+}
+.tool-auth-transfer >>> .tool-auth-transfer-label {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 </style>

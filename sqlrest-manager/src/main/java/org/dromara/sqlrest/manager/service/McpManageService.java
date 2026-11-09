@@ -13,8 +13,10 @@ import cn.hutool.extra.spring.SpringUtil;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -22,11 +24,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.IdWithName;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.exception.CommonException;
 import org.dromara.sqlrest.common.exception.ResponseErrorCode;
 import org.dromara.sqlrest.common.util.TokenUtils;
 import org.dromara.sqlrest.core.dto.EntitySearchRequest;
+import org.dromara.sqlrest.core.dto.McpClientToolRequest;
 import org.dromara.sqlrest.core.dto.McpServerAddrResponse;
 import org.dromara.sqlrest.core.dto.McpToolResponse;
 import org.dromara.sqlrest.core.dto.McpToolSaveRequest;
@@ -37,6 +41,7 @@ import org.dromara.sqlrest.persistence.dao.ApiAssignmentDao;
 import org.dromara.sqlrest.persistence.dao.ApiModuleDao;
 import org.dromara.sqlrest.persistence.dao.ApiOnlineDao;
 import org.dromara.sqlrest.persistence.dao.McpClientDao;
+import org.dromara.sqlrest.persistence.dao.McpClientToolDao;
 import org.dromara.sqlrest.persistence.dao.McpToolDao;
 import org.dromara.sqlrest.persistence.entity.ApiAssignmentEntity;
 import org.dromara.sqlrest.persistence.entity.ApiModuleEntity;
@@ -58,6 +63,8 @@ public class McpManageService {
   @Resource
   private McpClientDao mcpClientDao;
   @Resource
+  private McpClientToolDao mcpClientToolDao;
+  @Resource
   private McpToolDao mcpToolDao;
   @Resource
   private ApiModuleDao apiModuleDao;
@@ -77,6 +84,16 @@ public class McpManageService {
     } catch (Exception e) {
       log.error("Failed load mcp tools to memory: {}", e.getMessage(), e);
       throw e;
+    }
+    try {
+      long unassigned = mcpClientDao.listAll(null).stream()
+          .filter(client -> mcpClientToolDao.getAuthTool(client.getId()).isEmpty())
+          .count();
+      if (unassigned > 0) {
+        log.warn("There are {} MCP clients without any tool authorization.", unassigned);
+      }
+    } catch (Exception e) {
+      log.warn("Failed to check MCP clients without tool authorization: {}", e.getMessage());
     }
   }
 
@@ -137,6 +154,34 @@ public class McpManageService {
         request.getPage(),
         request.getSize()
     );
+  }
+
+  @Transactional(rollbackFor = Exception.class)
+  public void saveClientToolAuth(McpClientToolRequest request) {
+    if (null == mcpClientDao.getById(request.getClientId())) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "clientId=" + request.getClientId());
+    }
+    List<Long> toolIds = null == request.getToolIds() ? Collections.emptyList() : request.getToolIds();
+    Set<Long> existsToolIds = mcpToolDao.listAll(null).stream()
+        .map(McpToolEntity::getId)
+        .collect(Collectors.toSet());
+    for (Long toolId : toolIds) {
+      if (null == toolId) {
+        throw new CommonException(ResponseErrorCode.ERROR_INVALID_ARGUMENT, "toolId is null");
+      }
+      if (!existsToolIds.contains(toolId)) {
+        throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_EXISTS, "toolId=" + toolId);
+      }
+    }
+    mcpClientToolDao.saveAuthTool(request.getClientId(), toolIds);
+  }
+
+  public List<IdWithName> getClientToolAuth(Long id) {
+    return mcpClientToolDao.getAuthTool(id);
+  }
+
+  public List<IdWithName> listToolOptions() {
+    return mcpToolDao.listIdName();
   }
 
   @Transactional(rollbackFor = Exception.class)

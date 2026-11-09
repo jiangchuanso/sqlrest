@@ -13,15 +13,18 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
+import io.modelcontextprotocol.server.McpToolAuthorizer;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerAuthChecker;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
 import io.modelcontextprotocol.server.transport.WebMvcStreamHttpServerProvider;
 import io.modelcontextprotocol.spec.McpSchema.LoggingLevel;
 import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
+import java.util.HashSet;
 import org.dromara.sqlrest.common.consts.Constants;
 import org.dromara.sqlrest.common.util.PomVersionUtils;
 import org.dromara.sqlrest.persistence.dao.McpClientDao;
+import org.dromara.sqlrest.persistence.dao.McpClientToolDao;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -56,7 +59,13 @@ public class McpServerConfiguration {
   }
 
   @Bean
-  public McpSyncServer mcpSyncServer(WebMvcSseServerTransportProvider transportProvider) {
+  public McpToolAuthorizer mcpToolAuthorizer(McpClientToolDao mcpClientToolDao) {
+    return token -> new HashSet<>(mcpClientToolDao.listAllowedToolNames(token));
+  }
+
+  @Bean
+  public McpSyncServer mcpSyncServer(WebMvcSseServerTransportProvider transportProvider,
+      McpToolAuthorizer mcpToolAuthorizer) {
     McpSyncServer syncServer = McpServer.sync(transportProvider)
         .serverInfo(Constants.MCP_SERVER_NAME, PomVersionUtils.getCachedProjectVersion())
         .capabilities(
@@ -66,6 +75,7 @@ public class McpServerConfiguration {
                 .prompts(true)
                 .logging()
                 .build())
+        .toolAuthorizer(mcpToolAuthorizer)
         .build();
     syncServer.loggingNotification(
         LoggingMessageNotification.builder()
@@ -78,9 +88,9 @@ public class McpServerConfiguration {
 
   @Bean
   public WebMvcStreamHttpServerProvider webMvcStreamHttpServerProvider(WebMvcSseServerAuthChecker checker,
-      McpSyncServer mcpSyncServer) {
+      McpSyncServer mcpSyncServer, McpToolAuthorizer mcpToolAuthorizer) {
     String mcpEndpoint = Constants.DEFAULT_STREAM_ENDPOINT;
-    return new WebMvcStreamHttpServerProvider(new ObjectMapper(), checker, mcpEndpoint, mcpSyncServer);
+    return new WebMvcStreamHttpServerProvider(new ObjectMapper(), checker, mcpEndpoint, mcpSyncServer, mcpToolAuthorizer);
   }
   
   @Bean

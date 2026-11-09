@@ -56,6 +56,10 @@ public class McpAsyncServerExchange {
 		return this.clientInfo;
 	}
 
+	public String getClientToken() {
+		return this.session.getClientToken();
+	}
+
 	/**
 	 * Create a new message using the sampling capabilities of the client. The Model
 	 * Context Protocol (MCP) provides a standardized way for servers to request LLM

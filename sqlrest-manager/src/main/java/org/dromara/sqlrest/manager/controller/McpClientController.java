@@ -11,13 +11,16 @@ package org.dromara.sqlrest.manager.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import org.dromara.sqlrest.common.consts.Constants;
+import org.dromara.sqlrest.common.dto.IdWithName;
 import org.dromara.sqlrest.common.dto.PageResult;
 import org.dromara.sqlrest.common.dto.ResultEntity;
 import org.dromara.sqlrest.core.dto.EntitySearchRequest;
+import org.dromara.sqlrest.core.dto.McpClientToolRequest;
 import org.dromara.sqlrest.core.dto.McpServerAddrResponse;
 import org.dromara.sqlrest.manager.service.McpManageService;
 import org.dromara.sqlrest.persistence.entity.McpClientEntity;
@@ -71,5 +74,18 @@ public class McpClientController {
   @PostMapping(value = "/listAll", produces = MediaType.APPLICATION_JSON_VALUE)
   public PageResult<McpClientEntity> listAll(@RequestBody EntitySearchRequest request) {
     return mcpManageService.listClientAll(request);
+  }
+
+  @ApiOperation(value = "保存令牌授权")
+  @PostMapping(value = "/auth/create", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity createToolAuth(@Valid @RequestBody McpClientToolRequest request) {
+    mcpManageService.saveClientToolAuth(request);
+    return ResultEntity.success();
+  }
+
+  @ApiOperation(value = "回显令牌授权")
+  @GetMapping(value = "/auth/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity<List<IdWithName>> getToolAuth(@PathVariable("id") Long id) {
+    return ResultEntity.success(mcpManageService.getClientToolAuth(id));
   }
 }
