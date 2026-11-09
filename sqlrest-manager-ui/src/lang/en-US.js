@@ -110,7 +110,17 @@ export default {
     passwordRequired: 'Please enter password',
     loginSuccess: 'Login successful!',
     loginError: 'Login error,',
-    connectionFailed: 'Connection failed'
+    connectionFailed: 'Connection failed',
+    welcomeBack: 'Welcome back',
+    subtitle: 'Sign in to manage your data sources, SQL and APIs',
+    brandEyebrow: 'Open Source · Data Access Middleware',
+    brandSlogan: 'Enterprise SQL2API Data Service Development & Management Platform',
+    brandDesc: 'SQLREST is a fully open-source project that provides a simple yet powerful way to transform SQL (or SQL-Like, i.e., DSL) operations into RESTful APIs. Create APIs by configuring SQL statements without writing complex backend logic.',
+    featureApi: 'SQL-driven API creation with configurable CRUD SQL and parameters',
+    featureDb: 'Multi-database support: 20+ databases, including domestic Chinese databases',
+    featureEnterprise: 'Enterprise-ready: token auth, Sentinel flow control, online API docs and MCP service',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password'
   },
   datasource: {
     title: 'DataSource Management',

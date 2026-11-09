@@ -12,6 +12,7 @@ import './assets/dbicon/iconfont.css'
 import './assets/dbicon/iconfont.js'
 import './assets/sysicon/iconfont.css'
 import 'element-ui/lib/theme-chalk/index.css';
+import './assets/styles/theme.css'
 import * as echarts from 'echarts'
 import VueCodeMirror from 'vue-codemirror'
 import 'codemirror/lib/codemirror.css'

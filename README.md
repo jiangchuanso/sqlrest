@@ -264,7 +264,7 @@ Login username: ```admin```  Login password: ```123456```
 
 ### 3.1 Documentation
 
-[SQLREST User Guide](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
+[SQLREST User Guide](https://www.kdocs.cn/l/cnY99NoOu9P0)
 
 ### 3.2 Screenshots
 

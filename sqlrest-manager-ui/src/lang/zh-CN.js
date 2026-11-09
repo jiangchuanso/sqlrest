@@ -110,7 +110,17 @@ export default {
     passwordRequired: '请输入密码',
     loginSuccess: '登录成功！',
     loginError: '系统登录异常,',
-    connectionFailed: '地址无法联通'
+    connectionFailed: '地址无法联通',
+    welcomeBack: '欢迎回来',
+    subtitle: '登录以管理数据源、SQL 与 API 接口',
+    brandEyebrow: '开源 · 数据访问中间件',
+    brandSlogan: '企业级 SQL2API 数据服务开发管理平台',
+    brandDesc: 'SQLREST 是一个完全开源的项目，通过配置 SQL（或 DSL）语句即可生成 RESTful API，无需编写复杂的后端逻辑，只需选择数据源、输入 SQL 或脚本并配置路径即可快速生成 API 接口。',
+    featureApi: 'SQL 直接构建 API：配置增删改查 SQL 与参数即可生成接口',
+    featureDb: '多数据库支持：支持常见的 20+ 种数据库，含多款国产数据库',
+    featureEnterprise: '企业级能力：Token 认证、Sentinel 流控、在线接口文档与 MCP 服务',
+    showPassword: '显示密码',
+    hidePassword: '隐藏密码'
   },
   datasource: {
     title: '数据源管理',

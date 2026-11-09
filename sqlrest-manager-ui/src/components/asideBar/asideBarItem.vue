@@ -58,7 +58,13 @@ export default {
 
 <style scoped>
 .el-menu-item.is-active {
-  background-color: #1890ff !important;
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.el-menu-item i,
+.el-submenu__title i {
+  color: inherit;
 }
 
 /*隐藏文字*/

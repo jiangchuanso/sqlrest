@@ -1388,7 +1388,7 @@ export default {
 
     },
     handleHelp: function () {
-      const url = 'https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb#Wkpmx';
+      const url = 'https://www.kdocs.cn/l/cnY99NoOu9P0';
       window.open(url, '_blank');
     },
     handleGoBack: function () {

@@ -21,9 +21,6 @@ export default {
  
 <style scoped>
 .viewer-container {
-  padding-top: 10px;
-  padding-right: 10px;
-  padding-bottom: 10px;
-  padding-left: 10px;
+  padding: 16px;
 }
 </style>

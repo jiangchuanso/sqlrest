@@ -268,7 +268,7 @@ sqlrest:
 
 ### 1、使用说明文档
 
-[《SQLREST工具使用说明文档》](https://www.yuque.com/sanpang-jq7te/nys82g/hur636mthgyhaodb)
+[《SQLREST工具使用说明文档》](https://www.kdocs.cn/l/cnY99NoOu9P0)
 
 ### 2、部分系统截图
 

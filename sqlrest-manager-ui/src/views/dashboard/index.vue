@@ -682,7 +682,7 @@ export default {
 
 <style scoped>
 .dashbord {
-  background-color: #f0f3f4;
+  background-color: var(--sr-bg);
 }
 
 .color-green1 {
@@ -707,13 +707,21 @@ export default {
 }
 
 .infoCrads .el-col .cardItem {
-  height: 100px;
-  background: #fff;
-  border-radius: 6px;
+  height: 104px;
+  background: var(--sr-card);
+  border: 1px solid var(--sr-border);
+  border-radius: var(--sr-radius-lg);
+  box-shadow: var(--sr-shadow-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  transition: var(--sr-transition);
+}
+
+.infoCrads .el-col .cardItem:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sr-shadow-md);
 }
 
 .cardItem {
@@ -737,12 +745,21 @@ export default {
 }
 
 .cardItem .cardItem_icon {
-  font-size: 48px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
   font-weight: bold;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
 }
 
 .dash-tabs {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  box-shadow: var(--sr-shadow-sm);
+  border-radius: var(--sr-radius);
+  overflow: hidden;
 }
 
 .chart-row {
@@ -750,9 +767,10 @@ export default {
 }
 
 .chart-panel {
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
+  background: var(--sr-card);
+  border: 1px solid var(--sr-border);
+  border-radius: var(--sr-radius);
+  box-shadow: var(--sr-shadow-sm);
   width: 100%;
   height: 350px;
 }
@@ -772,7 +790,8 @@ export default {
 .filter-row {
   margin-bottom: 16px;
   padding: 12px;
-  background: #fafafa;
-  border-radius: 4px;
+  background: #f8fafc;
+  border: 1px solid var(--sr-border);
+  border-radius: var(--sr-radius-sm);
 }
 </style>

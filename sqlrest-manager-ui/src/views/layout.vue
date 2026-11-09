@@ -3,7 +3,7 @@
     <el-aside :width="isCollapse?'64px':'250px'">
       <!-- 左侧LOGO -->
       <div class="title">
-        <img src="../assets/logo.png" />
+        <img src="../assets/LOGO.png" />
         <span class="title-text"
               v-if="!isCollapse">{{title}}</span>
       </div>
@@ -80,41 +80,51 @@ export default {
 
 .el-aside {
   float: left;
-  background: #002140;
+  background: var(--sr-sidebar);
   color: #333;
   text-align: left;
+  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.06);
+  transition: width 0.28s ease;
+  overflow-x: hidden;
 }
 
 .el-aside .title {
   height: 60px;
-  background: #001529;
+  background: var(--sr-sidebar-title);
   line-height: 64px;
-  background: #002140;
   text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .el-aside .title img {
-  width: 50px;
-  height: 50px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--sr-radius-sm);
   vertical-align: middle;
 }
 
 .el-aside .title .title-text {
   color: #fff;
   font-weight: 600;
-  font-size: 20px;
+  font-size: 19px;
+  letter-spacing: 1px;
+  margin-left: 10px;
   vertical-align: middle;
 }
 
 .el-header {
   padding: 0px;
-  color: #ffffff;
+  color: var(--sr-text);
   width: 100%;
   height: 60px;
   background: #fff;
   display: flex;
   align-items: center;
   line-height: 60px;
+  border-bottom: 1px solid var(--sr-border);
+  box-shadow: var(--sr-shadow-sm);
+  position: relative;
+  z-index: 5;
 }
 
 .el-header .header-right {
@@ -132,16 +142,21 @@ export default {
   display: flex;
   align-items: center;
   height: 100%;
-  padding-left: 2px;
+  padding-left: 12px;
   font-size: 22px;
-  color: #838383;
+  color: var(--sr-text-secondary);
   margin-right: 20px;
   cursor: pointer;
+  transition: var(--sr-transition);
+}
+
+.el-header .collapse:hover {
+  color: var(--sr-primary);
 }
 
 .el-main {
   padding: 0px;
   float: left;
-  background-color: #eaedf1;
+  background-color: var(--sr-bg);
 }
 </style>
