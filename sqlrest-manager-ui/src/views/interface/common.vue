@@ -51,6 +51,12 @@
           </el-button>
           <el-button type="primary"
                      size="mini"
+                     icon="el-icon-document"
+                     @click="handleGenerateDoc">
+            {{ $t('common2.generateDoc') }}
+          </el-button>
+          <el-button type="primary"
+                     size="mini"
                      v-if="isOnlyShowDetail"
                      icon="el-icon-top"
                      @click="handleShowVersionList">
@@ -170,6 +176,33 @@
                           {{ $t('common2.parseInputParams') }}
                         </el-button>
                       </el-col>
+                      <el-col :span="4"
+                              v-if="createParam.engine==='SQL' && !isOnlyShowDetail">
+                        <el-button type="warning"
+                                   size="mini"
+                                   icon="el-icon-magic-stick"
+                                   :loading="autoing"
+                                   @click="handleAutoParams">
+                          {{ $t('common2.autoParams') }}
+                        </el-button>
+                      </el-col>
+                      <el-col :span="4"
+                              v-if="createParam.engine==='SQL' && !isOnlyShowDetail">
+                        <el-button type="success"
+                                   size="mini"
+                                   icon="el-icon-document"
+                                   :loading="pullingRemarks"
+                                   @click="handlePullRemarks">
+                          {{ $t('common2.pullRemarks') }}
+                        </el-button>
+                      </el-col>
+                      <el-col :span="4"
+                              v-if="createParam.engine==='SQL' && !isOnlyShowDetail">
+                        <el-checkbox v-model="overwriteRemarks"
+                                     style="margin-top:6px;">
+                          {{ $t('common2.overwriteRemarks') }}
+                        </el-checkbox>
+                      </el-col>
                       <el-col :span="3">
                         <el-button type="primary"
                                    size="mini"
@@ -188,7 +221,7 @@
                           {{ $t('common2.pageParams') }}
                         </el-button>
                       </el-col>
-                      <el-col :span="15">
+                      <el-col :span="3">
                       </el-col>
                     </el-row>
                     <el-table :data="inputParams"
@@ -825,6 +858,22 @@
       </el-card>
     </el-drawer>
 
+    <el-dialog :title="$t('common2.docTitle')"
+               :visible.sync="showDocDialog"
+               width="60%">
+      <el-input type="textarea"
+                :rows="20"
+                v-model="docContent"
+                readonly></el-input>
+      <span slot="footer">
+        <el-button size="mini"
+                   @click="handleCopyDoc">{{ $t('common2.copyDoc') }}</el-button>
+        <el-button type="primary"
+                   size="mini"
+                   @click="showDocDialog=false">{{ $t('common.confirm') }}</el-button>
+      </span>
+    </el-dialog>
+
   </el-card>
 </template>
 
@@ -899,6 +948,11 @@ export default {
       showVersionDrawer: false,
       versionList: [],
       showVersionDetail: false,
+      pullingRemarks: false,
+      overwriteRemarks: false,
+      autoing: false,
+      showDocDialog: false,
+      docContent: '',
       rules: {
         name: [
           {
@@ -1286,14 +1340,17 @@ export default {
             let tableList = []
             let nameList = []
             for (let element of res.data.data) {
+              let name = typeof element === 'string' ? element : element.name
+              let remarks = typeof element === 'string' ? '' : (element.remarks || '')
               let obj = new Object();
-              obj['label'] = element;
+              obj['label'] = name;
               obj['parent'] = id;
               obj['value'] = schema;
               obj['hasChild'] = true;
               obj['type'] = type;
+              obj['remarks'] = remarks;
               tableList.push(obj);
-              nameList.push(element)
+              nameList.push(name)
             }
 
             if (this.tableHints[schema] && Array.isArray(this.tableHints[schema])) {
@@ -1326,6 +1383,7 @@ export default {
               obj['value'] = element.name;
               obj['hasChild'] = false;
               obj['type'] = element.type;
+              obj['remarks'] = element.remarks || '';
               columnList.push(obj);
             }
             return resolve(columnList);
@@ -1366,8 +1424,8 @@ export default {
           <div class="custom-tree-node">
             <i class={icon_pic}></i>
             <el-tooltip class="item" effect="light" placement="left">
-              <div slot="content">{node.label}</div>
-              <span>{data.label}</span>
+              <div slot="content">{data.remarks ? data.label + ' - ' + data.remarks : node.label}</div>
+              <span>{data.label}{data.remarks ? <span class="tree-node-remark"> - {data.remarks}</span> : null}</span>
             </el-tooltip>
           </div>
         );
@@ -1376,8 +1434,8 @@ export default {
           <div class="custom-tree-node">
             <i class="el-icon-set-up"></i>
             <el-tooltip class="item" effect="light" placement="left">
-              <div slot="content">{data.type}</div>
-              <span>{data.label}({data.type})</span>
+              <div slot="content">{data.type}{data.remarks ? ' - ' + data.remarks : ''}</div>
+              <span>{data.label}({data.type}){data.remarks ? <span class="tree-node-remark"> - {data.remarks}</span> : null}</span>
             </el-tooltip>
           </div>
         );
@@ -1400,6 +1458,561 @@ export default {
       if (this.showTree) {
         this.loadTreeData();
       }
+    },
+    extractSqlTableNames: function (sqlList) {
+      let text = (sqlList || []).join('\n')
+      text = text.replace(/\/\*[\s\S]*?\*\//g, ' ')
+      text = text.replace(/--[^\n]*/g, ' ')
+      text = text.replace(/<[^>]*>/g, ' ')
+      text = text.replace(/#[{][^}]*[}]/g, ' ')
+      text = text.replace(/[`"\[\]]/g, '')
+      let tables = []
+      let regex = /\b(?:from|join)\s+([\w$]+(?:\s*\.\s*[\w$]+)?)/gi
+      let matched
+      while ((matched = regex.exec(text)) !== null) {
+        let name = matched[1].replace(/\s+/g, '')
+        if (!name || /^\d/.test(name)) {
+          continue
+        }
+        if (tables.indexOf(name) === -1) {
+          tables.push(name)
+        }
+        if (tables.length >= 20) {
+          break
+        }
+      }
+      return tables
+    },
+    normalizeRemarkKey: function (name) {
+      return String(name || '').replace(/[_\-\s]/g, '').toLowerCase()
+    },
+    fillParamRemarks: function (params, columnRemarks) {
+      let count = 0
+      for (let param of (params || [])) {
+        let remark = columnRemarks[this.normalizeRemarkKey(param.name)]
+        if (remark && (this.overwriteRemarks || !param.remark)) {
+          this.$set(param, 'remark', remark)
+          count++
+        }
+        if (Array.isArray(param.children)) {
+          count += this.fillParamRemarks(param.children, columnRemarks)
+        }
+      }
+      return count
+    },
+    handlePullRemarks: function () {
+      if (!this.createParam.dataSourceId) {
+        this.$message.warning(this.$t('common2.pullRemarksNoDatasource'))
+        return
+      }
+      let sqlList = this.$refs.sqlEditors ? this.$refs.sqlEditors.queryContent() : []
+      let tables = this.extractSqlTableNames(sqlList)
+      if (tables.length === 0) {
+        this.$message.warning(this.$t('common2.pullRemarksNoTable'))
+        return
+      }
+      this.pullingRemarks = true
+      this.$http({
+        method: 'GET',
+        url: '/sqlrest/manager/api/v1/datasource/metadata/get/' + this.createParam.dataSourceId
+          + '?tables=' + urlencode(tables.join(','))
+      }).then(res => {
+        this.pullingRemarks = false
+        if (res.data.code !== 0) {
+          this.$message.error(res.data.message || this.$t('common2.pullRemarksFailed'))
+          return
+        }
+        let metadata = res.data.data || []
+        let columnRemarks = {}
+        let tableRemarks = []
+        for (let table of metadata) {
+          if (table.remarks && table.remarks.trim()) {
+            tableRemarks.push((table.name ? table.name + ': ' : '') + table.remarks.trim())
+          }
+          for (let column of (table.columns || [])) {
+            let key = this.normalizeRemarkKey(column.name)
+            if (column.remarks && column.remarks.trim() && !columnRemarks[key]) {
+              columnRemarks[key] = column.remarks.trim()
+            }
+          }
+        }
+        let count = 0
+        if (tableRemarks.length && (this.overwriteRemarks || !this.createParam.description)) {
+          this.createParam.description = tableRemarks.join('; ').substring(0, 1000)
+          count++
+        }
+        count += this.fillParamRemarks(this.inputParams, columnRemarks)
+        count += this.fillParamRemarks(this.outputParams, columnRemarks)
+        if (count > 0) {
+          this.$message.success(this.$t('common2.pullRemarksDone').replace('{0}', count))
+        } else {
+          this.$message.info(this.$t('common2.pullRemarksEmpty'))
+        }
+      }).catch(() => {
+        this.pullingRemarks = false
+        this.$message.error(this.$t('common2.pullRemarksFailed'))
+      })
+    },
+    cleanSql: function (text) {
+      return String(text || '')
+        .replace(/\/\*[\s\S]*?\*\//g, ' ')
+        .replace(/--[^\n]*/g, ' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/#\{[^}]*\}/g, ' ')
+        .replace(/[`"\[\]]/g, '')
+    },
+    findTopLevelKeyword: function (sql, kw) {
+      let upper = sql.toUpperCase()
+      let target = kw.toUpperCase()
+      let depth = 0
+      for (let i = 0; i < sql.length; i++) {
+        let ch = sql[i]
+        if (ch === '(') depth++
+        else if (ch === ')') depth--
+        if (depth === 0 && upper.substr(i, target.length) === target) {
+          let before = i === 0 ? ' ' : sql[i - 1]
+          let after = sql[i + target.length] || ' '
+          if (!/[A-Za-z0-9_]/.test(before) && !/[A-Za-z0-9_]/.test(after)) {
+            return i
+          }
+        }
+      }
+      return -1
+    },
+    splitTopLevel: function (sql, sepRegex) {
+      let parts = []
+      let depth = 0
+      let last = 0
+      let i = 0
+      while (i < sql.length) {
+        let ch = sql[i]
+        if (ch === '(') depth++
+        else if (ch === ')') depth--
+        if (depth === 0) {
+          let rest = sql.substr(i)
+          let m = rest.match(sepRegex)
+          if (m && m.index === 0) {
+            parts.push(sql.substring(last, i).trim())
+            i += m[0].length
+            last = i
+            continue
+          }
+        }
+        i++
+      }
+      parts.push(sql.substring(last).trim())
+      return parts.filter(p => p.length > 0)
+    },
+    findColumnSegment: function (sql) {
+      let fromIdx = this.findTopLevelKeyword(sql, 'FROM')
+      if (fromIdx < 0) return ''
+      let depth = 0
+      for (let i = fromIdx - 1; i >= 0; i--) {
+        let ch = sql[i]
+        if (ch === ')') depth++
+        else if (ch === '(') { depth--; if (depth < 0) depth = 0 }
+        if (depth === 0) {
+          if (sql.toUpperCase().substring(i, i + 6) === 'SELECT' &&
+              (i === 0 || !/[A-Za-z0-9_]/.test(sql[i - 1]))) {
+            return sql.substring(i + 6, fromIdx).trim()
+          }
+        }
+      }
+      return ''
+    },
+    extractTableAliases: function (sql) {
+      let aliases = {}
+      let fromIdx = this.findTopLevelKeyword(sql, 'FROM')
+      if (fromIdx < 0) return aliases
+      let whereIdx = this.findTopLevelKeyword(sql, 'WHERE')
+      let end = whereIdx > 0 ? whereIdx : sql.length
+      let seg = sql.substring(fromIdx + 4, end)
+      let items = this.splitTopLevel(seg, /\s+(?:inner|left|right|full|cross)\s+(?:outer\s+)?join\s+/i)
+      for (let item of items) {
+        let m = item.match(/^\s*([A-Za-z_][A-Za-z0-9_]*(?:\s*\.\s*[A-Za-z_][A-Za-z0-9_]*)?)\s*(?:as\s+)?([A-Za-z_][A-Za-z0-9_]*)?/i)
+        if (m) {
+          let realTable = m[1].replace(/\s+/g, '')
+          let alias = m[2] ? m[2] : realTable.split(/\./).pop()
+          aliases[alias.toUpperCase()] = realTable.split(/\./).pop().toUpperCase()
+        }
+      }
+      return aliases
+    },
+    mapJdbcType: function (jdbcType) {
+      if (!jdbcType) return 'STRING'
+      let t = jdbcType.toUpperCase()
+      if (t.indexOf('VARCHAR') >= 0 || t.indexOf('CHAR') >= 0 || t.indexOf('TEXT') >= 0 ||
+          t.indexOf('CLOB') >= 0 || t === 'JSON' || t.indexOf('BLOB') >= 0) return 'STRING'
+      if (t === 'INT' || t === 'INTEGER' || t === 'SMALLINT' || t === 'TINYINT' || t === 'MEDIUMINT') return 'INTEGER'
+      if (t === 'BIGINT') return 'LONG'
+      if (t === 'DECIMAL' || t === 'NUMERIC' || t === 'FLOAT' || t === 'DOUBLE' || t === 'REAL') return 'DOUBLE'
+      if (t === 'BOOLEAN' || t === 'BIT') return 'BOOLEAN'
+      return 'STRING'
+    },
+    resolveColumnMeta: function (name, tableHint, aliases, columnsMap) {
+      let key = String(name).toUpperCase()
+      if (tableHint) {
+        let resolved = aliases[tableHint.toUpperCase()] || tableHint.toUpperCase()
+        let cols = columnsMap[resolved]
+        if (cols) {
+          let c = cols.find(x => x.name.toUpperCase() === key)
+          if (c) return { type: this.mapJdbcType(c.type), remark: c.remarks || '' }
+        }
+      }
+      for (let tk in columnsMap) {
+        let c = columnsMap[tk].find(x => x.name.toUpperCase() === key)
+        if (c) return { type: this.mapJdbcType(c.type), remark: c.remarks || '' }
+      }
+      return { type: 'STRING', remark: '' }
+    },
+    buildOutput: function (name, type, remark) {
+      return { id: this.uuid(), name: name, type: type, isArray: false, remark: remark || '', children: [] }
+    },
+    parseSelectOutputs: function (sql, aliases, columnsMap, firstTableKey) {
+      let seg = this.findColumnSegment(sql)
+      let outputs = []
+      let seen = {}
+      if (!seg) return outputs
+      let items = this.splitTopLevel(seg, /,/)
+      for (let raw of items) {
+        let item = raw.trim().replace(/^\(+/, '')
+        if (!item) continue
+        let star = item.match(/^([A-Za-z_][A-Za-z0-9_]*)?\s*\.\s*\*$/i)
+        if (item === '*' || star) {
+          let keys
+          if (star && star[1]) {
+            keys = [aliases[star[1].toUpperCase()] || star[1].toUpperCase()]
+          } else {
+            keys = Object.keys(columnsMap)
+          }
+          for (let tk of keys) {
+            let cols = columnsMap[tk]
+            if (!cols) continue
+            for (let col of cols) {
+              if (seen[col.name.toUpperCase()]) continue
+              seen[col.name.toUpperCase()] = true
+              outputs.push(this.buildOutput(col.name, this.mapJdbcType(col.type), col.remarks || ''))
+            }
+          }
+          continue
+        }
+        let hasParen = item.indexOf('(') >= 0
+        let asMatch = item.match(/\s+as\s+([A-Za-z_][A-Za-z0-9_]*)\s*$/i)
+        let alias = asMatch ? asMatch[1] : null
+        let colPart = asMatch ? item.substring(0, asMatch.index).trim() : item
+        if (!alias && !hasParen) {
+          let sp = colPart.match(/\s+([A-Za-z_][A-Za-z0-9_]*)\s*$/)
+          if (sp && !/^(from|as)$/i.test(sp[1])) {
+            alias = sp[1]
+            colPart = colPart.substring(0, sp.index).trim()
+          }
+        }
+        if (hasParen) {
+          if (alias) outputs.push(this.buildOutput(alias, 'STRING', ''))
+          continue
+        }
+        let dot = colPart.match(/^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)$/)
+        let colName, tableHint
+        if (dot) { tableHint = dot[1]; colName = dot[2] }
+        else { colName = colPart }
+        let meta = this.resolveColumnMeta(colName, tableHint, aliases, columnsMap)
+        let outName = alias || colName
+        if (seen[outName.toUpperCase()]) continue
+        seen[outName.toUpperCase()] = true
+        outputs.push(this.buildOutput(outName, meta.type, meta.remark))
+      }
+      return outputs
+    },
+    parseWhereInputs: function (sql, columnsGlobal, columnsMeta, aliases) {
+      let whereIdx = this.findTopLevelKeyword(sql, 'WHERE')
+      let inputs = []
+      let seen = {}
+      if (whereIdx < 0) return inputs
+      let rest = sql.substring(whereIdx + 5)
+      let ends = [this.findTopLevelKeyword(rest, 'GROUP'), this.findTopLevelKeyword(rest, 'ORDER'), this.findTopLevelKeyword(rest, 'HAVING')]
+      let end = rest.length
+      for (let e of ends) { if (e >= 0 && e < end) end = e }
+      let seg = rest.substring(0, end)
+      let conds = this.splitTopLevel(seg, /\s+(?:and|or)\s+/i)
+      for (let cond of conds) {
+        let m = cond.match(/([A-Za-z_][A-Za-z0-9_]*)(?:\.([A-Za-z_][A-Za-z0-9_]*))?\s*(?:<=|>=|<>|!=|=|<|>|like|in|between|not\s+like)/i)
+        if (!m) continue
+        let colName = m[2] || m[1]
+        let key = colName.toUpperCase()
+        if (!columnsGlobal.has(key)) continue
+        if (seen[key]) continue
+        seen[key] = true
+        let meta = columnsMeta[key] || { type: 'STRING', remark: '' }
+        inputs.push({ id: this.uuid(), name: colName, location: 'REQUEST_BODY', type: meta.type, isArray: false, required: true, defaultValue: '', remark: meta.remark || '' })
+      }
+      return inputs
+    },
+    extractParamHints: function (sqlList, columnsMeta) {
+      let hints = {}
+      for (let raw of (sqlList || [])) {
+        let text = this.cleanSqlKeepPlaceholder(raw)
+        let regex = /#\{\s*([A-Za-z_][A-Za-z0-9_.]*)\s*\}/g
+        let m
+        while ((m = regex.exec(text)) !== null) {
+          let fullName = m[1]
+          if (fullName.indexOf('.') >= 0) continue
+          let before = text.substring(Math.max(0, m.index - 90), m.index)
+          let opMatch = before.match(/([A-Za-z_][A-Za-z0-9_.]*)\s*(<=|>=|<>|!=|=|<|>|like|in|between|not\s+like)\s*\(?\s*$/i)
+          let colName = opMatch ? opMatch[1].split('.').pop() : null
+          let operator = opMatch ? opMatch[2].toLowerCase() : ''
+          let meta = colName ? (columnsMeta[colName.toUpperCase()] || null) : null
+          let required = true
+          let isArray = false
+          if (operator === 'like' || operator === 'not like' || operator === '!=' || operator === '<>') {
+            required = false
+          }
+          if (operator === 'in') {
+            required = false
+            isArray = true
+          }
+          if (!hints[fullName]) {
+            hints[fullName] = {
+              name: fullName,
+              type: meta ? meta.type : 'STRING',
+              required: required,
+              isArray: isArray,
+              remark: meta ? meta.remark : ''
+            }
+          }
+        }
+      }
+      return hints
+    },
+    cleanSqlKeepPlaceholder: function (text) {
+      return String(text || '')
+        .replace(/\/\*[\s\S]*?\*\//g, ' ')
+        .replace(/--[^\n]*/g, ' ')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/[`"\[\]]/g, '')
+    },
+    autoFillBasicInfo: function (metadata) {
+      if (this.$route.query.id) {
+        return
+      }
+      let main = metadata && metadata.length ? metadata[0] : null
+      if (!main) {
+        return
+      }
+      let tableKey = String(main.name).split(/\./).pop()
+      let tableRemark = main.remarks ? main.remarks.trim() : ''
+      if ((!this.createParam.name || this.overwriteRemarks) && tableRemark) {
+        this.createParam.name = tableRemark.substring(0, 100)
+      }
+      if ((!this.createParam.description || this.overwriteRemarks) && tableRemark) {
+        this.createParam.description = tableRemark.substring(0, 1000)
+      }
+      if (!this.createParam.path || this.overwriteRemarks) {
+        let path = tableKey.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+        this.createParam.path = '/' + (path || 'api')
+      }
+      if (!this.createParam.method || this.overwriteRemarks) {
+        this.createParam.method = this.inputParams.length > 0 ? 'POST' : 'GET'
+      }
+    },
+    sampleValue: function (type) {
+      switch (String(type || '').toUpperCase()) {
+        case 'INTEGER': return 0
+        case 'LONG': return 0
+        case 'DOUBLE': return 0.0
+        case 'BOOLEAN': return true
+        case 'OBJECT': return {}
+        case 'ARRAY': return []
+        default: return 'string'
+      }
+    },
+    buildSampleParams: function () {
+      let obj = {}
+      for (let p of this.inputParams) {
+        if (!p.name) continue
+        if (p.children && p.children.length) {
+          let child = {}
+          for (let c of p.children) child[c.name] = this.sampleValue(c.type)
+          obj[p.name] = p.isArray ? [child] : child
+        } else {
+          obj[p.name] = p.isArray ? [this.sampleValue(p.type)] : this.sampleValue(p.type)
+        }
+      }
+      return obj
+    },
+    buildSampleResponse: function () {
+      let obj = {}
+      for (let o of this.outputParams) {
+        if (!o.name) continue
+        if (o.children && o.children.length) {
+          let child = {}
+          for (let c of o.children) child[c.name] = this.sampleValue(c.type)
+          obj[o.name] = o.isArray ? [child] : child
+        } else {
+          obj[o.name] = o.isArray ? [this.sampleValue(o.type)] : this.sampleValue(o.type)
+        }
+      }
+      return obj
+    },
+    handleGenerateDoc: function () {
+      let rows = []
+      let name = this.createParam.name || '未命名接口'
+      let desc = this.createParam.description || ''
+      let method = this.createParam.method || 'POST'
+      let path = this.createParam.path || ''
+      rows.push('## ' + name)
+      if (desc) rows.push('', desc)
+      rows.push('', '- 方法: ' + method)
+      rows.push('- 路径: ' + (this.gatewayApiPrefix || '') + path)
+      let ds = this.connectionList.find(x => String(x.id) === String(this.createParam.dataSourceId))
+      if (ds) rows.push('- 数据源: ' + ds.name)
+      rows.push('', '### 请求参数', '')
+      if (this.inputParams.length === 0) {
+        rows.push('无')
+      } else {
+        rows.push('| 参数 | 类型 | 必填 | 说明 |')
+        rows.push('| --- | --- | --- | --- |')
+        for (let p of this.inputParams) {
+          rows.push('| ' + (p.name || '') + ' | ' + (p.type || '') + ' | ' + (p.required ? '是' : '否') + ' | ' + (p.remark || '') + ' |')
+          for (let c of (p.children || [])) {
+            rows.push('| ' + (p.name || '') + '.' + (c.name || '') + ' | ' + (c.type || '') + ' | ' + (c.required ? '是' : '否') + ' | ' + (c.remark || '') + ' |')
+          }
+        }
+      }
+      rows.push('', '### 响应字段', '')
+      if (this.outputParams.length === 0) {
+        rows.push('无')
+      } else {
+        rows.push('| 字段 | 类型 | 说明 |')
+        rows.push('| --- | --- | --- |')
+        for (let o of this.outputParams) {
+          rows.push('| ' + (o.name || '') + ' | ' + (o.type || '') + ' | ' + (o.remark || '') + ' |')
+          for (let c of (o.children || [])) {
+            rows.push('| ' + (o.name || '') + '.' + (c.name || '') + ' | ' + (c.type || '') + ' | ' + (c.remark || '') + ' |')
+          }
+        }
+      }
+      rows.push('', '### 请求示例', '', '```')
+      rows.push('curl -X ' + method + ' "' + (this.gatewayApiPrefix || '') + path + '" \\')
+      rows.push('  -H "Content-Type: application/json" \\')
+      rows.push('  -d \'' + JSON.stringify(this.buildSampleParams(), null, 2) + '\'')
+      rows.push('```')
+      rows.push('', '### 响应示例', '', '```json')
+      rows.push(JSON.stringify(this.buildSampleResponse(), null, 2))
+      rows.push('```')
+      this.docContent = rows.join('\n')
+      this.showDocDialog = true
+    },
+    handleCopyDoc: function () {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(this.docContent)
+        this.$message.success(this.$t('common2.docCopied'))
+      }
+    },
+    handleAutoParams: function () {
+      if (!this.createParam.dataSourceId) {
+        this.$message.warning(this.$t('common2.pullRemarksNoDatasource'))
+        return
+      }
+      let sqlList = this.$refs.sqlEditors ? this.$refs.sqlEditors.queryContent() : []
+      let tables = this.extractSqlTableNames(sqlList)
+      if (tables.length === 0) {
+        this.$message.warning(this.$t('common2.pullRemarksNoTable'))
+        return
+      }
+      this.autoing = true
+      this.$http({
+        method: 'GET',
+        url: '/sqlrest/manager/api/v1/datasource/metadata/get/' + this.createParam.dataSourceId
+          + '?tables=' + urlencode(tables.join(','))
+      }).then(res => {
+        this.autoing = false
+        if (res.data.code !== 0) {
+          this.$message.error(res.data.message || this.$t('common2.pullRemarksFailed'))
+          return
+        }
+        let metadata = res.data.data || []
+        let columnsMap = {}
+        let columnsGlobal = new Set()
+        let columnsMeta = {}
+        let firstTableKey = null
+        for (let table of metadata) {
+          let key = String(table.name).split(/\./).pop().toUpperCase()
+          if (!firstTableKey) firstTableKey = key
+          columnsMap[key] = table.columns || []
+          for (let col of (table.columns || [])) {
+            let ck = col.name.toUpperCase()
+            columnsGlobal.add(ck)
+            if (!columnsMeta[ck]) columnsMeta[ck] = { type: this.mapJdbcType(col.type), remark: col.remarks || '' }
+          }
+        }
+        let paramHints = this.extractParamHints(sqlList, columnsMeta)
+        let aliases = {}
+        let outCount = 0
+        let inCount = 0
+        for (let name in paramHints) {
+          let hint = paramHints[name]
+          if (!this.inputParams.find(i => i.name === hint.name)) {
+            this.inputParams.push({
+              id: this.uuid(),
+              name: hint.name,
+              location: 'REQUEST_BODY',
+              type: hint.type,
+              isArray: hint.isArray,
+              required: hint.required,
+              defaultValue: '',
+              remark: hint.remark
+            })
+            inCount++
+          } else if (this.overwriteRemarks) {
+            let exist = this.inputParams.find(i => i.name === hint.name)
+            if (exist) {
+              exist.type = hint.type || exist.type
+              exist.required = hint.required
+              exist.isArray = hint.isArray || exist.isArray
+              if (!exist.remark) exist.remark = hint.remark
+            }
+          }
+        }
+        for (let sql of sqlList) {
+          let clean = this.cleanSql(sql)
+          let a = this.extractTableAliases(clean)
+          for (let k in a) aliases[k] = a[k]
+          let outputs = this.parseSelectOutputs(clean, aliases, columnsMap, firstTableKey)
+          for (let o of outputs) {
+            let exist = this.outputParams.find(x => x.name === o.name)
+            if (!exist) {
+              this.outputParams.push(o)
+              outCount++
+            } else if (!exist.remark && o.remark) {
+              exist.remark = o.remark
+            } else if (this.overwriteRemarks && !exist.remark) {
+              exist.remark = o.remark
+            }
+          }
+          let inputs = this.parseWhereInputs(clean, columnsGlobal, columnsMeta, aliases)
+          for (let inp of inputs) {
+            if (!this.inputParams.find(i => i.name === inp.name)) {
+              this.inputParams.push(inp)
+              inCount++
+            } else if (this.overwriteRemarks) {
+              let exist = this.inputParams.find(i => i.name === inp.name)
+              if (exist) {
+                exist.type = inp.type
+                if (!exist.remark) exist.remark = inp.remark
+              }
+            }
+          }
+        }
+        this.autoFillBasicInfo(metadata)
+        if (outCount === 0 && inCount === 0) {
+          this.$message.info(this.$t('common2.autoParamsEmpty'))
+        } else {
+          this.$message.success(this.$t('common2.autoParamsDone').replace('{0}', inCount).replace('{1}', outCount))
+        }
+      }).catch(() => {
+        this.autoing = false
+        this.$message.error(this.$t('common2.pullRemarksFailed'))
+      })
     },
     handleParseInputParams: function () {
       var currTabSql = this.$refs.sqlEditors.queryCurrentTabSql()
@@ -2080,6 +2693,11 @@ export default {
 }
 
 .tip-content {
+  font-size: 12px;
+}
+
+.tree-node-remark {
+  color: #8492a6;
   font-size: 12px;
 }
 

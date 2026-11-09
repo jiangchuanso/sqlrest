@@ -22,6 +22,9 @@ import org.dromara.sqlrest.core.dto.EntitySearchRequest;
 import org.dromara.sqlrest.core.service.DataSourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import org.springframework.http.MediaType;
@@ -135,6 +138,20 @@ public class DataSourceController {
   public ResultEntity getTableColumns(@PathVariable("id") Long id,
       @RequestParam("schema") String schema, @RequestParam("table") String table) {
     return ResultEntity.success(datasourceService.getTableColumns(id, schema, table));
+  }
+
+  @ApiOperation(value = "批量查询表/视图及其列的注释")
+  @GetMapping(value = "/metadata/get/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResultEntity getTableMetadata(@PathVariable("id") Long id,
+      @RequestParam(value = "schema", required = false) String schema,
+      @RequestParam("tables") String tables) {
+    List<String> names = Arrays.stream(tables.split(","))
+        .map(String::trim)
+        .filter(name -> !name.isEmpty())
+        .distinct()
+        .limit(20)
+        .collect(Collectors.toList());
+    return ResultEntity.success(datasourceService.getTableMetadata(id, schema, names));
   }
 
 }

@@ -1,0 +1,178 @@
+name: Build, Release and Publish SQLRest Docker Images
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 1.8.0)'
+        required: true
+        default: '1.8.0'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Extract version
+        id: get_version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG_NAME="v${VERSION}"
+          else
+            TAG_NAME="${{ github.ref_name }}"
+            VERSION=${TAG_NAME#v}
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Build SQLRest with Maven
+        run: |
+          mvn clean package -DskipTests
+
+      - name: Find generated tar.gz file
+        id: find_tar
+        run: |
+          TAR_FILE=$(find target -name "sqlrest-release-*.tar.gz" -type f | head -n 1)
+          if [ -z "$TAR_FILE" ]; then
+            echo "Error: No tar.gz file found"
+            find target/ -name "*.tar.gz" || true
+            exit 1
+          fi
+          ABSOLUTE_PATH="${PWD}/${TAR_FILE}"
+          echo "tar_file=${ABSOLUTE_PATH}" >> $GITHUB_OUTPUT
+          echo "tar_name=$(basename ${TAR_FILE})" >> $GITHUB_OUTPUT
+          echo "Found: ${ABSOLUTE_PATH}"
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag_name }}
+          name: Release ${{ steps.get_version.outputs.tag_name }}
+          body: |
+            ## SQLRest ${{ steps.get_version.outputs.version }}
+            
+            This release is automatically built by GitHub Actions.
+          files: ${{ steps.find_tar.outputs.tar_file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare Docker build context
+        run: |
+          set -e
+          mkdir -p ./docker-context/sqlrest
+          cd ./docker-context
+          
+          cp "${{ steps.find_tar.outputs.tar_file }}" ./original.tar.gz
+          mkdir tmp_extract
+          tar -xzf original.tar.gz -C tmp_extract
+          
+          EXTRACTED_DIR=$(find tmp_extract -maxdepth 1 -type d ! -path tmp_extract | head -1)
+          if [ -z "$EXTRACTED_DIR" ]; then
+            echo "Error: No directory found after extraction"
+            exit 1
+          fi
+          
+          echo "Extracted directory: $EXTRACTED_DIR"
+          # 重命名解压出的目录为 sqlrest-release（保留顶层目录）
+          mv "$EXTRACTED_DIR" ./sqlrest-release
+          # 打包整个 sqlrest-release 目录
+          tar -czf ./sqlrest/sqlrest-release.tar.gz ./sqlrest-release
+          rm -rf ./sqlrest-release
+          
+          rm -rf tmp_extract original.tar.gz
+          
+          # 复制 Dockerfile
+          if [ -f ../build-docker/sqlrest/Dockerfile-manager ]; then
+            cp ../build-docker/sqlrest/Dockerfile-manager ./sqlrest/
+          else
+            echo "Error: build-docker/sqlrest/Dockerfile-manager not found"
+            exit 1
+          fi
+          
+          if [ -f ../build-docker/sqlrest/Dockerfile-executor ]; then
+            cp ../build-docker/sqlrest/Dockerfile-executor ./sqlrest/
+          else
+            echo "Error: build-docker/sqlrest/Dockerfile-executor not found"
+            exit 1
+          fi
+          
+          if [ -f ../build-docker/sqlrest/Dockerfile-gateway ]; then
+            cp ../build-docker/sqlrest/Dockerfile-gateway ./sqlrest/
+          else
+            echo "Error: build-docker/sqlrest/Dockerfile-gateway not found"
+            exit 1
+          fi
+          
+          echo "Docker context prepared at ./docker-context/sqlrest"
+          ls -lh ./sqlrest/
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Manager image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker-context/sqlrest
+          file: ./docker-context/sqlrest/Dockerfile-manager
+          platforms: linux/amd64, linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sqlrest-manager:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/sqlrest-manager:latest
+
+      - name: Build and push Executor image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker-context/sqlrest
+          file: ./docker-context/sqlrest/Dockerfile-executor
+          platforms: linux/amd64, linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sqlrest-executor:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/sqlrest-executor:latest
+
+      - name: Build and push Gateway image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./docker-context/sqlrest
+          file: ./docker-context/sqlrest/Dockerfile-gateway
+          platforms: linux/amd64, linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/sqlrest-gateway:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/sqlrest-gateway:latest
