@@ -1643,7 +1643,7 @@ export default {
       let t = jdbcType.toUpperCase()
       if (t.indexOf('VARCHAR') >= 0 || t.indexOf('CHAR') >= 0 || t.indexOf('TEXT') >= 0 ||
           t.indexOf('CLOB') >= 0 || t === 'JSON' || t.indexOf('BLOB') >= 0) return 'STRING'
-      if (t === 'INT' || t === 'INTEGER' || t === 'SMALLINT' || t === 'TINYINT' || t === 'MEDIUMINT') return 'INTEGER'
+      if (t === 'INT' || t === 'INTEGER' || t === 'SMALLINT' || t === 'TINYINT' || t === 'MEDIUMINT') return 'LONG'
       if (t === 'BIGINT') return 'LONG'
       if (t === 'DECIMAL' || t === 'NUMERIC' || t === 'FLOAT' || t === 'DOUBLE' || t === 'REAL') return 'DOUBLE'
       if (t === 'BOOLEAN' || t === 'BIT') return 'BOOLEAN'
