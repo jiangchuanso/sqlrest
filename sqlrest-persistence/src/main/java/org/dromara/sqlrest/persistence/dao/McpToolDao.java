@@ -12,7 +12,7 @@ package org.dromara.sqlrest.persistence.dao;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.sqlrest.common.dto.IdWithName;
 import org.dromara.sqlrest.persistence.entity.McpToolEntity;
