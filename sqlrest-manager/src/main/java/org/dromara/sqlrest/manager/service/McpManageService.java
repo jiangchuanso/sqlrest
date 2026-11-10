@@ -61,20 +61,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class McpManageService {
 
-  @Resource
-  private McpClientDao mcpClientDao;
-  @Resource
-  private McpClientToolDao mcpClientToolDao;
-  @Resource
-  private McpToolDao mcpToolDao;
-  @Resource
-  private ApiModuleDao apiModuleDao;
-  @Resource
-  private ApiAssignmentDao apiAssignmentDao;
-  @Resource
-  private ApiOnlineDao apiOnlineDao;
-  @Resource
-  private McpSyncServer mcpSyncServer;
+  private final McpClientDao mcpClientDao;
+  private final McpClientToolDao mcpClientToolDao;
+  private final McpToolDao mcpToolDao;
+  private final ApiModuleDao apiModuleDao;
+  private final ApiAssignmentDao apiAssignmentDao;
+  private final ApiOnlineDao apiOnlineDao;
+  private final McpSyncServer mcpSyncServer;
 
   @EventListener(ApplicationReadyEvent.class)
   public void loadMcpTools() {
