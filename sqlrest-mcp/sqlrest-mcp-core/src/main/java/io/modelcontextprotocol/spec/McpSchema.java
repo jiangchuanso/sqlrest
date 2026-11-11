@@ -6,6 +6,8 @@ package io.modelcontextprotocol.spec;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +40,15 @@ public final class McpSchema {
 	}
 
 	public static final String LATEST_PROTOCOL_VERSION = "2024-11-05";
+
+	/**
+	 * Protocol revisions this server is able to serve, ordered from the oldest to the
+	 * newest one. During `initialize` negotiation the client's requested revision is
+	 * echoed back when it appears here; otherwise the server answers with the last entry
+	 * (its highest supported revision), as required by the MCP specification.
+	 */
+	public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Collections
+			.unmodifiableList(Arrays.asList("2024-11-05", "2025-03-26", "2025-06-18"));
 
 	public static final String JSONRPC_VERSION = "2.0";
 

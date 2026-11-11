@@ -67,6 +67,19 @@ public class McpSyncServer {
 	}
 
 	/**
+	 * Overrides the protocol revisions the server accepts during `initialize`
+	 * negotiation: the client's requested revision is echoed back when it is part of the
+	 * list, otherwise the last (newest) entry is returned.
+	 * @param protocolVersions Supported revisions, ordered from the oldest to the newest.
+	 * @see McpSchema#SUPPORTED_PROTOCOL_VERSIONS
+	 */
+	public void setSupportedProtocolVersions(List<String> protocolVersions) {
+		Assert.notNull(protocolVersions, "Protocol versions must not be null");
+		Assert.notEmpty(protocolVersions, "Protocol versions must not be empty");
+		this.asyncServer.setProtocolVersions(protocolVersions);
+	}
+
+	/**
 	 * Retrieves the list of all roots provided by the client.
 	 * @return The list of roots
 	 * @deprecated This method will be removed in 0.9.0. Use

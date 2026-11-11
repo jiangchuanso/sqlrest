@@ -102,21 +102,29 @@ public class WebMvcStreamHttpServerProvider {
       String body = request.body(String.class);
       ObjectNode root = objectMapper.readValue(body, ObjectNode.class);
       String method = root.get("method").asText();
+      // Keep the JSON-RPC id exactly as received (number stays number, string stays
+      // string). Converting it to text breaks clients that type the id as a number.
+      JsonNode id = root.get("id");
       switch (method) {
         case McpSchema.METHOD_INITIALIZE:
-          return handleInitialize(root.get("id").asText());
+          return handleInitialize(id, root.get("params"));
         case McpSchema.METHOD_NOTIFICATION_INITIALIZED:
-          return handleNotificationInitialized();
+          return handleNotificationAccepted();
         case McpSchema.METHOD_TOOLS_LIST:
-          return handleListTools(root.get("id").asText(), accessToken);
+          return handleListTools(id, accessToken);
         case McpSchema.METHOD_PING:
-          return handlePing(root.get("id").asText());
+          return handlePing(id);
         case McpSchema.METHOD_TOOLS_CALL:
-          return handleCallTool(root.get("id").asText(), accessToken, root.get("params"));
+          return handleCallTool(id, accessToken, root.get("params"));
         case McpSchema.METHOD_LOGGING_SET_LEVEL:
-          return handleSettingLoggingLevel(root.get("id").asText(), root.get("params"));
+          return handleSettingLoggingLevel(id, root.get("params"));
         default:
-          return handleUnsupportedMethod(root.get("id").asText(), method);
+          // A JSON-RPC notification carries no id and MUST NOT receive a response
+          // body (202 Accepted), otherwise strict clients treat it as an error.
+          if (id == null || id.isNull()) {
+            return ServerResponse.status(HttpStatus.ACCEPTED).build();
+          }
+          return handleUnsupportedMethod(id, method);
       }
     } catch (Exception e) {
       log.error("Error handling message: {}", e.getMessage(), e);
@@ -124,9 +132,9 @@ public class WebMvcStreamHttpServerProvider {
     }
   }
 
-  private ServerResponse handleInitialize(String id) {
+  private ServerResponse handleInitialize(JsonNode id, JsonNode params) {
     Map<String, Object> initMap = new HashMap<>(2);
-    initMap.put("protocolVersion", McpSchema.LATEST_PROTOCOL_VERSION);
+    initMap.put("protocolVersion", negotiateProtocolVersion(params));
     initMap.put("capabilities", McpSchema.ServerCapabilities.builder()
             .tools(true)
             .build());
@@ -140,14 +148,34 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handleNotificationInitialized() {
-    McpSchema.InitializeResult initializeResult = new McpSchema.InitializeResult(
-        mcpSyncServer.getServerInfo().getVersion(), mcpSyncServer.getServerCapabilities(),
-        mcpSyncServer.getServerInfo(), null);
-    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(initializeResult);
+  /**
+   * Implements the MCP initialize version contract: when the client requests a revision
+   * this server implements it MUST be echoed back, otherwise the server MUST answer with
+   * the highest revision it supports.
+   */
+  private String negotiateProtocolVersion(JsonNode params) {
+    String requested = null == params ? null : params.path("protocolVersion").asText(null);
+    if (null != requested && McpSchema.SUPPORTED_PROTOCOL_VERSIONS.contains(requested)) {
+      log.info("Client negotiated MCP protocol version: {}", requested);
+      return requested;
+    }
+
+    String highest = McpSchema.SUPPORTED_PROTOCOL_VERSIONS
+        .get(McpSchema.SUPPORTED_PROTOCOL_VERSIONS.size() - 1);
+    log.warn("Client requested unsupported protocol version: {}, so the server suggests the {} version instead",
+        requested, highest);
+    return highest;
   }
 
-  private ServerResponse handleUnsupportedMethod(String id, String method) {
+  /**
+   * Acknowledges a JSON-RPC notification. Per the MCP Streamable HTTP transport the
+   * server replies 202 Accepted with an empty body and never sends a JSON-RPC payload.
+   */
+  private ServerResponse handleNotificationAccepted() {
+    return ServerResponse.status(HttpStatus.ACCEPTED).build();
+  }
+
+  private ServerResponse handleUnsupportedMethod(JsonNode id, String method) {
     JSONRPCError jsonrpcError = new JSONRPCError();
     jsonrpcError.setCode(McpSchema.ErrorCodes.METHOD_NOT_FOUND);
     jsonrpcError.setMessage("Unsupported method: '" + method + "' ");
@@ -159,7 +187,7 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.badRequest().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handlePing(String id) {
+  private ServerResponse handlePing(JsonNode id) {
     JSONRPCResponse jsonrpcResponse = new JSONRPCResponse();
     jsonrpcResponse.setId(id);
     jsonrpcResponse.setJsonrpc(McpSchema.JSONRPC_VERSION);
@@ -167,7 +195,7 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handleListTools(String id, String accessToken) {
+  private ServerResponse handleListTools(JsonNode id, String accessToken) {
     Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, accessToken);
     List<Tool> tools = mcpSyncServer.listTool().stream()
         .map(McpServerFeatures.AsyncToolSpecification::getTool)
@@ -184,7 +212,7 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handleCallTool(String id, String accessToken, JsonNode params) {
+  private ServerResponse handleCallTool(JsonNode id, String accessToken, JsonNode params) {
     McpSchema.CallToolRequest callToolRequest = objectMapper.convertValue(params,
         new TypeReference<CallToolRequest>() {
         });
@@ -216,7 +244,7 @@ public class WebMvcStreamHttpServerProvider {
     return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(jsonrpcResponse);
   }
 
-  private ServerResponse handleSettingLoggingLevel(String id, JsonNode params) {
+  private ServerResponse handleSettingLoggingLevel(JsonNode id, JsonNode params) {
     McpSchema.SettingLoggingLevelRequest settingLoggingLevelRequest = objectMapper.convertValue(params,
         new TypeReference<McpSchema.SettingLoggingLevelRequest>() {
         });

@@ -73,15 +73,19 @@ public class McpToolCallHandler {
     if (CollectionUtils.isNotEmpty(params)) {
       for (ItemParam param : params) {
         ObjectNode node = objectMapper.createObjectNode();
-        if (param.getIsArray()) {
-          rootRequired.add(param.getName());
+        if (Boolean.TRUE.equals(param.getIsArray())) {
+          // 数组参数也按管理端配置的 required 决定是否必填：此前无条件加进 required，
+          // 会让 MCP 客户端（模型）以为必须给值，可能生成空数组导致执行失败。
+          if (Boolean.TRUE.equals(param.getRequired())) {
+            rootRequired.add(param.getName());
+          }
           ObjectNode items = objectMapper.createObjectNode();
           items.put(FN_TYPE, param.getType().getJsType());
           node.put(FN_TYPE, FV_ARRAY);
           node.put(FN_DESCRIPTION, param.getRemark());
           node.set(FN_ITEMS, items);
         } else {
-          if (param.getRequired()) {
+          if (Boolean.TRUE.equals(param.getRequired())) {
             rootRequired.add(param.getName());
           }
           node.put(FN_TYPE, param.getType().getJsType());
@@ -90,7 +94,7 @@ public class McpToolCallHandler {
             ArrayNode subRequired = objectMapper.createArrayNode();
             ObjectNode properties = objectMapper.createObjectNode();
             for (BaseParam subParam : param.getChildren()) {
-              if (subParam.getRequired()) {
+              if (Boolean.TRUE.equals(subParam.getRequired())) {
                 subRequired.add(subParam.getName());
               }
               ObjectNode item = objectMapper.createObjectNode();

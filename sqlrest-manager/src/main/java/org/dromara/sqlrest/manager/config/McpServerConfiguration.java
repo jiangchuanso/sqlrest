@@ -17,6 +17,7 @@ import io.modelcontextprotocol.server.McpToolAuthorizer;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerAuthChecker;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
 import io.modelcontextprotocol.server.transport.WebMvcStreamHttpServerProvider;
+import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.LoggingLevel;
 import io.modelcontextprotocol.spec.McpSchema.LoggingMessageNotification;
 import io.modelcontextprotocol.spec.McpSchema.ServerCapabilities;
@@ -77,6 +78,7 @@ public class McpServerConfiguration {
                 .build())
         .toolAuthorizer(mcpToolAuthorizer)
         .build();
+    syncServer.setSupportedProtocolVersions(McpSchema.SUPPORTED_PROTOCOL_VERSIONS);
     syncServer.loggingNotification(
         LoggingMessageNotification.builder()
             .level(LoggingLevel.INFO)
