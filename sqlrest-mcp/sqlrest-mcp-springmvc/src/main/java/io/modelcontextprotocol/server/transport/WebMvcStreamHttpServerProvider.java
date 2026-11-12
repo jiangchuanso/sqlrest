@@ -197,10 +197,15 @@ public class WebMvcStreamHttpServerProvider {
 
   private ServerResponse handleListTools(JsonNode id, String accessToken) {
     Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, accessToken);
-    List<Tool> tools = mcpSyncServer.listTool().stream()
+    List<McpServerFeatures.AsyncToolSpecification> specifications = mcpSyncServer.listTool();
+    List<String> inMemoryToolNames = specifications.stream()
+        .map(specification -> specification.getTool().getName())
+        .collect(Collectors.toList());
+    List<Tool> tools = specifications.stream()
         .map(McpServerFeatures.AsyncToolSpecification::getTool)
         .filter(tool -> McpToolAccess.isAllowed(allowed, tool.getName()))
         .collect(Collectors.toList());
+    McpToolAccess.logListResult("streamable-http", accessToken, inMemoryToolNames, allowed, tools.size());
 
     Map<String, Object> toolsMap = new HashMap<>(2);
     toolsMap.put("tools", tools);

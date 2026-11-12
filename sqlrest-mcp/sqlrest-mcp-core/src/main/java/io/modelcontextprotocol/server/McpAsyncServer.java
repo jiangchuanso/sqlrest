@@ -628,10 +628,14 @@ public class McpAsyncServer {
 		private McpServerSession.RequestHandler<McpSchema.ListToolsResult> toolsListRequestHandler() {
 			return (exchange, params) -> {
 				Set<String> allowed = McpToolAccess.resolveAllowed(this.toolAuthorizer, exchange.getClientToken());
+				List<String> inMemoryToolNames = this.tools.stream()
+					.map(specification -> specification.getTool().getName())
+					.collect(Collectors.toList());
 				List<Tool> tools = this.tools.stream()
 					.map(McpServerFeatures.AsyncToolSpecification::getTool)
 					.filter(tool -> McpToolAccess.isAllowed(allowed, tool.getName()))
 					.collect(Collectors.toList());
+				McpToolAccess.logListResult("sse", exchange.getClientToken(), inMemoryToolNames, allowed, tools.size());
 
 				return Mono.just(new McpSchema.ListToolsResult(tools, null));
 			};

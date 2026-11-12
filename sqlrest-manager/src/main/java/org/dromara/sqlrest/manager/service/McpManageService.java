@@ -73,8 +73,22 @@ public class McpManageService {
   public void loadMcpTools() {
     try {
       List<McpToolEntity> lists = mcpToolDao.listAll(null);
-      lists.forEach(this::addMcpTool);
-      log.info("Finish load total count [{}] mcp tools to memory.", lists.size());
+      int registered = 0;
+      int skipped = 0;
+      for (McpToolEntity toolEntity : lists) {
+        if (addMcpTool(toolEntity)) {
+          registered++;
+        } else {
+          skipped++;
+        }
+      }
+      log.info("Finish load mcp tools to memory: registered=[{}], skipped=[{}], total=[{}].",
+          registered, skipped, lists.size());
+      if (skipped > 0) {
+        log.warn("{} mcp tools were NOT registered in memory because their api_id has no SQLREST_API_ONLINE "
+            + "record. Those tools can not be listed by any MCP client until the api is published again "
+            + "and the manager restarts.", skipped);
+      }
     } catch (Exception e) {
       log.error("Failed load mcp tools to memory: {}", e.getMessage(), e);
       throw e;
@@ -199,9 +213,11 @@ public class McpManageService {
         .build();
     try {
       mcpToolDao.insert(toolEntity);
-      addMcpTool(toolEntity);
     } catch (DuplicateKeyException e) {
       throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_ALREADY_EXISTS, "tool name already exists");
+    }
+    if (!addMcpTool(toolEntity)) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_ONLINE, "apiId=" + request.getApiId());
     }
   }
 
@@ -288,11 +304,16 @@ public class McpManageService {
     return answer;
   }
 
-  private void addMcpTool(McpToolEntity toolEntity) {
+  /**
+   * 把工具注册进内存，返回是否注册成功。
+   * 未找到该工具对应的在线接口时返回 false，由调用方决定是提示错误还是计入跳过统计。
+   */
+  private boolean addMcpTool(McpToolEntity toolEntity) {
     ApiAssignmentEntity config = apiOnlineDao.getByApiId(toolEntity.getApiId());
     if (null == config) {
-      log.warn("Can't find online api assignment failed by id={}, skip add mcp tool.", toolEntity.getApiId());
-      return;
+      log.warn("Can't find online api assignment for mcp tool [id={}, name={}, apiId={}], skip add mcp tool.",
+          toolEntity.getId(), toolEntity.getName(), toolEntity.getApiId());
+      return false;
     }
     McpToolCallHandler toolCallHandler = new McpToolCallHandler(
         toolEntity.getName(),
@@ -304,11 +325,16 @@ public class McpManageService {
             toolCallHandler::executeTool
         )
     );
+    log.info("Registered mcp tool [id={}, name={}, apiId={}] into memory.",
+        toolEntity.getId(), toolEntity.getName(), toolEntity.getApiId());
+    return true;
   }
 
   private void updateMcpTool(String oldToolName, McpToolEntity toolEntity) {
     mcpSyncServer.removeTool(oldToolName);
-    addMcpTool(toolEntity);
+    if (!addMcpTool(toolEntity)) {
+      throw new CommonException(ResponseErrorCode.ERROR_RESOURCE_NOT_ONLINE, "apiId=" + toolEntity.getApiId());
+    }
   }
 
   private void deleteMcpTool(String toolName) {
